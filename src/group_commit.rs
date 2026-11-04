@@ -6,6 +6,40 @@ use std::time::{Duration, Instant};
 const MAX_BATCH: usize = 32;
 const MAX_BATCH_BYTES: usize = 4 * 1024 * 1024;
 
+#[cfg(feature = "handoff-refill")]
+fn refill_delay(
+    wake_on_four: bool,
+    initial_delay: Duration,
+    handed_off: bool,
+    queued: usize,
+) -> Duration {
+    if wake_on_four && initial_delay.is_zero() && handed_off && (1..4).contains(&queued) {
+        // Draining an old partial group immediately can strand the previous
+        // group's clients in another sync; idle and full groups need no refill.
+        Duration::from_micros(1000)
+    } else {
+        Duration::ZERO
+    }
+}
+
+#[cfg(feature = "handoff-refill")]
+fn cohort_delay(
+    wake_on_four: bool,
+    initial: Duration,
+    previous: Option<(Instant, usize)>,
+    now: Instant,
+) -> Duration {
+    if wake_on_four
+        && previous.is_some_and(|(ended, count)| {
+            count >= 4 && now.saturating_duration_since(ended) < Duration::from_millis(2)
+        })
+    {
+        Duration::from_micros(1000)
+    } else {
+        initial
+    }
+}
+
 #[derive(Default)]
 pub(super) struct GroupCommit {
     enabled: AtomicBool,
@@ -13,6 +47,8 @@ pub(super) struct GroupCommit {
     pending: Mutex<Vec<Request>>,
     #[cfg(feature = "group-handoff")]
     leader: Mutex<()>,
+    #[cfg(feature = "handoff-refill")]
+    recent_group: Mutex<Option<(Instant, usize)>>,
     wake_on_four: AtomicBool,
     ready: std::sync::Condvar,
     timing: AtomicBool,
@@ -198,15 +234,29 @@ impl GroupCommit {
         mut pending: MutexGuard<'a, Vec<Request>>,
         wake_on_four: bool,
     ) -> Result<()> {
+        #[cfg(feature = "handoff-refill")]
+        let mut handed_off = false;
         #[cfg(feature = "group-handoff")]
         let _leader = {
             drop(pending);
             // A poisoned coordinator owns no durable state; writer/state poisoning
             // still rejects persistence, while queued callers must receive replies.
+            #[cfg(not(feature = "handoff-refill"))]
             let guard = self
                 .leader
                 .lock()
                 .unwrap_or_else(|error| error.into_inner());
+            #[cfg(feature = "handoff-refill")]
+            let guard = match self.leader.try_lock() {
+                Ok(guard) => guard,
+                Err(std::sync::TryLockError::Poisoned(error)) => error.into_inner(),
+                Err(std::sync::TryLockError::WouldBlock) => {
+                    handed_off = true;
+                    self.leader
+                        .lock()
+                        .unwrap_or_else(|error| error.into_inner())
+                }
+            };
             pending = self.pending.lock().map_err(|_| Error::Poisoned)?;
             guard
         };
@@ -237,6 +287,13 @@ impl GroupCommit {
         } else {
             delay
         };
+        #[cfg(feature = "handoff-refill")]
+        let delay = cohort_delay(
+            wake_on_four,
+            delay,
+            *self.recent_group.lock().map_err(|_| Error::Poisoned)?,
+            Instant::now(),
+        );
         if wake_on_four && !delay.is_zero() {
             pending = self
                 .ready
@@ -247,6 +304,17 @@ impl GroupCommit {
             drop(pending);
             std::thread::sleep(delay);
             pending = self.pending.lock().map_err(|_| Error::Poisoned)?;
+        }
+        #[cfg(feature = "handoff-refill")]
+        {
+            let refill = refill_delay(wake_on_four, delay, handed_off, pending.len());
+            if !refill.is_zero() {
+                pending = self
+                    .ready
+                    .wait_timeout_while(pending, refill, |requests| requests.len() < 4)
+                    .map_err(|_| Error::Poisoned)?
+                    .0;
+            }
         }
         let mut requests = std::mem::take(&mut *pending);
         drop(pending);
@@ -291,6 +359,14 @@ impl GroupCommit {
         }
         #[cfg(feature = "lock-timing")]
         let trace = take_commit_trace();
+        #[cfg(feature = "handoff-refill")]
+        {
+            let successful = results.iter().filter(|result| result.is_ok()).count();
+            *self
+                .recent_group
+                .lock()
+                .unwrap_or_else(|error| error.into_inner()) = Some((Instant::now(), successful));
+        }
         for (request, result) in requests.into_iter().zip(results) {
             drop(request.transaction);
             #[cfg(feature = "lock-timing")]
@@ -866,6 +942,70 @@ mod tests {
                 recv.recv_timeout(Duration::from_secs(10)).unwrap().unwrap();
             }
         });
+    }
+
+    #[cfg(feature = "handoff-refill")]
+    #[test]
+    fn st_recent_full_group_can_reform_but_idle_or_small_groups_keep_the_original_budget() {
+        let end = Instant::now();
+        let original = Duration::from_micros(200);
+        for count in [1, 2, 3] {
+            assert_eq!(
+                cohort_delay(true, original, Some((end, count)), end),
+                original
+            );
+        }
+        for age in [
+            Duration::from_millis(2),
+            Duration::from_millis(2) + Duration::from_nanos(1),
+        ] {
+            assert_eq!(
+                cohort_delay(true, original, Some((end, 4)), end + age),
+                original
+            );
+        }
+        assert_eq!(cohort_delay(true, original, None, end), original);
+        assert_eq!(cohort_delay(false, original, Some((end, 4)), end), original);
+        assert_eq!(
+            cohort_delay(
+                true,
+                original,
+                Some((end, 4)),
+                end + Duration::from_millis(2) - Duration::from_nanos(1)
+            ),
+            Duration::from_micros(1000)
+        );
+    }
+
+    #[cfg(feature = "handoff-refill")]
+    #[test]
+    fn bv_refill_wait_requires_prior_writer_and_expired_partial_group() {
+        for queued in [1, 2, 3, 4, MAX_BATCH] {
+            assert_eq!(
+                refill_delay(false, Duration::ZERO, true, queued),
+                Duration::ZERO
+            );
+            assert_eq!(
+                refill_delay(true, Duration::from_nanos(1), true, queued),
+                Duration::ZERO
+            );
+        }
+        for queued in [0, 4, MAX_BATCH] {
+            assert_eq!(
+                refill_delay(true, Duration::ZERO, true, queued),
+                Duration::ZERO
+            );
+        }
+        for queued in [1, 2, 3] {
+            assert_eq!(
+                refill_delay(true, Duration::ZERO, false, queued),
+                Duration::ZERO
+            );
+            assert_eq!(
+                refill_delay(true, Duration::ZERO, true, queued),
+                Duration::from_micros(1000)
+            );
+        }
     }
 
     #[cfg(feature = "group-handoff")]

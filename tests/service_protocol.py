@@ -73,6 +73,55 @@ class ServiceTests(unittest.TestCase):
             self.ok(c, op="put", key=key, value=value)
             return self.ok(c, op="commit")
 
+    def test_eq_single_requests_crud_pages_ping_and_reopen(self):
+        c = self.client()
+        self.assertIsNone(self.ok(c, op="get_latest", key="01")["value"])
+        self.assertEqual(self.ok(c, op="scan_latest", start="")["rows"], [])
+        for k, v in [("01", ""), ("02", "abcd"), ("03", "ff")]:
+            result = self.ok(c, op="put_commit", key=k, value=v)
+            self.assertEqual(self.ok(c, op="ping")["version"], result["version"])
+        self.assertEqual(self.ok(c, op="get_latest", key="01")["value"], "")
+        old = self.client(); self.ok(old, op="begin")
+        self.ok(old, op="get", key="02")
+        page = self.ok(c, op="scan_latest", start="", rows=2)
+        self.assertEqual(page["rows"], [["01", ""], ["02", "abcd"]])
+        self.ok(c, op="put_commit", key="03", value="aa")
+        self.assertEqual(self.ok(c, op="scan_latest", start="", after=page["next_after"])["rows"], [["03", "aa"]])
+        self.ok(c, op="delete_commit", key="02")
+        self.assertEqual(self.ok(old, op="get", key="02")["value"], "abcd")
+        self.ok(old, op="put", key="04", value="bb")
+        self.assertEqual(old.request(op="commit")["error"], "conflict")
+        self.stop(); self.start(); c = self.client()
+        self.assertEqual(self.ok(c, op="scan_latest", start="")["rows"], [["01", ""], ["03", "aa"]])
+
+    def test_st_single_requests_reject_active_transaction_without_discarding_it(self):
+        c = self.client(); self.ok(c, op="begin"); self.ok(c, op="put", key="01", value="aa")
+        for op in ["get_latest", "scan_latest", "put_commit", "delete_commit"]:
+            self.assertEqual(c.request(op=op, key="01", value="bb", start="")["error"], "invalid_request")
+            self.assertEqual(self.ok(c, op="get", key="01")["value"], "aa")
+        self.ok(c, op="commit")
+        self.assertEqual(self.ok(c, op="get_latest", key="01")["value"], "aa")
+
+    def test_bv_single_requests_limits_leave_connection_and_data_intact(self):
+        c = self.client()
+        for request in [dict(op="put_commit",key="ab"*1025,value=""), dict(op="put_commit",key="01",value="ab"*(256*1024+1)), dict(op="scan_latest",start="",rows=0), dict(op="scan_latest",start="",rows=4097), dict(op="put_commit",key="zz",value="ab")]:
+            self.assertFalse(c.request(**request)["ok"])
+            self.ok(c, op="ping")
+        self.assertEqual(self.ok(c, op="scan_latest", start="")["rows"], [])
+        self.ok(c, op="put_commit", key="ab"*1024, value="ab"*(256*1024))
+        self.assertFalse(c.request(op="scan_latest",start="",bytes=10)["ok"])
+        self.assertEqual(len(self.ok(c, op="get_latest",key="ab"*1024)["value"]),256*1024*2)
+        self.ok(c, op="delete_commit", key="ab"*1024)
+        for count in [1,4096]: self.assertEqual(self.ok(c,op="scan_latest",start="",rows=count)["rows"],[])
+
+    def test_er_single_request_acknowledgements_survive_process_exit(self):
+        def writer(i):
+            with Client("127.0.0.1",self.port,self.token) as c:
+                for n in range(15): self.ok(c,op="put_commit",key=f"{i:02x}{n:02x}",value="ff")
+        with concurrent.futures.ThreadPoolExecutor(4) as pool: list(pool.map(writer,range(4)))
+        self.stop(); self.start()
+        self.assertEqual(len(self.ok(self.client(),op="scan_latest",start="",rows=100)["rows"]),60)
+
     def test_eq_empty_value_missing_update_delete_and_restart(self):
         c = self.client()
         self.ok(c, op="begin")

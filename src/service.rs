@@ -420,9 +420,28 @@ fn dispatch(db: &Database, tx: &mut Option<Transaction>, v: &Value) -> Result<Va
     match op {
         #[cfg(all(feature = "fixed-log", feature = "lock-timing"))]
         "fixed_log_metrics" => Ok(json!({"ok":true,"metrics":db.fixed_log_metrics()?})),
-        "ping" => {
-            let stats = db.stats()?;
-            Ok(json!({"ok":true,"version":stats.version.to_string()}))
+        "ping" => Ok(json!({"ok":true,"version":db.current_version()?.to_string()})),
+        "get_latest" | "scan_latest" | "put_commit" | "delete_commit" => {
+            if tx.is_some() {
+                return Err(Error::Invalid("single request requires no transaction"));
+            }
+            let (operation, writes) = match op {
+                "get_latest" => ("get", false),
+                "scan_latest" => ("scan", false),
+                "put_commit" => ("put", true),
+                _ => ("delete", true),
+            };
+            // Reusing dispatch preserves the existing validation and response bounds.
+            let mut request = v.clone();
+            request["op"] = Value::String(operation.into());
+            let mut local = Some(db.begin()?);
+            let response = dispatch(db, &mut local, &request)?;
+            if writes {
+                let version = local.take().unwrap().commit()?;
+                Ok(json!({"ok":true,"version":version.to_string()}))
+            } else {
+                Ok(response)
+            }
         }
         "begin" => {
             if tx.is_some() {
@@ -554,6 +573,85 @@ mod tests {
             .unwrap()
         }
     }
+    #[test]
+    fn st_single_update_waits_for_sync_and_hides_uncommitted_values() {
+        let fixture = Fixture::new();
+        let db = fixture.db();
+        db.set_group_commit(true);
+        let mut old = db.begin().unwrap();
+        let gate = Arc::new([std::sync::Barrier::new(2), std::sync::Barrier::new(2)]);
+        db.hold_test_sync(gate.clone());
+        let (send, recv) = std::sync::mpsc::channel();
+        std::thread::scope(|scope| {
+            scope.spawn(|| {
+                send.send(dispatch(
+                    &db,
+                    &mut None,
+                    &json!({"op":"put_commit","key":"01","value":"aa"}),
+                ))
+                .unwrap();
+            });
+            gate[0].wait();
+            let response_pending = recv.try_recv().is_err();
+            let hidden = dispatch(&db, &mut None, &json!({"op":"get_latest","key":"01"})).unwrap();
+            let version = dispatch(&db, &mut None, &json!({"op":"ping"})).unwrap();
+            gate[1].wait();
+            assert!(response_pending);
+            assert!(hidden["value"].is_null());
+            assert_eq!(version["version"], "0");
+            assert!(recv.recv_timeout(Duration::from_secs(10)).unwrap().is_ok());
+        });
+        assert!(old.get(&[1]).unwrap().is_none());
+        assert_eq!(db.current_version().unwrap(), db.stats().unwrap().version);
+    }
+
+    #[test]
+    #[ignore]
+    fn single_request_crash_worker() {
+        let db = Database::open(std::env::var_os("CATDB_SINGLE_CRASH_PATH").unwrap()).unwrap();
+        db.set_group_commit(true);
+        dispatch(
+            &db,
+            &mut None,
+            &json!({"op":"put_commit","key":"02","value":"bb"}),
+        )
+        .unwrap();
+        panic!("crash hook not reached");
+    }
+
+    #[test]
+    fn er_single_request_crash_keeps_acknowledged_values() {
+        for phase in ["before-sync", "after-sync"] {
+            let fixture = Fixture::new();
+            let db = fixture.db();
+            dispatch(
+                &db,
+                &mut None,
+                &json!({"op":"put_commit","key":"01","value":"aa"}),
+            )
+            .unwrap();
+            drop(db);
+            let status = std::process::Command::new(std::env::current_exe().unwrap())
+                .args([
+                    "--ignored",
+                    "--exact",
+                    "service::tests::single_request_crash_worker",
+                ])
+                .env("CATDB_SINGLE_CRASH_PATH", fixture.0.join("state.ndb"))
+                .env("NEWDBMS_GROUP_CRASH_PHASE", phase)
+                .status()
+                .unwrap();
+            assert_eq!(status.code(), Some(77));
+            let db = Database::open(fixture.0.join("state.ndb")).unwrap();
+            assert_eq!(db.begin().unwrap().get(&[1]).unwrap(), Some(vec![170]));
+            let next = db.begin().unwrap().get(&[2]).unwrap();
+            assert!(next.is_none() || next == Some(vec![187]));
+            if phase == "after-sync" {
+                assert_eq!(next, Some(vec![187]));
+            }
+        }
+    }
+
     #[test]
     fn eq_service_mutations_and_embedded_reopen_agree() {
         let fixture = Fixture::new();

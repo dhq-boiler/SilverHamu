@@ -86,6 +86,11 @@ pub struct CommitOutcome {
 }
 
 impl Database {
+    #[cfg(test)]
+    pub(crate) fn hold_test_sync(&self, gate: Arc<[std::sync::Barrier; 2]>) {
+        *self.inner.group.sync_gate.lock().unwrap() = Some(gate);
+    }
+
     #[cfg(feature = "lock-timing")]
     #[doc(hidden)]
     pub fn set_group_collection_timing(&self, enabled: bool) {

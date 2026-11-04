@@ -876,6 +876,10 @@ impl Database {
         })
     }
 
+    pub fn current_version(&self) -> Result<u64> {
+        Ok(self.state()?.sequence)
+    }
+
     pub fn stats(&self) -> Result<Stats> {
         let state = self.state()?;
         Ok(Stats {

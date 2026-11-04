@@ -27,5 +27,6 @@ for name,expected in env['source_sha256'].items():
     data=(source/name).read_bytes();lf=data.replace(b'\r\n',b'\n')
     variants=[data,lf,lf.rstrip(b'\n')+b'\n',lf.rstrip(b'\n')+b'\n\n']
     variants += [v.replace(b'\r\n',b'\n').replace(b'\n',b'\r\n') for v in variants]
+    variants += [v.rstrip(b'\r\n')+b'\r\n' for v in variants]
     assert expected in {hashlib.sha256(v).hexdigest() for v in variants},name
 print('Validated: 108 cases, 864000 latencies, 144 content checks, cross-engine equality, source hashes.')

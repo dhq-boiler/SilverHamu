@@ -1,0 +1,34 @@
+name: CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: cargo test --locked --features service
+      - run: cargo build --locked --features service --bin catdb-server
+      - run: python tests/service_protocol.py
+      - run: cargo build --locked --release --lib
+      - run: python -m unittest discover -s tests -p "*ffi_checks.py"
+      - run: cargo clippy --locked --features service --lib --bin catdb-server -- -D warnings
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: docker build -t catdb:local .
+      - run: python tests/service_container.py

@@ -1,0 +1,9 @@
+/target/
+/artifacts/
+/.secrets/
+/data/
+.env
+*.ndb
+*.wal
+__pycache__/
+*.pyc

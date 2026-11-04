@@ -1,0 +1,22 @@
+services:
+  catdb:
+    build: .
+    image: catdb:local
+    ports:
+      - "127.0.0.1:7400:7400"
+    volumes:
+      - catdb-data:/data
+    secrets:
+      - catdb_token
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    mem_limit: 512m
+    stop_grace_period: 60s
+    restart: unless-stopped
+secrets:
+  catdb_token:
+    file: .secrets/catdb-token
+volumes:
+  catdb-data:

@@ -1,0 +1,419 @@
+{
+  "utc": "2026-11-04T17:55:29.510657+00:00",
+  "rows": 100000,
+  "value_bytes": 256,
+  "ops": 8000,
+  "reps": 3,
+  "profile": false,
+  "profile_variants": [
+    "baseline-diag",
+    "handoff-diag"
+  ],
+  "clients": [
+    4
+  ],
+  "workloads": [
+    "update"
+  ],
+  "server_cpus": 2,
+  "client_cpus": 2,
+  "memory_gib_each": 4,
+  "variants": {
+    "baseline": {
+      "image": "catdb-comparison:local",
+      "id": "sha256:39802503b80b1a6c6f55632fb407b2a47d410316450c48fab246be81adf22f38"
+    },
+    "baseline-diag": {
+      "image": "catdb-update-baseline-diag:local",
+      "id": "sha256:9b8dcc011bc9cc79176796e3edfebd3352387030d7b2d5d89f4edbadb3539b29"
+    },
+    "handoff": {
+      "image": "catdb-update-handoff:local",
+      "id": "sha256:7aba2b609ac274b760bc406cbd0e5adf3ecb34fc200049ee0772725a1b7b97ce"
+    },
+    "handoff-diag": {
+      "image": "catdb-update-handoff-diag:local",
+      "id": "sha256:c0a82bb7176adc91d9e4f50237e87823e2b7db02b095049070b604657a2d4e3c"
+    }
+  },
+  "source_sha256": {
+    "benchmarks\\runner.py": "aa313e3ba0969e60f1c6917acfff090c572e4a25f5bbe60b04d319a410e754e0",
+    "benchmarks\\service-update\\client.py": "60aa1cd655a6401f6d9f163c5cd9c9cc7d21748a19418bcb11877c2bc9588208",
+    "src\\group_commit.rs": "a72304caba338912c4224bfce2ccc56ad3194c4120ab75841509d681c11e941e",
+    "src\\service.rs": "6be8f181f378a92db6dcdf20fa690c74a0d05cc0e33f42b3d98fd6720abf5406"
+  },
+  "runs": [
+    {
+      "variant": "baseline",
+      "rep": 1,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        }
+      ]
+    },
+    {
+      "variant": "baseline-diag",
+      "rep": 1,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        }
+      ]
+    },
+    {
+      "variant": "handoff",
+      "rep": 1,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        }
+      ]
+    },
+    {
+      "variant": "handoff-diag",
+      "rep": 1,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        }
+      ]
+    },
+    {
+      "variant": "handoff-diag",
+      "rep": 2,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "expected_sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "updated_keys": 7660,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "expected_sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "updated_keys": 7660,
+          "empty_and_last": true
+        }
+      ]
+    },
+    {
+      "variant": "handoff",
+      "rep": 2,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "expected_sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "updated_keys": 7660,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "expected_sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "updated_keys": 7660,
+          "empty_and_last": true
+        }
+      ]
+    },
+    {
+      "variant": "baseline-diag",
+      "rep": 2,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "expected_sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "updated_keys": 7660,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "expected_sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "updated_keys": 7660,
+          "empty_and_last": true
+        }
+      ]
+    },
+    {
+      "variant": "baseline",
+      "rep": 2,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "expected_sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "updated_keys": 7660,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "expected_sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "updated_keys": 7660,
+          "empty_and_last": true
+        }
+      ]
+    },
+    {
+      "variant": "baseline",
+      "rep": 3,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "expected_sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "updated_keys": 7705,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "expected_sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "updated_keys": 7705,
+          "empty_and_last": true
+        }
+      ]
+    },
+    {
+      "variant": "baseline-diag",
+      "rep": 3,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "expected_sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "updated_keys": 7705,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "expected_sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "updated_keys": 7705,
+          "empty_and_last": true
+        }
+      ]
+    },
+    {
+      "variant": "handoff",
+      "rep": 3,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "expected_sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "updated_keys": 7705,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "expected_sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "updated_keys": 7705,
+          "empty_and_last": true
+        }
+      ]
+    },
+    {
+      "variant": "handoff-diag",
+      "rep": 3,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "expected_sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "updated_keys": 7705,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "expected_sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "updated_keys": 7705,
+          "empty_and_last": true
+        }
+      ]
+    }
+  ]
+}

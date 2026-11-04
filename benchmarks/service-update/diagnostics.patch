@@ -1,5 +1,5 @@
 diff --git a/src/service.rs b/src/service.rs
-index 9590f8a..7f45208 100644
+index 9590f8a..eeed460 100644
 --- a/src/service.rs
 +++ b/src/service.rs
 @@ -268,6 +268,8 @@ fn connection(
@@ -23,12 +23,13 @@ index 9590f8a..7f45208 100644
          if transaction.is_some() && expires.is_none() {
              expires = Some(Instant::now() + config.transaction_timeout);
          }
-@@ -305,6 +311,19 @@ fn connection(
+@@ -305,6 +311,20 @@ fn connection(
                  Error::Io(_) | Error::Locked(_) => "storage_error",
              }),
          };
 +        #[cfg(feature = "lock-timing")]
-+        let response = if diagnostic && request.get("op").and_then(Value::as_str) == Some("commit") {
++        let response = if diagnostic && request.get("op").and_then(Value::as_str) == Some("commit")
++        {
 +            let mut response = response;
 +            response["diagnostic"] = json!({
 +                "dispatch_ns": dispatch_finished.saturating_sub(dispatch_started),

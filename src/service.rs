@@ -312,7 +312,8 @@ fn connection(
             }),
         };
         #[cfg(feature = "lock-timing")]
-        let response = if diagnostic && request.get("op").and_then(Value::as_str) == Some("commit") {
+        let response = if diagnostic && request.get("op").and_then(Value::as_str) == Some("commit")
+        {
             let mut response = response;
             response["diagnostic"] = json!({
                 "dispatch_ns": dispatch_finished.saturating_sub(dispatch_started),

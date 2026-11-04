@@ -1,0 +1,18 @@
+{
+  "baseline_runtime_equivalent_commit": "1c226013caa4271e397cca209e85d175d6a4eddf",
+  "candidate_source_commit": "a5dec6eb77c42efff5b99a93e09b2c6f934c2600",
+  "baseline_features": [
+    "service"
+  ],
+  "candidate_features": [
+    "service",
+    "group-handoff"
+  ],
+  "diagnostic_features_added": [
+    "lock-timing"
+  ],
+  "diagnostic_build_note": "Diagnostic images were built before the test-only sync_gate was added. Production runtime code is the same; handoff was selected explicitly for the candidate diagnostic image before it became a service dependency. Image IDs are in observer/environment.json.",
+  "source_hash_note": "environment.json source hashes identify the candidate checkout at run start, not the frozen baseline image. Runtime baseline equality from 60a67085 to 1c22601 was checked with git diff over src, Cargo.toml and Cargo.lock.",
+  "client_image": "catdb-comparison:local (frozen; same client in all variants)",
+  "historical_results_preserved": "../2026-11-05/"
+}

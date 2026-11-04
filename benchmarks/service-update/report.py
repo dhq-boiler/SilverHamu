@@ -78,6 +78,10 @@ for variant in ("baseline", "handoff"):
     latency_change = (median(observer, variant+'-diag', 'p99_ms') / median(observer, variant, 'p99_ms') - 1) * 100
     text += f"\nFor {variant}, enabling diagnostics changed median throughput by {throughput_change:+.1f}% and p99 by {latency_change:+.1f}%.\n"
 text += """
+Instrumentation can alter arrival timing and group formation. An apparent
+throughput gain with diagnostics is not evidence of negative overhead or zero
+observer effect; the uninstrumented paired runs support the headline result.
+
 `batch_queue` includes the coordinator handoff wait. `writer_wait` measures the
 writer lock after group selection. Stage means, not stage p99s, explain the
 commit path. `client_extra` includes network, parsing and scheduling and cannot
@@ -95,7 +99,8 @@ See [all diagnostic distributions](observer/diagnosis.json),
   Fresh named volumes on the same host. Shared workstation, not dedicated hardware.
 - Baseline runtime sources: `1c22601` (identical engine to original comparison
   `60a67085f3f90cf8518106146d0c5a09e902ccbd`). Candidate uses this change's
-  `service` feature. Immutable image IDs and source hashes are recorded in
+  `service` feature at `a5dec6e`; see [build provenance](provenance.json).
+  Immutable image IDs and source hashes are recorded in
   [environment.json](environment.json). Hashes describe the checkout at run start,
   not the historical baseline sources; variant images identify the actual binaries.
 - Before/after order alternates, each six-case order is shuffled identically for
@@ -108,6 +113,13 @@ See [all diagnostic distributions](observer/diagnosis.json),
   checks that no uncommitted value or success is visible, then checks four
   commits in two syncs and exact values after reopen. Process crashes do not
   prove protection against power loss or storage firmware failures.
+
+The [implementation CI](https://github.com/dhq-boiler/catdb/actions/runs/41882479578)
+passed on Windows and Linux, including protocol, C ABI and Clippy checks; the
+container job also passed. Locally, the Linux Rust suite, 13 real-process service
+tests, 30 C ABI checks and the concurrent diagnostic-timestamp test passed.
+The deterministic sync gate covers the added handoff behavior; existing tests
+remain the oracle for conflict and recovery semantics.
 
 ## What open-source implementations contributed
 

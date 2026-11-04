@@ -36,7 +36,8 @@ measurements include TCP, drivers and an additional client container.
 The workload uses **100,000 synthetic records, 256-byte values, 1 or 4 clients**,
 with a separate transaction for every lookup, 100-record keyset scan or durable
 single-record update. Each condition runs three times in varied order. Bars show
-medians; whiskers show the minimum and maximum of the three runs.
+medians; whiskers show the minimum and maximum of the three runs. These original
+product comparisons predate the [group-commit follow-up](#follow-up-faster-four-client-service-updates) below.
 
 ![Embedded API throughput and p99 latency comparison](docs/benchmarks/2026-11-05/embedded.svg)
 
@@ -60,6 +61,27 @@ See the [results and machine configuration](docs/benchmarks/2026-11-05/README.md
 [raw run summaries](docs/benchmarks/2026-11-05/results.json).
 SQL Server is not measured because the reviewed edition requires prior written
 permission to publish benchmark results; see [product coverage](benchmarks/README.md#product-coverage-and-publication).
+
+### Follow-up: faster four-client service updates
+
+The figures above retain the **original catdb implementation**. A new paired
+comparison enables group-commit handoff, so requests arriving during a log sync
+can share the next sync. Durability acknowledgement and conflict checks are
+unchanged; instrumentation is disabled in the chart below.
+
+With the same 100,000 records, 256-byte values and original client, median
+four-client update throughput increased from **324 to 630 operations/s (1.94x)**,
+while p99 fell from **16.984 to 8.827 ms (48% lower)**. Three runs per condition,
+with before/after order alternated; all read conditions are also shown.
+
+![catdb service before and after group-commit handoff, throughput and p99 for 1 and 4 clients](docs/benchmarks/service-update-2026-11-05/service-update.svg)
+
+All 288,000 operations and 48 full-content checks, including six restarts, passed.
+These checks do not prove power-loss durability. PostgreSQL and Oracle were not
+rerun in this follow-up; this improvement does not establish that catdb overtook
+them. See the [full report, timing breakdown and observer overhead](docs/benchmarks/service-update-2026-11-05/README.md),
+[numerical table](docs/benchmarks/service-update-2026-11-05/table.md) and
+[reproduction commands](benchmarks/service-update/README.md).
 
 ## Build
 

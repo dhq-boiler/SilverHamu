@@ -7,7 +7,7 @@ catdb is experimental. Keep changes small and document their effect on durabilit
 Use Rust 1.89 or newer and Python 3. Build the service before its process tests:
 
 ```sh
-cargo test --locked --features service
+cargo test --locked --features service -- --test-threads=1
 cargo build --locked --features service --bin catdb-server
 python tests/service_protocol.py
 cargo build --locked --release --lib
@@ -37,3 +37,7 @@ The Cargo package is `catdb`, while the Rust library/native library remain `newd
 The standalone extraction excludes the original application integration and private experiment logs. Benchmark claims need a reproducible workload, hardware description, correctness checks, and both throughput and latency distributions. Avoid claiming universal superiority from a single workload.
 
 Report bugs with a minimal synthetic reproducer, platform/toolchain, and sanitized diagnostics. Never include credentials or private database contents in a public issue.
+
+Run test cases sequentially to isolate subprocess crash fixtures from other
+tests' file-lock lifetimes. Tests still exercise their own concurrent readers
+and writers; this flag does not disable that internal concurrency.

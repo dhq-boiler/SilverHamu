@@ -24,3 +24,13 @@ performance charts.
 All fixtures were synthetic and used uniquely named containers/volumes. Each
 attempt removed its own fixtures. No production library, SQLite source or backup
 was used. No failed preparation result was converted into a performance number.
+
+## Post-publication CI check
+
+The first publication CI run passed Windows and container checks, but one existing
+Linux recovery test failed reopening its file with `Locked`. CI now runs Rust test
+cases sequentially to isolate subprocess crash fixtures from other tests' file-lock
+lifetimes. Tests retain their internal concurrent readers/writers. This is a test
+execution isolation measure, not a demonstrated engine fix; the exact original
+interleaving was not traced. The database source and benchmark measurements are
+unchanged. The complete Linux Rust suite passed with this configuration.

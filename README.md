@@ -160,7 +160,7 @@ In PowerShell, use `Get-Content requests.jsonl | python scripts/catdb-client.py 
 ## Tests
 
 ```sh
-cargo test --locked --features service
+cargo test --locked --features service -- --test-threads=1
 cargo clippy --locked --features service --lib --bin catdb-server -- -D warnings
 cargo build --locked --features service --bin catdb-server
 python tests/service_protocol.py

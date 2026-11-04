@@ -17,7 +17,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: cargo test --locked --features service
+      # Subprocess crash fixtures must not overlap other tests' file-lock lifetimes.
+      - run: cargo test --locked --features service -- --test-threads=1
       - run: cargo build --locked --features service --bin catdb-server
       - run: python tests/service_protocol.py
       - run: cargo build --locked --release --lib

@@ -1,0 +1,63 @@
+{
+  "utc": "2026-11-04T18:27:46.267966+00:00",
+  "rows": 100000,
+  "value_bytes": 256,
+  "ops": 8000,
+  "reps": 1,
+  "profile": true,
+  "profile_variants": [],
+  "clients": [
+    4
+  ],
+  "workloads": [
+    "update"
+  ],
+  "server_cpus": 2,
+  "client_cpus": 2,
+  "memory_gib_each": 4,
+  "variants": {
+    "cohort-diag": {
+      "image": "catdb-sync-cohort-diag:local",
+      "id": "sha256:e0aa4f4a8f65cd750ce2dad54f9ebb1d8c91eca65395453a4f0a0898ae35d66e"
+    }
+  },
+  "source_sha256": {
+    "benchmarks\\runner.py": "aa313e3ba0969e60f1c6917acfff090c572e4a25f5bbe60b04d319a410e754e0",
+    "benchmarks\\service-update\\client.py": "60aa1cd655a6401f6d9f163c5cd9c9cc7d21748a19418bcb11877c2bc9588208",
+    "src\\group_commit.rs": "c7d0b00d392a73911d3a137dad26f54110129aee195d58411ebc612c7a3f7883",
+    "src\\service.rs": "b2f3a7b6e7753b30fc5d5dc6ba5292f316cd2d138292107bcd5b1a6dd9511111"
+  },
+  "runs": [
+    {
+      "variant": "cohort-diag",
+      "rep": 1,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        }
+      ]
+    }
+  ]
+}

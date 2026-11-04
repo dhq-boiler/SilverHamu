@@ -15,7 +15,8 @@ a POSIX shell; PowerShell accepts the same commands without the line continuatio
 ```sh
 git worktree add --detach artifacts/service-update-baseline 1c22601
 docker build -f artifacts/service-update-baseline/benchmarks/Dockerfile -t catdb-comparison:local artifacts/service-update-baseline
-docker build -f benchmarks/service-update/Dockerfile -t catdb-update-handoff:local .
+git worktree add --detach artifacts/service-update-candidate a5dec6e
+docker build -f artifacts/service-update-candidate/benchmarks/service-update/Dockerfile -t catdb-update-handoff:local artifacts/service-update-candidate
 python benchmarks/service-update/run.py --variant baseline=catdb-comparison:local --variant handoff=catdb-update-handoff:local --out artifacts/service-update-rerun --reps 3
 python benchmarks/service-update/validate.py artifacts/service-update-rerun
 docker run --rm -v "$PWD:/repo" -w /repo catdb-comparison:local python benchmarks/service-update/plot.py artifacts/service-update-rerun
@@ -46,7 +47,7 @@ baseline, apply only the saved instrumentation patch to the detached baseline:
 ```sh
 git -C artifacts/service-update-baseline apply "$PWD/benchmarks/service-update/diagnostics.patch"
 docker build -f "$PWD/benchmarks/service-update/Dockerfile" --build-arg CATDB_FEATURES=service,lock-timing -t catdb-update-baseline-diag:local artifacts/service-update-baseline
-docker build -f benchmarks/service-update/Dockerfile --build-arg CATDB_FEATURES=service,lock-timing -t catdb-update-handoff-diag:local .
+docker build -f artifacts/service-update-candidate/benchmarks/service-update/Dockerfile --build-arg CATDB_FEATURES=service,lock-timing -t catdb-update-handoff-diag:local artifacts/service-update-candidate
 python benchmarks/service-update/run.py --variant baseline=catdb-comparison:local --variant baseline-diag=catdb-update-baseline-diag:local --variant handoff=catdb-update-handoff:local --variant handoff-diag=catdb-update-handoff-diag:local --profile-variants baseline-diag handoff-diag --clients 4 --workloads update --reps 3 --out artifacts/service-update-overhead
 python benchmarks/service-update/validate.py artifacts/service-update-overhead
 python benchmarks/service-update/analyze.py artifacts/service-update-overhead

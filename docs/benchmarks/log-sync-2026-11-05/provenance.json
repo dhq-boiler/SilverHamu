@@ -1,0 +1,50 @@
+{
+  "baseline_commit": "dfebd0a729663e27f31d28790d6cb367cecce02d",
+  "candidate_commit": "1c046f2ede2e979b1e228480ed10b55cd61a7f83",
+  "candidate_features_measured": [
+    "service",
+    "handoff-refill"
+  ],
+  "candidate_features_default_after_adoption": [
+    "service"
+  ],
+  "adoption_change": "Only the service feature dependency changed from group-handoff to handoff-refill after measurement; enabled feature closure is identical. Rust runtime source is byte-for-byte unchanged from the uninstrumented candidate measured in environment.json.",
+  "diagnostic_candidate": "Same selected runtime policy; diagnostic image was built before rustfmt-only formatting. Image IDs are in observer/environment.json.",
+  "frozen_client_commit": "1c22601",
+  "frozen_client_image": "sha256:39802503b80b1a6c6f55632fb407b2a47d410316450c48fab246be81adf22f38",
+  "main_images": {
+    "catdb-current": "sha256:7aba2b609ac274b760bc406cbd0e5adf3ecb34fc200049ee0772725a1b7b97ce",
+    "catdb-candidate": "sha256:ae867014ca8bbe0daaf18994e6098a8d2e74d21726eea4ee948ca8d0ddff7b81",
+    "postgres": [
+      "postgres@sha256:3a4264520e121176619f54ff867d12774bc81e95e7b84db58d63bccdb6144b81"
+    ],
+    "oracle": [
+      "container-registry.oracle.com/database/free@sha256:cf540c3fa190d7cffad08c491652ac07fc70314e510f6b87890449517d565e94"
+    ]
+  },
+  "rust_runtime_sha256": {
+    "Cargo.toml": "ab2c9b5e0135359ae7e0b09a15aad49cd8bf372ea9ef5d5af638a79fbd47e19d",
+    "src\\group_commit.rs": "7bd05bb5d737fd42ea166d39fea20bc2f1f076315089216078c84920a110b2ec",
+    "src\\transactions.rs": "2acdbc97ec10d84a55322839fabfd0cce635988d19318328c3ddffcee3126f93",
+    "src\\service.rs": "b2f3a7b6e7753b30fc5d5dc6ba5292f316cd2d138292107bcd5b1a6dd9511111"
+  },
+  "safety_linux": {
+    "rust_passed": 101,
+    "rust_worker_helpers_ignored": 4,
+    "service_protocol_passed": 13,
+    "c_abi_passed": 30,
+    "clippy": "passed",
+    "features": [
+      "service",
+      "handoff-refill"
+    ]
+  },
+  "ci_url": "https://github.com/dhq-boiler/catdb/actions/runs/41890144568",
+  "ci_status": "passed",
+  "historical_sources": "benchmarks/runner.py was not modified. Earlier product and handoff measurements remain unchanged.",
+  "ci_platforms": [
+    "ubuntu-latest",
+    "windows-latest",
+    "Docker"
+  ]
+}

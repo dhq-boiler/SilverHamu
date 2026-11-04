@@ -1,0 +1,132 @@
+{
+  "utc": "2026-11-04T18:17:22.986470+00:00",
+  "rows": 100000,
+  "value_bytes": 256,
+  "ops": 8000,
+  "reps": 1,
+  "profile": false,
+  "profile_variants": [],
+  "clients": [
+    1,
+    2,
+    4
+  ],
+  "workloads": [
+    "update"
+  ],
+  "server_cpus": 2,
+  "client_cpus": 2,
+  "memory_gib_each": 4,
+  "variants": {
+    "current": {
+      "image": "catdb-update-handoff:local",
+      "id": "sha256:7aba2b609ac274b760bc406cbd0e5adf3ecb34fc200049ee0772725a1b7b97ce"
+    },
+    "refill": {
+      "image": "catdb-sync-refill:local",
+      "id": "sha256:b1163acb0de1edaa6afec76e904963058728123b15d5cb4c8006a483c3362a72"
+    }
+  },
+  "source_sha256": {
+    "benchmarks\\runner.py": "aa313e3ba0969e60f1c6917acfff090c572e4a25f5bbe60b04d319a410e754e0",
+    "benchmarks\\service-update\\client.py": "60aa1cd655a6401f6d9f163c5cd9c9cc7d21748a19418bcb11877c2bc9588208",
+    "src\\group_commit.rs": "ab566a56d306d2a3e0ce98044d2089d473f4a9b2d2e667995a836177a2081994",
+    "src\\service.rs": "b2f3a7b6e7753b30fc5d5dc6ba5292f316cd2d138292107bcd5b1a6dd9511111"
+  },
+  "runs": [
+    {
+      "variant": "current",
+      "rep": 1,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-2",
+          "rows": 100000,
+          "sha256": "8d06af84675865ee49d741f1ffea72f4176acc0f71cf7b97d8de0dbcb11c5fcd",
+          "expected_sha256": "8d06af84675865ee49d741f1ffea72f4176acc0f71cf7b97d8de0dbcb11c5fcd",
+          "updated_keys": 7668,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "fefe9a0c39933aefe9e9a48ae34348d645740deb91daff12d6f4806fd32be55d",
+          "expected_sha256": "fefe9a0c39933aefe9e9a48ae34348d645740deb91daff12d6f4806fd32be55d",
+          "updated_keys": 13024,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-1",
+          "rows": 100000,
+          "sha256": "dc3d22dfb765068b554000b599c47558514289fe03eb38aa85f8081e11cf78a2",
+          "expected_sha256": "dc3d22dfb765068b554000b599c47558514289fe03eb38aa85f8081e11cf78a2",
+          "updated_keys": 18036,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "dc3d22dfb765068b554000b599c47558514289fe03eb38aa85f8081e11cf78a2",
+          "expected_sha256": "dc3d22dfb765068b554000b599c47558514289fe03eb38aa85f8081e11cf78a2",
+          "updated_keys": 18036,
+          "empty_and_last": true
+        }
+      ]
+    },
+    {
+      "variant": "refill",
+      "rep": 1,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-2",
+          "rows": 100000,
+          "sha256": "8d06af84675865ee49d741f1ffea72f4176acc0f71cf7b97d8de0dbcb11c5fcd",
+          "expected_sha256": "8d06af84675865ee49d741f1ffea72f4176acc0f71cf7b97d8de0dbcb11c5fcd",
+          "updated_keys": 7668,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "fefe9a0c39933aefe9e9a48ae34348d645740deb91daff12d6f4806fd32be55d",
+          "expected_sha256": "fefe9a0c39933aefe9e9a48ae34348d645740deb91daff12d6f4806fd32be55d",
+          "updated_keys": 13024,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-1",
+          "rows": 100000,
+          "sha256": "dc3d22dfb765068b554000b599c47558514289fe03eb38aa85f8081e11cf78a2",
+          "expected_sha256": "dc3d22dfb765068b554000b599c47558514289fe03eb38aa85f8081e11cf78a2",
+          "updated_keys": 18036,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "dc3d22dfb765068b554000b599c47558514289fe03eb38aa85f8081e11cf78a2",
+          "expected_sha256": "dc3d22dfb765068b554000b599c47558514289fe03eb38aa85f8081e11cf78a2",
+          "updated_keys": 18036,
+          "empty_and_last": true
+        }
+      ]
+    }
+  ]
+}

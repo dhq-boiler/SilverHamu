@@ -83,6 +83,30 @@ them. See the [full report, timing breakdown and observer overhead](docs/benchma
 [numerical table](docs/benchmarks/service-update-2026-11-05/table.md) and
 [reproduction commands](benchmarks/service-update/README.md).
 
+### Follow-up: sharing the remaining log-sync cost
+
+A further comparison reruns **catdb before/after, PostgreSQL and Oracle Free**
+with the same 100,000 records, 256-byte values and original client, three times
+in varied order. A bounded collection policy lets recently active writers
+re-form a full group. Four-client throughput improves from **568 to 776
+operations/s (37% higher)** and p99 from **9.880 to 7.230 ms
+(27% lower)**. Single-client throughput remains approximately
+238–239 operations/s.
+
+![Durable service updates: contemporaneous catdb before and after, PostgreSQL and Oracle Free, 1 and 4 clients](docs/benchmarks/log-sync-2026-11-05/service-updates.svg)
+
+**Individual log syncs still take about 3 ms.** The gain comes from sharing more
+updates per sync, not weakening durability. PostgreSQL (1183
+operations/s) and Oracle Free (1081) remain faster at four clients.
+All 192,000 main-run operations and 48 full-content checks, including restarts,
+passed. These checks are not proof against actual power loss.
+
+The [full report](docs/benchmarks/log-sync-2026-11-05/README.md) retains rejected
+candidates, I/O probes, timing overhead and limitations. See the
+[numerical table](docs/benchmarks/log-sync-2026-11-05/table.md),
+[raw results](docs/benchmarks/log-sync-2026-11-05/results.json) and
+[reproduction commands](benchmarks/log-sync/README.md).
+
 ## Build
 
 Requires Rust **1.89 or newer**. Python 3 is used by the optional client and integration tests. Docker is needed only for containers.

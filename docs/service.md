@@ -44,6 +44,25 @@ Ranges are `start <= key < end`; omit `end` or use null for no upper bound. Empt
 
 Read-only transactions can finish at their original snapshot. A writing transaction validates write, read, and range dependencies. Successful commit replies are sent only after durable log synchronization. Checkpoints preserve pinned old readers.
 
+## Single-request operations
+
+`get_latest`, `scan_latest`, `put_commit` and `delete_commit` accept the same fields
+and bounds as `get`, `scan`, `put` and `delete`, respectively. They require no
+active transaction and perform one internal transaction per request. An active
+transaction causes `invalid_request` without discarding its staged changes.
+Read responses have the original get/scan shape. Mutation responses contain the
+committed `version` and are returned only after durable synchronization.
+
+Each `scan_latest` request has its own snapshot. Its continuation key is a keyset
+position, not a snapshot token: later pages may reflect intervening commits.
+Use `begin` + repeated `scan` + `rollback` for a stable multi-page snapshot.
+Missing values remain null; empty values remain empty strings. Read failures
+and invalid mutations release the internal transaction. A lost mutation response
+still means the outcome may be unknown; requests are not automatically retried.
+
+`ping` reads only the committed version, without traversing records or versions.
+It still observes the engine's poisoned/reopen-required state.
+
 ## Bounds
 
 | Resource | Default / maximum |

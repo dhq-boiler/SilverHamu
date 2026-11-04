@@ -136,6 +136,32 @@ See the [report, synchronization breakdown and reopen times](docs/benchmarks/fix
 [reproduction commands](benchmarks/fixed-log/README.md). Earlier product results
 are retained; PostgreSQL and Oracle were not rerun for this prototype.
 
+### Follow-up: single-request service APIs
+
+Single-request reads and mutations remove explicit begin/finish network round
+trips while using the same transaction engine and durable commit path. Ping now
+reads only the committed version instead of computing full database statistics.
+The original transaction API remains available, including stable multi-page reads.
+
+In three paired repeats at 100,000 records / 256-byte values, four-client updates
+rise from **794 to 1,013 operations/s (27.6% higher)** and p99 falls from
+**7.334 to 5.889 ms (19.7% lower)**. The new server's original API is also measured
+as a control; all three series, including regressions and repeat ranges, appear
+below. Key lookups and 100-row scans are included, not only updates.
+
+![Original server, new server with legacy API, and new single-request API: throughput and p99](docs/benchmarks/single-request-2026-11-05/single-request.svg)
+
+All **432,000 operations and 72 full-content checks**, including nine restarts,
+passed. No durability barrier was removed. These remain warm-cache, closed-loop
+Python API measurements on one workstation, not a general product ranking.
+PostgreSQL and Oracle were not rerun in this follow-up.
+
+See the [full report and ping comparison](docs/benchmarks/single-request-2026-11-05/README.md),
+[raw results](docs/benchmarks/single-request-2026-11-05/results.json),
+[reproduction commands](benchmarks/single-request/README.md), and
+[API semantics](docs/service.md#single-request-operations). In particular,
+`scan_latest` pages do not share a snapshot across requests.
+
 ## Build
 
 Requires Rust **1.89 or newer**. Python 3 is used by the optional client and integration tests. Docker is needed only for containers.

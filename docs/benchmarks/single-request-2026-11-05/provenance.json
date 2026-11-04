@@ -1,0 +1,20 @@
+{
+  "baseline_commit": "92d8917",
+  "baseline_runtime_commit": "1c046f2",
+  "candidate_commit": "96769c4",
+  "features": "service",
+  "fixed_log": false,
+  "source_sha256": {
+    "src/service.rs": "cf3e3c43f152fea07f4e328da61f9ed0a51b0e25cda990299a21fb7e37721c33",
+    "src/transactions.rs": "49e9baa75b8762b619841140fc3f26219bc790cdab2c8ba0333df4479c4adbf8",
+    "src/group_commit.rs": "ed54bd4a3ff0f51c2b8eb43d91a9cda4b9e3b1ae9dd7112394bfab23688c82ff",
+    "Cargo.toml": "875fa5aee885a656af5f245216e98ed73f0485e4846cea6233565b55cf7ab447",
+    "benchmarks/runner.py": "aa313e3ba0969e60f1c6917acfff090c572e4a25f5bbe60b04d319a410e754e0",
+    "benchmarks/single-request/client.py": "32b865f7fa38ec14d8ffdbd8d18ce10edfe637e2e3f9a191fc5f914a6ae41ef3",
+    "benchmarks/single-request/run.py": "bc91b5af784e49573456e47285e7f3f7ac74f7a518a6cb991dd8a73b40ee92e1"
+  },
+  "ci_url": "https://github.com/dhq-boiler/catdb/actions/runs/41928761537",
+  "ci_status": "success",
+  "local_protocol_tests": 17,
+  "safety": "Same transactional commit path; held sync prevents acknowledgement/publication; subprocess before/after sync; existing engine persistence failure tests retained. Actual power loss not tested."
+}

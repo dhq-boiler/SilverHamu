@@ -1,0 +1,16 @@
+{
+  "cpu": {
+    "Name": "AMD Ryzen 9 5950X 16-Core Processor            ",
+    "NumberOfCores": 16,
+    "NumberOfLogicalProcessors": 32
+  },
+  "physical_memory_bytes": 137352949760,
+  "platform": "Windows host / Docker Desktop Linux (WSL2)",
+  "database_storage": "Fresh Docker named volumes; not Windows bind mounts",
+  "server_cpu_quota": 2,
+  "server_memory_limit_gib": 4,
+  "client_cpu_quota": 2,
+  "client_memory_limit_gib": 4,
+  "affinity_pinned": false,
+  "dedicated_bare_metal": false
+}

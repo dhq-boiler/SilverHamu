@@ -1,0 +1,9 @@
+**
+!Cargo.toml
+!Cargo.lock
+!src/
+!src/**
+!benchmarks/
+!benchmarks/**
+!scripts/
+!scripts/catdb-client.py

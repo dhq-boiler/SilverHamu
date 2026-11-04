@@ -27,6 +27,40 @@ catdb is a Rust key-value database that runs either **embedded, without a servic
 
 The service protocol is experimental framed JSON over TCP, **not HTTP or SQL**. The default host binding is loopback. Use an encrypted tunnel or TLS proxy for cross-host access; the shared token alone does not encrypt traffic.
 
+## API microbenchmarks (experimental)
+
+A reproducible comparison of **catdb, SQLite, PostgreSQL, MySQL and Oracle Free**
+on one workstation. Embedded and service results are shown separately: the service
+measurements include TCP, drivers and an additional client container.
+
+The workload uses **100,000 synthetic records, 256-byte values, 1 or 4 clients**,
+with a separate transaction for every lookup, 100-record keyset scan or durable
+single-record update. Each condition runs three times in varied order. Bars show
+medians; whiskers show the minimum and maximum of the three runs.
+
+![Embedded API throughput and p99 latency comparison](docs/benchmarks/2026-11-05/embedded.svg)
+
+![Service API throughput and p99 latency comparison](docs/benchmarks/2026-11-05/service.svg)
+
+These are **warm-cache Python-client microbenchmarks**, including API and driver
+overhead. Python thread scheduling and the GIL can limit four-client throughput.
+SQLite is the bundled **3.40.1**, not the latest upstream release.
+They are not a general DBMS ranking, an engine-only ceiling, or a comparison of
+SQL features, cold startup, larger-than-memory datasets or production reliability.
+Faster results in one panel do not imply superiority in the others.
+
+In this run, catdb's embedded single-client reads were faster than the bundled
+SQLite path, while service updates lagged PostgreSQL and Oracle Free. All 864,000
+operations and 144 full-content checks passed; these checks do not prove power-loss
+durability.
+
+See the [results and machine configuration](docs/benchmarks/2026-11-05/README.md),
+[complete numerical table](docs/benchmarks/2026-11-05/table.md),
+[methodology and reproduction commands](benchmarks/README.md), and
+[raw run summaries](docs/benchmarks/2026-11-05/results.json).
+SQL Server is not measured because the reviewed edition requires prior written
+permission to publish benchmark results; see [product coverage](benchmarks/README.md#product-coverage-and-publication).
+
 ## Build
 
 Requires Rust **1.89 or newer**. Python 3 is used by the optional client and integration tests. Docker is needed only for containers.

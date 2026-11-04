@@ -1,0 +1,20 @@
+{
+  "baseline_commit": "14e8a7d",
+  "baseline_runtime_commit": "96769c4",
+  "candidate_commit": "c0c8cff",
+  "main_features": "service",
+  "diagnostic_features": "service,lock-timing",
+  "main_fixed_log": false,
+  "ci_url": "https://github.com/dhq-boiler/catdb/actions/runs/41933922562",
+  "ci_status": "success",
+  "notes": "Images were built before rustfmt of the auxiliary probe, its required-features manifest entry, and a documentation-only transaction comment. Runtime logic is c0c8cff. Source hashes below identify committed sources, not byte-for-byte build input. Baseline diagnostics patch has no behavioral optimization. Main benchmark uses frozen client and baseline images.",
+  "source_sha256": {
+    "src/transactions.rs": "19abe3ce7a04eb713122298df3df8a6706030e1f17a3b40aba2d31e28cbd2c4f",
+    "src/service.rs": "22cb26ff83dab8df3e0ad07d59e770d1abc9d8add1ef9639cd37f15b19a2a1f0",
+    "src/group_commit.rs": "ed54bd4a3ff0f51c2b8eb43d91a9cda4b9e3b1ae9dd7112394bfab23688c82ff",
+    "src/bin/read-gc-bench.rs": "a43bb5577a31a2ccecf24447d9b0aea8aafa03250b91e606045dd4ba3d9dac8a",
+    "benchmarks/read-gc/baseline-diagnostics.patch": "c0be5c14f5500c4efc0aae7bf4903cfc374e760fc51ec53636117d287f6a1391",
+    "benchmarks/single-request/client.py": "32b865f7fa38ec14d8ffdbd8d18ce10edfe637e2e3f9a191fc5f914a6ae41ef3",
+    "benchmarks/single-request/run.py": "bc91b5af784e49573456e47285e7f3f7ac74f7a518a6cb991dd8a73b40ee92e1"
+  }
+}

@@ -162,6 +162,31 @@ See the [full report and ping comparison](docs/benchmarks/single-request-2026-11
 [API semantics](docs/service.md#single-request-operations). In particular,
 `scan_latest` pages do not share a snapshot across requests.
 
+### Follow-up: read-only snapshots and bounded reclamation
+
+A further paired comparison uses the same single-request API on both versions.
+Read-only transactions avoid write-validation bookkeeping; values are copied
+outside the state lock, and old versions are reclaimed in bounded portions.
+
+**The result is a tradeoff, not a general speedup.** At 100,000 records / 256 B,
+four-client updates remain near 990 ops/s. Four-client scans improve slightly,
+while lookup and single-client scan throughput decline. All 288,000 operations,
+48 full-content checks and six restarts pass.
+
+![Service throughput and p99 before and after read-only snapshots and bounded reclamation](docs/benchmarks/read-gc-2026-11-05/read-gc.svg)
+
+In separate instrumented native tests, large-value read p99 improves from
+**0.552 to 0.051 ms**, and releasing an old snapshot from **26.086 to 0.066 ms**.
+However, complete reclamation increases from **26.086 to 58.599 ms**, its read p99
+worsens, and the worst observed read across those repeats increases from
+**26.413 to 32.121 ms**. Deferred reclamation also retains more memory temporarily.
+No durability barrier is removed; no peer DBMS is rerun.
+
+See the [full tradeoffs, memory results and safety checks](docs/benchmarks/read-gc-2026-11-05/README.md),
+[all service values](docs/benchmarks/read-gc-2026-11-05/table.md),
+[native diagnostic results](docs/benchmarks/read-gc-2026-11-05/auxiliary/table.md),
+and [reproduction commands](benchmarks/read-gc/README.md).
+
 ## Build
 
 Requires Rust **1.89 or newer**. Python 3 is used by the optional client and integration tests. Docker is needed only for containers.

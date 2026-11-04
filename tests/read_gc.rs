@@ -80,7 +80,12 @@ fn bv_gc_splits_many_keys_and_keeps_unfreed_versions_charged_until_progress() {
         w.put(&i.to_be_bytes(), &[2; 16]).unwrap();
     }
     w.commit().unwrap();
-    assert_eq!(old.scan(&[], None).unwrap().len(), 200);
+    assert_eq!(
+        old.scan(&[], None).unwrap(),
+        (0u32..200)
+            .map(|i| (i.to_be_bytes().to_vec(), vec![1; 16]))
+            .collect::<Vec<_>>()
+    );
     assert_eq!(db.stats().unwrap().retained_versions, 400);
     drop(old);
     assert_eq!(db.stats().unwrap().retained_versions, 336);
@@ -94,7 +99,12 @@ fn bv_gc_splits_many_keys_and_keeps_unfreed_versions_charged_until_progress() {
     assert_eq!(db.resource_usage().unwrap().current[3], original);
     drop(db);
     let db = Database::open(f.0.join("db")).unwrap();
-    assert_eq!(db.begin_read().unwrap().scan(&[], None).unwrap().len(), 200);
+    assert_eq!(
+        db.begin_read().unwrap().scan(&[], None).unwrap(),
+        (0u32..200)
+            .map(|i| (i.to_be_bytes().to_vec(), vec![2; 16]))
+            .collect::<Vec<_>>()
+    );
 }
 #[test]
 fn bv_one_hot_key_reclaims_at_most_128_versions_per_step() {
@@ -138,4 +148,57 @@ fn bv_gc_byte_budget_and_oversized_value_both_make_progress() {
         while db.collect_garbage().unwrap() {}
         assert_eq!(db.stats().unwrap().retained_versions, 1);
     }
+}
+
+#[test]
+fn er_partial_reclamation_pressure_rejects_without_logging_and_recovers_after_drain() {
+    let f = Fixture::new();
+    let db = f.db(ResourceLimits {
+        max_retained_bytes: 72_000,
+        ..ResourceLimits::default()
+    });
+    let mut seed = db.begin().unwrap();
+    for i in 0u32..200 {
+        seed.put(&i.to_be_bytes(), &[1; 16]).unwrap();
+    }
+    seed.commit().unwrap();
+    let old = db.begin_read().unwrap();
+    let mut update = db.begin().unwrap();
+    for i in 0u32..200 {
+        update.put(&i.to_be_bytes(), &[2; 16]).unwrap();
+    }
+    update.commit().unwrap();
+    drop(old);
+    let wal_bytes = db.stats().unwrap().wal_bytes;
+    let mut rejected = db.begin().unwrap();
+    for i in 0u32..200 {
+        rejected.put(&i.to_be_bytes(), &[3; 16]).unwrap();
+    }
+    assert!(matches!(
+        rejected.commit(),
+        Err(Error::ResourceExhausted(_))
+    ));
+    assert_eq!(db.stats().unwrap().wal_bytes, wal_bytes);
+    while db.collect_garbage().unwrap() {}
+    assert_eq!(db.resource_usage().unwrap().current[3], 56_000);
+    let mut read = db.begin_read().unwrap();
+    assert!(
+        read.scan(&[], None)
+            .unwrap()
+            .iter()
+            .all(|(_, v)| v == &[2; 16])
+    );
+    drop(read);
+    let mut retry = db.begin().unwrap();
+    for i in 0u32..200 {
+        retry.put(&i.to_be_bytes(), &[3; 16]).unwrap();
+    }
+    retry.commit().unwrap();
+    while db.collect_garbage().unwrap() {}
+    assert_eq!(db.resource_usage().unwrap().current[3], 56_000);
+    drop(db);
+    let db = Database::open(f.0.join("db")).unwrap();
+    let values = db.begin_read().unwrap().scan(&[], None).unwrap();
+    assert_eq!(values.len(), 200);
+    assert!(values.iter().all(|(_, v)| v == &[3; 16]));
 }

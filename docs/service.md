@@ -39,7 +39,7 @@ Every message is a four-byte big-endian unsigned length followed by that many UT
 | rollback | none | none |
 | checkpoint | no active transaction on this connection | version, records |
 
-Keys and values are hexadecimal. A missing value is `null`; an empty value is `""`. `get`, `put`, `delete`, `scan`, `commit`, and `rollback` require `begin`. Repeated `begin` is rejected without discarding the current transaction. Commit consumes its transaction even on conflict or persistence failure.
+Keys and values are hexadecimal. A missing value is `null`; an empty value is `""`. `get`, `scan`, `commit`, and `rollback` require `begin` or `begin_read`; writes require `begin`. Repeated begin requests are rejected without discarding the current transaction. Commit consumes its transaction even on conflict or persistence failure.
 
 Ranges are `start <= key < end`; omit `end` or use null for no upper bound. Empty `start` begins at the first key. `after` is exclusive. Continue using `next_after` on the same transaction with the same range. An empty page can still have a continuation key. Writes staged in that transaction affect subsequent reads.
 

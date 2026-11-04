@@ -1,0 +1,9 @@
+{
+  "cpus": 2,
+  "memory_gib": 4,
+  "reps": 3,
+  "images": {
+    "before": "sha256:fe08536bc2e401f78c1ad6ec545d086bc64e80e1a2a079016eff3b495dd7c04a",
+    "after": "sha256:9e2a7ec65756c7174964ec1b444a0ccece24edb5ae1426afdc5efceae67bd811"
+  }
+}

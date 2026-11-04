@@ -1,8 +1,9 @@
 """Render only complete, verified repetitions; retain every measured product."""
-import argparse, csv, json, pathlib, statistics
+import argparse, csv, datetime, json, pathlib, statistics
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+plt.rcParams['svg.hashsalt']='catdb-api-comparison-v1'
 NAMES={'catdb-embedded':'catdb (C ABI)','sqlite':'SQLite','catdb-service':'catdb (TCP)','postgres':'PostgreSQL','mysql':'MySQL','oracle':'Oracle Free'}
 COLORS={'catdb-embedded':'#0072B2','sqlite':'#757575','catdb-service':'#0072B2','postgres':'#009E73','mysql':'#E69F00','oracle':'#CC79A7'}
 WORK={'get':'Key lookup','range100':'Read 100 consecutive records','update':'Replace one value + durable commit'}
@@ -12,6 +13,7 @@ def main():
     assert env['reps']==3 and len(env['runs'])==18
     assert all(r['status']=='passed' and len(r['verification'])==8 for r in env['runs'])
     assert len(records)==108 and all(not r['errors'] and r['completed']==r['attempted'] for r in records)
+    measured_date=datetime.datetime.fromisoformat(env['utc']).astimezone(datetime.timezone(datetime.timedelta(hours=9))).date().isoformat()
     aggregate=[]
     for mode,engines in [('embedded',['catdb-embedded','sqlite']),('service',['catdb-service','postgres','mysql','oracle'])]:
         fig,axes=plt.subplots(3,2,figsize=(13,10 if mode=='embedded' else 14),layout='constrained')
@@ -50,8 +52,8 @@ def main():
             elif e=='mysql':v=m['select version()'][0][0]
             else:v=m['select banner_full from v$version'][0][0].split('Version ')[-1]
             versions.append(NAMES[e]+' '+v)
-        fig.supxlabel('Median of 3 runs; whiskers = min/max. Python client overhead included.\nExperimental catdb; warm-cache microbenchmarks, not a general DBMS ranking. 2026-11-05\n'+' | '.join(versions),fontsize=9)
-        fig.savefig(root/f'{mode}.svg');fig.savefig(root/f'{mode}.png',dpi=140);plt.close(fig)
+        fig.supxlabel('Median of 3 runs; whiskers = min/max. Python client overhead included.\nExperimental catdb; warm-cache microbenchmarks, not a general DBMS ranking. '+measured_date+'\n'+' | '.join(versions),fontsize=9)
+        fig.savefig(root/f'{mode}.svg',metadata={'Date':env['utc']});fig.savefig(root/f'{mode}.png',dpi=140);plt.close(fig)
         svg=root/f'{mode}.svg'
         svg.write_text('\n'.join(line.rstrip() for line in svg.read_text(encoding='utf-8').splitlines())+'\n',encoding='utf-8')
     with (root/'summary.csv').open('w',newline='',encoding='utf-8') as f:

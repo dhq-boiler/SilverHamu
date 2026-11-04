@@ -20,7 +20,7 @@ docker build -f benchmarks/Dockerfile -t catdb-comparison:local .
 # Small correctness/restart smoke run, not publishable performance data:
 python benchmarks/run.py --out artifacts/comparison-smoke --rows 1000 --ops 100 --reps 1
 # Full comparison; output directory must not already exist:
-python benchmarks/run.py --out docs/benchmarks/2026-11-05 --rows 100000 --ops 8000 --reps 3
+python benchmarks/run.py --out artifacts/comparison-full --rows 100000 --ops 8000 --reps 3
 ```
 
 Tags can move. Use the image digests in the published `environment.json` to

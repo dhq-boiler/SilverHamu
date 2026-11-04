@@ -84,3 +84,17 @@ The Docker image uses a multi-stage Rust 1.89/Debian build and runs as UID/GID 1
 Compose adds a 512 MiB memory cap, 128-process limit, dropped capabilities, read-only root filesystem, and no-new-privileges. Those settings are deployment starting points, not benchmark results or production guarantees. Named volumes survive `docker compose down`; deleting volumes destroys the data.
 
 Tests cover non-root operation, authenticated health checks, checkpoint failure when directory writes are denied, graceful shutdown with an open transaction, force-kill, and restoring acknowledged values in a recreated container. They do not simulate actual power failure or hardware lying about flush completion.
+
+## Commit grouping
+
+The `service` feature enables group-commit handoff. A coordinator keeps arrivals
+queued while the preceding group synchronizes its log, then collects the next
+group before acquiring the writer lock. Success still follows log synchronization
+and committed-state publication; conflict checks and the file format are unchanged.
+The queue is bounded at 32 transactions and 4 MiB of staged write bytes. Requests
+that do not fit use the existing single-commit path rather than exceeding those
+bounds. The existing 200-microsecond collection budget includes time already spent
+queued, and four queued writes wake it early.
+
+See the [paired service measurements](../benchmarks/service-update/README.md) for
+reproduction and the distinction between normal and diagnostic builds.

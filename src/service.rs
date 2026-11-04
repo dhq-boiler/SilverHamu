@@ -268,6 +268,8 @@ fn connection(
         deadline,
         stop,
     )?;
+    #[cfg(feature = "lock-timing")]
+    let diagnostic = std::env::var_os("CATDB_DIAGNOSTICS").is_some();
     let mut transaction: Option<Transaction> = None;
     let mut expires = None;
     while !stop.load(Ordering::Acquire) {
@@ -279,7 +281,11 @@ fn connection(
         if Instant::now() >= deadline || stop.load(Ordering::Acquire) {
             break;
         }
+        #[cfg(feature = "lock-timing")]
+        let dispatch_started = crate::transactions::diagnostic_now_ns();
         let result = dispatch(&db, &mut transaction, &request);
+        #[cfg(feature = "lock-timing")]
+        let dispatch_finished = crate::transactions::diagnostic_now_ns();
         if transaction.is_some() && expires.is_none() {
             expires = Some(Instant::now() + config.transaction_timeout);
         }
@@ -304,6 +310,19 @@ fn connection(
                 Error::Poisoned => "reopen_required",
                 Error::Io(_) | Error::Locked(_) => "storage_error",
             }),
+        };
+        #[cfg(feature = "lock-timing")]
+        let response = if diagnostic && request.get("op").and_then(Value::as_str) == Some("commit") {
+            let mut response = response;
+            response["diagnostic"] = json!({
+                "dispatch_ns": dispatch_finished.saturating_sub(dispatch_started),
+                "finished_ns": dispatch_finished,
+                "trace": crate::transactions::take_commit_trace(),
+                "sync_attempts": db.commit_sync_attempts(),
+            });
+            response
+        } else {
+            response
         };
         send(
             &mut stream,

@@ -23,6 +23,8 @@ pub(super) struct GroupCommit {
     collections: Mutex<Vec<[u64; 5]>>,
     #[cfg(any(test, feature = "sync-stall"))]
     stall: Mutex<Option<(Instant, Duration, Duration, Duration)>>,
+    #[cfg(test)]
+    sync_gate: Mutex<Option<Arc<[std::sync::Barrier; 2]>>>,
 }
 
 struct Request {
@@ -120,6 +122,11 @@ impl Database {
 impl GroupCommit {
     #[cfg(any(test, feature = "sync-stall"))]
     fn stall_sync(&self) {
+        #[cfg(test)]
+        if let Some(gate) = self.sync_gate.lock().unwrap().take() {
+            gate[0].wait();
+            gate[1].wait();
+        }
         let delay =
             self.stall
                 .lock()
@@ -859,6 +866,58 @@ mod tests {
                 recv.recv_timeout(Duration::from_secs(10)).unwrap().unwrap();
             }
         });
+    }
+
+    #[cfg(feature = "group-handoff")]
+    #[test]
+    fn st_handoff_collects_during_sync_without_early_ack_or_visibility() {
+        let fixture = Fixture::new();
+        let db = Database::create(&fixture.0, [71; 16]).unwrap();
+        db.set_group_commit(true);
+        db.set_group_commit_wake_on_four(true);
+        let mut old = db.begin().unwrap();
+        let gate = Arc::new([std::sync::Barrier::new(2), std::sync::Barrier::new(2)]);
+        *db.inner.group.sync_gate.lock().unwrap() = Some(Arc::clone(&gate));
+        struct Release(Arc<[std::sync::Barrier; 2]>);
+        impl Drop for Release {
+            fn drop(&mut self) {
+                self.0[1].wait();
+            }
+        }
+        std::thread::scope(|scope| {
+            let (send, recv) = mpsc::channel();
+            let first = write(&db, b"a");
+            let first_send = send.clone();
+            scope.spawn(move || first_send.send(first.commit()).unwrap());
+            gate[0].wait();
+            let release = Release(Arc::clone(&gate));
+            for key in [b"b", b"c", b"d"] {
+                let tx = write(&db, key);
+                let send = send.clone();
+                scope.spawn(move || send.send(tx.commit()).unwrap());
+            }
+            wait_pending(&db, 3);
+            assert_eq!(db.commit_sync_attempts(), 1);
+            assert!(matches!(recv.try_recv(), Err(mpsc::TryRecvError::Empty)));
+            assert!(old.scan(b"", None).unwrap().is_empty());
+            assert!(db.begin().unwrap().scan(b"", None).unwrap().is_empty());
+            drop(release);
+            let mut versions: Vec<_> = (0..4)
+                .map(|_| recv.recv_timeout(Duration::from_secs(10)).unwrap().unwrap())
+                .collect();
+            versions.sort();
+            assert_eq!(versions, vec![1, 2, 3, 4]);
+        });
+        assert_eq!(db.commit_sync_attempts(), 2);
+        assert!(old.scan(b"", None).unwrap().is_empty());
+        drop(old);
+        drop(db);
+        let db = Database::open(&fixture.0).unwrap();
+        let expected: Vec<_> = [b"a", b"b", b"c", b"d"]
+            .into_iter()
+            .map(|key| (key.to_vec(), b"value".to_vec()))
+            .collect();
+        assert_eq!(db.begin().unwrap().scan(b"", None).unwrap(), expected);
     }
 
     #[cfg(feature = "group-handoff")]

@@ -10,6 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
+        features: [service, "service,fixed-log"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -18,12 +19,16 @@ jobs:
         with:
           python-version: '3.12'
       # Subprocess crash fixtures must not overlap other tests' file-lock lifetimes.
-      - run: cargo test --locked --features service -- --test-threads=1
-      - run: cargo build --locked --features service --bin catdb-server
+      - run: cargo test --locked --features "${{ matrix.features }}" -- --test-threads=1
+      - run: cargo build --locked --features "${{ matrix.features }}" --bin catdb-server
       - run: python tests/service_protocol.py
-      - run: cargo build --locked --release --lib
+      - if: contains(matrix.features, 'fixed-log')
+        run: python tests/service_protocol.py
+        env:
+          CATDB_EXPERIMENTAL_FIXED_LOG_BYTES: '16777216'
+      - run: cargo build --locked --release --features "${{ matrix.features }}" --lib
       - run: python -m unittest discover -s tests -p "*ffi_checks.py"
-      - run: cargo clippy --locked --features service --lib --bin catdb-server -- -D warnings
+      - run: cargo clippy --locked --features "${{ matrix.features }}" --lib --bin catdb-server -- -D warnings
   container:
     runs-on: ubuntu-latest
     steps:

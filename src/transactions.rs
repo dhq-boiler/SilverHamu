@@ -14,8 +14,15 @@ use std::ops::Bound::{Excluded, Included, Unbounded};
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, MutexGuard};
 
+#[cfg(feature = "fixed-log")]
+#[path = "fixed_log.rs"]
+mod fixed_log;
 #[path = "group_commit.rs"]
 mod group_commit;
+#[cfg(feature = "fixed-log")]
+use fixed_log::LogFile as WalFile;
+#[cfg(not(feature = "fixed-log"))]
+type WalFile = File;
 #[path = "retirement.rs"]
 mod retirement;
 #[cfg(feature = "commit-window")]
@@ -144,7 +151,7 @@ struct Inner {
 }
 
 struct State {
-    file: Option<File>,
+    file: Option<WalFile>,
     path: PathBuf,
     sequence: u64,
     wal_bytes: u64,
@@ -269,7 +276,11 @@ impl Database {
         file.try_lock().map_err(|e| Error::Locked(e.to_string()))?;
         file.write_all(&wal_header(id, 0, 0))?;
         file.sync_all()?;
-        Ok(Self::from_state(State::new(file, path, budget), id, owner))
+        Ok(Self::from_state(
+            State::new(legacy_wal_file(file), path, budget),
+            id,
+            owner,
+        ))
     }
 
     /// Opens an existing WAL. Incomplete final frames are removed; complete corruption is rejected.
@@ -290,7 +301,9 @@ impl Database {
         let mut header = [0; HEADER_BYTES];
         file.read_exact(&mut header)?;
         if &header[..8] != MAGIC
-            || ![1, 2].contains(&read_u32(&header, 8))
+            || !(read_u32(&header, 8) == 1
+                || read_u32(&header, 8) == 2
+                || (cfg!(feature = "fixed-log") && read_u32(&header, 8) == 3))
             || read_u32(&header, 12) != HEADER_BYTES as u32
             || read_u32(&header, 44) != crate::crc32(&header[..44])
         {
@@ -307,6 +320,14 @@ impl Database {
         if (legacy && header[32..44] != [0; 12]) || chunks > 65536 || (base == 0 && chunks != 0) {
             return Err(Error::Invalid("WAL checkpoint header"));
         }
+        #[cfg(feature = "fixed-log")]
+        let file = WalFile::open(file, header)?;
+        #[cfg(feature = "fixed-log")]
+        let confirmed = file.confirmed_end()?;
+        #[cfg(not(feature = "fixed-log"))]
+        let confirmed: Option<u64> = None;
+        #[cfg(feature = "fixed-log")]
+        let length = file.capacity().unwrap_or(length);
         let mut state = State::new(file, path, budget);
         state.sequence = base;
         let mut checkpoint_remaining = chunks;
@@ -328,15 +349,24 @@ impl Database {
             }
             let mut prefix = [0; PREFIX_BYTES];
             state.file.as_mut().unwrap().read_exact(&mut prefix)?;
+            if confirmed.is_some_and(|end| offset >= end) && prefix == [0; PREFIX_BYTES] {
+                break;
+            }
             let body_length = read_u32(&prefix, 8);
             if &prefix[..8] != FRAME
                 || read_u32(&prefix, 12) != !body_length
                 || read_u32(&prefix, 16) != crate::crc32(&prefix[..16])
                 || !(12..=MAX_TRANSACTION_BYTES).contains(&(body_length as usize))
             {
+                if confirmed.is_some_and(|end| offset >= end) && checkpoint_remaining == 0 {
+                    break;
+                }
                 return Err(Error::Invalid("WAL frame prefix"));
             }
             let frame_length = PREFIX_BYTES as u64 + u64::from(body_length) + TRAILER_BYTES as u64;
+            if confirmed.is_some_and(|end| offset < end && offset + frame_length > end) {
+                return Err(Error::Invalid("fixed log end splits frame"));
+            }
             if remaining < frame_length {
                 if checkpoint_remaining > 0 {
                     return Err(Error::Invalid("incomplete checkpoint frame"));
@@ -348,6 +378,9 @@ impl Database {
             state.file.as_mut().unwrap().read_exact(&mut body_header)?;
             let operations = read_u32(&body_header, 8) as usize;
             if operations == 0 || operations > MAX_TRANSACTION_WRITES {
+                if confirmed.is_some_and(|end| offset >= end) && checkpoint_remaining == 0 {
+                    break;
+                }
                 return Err(Error::Invalid("WAL operation count"));
             }
             buffer
@@ -358,6 +391,9 @@ impl Database {
             let mut trailer = [0; TRAILER_BYTES];
             state.file.as_mut().unwrap().read_exact(&mut trailer)?;
             if read_u32(&trailer, 0) != crate::crc32(&body) || &trailer[4..] != SEAL {
+                if confirmed.is_some_and(|end| offset >= end) && checkpoint_remaining == 0 {
+                    break;
+                }
                 return Err(Error::Invalid("WAL frame checksum or commit seal"));
             }
             let (sequence, writes) = decode_frame(&body)?;
@@ -382,11 +418,15 @@ impl Database {
         if checkpoint_remaining > 0 {
             return Err(Error::Invalid("missing checkpoint frames"));
         }
-        if offset < length {
+        if confirmed.is_none() && offset < length {
             state.file.as_mut().unwrap().set_len(offset)?;
             state.file.as_mut().unwrap().sync_all()?;
         }
         state.file.as_mut().unwrap().seek(SeekFrom::Start(offset))?;
+        #[cfg(feature = "fixed-log")]
+        if confirmed.is_some() {
+            state.file.as_ref().unwrap().sync_all()?;
+        }
         state.wal_bytes = offset;
         Ok(Self::from_state(state, id, owner))
     }
@@ -430,7 +470,7 @@ impl Database {
     fn persist_wal<'a>(
         &'a self,
         mut state: MutexGuard<'a, State>,
-        persist: impl FnOnce(&mut File) -> io::Result<()>,
+        persist: impl FnOnce(&mut WalFile) -> io::Result<()>,
     ) -> io::Result<MutexGuard<'a, State>> {
         let mut file = state
             .file
@@ -464,8 +504,29 @@ impl Database {
         self.checkpoint_with(|_| Ok(()))
     }
 
+    /// Experimental fixed-length WAL conversion/expansion through atomic checkpoint replacement.
+    #[cfg(feature = "fixed-log")]
+    pub fn checkpoint_fixed_log(&self, capacity: u64) -> Result<CheckpointInfo> {
+        fixed_log::validate_capacity(capacity)?;
+        self.checkpoint_impl(false, Some(capacity), |_| Ok(()))
+    }
+    #[cfg(feature = "fixed-log")]
+    pub fn fixed_log_capacity(&self) -> Result<Option<u64>> {
+        Ok(self.state()?.file.as_ref().and_then(|f| f.capacity()))
+    }
+
+    #[cfg(all(feature = "fixed-log", feature = "lock-timing"))]
+    #[doc(hidden)]
+    pub fn fixed_log_metrics(&self) -> Result<Option<[u64; 3]>> {
+        self.state()?
+            .file
+            .as_ref()
+            .ok_or(Error::ResourceExhausted("writer active"))?
+            .metrics()
+            .map_err(Error::Io)
+    }
     pub fn checkpoint_deferred_reclaim(&self) -> Result<CheckpointInfo> {
-        self.checkpoint_impl(true, |_| Ok(()))
+        self.checkpoint_impl(true, None, |_| Ok(()))
     }
 
     pub fn reclaim_checkpoint(&self) -> Result<()> {
@@ -503,12 +564,13 @@ impl Database {
         &self,
         hook: impl FnMut(CheckpointStage) -> io::Result<()>,
     ) -> Result<CheckpointInfo> {
-        self.checkpoint_impl(false, hook)
+        self.checkpoint_impl(false, None, hook)
     }
 
     fn checkpoint_impl(
         &self,
         defer_reclaim: bool,
+        _fixed_capacity: Option<u64>,
         mut hook: impl FnMut(CheckpointStage) -> io::Result<()>,
     ) -> Result<CheckpointInfo> {
         let _checkpoint = self.inner.checkpoint.lock().map_err(|_| Error::Poisoned)?;
@@ -529,6 +591,9 @@ impl Database {
         }
         let sequence = state.sequence;
         let before_bytes = state.wal_bytes;
+        #[cfg(feature = "fixed-log")]
+        let fixed_capacity =
+            _fixed_capacity.or_else(|| state.file.as_ref().and_then(|f| f.capacity()));
         let last_key = state.rows.last_key_value().map(|(key, _)| key.clone());
         let path = state.path.clone();
         let mut buffer = state.budget.buffer();
@@ -640,10 +705,24 @@ impl Database {
 
             #[cfg(feature = "lock-timing")]
             let timing_synced = std::time::Instant::now();
+            #[cfg(feature = "fixed-log")]
+            if let Some(capacity) = fixed_capacity {
+                buffer.add(32768)?;
+                fixed_log::initialize(output, after, capacity)?;
+            }
             hook(CheckpointStage::TailSynced)?;
             let charged_bytes = {
                 let state = self.state()?;
-                state.wal_bytes.max(state.reserved_bytes)
+                let bytes = state.wal_bytes.max(state.reserved_bytes);
+                #[cfg(feature = "fixed-log")]
+                let bytes = bytes.max(
+                    state
+                        .file
+                        .as_ref()
+                        .and_then(|f| f.capacity())
+                        .map_or(0, |n| n + fixed_log::METADATA_BYTES),
+                );
+                bytes
             };
             retirement.retain(charged_bytes);
             hook(CheckpointStage::Retained)?;
@@ -652,7 +731,7 @@ impl Database {
                 output
                     .try_lock()
                     .map_err(|e| Error::Locked(e.to_string()))?;
-                output.seek(SeekFrom::End(0))?;
+                output.seek(SeekFrom::Start(after))?;
             }
             #[cfg(not(feature = "checkpoint-handle-reuse"))]
             drop(replacement.take());
@@ -677,18 +756,19 @@ impl Database {
             let file = {
                 let mut file = OpenOptions::new().read(true).write(true).open(&path)?;
                 file.try_lock().map_err(|e| Error::Locked(e.to_string()))?;
-                file.seek(SeekFrom::End(0))?;
+                file.seek(SeekFrom::Start(after))?;
                 file
             };
             let mut state = self.state()?;
             // Reuse reduced the switch pause but regressed mixed-load p99, so it remains opt-in.
             #[cfg(feature = "checkpoint-handle-reuse")]
             {
-                state.file = replacement.take();
+                let file = replacement.take().unwrap();
+                state.file = Some(wrap_checkpoint_file(file, after)?);
             }
             #[cfg(not(feature = "checkpoint-handle-reuse"))]
             {
-                state.file = Some(file);
+                state.file = Some(wrap_checkpoint_file(file, after)?);
             }
             state.reserved_bytes = 0;
             state.wal_bytes = after;
@@ -1104,7 +1184,7 @@ impl Transaction {
 
     fn commit_with(
         mut self,
-        persist: impl FnOnce(&mut File, &[u8]) -> io::Result<()>,
+        persist: impl FnOnce(&mut WalFile, &[u8]) -> io::Result<()>,
     ) -> Result<u64> {
         let database = self.database.clone();
         if self.writes.is_empty() {
@@ -1135,6 +1215,7 @@ impl Transaction {
         if bytes > MAX_WAL_BYTES {
             return Err(Error::Limit("WAL bytes; checkpoint support required"));
         }
+        state.check_log_capacity(bytes)?;
         state.reserve_log(bytes);
         #[cfg(feature = "lock-timing")]
         trace_mark(4);
@@ -1263,7 +1344,7 @@ fn replace_file(source: &Path, target: &Path) -> io::Result<()> {
 }
 
 impl State {
-    fn new(file: File, path: PathBuf, budget: Arc<Budget>) -> Self {
+    fn new(file: WalFile, path: PathBuf, budget: Arc<Budget>) -> Self {
         Self {
             file: Some(file),
             path,
@@ -1279,7 +1360,25 @@ impl State {
             budget,
         }
     }
+    fn check_log_capacity(&self, _needed: u64) -> Result<()> {
+        #[cfg(feature = "fixed-log")]
+        if self
+            .file
+            .as_ref()
+            .and_then(|f| f.capacity())
+            .is_some_and(|n| _needed > n - PREFIX_BYTES as u64)
+        {
+            return Err(Error::ResourceExhausted(
+                "fixed log capacity; checkpoint required",
+            ));
+        }
+        Ok(())
+    }
     fn reserve_log(&mut self, needed: u64) {
+        #[cfg(feature = "fixed-log")]
+        if self.file.as_ref().and_then(|f| f.capacity()).is_some() {
+            return;
+        }
         if !self.reservation_enabled || needed <= self.reserved_bytes {
             return;
         }
@@ -2585,7 +2684,7 @@ mod reservation_tests {
         {
             let mut state = db.state().unwrap();
             let writable = state.file.take();
-            state.file = Some(File::open(&path).unwrap());
+            state.file = Some(legacy_wal_file(File::open(&path).unwrap()));
             state.reserve_log(32768);
             assert!(!state.reservation_enabled);
             assert!(!state.poisoned);
@@ -2664,4 +2763,32 @@ fn trace_mark(index: usize) {
 #[cfg(feature = "lock-timing")]
 pub fn take_commit_trace() -> [u64; 8] {
     COMMIT_TRACE.with(|trace| trace.replace([0; 8]))
+}
+
+fn wrap_checkpoint_file(mut file: File, end: u64) -> io::Result<WalFile> {
+    #[cfg(feature = "fixed-log")]
+    {
+        file.seek(SeekFrom::Start(0))?;
+        let mut header = [0; HEADER_BYTES];
+        file.read_exact(&mut header)?;
+        let mut file = WalFile::open(file, header)?;
+        file.seek(SeekFrom::Start(end))?;
+        Ok(file)
+    }
+    #[cfg(not(feature = "fixed-log"))]
+    {
+        file.seek(SeekFrom::Start(end))?;
+        Ok(file)
+    }
+}
+
+fn legacy_wal_file(file: File) -> WalFile {
+    #[cfg(feature = "fixed-log")]
+    {
+        file.into()
+    }
+    #[cfg(not(feature = "fixed-log"))]
+    {
+        file
+    }
 }

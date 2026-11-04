@@ -84,6 +84,29 @@ impl Server {
                     .into(),
             );
         };
+        if let Ok(value) = std::env::var("CATDB_EXPERIMENTAL_FIXED_LOG_BYTES") {
+            #[cfg(feature = "fixed-log")]
+            {
+                let capacity: u64 = value.parse()?;
+                match db.fixed_log_capacity()? {
+                    None => {
+                        db.checkpoint_fixed_log(capacity)?;
+                    }
+                    Some(existing) if existing == capacity => {}
+                    Some(_) => {
+                        return Err(
+                            "fixed log capacity differs; expand through explicit checkpoint API"
+                                .into(),
+                        );
+                    }
+                }
+            }
+            #[cfg(not(feature = "fixed-log"))]
+            {
+                let _ = value;
+                return Err("experimental fixed-log build feature required".into());
+            }
+        }
         db.set_group_commit(true);
         db.set_group_commit_wake_on_four(true);
         Ok(Self {
@@ -395,6 +418,8 @@ fn limit(v: &Value, name: &str, default: usize, max: usize) -> Result<usize, Err
 fn dispatch(db: &Database, tx: &mut Option<Transaction>, v: &Value) -> Result<Value, Error> {
     let op = text(v, "op")?;
     match op {
+        #[cfg(all(feature = "fixed-log", feature = "lock-timing"))]
+        "fixed_log_metrics" => Ok(json!({"ok":true,"metrics":db.fixed_log_metrics()?})),
         "ping" => {
             let stats = db.stats()?;
             Ok(json!({"ok":true,"version":stats.version.to_string()}))

@@ -149,7 +149,8 @@ impl Database {
         self.inner.group.enabled.store(enabled, Ordering::Relaxed);
     }
 
-    /// Number of commit log synchronization attempts on this open handle.
+    /// Number of commit durability attempts on this open handle.
+    /// The experimental fixed-length log uses two sync calls per attempt.
     pub fn commit_sync_attempts(&self) -> u64 {
         self.inner.group.syncs.load(Ordering::Relaxed)
     }
@@ -433,7 +434,7 @@ fn crash_group_at(stage: &str) {
 fn persist_group(
     database: &Database,
     requests: &mut [Request],
-    persist: impl FnOnce(&mut File, &[Vec<u8>]) -> io::Result<()>,
+    persist: impl FnOnce(&mut WalFile, &[Vec<u8>]) -> io::Result<()>,
 ) -> Vec<Result<u64>> {
     #[cfg(feature = "lock-timing")]
     trace_mark(2);
@@ -465,6 +466,7 @@ fn persist_group(
                 .checked_add(length as u64)
                 .filter(|bytes| *bytes <= MAX_WAL_BYTES)
                 .ok_or(Error::Limit("WAL bytes"))?;
+            state.check_log_capacity(next_bytes)?;
             let growth = retained
                 .checked_add(state.retained_growth(&transaction.writes))
                 .ok_or(Error::ResourceExhausted("group retained bytes"))?;
@@ -848,7 +850,7 @@ mod tests {
         let db = Database::create(&f.0, [68; 16]).unwrap();
         write(&db, b"ack").commit().unwrap();
         let txs = (0_u8..8).map(|k| write(&db, &[k])).collect();
-        db.inner.state.lock().unwrap().file = Some(File::open(&f.0).unwrap());
+        db.inner.state.lock().unwrap().file = Some(legacy_wal_file(File::open(&f.0).unwrap()));
         let result = db.commit_batch(txs).unwrap();
         assert_eq!(result.len(), 8);
         assert!(

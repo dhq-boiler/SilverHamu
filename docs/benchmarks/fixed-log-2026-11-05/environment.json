@@ -1,0 +1,349 @@
+{
+  "utc": "2026-11-04T19:24:23.589305+00:00",
+  "rows": 100000,
+  "write_measurement": "application WAL bytes: frame growth plus 20 sentinel bytes and 64 end-slot bytes per fixed commit group; physical-device counters unavailable in this WSL kernel",
+  "value_bytes": 256,
+  "ops": 8000,
+  "reps": 3,
+  "profile": false,
+  "profile_variants": [],
+  "fixed_variants": [
+    "fixed"
+  ],
+  "capacity": 67108864,
+  "fixed_metrics_variants": [],
+  "reopen_image": "sha256:28e7b07a7632eb35467a24b8c0306f9fbbb8c627b551d972bbbc4e55be5ea413",
+  "clients": [
+    1,
+    4
+  ],
+  "workloads": [
+    "update"
+  ],
+  "server_cpus": 2,
+  "client_cpus": 2,
+  "memory_gib_each": 4,
+  "variants": {
+    "current": {
+      "image": "catdb-sync-cohort:local",
+      "id": "sha256:ae867014ca8bbe0daaf18994e6098a8d2e74d21726eea4ee948ca8d0ddff7b81"
+    },
+    "fixed": {
+      "image": "catdb-fixed-log:local",
+      "id": "sha256:28e7b07a7632eb35467a24b8c0306f9fbbb8c627b551d972bbbc4e55be5ea413"
+    }
+  },
+  "source_sha256": {
+    "benchmarks\\runner.py": "aa313e3ba0969e60f1c6917acfff090c572e4a25f5bbe60b04d319a410e754e0",
+    "benchmarks\\fixed-log\\client.py": "ee85f787f63b5f72a1ddb650adba98d4ff8215c5d828bf1cb395b2370bd24ab7",
+    "benchmarks\\fixed-log\\run.py": "2f39712ba47308ad1240376166acb7b05bc6bb1e9f26f2518bf495dc400f1936",
+    "src\\fixed_log.rs": "75e1d34def70fa99ee6390352e28943541481997ccca5cfdce6d23d9fbe36023",
+    "src\\transactions.rs": "e8ae23f0363cb896762f2876255ba5a4293fb0714b23e010da759b424a8144f3",
+    "Cargo.toml": "875fa5aee885a656af5f245216e98ed73f0485e4846cea6233565b55cf7ab447",
+    "src\\group_commit.rs": "f173e2d2d9e901e59e6bcedbf311deb960fc10f0c1a0f514718c9f6fe0ca4aba",
+    "src\\service.rs": "c2a51cf98e3cfee84e85771d8fe5f3fbd6a81303862cfd5269555125f3d34bb9"
+  },
+  "runs": [
+    {
+      "variant": "current",
+      "rep": 1,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-1",
+          "rows": 100000,
+          "sha256": "f0a6d2c3ac62e3021f5c0f7bffd0f915fe2de0768a7eeaa5e1bd3046ccbed887",
+          "expected_sha256": "f0a6d2c3ac62e3021f5c0f7bffd0f915fe2de0768a7eeaa5e1bd3046ccbed887",
+          "updated_keys": 14319,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "f0a6d2c3ac62e3021f5c0f7bffd0f915fe2de0768a7eeaa5e1bd3046ccbed887",
+          "expected_sha256": "f0a6d2c3ac62e3021f5c0f7bffd0f915fe2de0768a7eeaa5e1bd3046ccbed887",
+          "updated_keys": 14319,
+          "empty_and_last": true
+        }
+      ],
+      "initial_io": {
+        "physical_bytes": 27317252,
+        "logical_bytes": 27317252,
+        "end_generation": 0
+      },
+      "reopen_probe": {
+        "open_ns": 164520650,
+        "rows": 100000,
+        "version": 16100,
+        "wal_bytes": 32389252
+      }
+    },
+    {
+      "variant": "fixed",
+      "rep": 1,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-1",
+          "rows": 100000,
+          "sha256": "f0a6d2c3ac62e3021f5c0f7bffd0f915fe2de0768a7eeaa5e1bd3046ccbed887",
+          "expected_sha256": "f0a6d2c3ac62e3021f5c0f7bffd0f915fe2de0768a7eeaa5e1bd3046ccbed887",
+          "updated_keys": 14319,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "f0a6d2c3ac62e3021f5c0f7bffd0f915fe2de0768a7eeaa5e1bd3046ccbed887",
+          "expected_sha256": "f0a6d2c3ac62e3021f5c0f7bffd0f915fe2de0768a7eeaa5e1bd3046ccbed887",
+          "updated_keys": 14319,
+          "empty_and_last": true
+        }
+      ],
+      "initial_io": {
+        "physical_bytes": 67117056,
+        "logical_bytes": 27317252,
+        "end_generation": 0
+      },
+      "reopen_probe": {
+        "open_ns": 163060275,
+        "rows": 100000,
+        "version": 16100,
+        "wal_bytes": 32389252
+      }
+    },
+    {
+      "variant": "fixed",
+      "rep": 2,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "expected_sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "updated_keys": 7660,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-1",
+          "rows": 100000,
+          "sha256": "4c23f682b65d63e50d2004398745728e373ef98653ed9b8a4b4ada5137d0af49",
+          "expected_sha256": "4c23f682b65d63e50d2004398745728e373ef98653ed9b8a4b4ada5137d0af49",
+          "updated_keys": 14325,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "4c23f682b65d63e50d2004398745728e373ef98653ed9b8a4b4ada5137d0af49",
+          "expected_sha256": "4c23f682b65d63e50d2004398745728e373ef98653ed9b8a4b4ada5137d0af49",
+          "updated_keys": 14325,
+          "empty_and_last": true
+        }
+      ],
+      "initial_io": {
+        "physical_bytes": 67117056,
+        "logical_bytes": 27317252,
+        "end_generation": 0
+      },
+      "reopen_probe": {
+        "open_ns": 169523729,
+        "rows": 100000,
+        "version": 16100,
+        "wal_bytes": 32389252
+      }
+    },
+    {
+      "variant": "current",
+      "rep": 2,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "expected_sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "updated_keys": 7660,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-1",
+          "rows": 100000,
+          "sha256": "4c23f682b65d63e50d2004398745728e373ef98653ed9b8a4b4ada5137d0af49",
+          "expected_sha256": "4c23f682b65d63e50d2004398745728e373ef98653ed9b8a4b4ada5137d0af49",
+          "updated_keys": 14325,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "4c23f682b65d63e50d2004398745728e373ef98653ed9b8a4b4ada5137d0af49",
+          "expected_sha256": "4c23f682b65d63e50d2004398745728e373ef98653ed9b8a4b4ada5137d0af49",
+          "updated_keys": 14325,
+          "empty_and_last": true
+        }
+      ],
+      "initial_io": {
+        "physical_bytes": 27317252,
+        "logical_bytes": 27317252,
+        "end_generation": 0
+      },
+      "reopen_probe": {
+        "open_ns": 161456800,
+        "rows": 100000,
+        "version": 16100,
+        "wal_bytes": 32389252
+      }
+    },
+    {
+      "variant": "current",
+      "rep": 3,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "expected_sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "updated_keys": 7705,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-1",
+          "rows": 100000,
+          "sha256": "810ec06009cb557335f0689044d1805b4f88b0a309786e38fe9b6b88843e9526",
+          "expected_sha256": "810ec06009cb557335f0689044d1805b4f88b0a309786e38fe9b6b88843e9526",
+          "updated_keys": 14349,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "810ec06009cb557335f0689044d1805b4f88b0a309786e38fe9b6b88843e9526",
+          "expected_sha256": "810ec06009cb557335f0689044d1805b4f88b0a309786e38fe9b6b88843e9526",
+          "updated_keys": 14349,
+          "empty_and_last": true
+        }
+      ],
+      "initial_io": {
+        "physical_bytes": 27317252,
+        "logical_bytes": 27317252,
+        "end_generation": 0
+      },
+      "reopen_probe": {
+        "open_ns": 168857702,
+        "rows": 100000,
+        "version": 16100,
+        "wal_bytes": 32389252
+      }
+    },
+    {
+      "variant": "fixed",
+      "rep": 3,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "expected_sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "updated_keys": 7705,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-1",
+          "rows": 100000,
+          "sha256": "810ec06009cb557335f0689044d1805b4f88b0a309786e38fe9b6b88843e9526",
+          "expected_sha256": "810ec06009cb557335f0689044d1805b4f88b0a309786e38fe9b6b88843e9526",
+          "updated_keys": 14349,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "810ec06009cb557335f0689044d1805b4f88b0a309786e38fe9b6b88843e9526",
+          "expected_sha256": "810ec06009cb557335f0689044d1805b4f88b0a309786e38fe9b6b88843e9526",
+          "updated_keys": 14349,
+          "empty_and_last": true
+        }
+      ],
+      "initial_io": {
+        "physical_bytes": 67117056,
+        "logical_bytes": 27317252,
+        "end_generation": 0
+      },
+      "reopen_probe": {
+        "open_ns": 163843386,
+        "rows": 100000,
+        "version": 16100,
+        "wal_bytes": 32389252
+      }
+    }
+  ],
+  "write_measurement_correction": "The original unavailable-counter note was premature: /proc/self/io is absent, but cgroup io.stat reports values after actual writes. Main/observer runs did not collect block counters. A separate io-accounting run collects them; original application-byte values are unchanged."
+}

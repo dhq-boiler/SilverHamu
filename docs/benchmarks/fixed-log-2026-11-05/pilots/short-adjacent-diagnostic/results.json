@@ -1,0 +1,44 @@
+[
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 1,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 1000,
+    "completed": 1000,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 1.234594432,
+    "ops_s": 809.9825935388635,
+    "p50_ms": 4.926873,
+    "p95_ms": 5.855323,
+    "p99_ms": 6.525089,
+    "max_ms": 9.212373,
+    "variant": "fixed-diag",
+    "io_before": {
+      "physical_bytes": 67108992,
+      "logical_bytes": 27317252,
+      "end_generation": 0
+    },
+    "io_after": {
+      "physical_bytes": 67108992,
+      "logical_bytes": 27634252,
+      "end_generation": 252
+    },
+    "io_delta": {
+      "physical_bytes": 0,
+      "logical_bytes": 317000,
+      "end_generation": 252
+    },
+    "application_written_bytes": 338168,
+    "fixed_sync_metrics": [
+      252,
+      431822460,
+      355336741
+    ],
+    "latencies_ns_file": "fixed-diag-r1-update-c4-latencies_ns.json.gz",
+    "profile_file": "fixed-diag-r1-update-c4-profile.json.gz"
+  }
+]

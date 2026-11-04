@@ -1,0 +1,434 @@
+[
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 1,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 10.268517178,
+    "ops_s": 779.0803541858768,
+    "p50_ms": 5.106472,
+    "p95_ms": 6.175502,
+    "p99_ms": 7.176814,
+    "max_ms": 11.74649,
+    "variant": "current",
+    "io_before": {
+      "physical_bytes": 27317252,
+      "logical_bytes": 27317252,
+      "end_generation": 0
+    },
+    "io_after": {
+      "physical_bytes": 29853252,
+      "logical_bytes": 29853252,
+      "end_generation": 0
+    },
+    "io_delta": {
+      "physical_bytes": 2536000,
+      "logical_bytes": 2536000,
+      "end_generation": 0
+    },
+    "application_written_bytes": 2536000,
+    "latencies_ns_file": "current-r1-update-c4-latencies_ns.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 1,
+    "rep": 1,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 33.259091602,
+    "ops_s": 240.53573367947695,
+    "p50_ms": 4.262104,
+    "p95_ms": 4.906707,
+    "p99_ms": 6.001988,
+    "max_ms": 14.246098,
+    "variant": "current",
+    "io_before": {
+      "physical_bytes": 29853252,
+      "logical_bytes": 29853252,
+      "end_generation": 0
+    },
+    "io_after": {
+      "physical_bytes": 32389252,
+      "logical_bytes": 32389252,
+      "end_generation": 0
+    },
+    "io_delta": {
+      "physical_bytes": 2536000,
+      "logical_bytes": 2536000,
+      "end_generation": 0
+    },
+    "application_written_bytes": 2536000,
+    "latencies_ns_file": "current-r1-update-c1-latencies_ns.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 1,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 10.127195824,
+    "ops_s": 789.9521386800035,
+    "p50_ms": 5.048459,
+    "p95_ms": 6.090304,
+    "p99_ms": 7.169665,
+    "max_ms": 15.235767,
+    "variant": "fixed",
+    "io_before": {
+      "physical_bytes": 67108992,
+      "logical_bytes": 27317252,
+      "end_generation": 0
+    },
+    "io_after": {
+      "physical_bytes": 67108992,
+      "logical_bytes": 29853252,
+      "end_generation": 2003
+    },
+    "io_delta": {
+      "physical_bytes": 0,
+      "logical_bytes": 2536000,
+      "end_generation": 2003
+    },
+    "application_written_bytes": 2704252,
+    "latencies_ns_file": "fixed-r1-update-c4-latencies_ns.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 1,
+    "rep": 1,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 31.874907323,
+    "ops_s": 250.98112188791947,
+    "p50_ms": 4.1074,
+    "p95_ms": 4.695339,
+    "p99_ms": 5.947074,
+    "max_ms": 14.95878,
+    "variant": "fixed",
+    "io_before": {
+      "physical_bytes": 67108992,
+      "logical_bytes": 29853252,
+      "end_generation": 2003
+    },
+    "io_after": {
+      "physical_bytes": 67108992,
+      "logical_bytes": 32389252,
+      "end_generation": 10003
+    },
+    "io_delta": {
+      "physical_bytes": 0,
+      "logical_bytes": 2536000,
+      "end_generation": 8000
+    },
+    "application_written_bytes": 3208000,
+    "latencies_ns_file": "fixed-r1-update-c1-latencies_ns.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 2,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 10.00974404,
+    "ops_s": 799.2212356311162,
+    "p50_ms": 5.001768,
+    "p95_ms": 5.993609,
+    "p99_ms": 6.876899,
+    "max_ms": 15.682868,
+    "variant": "fixed",
+    "io_before": {
+      "physical_bytes": 67108992,
+      "logical_bytes": 27317252,
+      "end_generation": 0
+    },
+    "io_after": {
+      "physical_bytes": 67108992,
+      "logical_bytes": 29853252,
+      "end_generation": 2002
+    },
+    "io_delta": {
+      "physical_bytes": 0,
+      "logical_bytes": 2536000,
+      "end_generation": 2002
+    },
+    "application_written_bytes": 2704168,
+    "latencies_ns_file": "fixed-r2-update-c4-latencies_ns.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 1,
+    "rep": 2,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 31.648484529,
+    "ops_s": 252.77671645444744,
+    "p50_ms": 4.070672,
+    "p95_ms": 4.714502,
+    "p99_ms": 5.6101,
+    "max_ms": 18.117693,
+    "variant": "fixed",
+    "io_before": {
+      "physical_bytes": 67108992,
+      "logical_bytes": 29853252,
+      "end_generation": 2002
+    },
+    "io_after": {
+      "physical_bytes": 67108992,
+      "logical_bytes": 32389252,
+      "end_generation": 10002
+    },
+    "io_delta": {
+      "physical_bytes": 0,
+      "logical_bytes": 2536000,
+      "end_generation": 8000
+    },
+    "application_written_bytes": 3208000,
+    "latencies_ns_file": "fixed-r2-update-c1-latencies_ns.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 2,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 10.351807037,
+    "ops_s": 772.8119323907371,
+    "p50_ms": 5.170155,
+    "p95_ms": 6.154465,
+    "p99_ms": 7.208672,
+    "max_ms": 11.405081,
+    "variant": "current",
+    "io_before": {
+      "physical_bytes": 27317252,
+      "logical_bytes": 27317252,
+      "end_generation": 0
+    },
+    "io_after": {
+      "physical_bytes": 29853252,
+      "logical_bytes": 29853252,
+      "end_generation": 0
+    },
+    "io_delta": {
+      "physical_bytes": 2536000,
+      "logical_bytes": 2536000,
+      "end_generation": 0
+    },
+    "application_written_bytes": 2536000,
+    "latencies_ns_file": "current-r2-update-c4-latencies_ns.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 1,
+    "rep": 2,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 32.883984578,
+    "ops_s": 243.2795204919342,
+    "p50_ms": 4.198734,
+    "p95_ms": 4.862116,
+    "p99_ms": 6.154432,
+    "max_ms": 14.42177,
+    "variant": "current",
+    "io_before": {
+      "physical_bytes": 29853252,
+      "logical_bytes": 29853252,
+      "end_generation": 0
+    },
+    "io_after": {
+      "physical_bytes": 32389252,
+      "logical_bytes": 32389252,
+      "end_generation": 0
+    },
+    "io_delta": {
+      "physical_bytes": 2536000,
+      "logical_bytes": 2536000,
+      "end_generation": 0
+    },
+    "application_written_bytes": 2536000,
+    "latencies_ns_file": "current-r2-update-c1-latencies_ns.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 3,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 10.243696897,
+    "ops_s": 780.9680509331455,
+    "p50_ms": 5.096973,
+    "p95_ms": 6.122569,
+    "p99_ms": 7.370463,
+    "max_ms": 15.074363,
+    "variant": "current",
+    "io_before": {
+      "physical_bytes": 27317252,
+      "logical_bytes": 27317252,
+      "end_generation": 0
+    },
+    "io_after": {
+      "physical_bytes": 29853252,
+      "logical_bytes": 29853252,
+      "end_generation": 0
+    },
+    "io_delta": {
+      "physical_bytes": 2536000,
+      "logical_bytes": 2536000,
+      "end_generation": 0
+    },
+    "application_written_bytes": 2536000,
+    "latencies_ns_file": "current-r3-update-c4-latencies_ns.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 1,
+    "rep": 3,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 32.974752907,
+    "ops_s": 242.6098543501665,
+    "p50_ms": 4.241852,
+    "p95_ms": 4.890083,
+    "p99_ms": 6.042311,
+    "max_ms": 18.912333,
+    "variant": "current",
+    "io_before": {
+      "physical_bytes": 29853252,
+      "logical_bytes": 29853252,
+      "end_generation": 0
+    },
+    "io_after": {
+      "physical_bytes": 32389252,
+      "logical_bytes": 32389252,
+      "end_generation": 0
+    },
+    "io_delta": {
+      "physical_bytes": 2536000,
+      "logical_bytes": 2536000,
+      "end_generation": 0
+    },
+    "application_written_bytes": 2536000,
+    "latencies_ns_file": "current-r3-update-c1-latencies_ns.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 3,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 10.060958969,
+    "ops_s": 795.152830326586,
+    "p50_ms": 5.032636,
+    "p95_ms": 6.013342,
+    "p99_ms": 7.039267,
+    "max_ms": 15.640043,
+    "variant": "fixed",
+    "io_before": {
+      "physical_bytes": 67108992,
+      "logical_bytes": 27317252,
+      "end_generation": 0
+    },
+    "io_after": {
+      "physical_bytes": 67108992,
+      "logical_bytes": 29853252,
+      "end_generation": 2001
+    },
+    "io_delta": {
+      "physical_bytes": 0,
+      "logical_bytes": 2536000,
+      "end_generation": 2001
+    },
+    "application_written_bytes": 2704084,
+    "latencies_ns_file": "fixed-r3-update-c4-latencies_ns.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 1,
+    "rep": 3,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 32.006500776,
+    "ops_s": 249.94922300280888,
+    "p50_ms": 4.123747,
+    "p95_ms": 4.69756,
+    "p99_ms": 5.989768,
+    "max_ms": 14.473268,
+    "variant": "fixed",
+    "io_before": {
+      "physical_bytes": 67108992,
+      "logical_bytes": 29853252,
+      "end_generation": 2001
+    },
+    "io_after": {
+      "physical_bytes": 67108992,
+      "logical_bytes": 32389252,
+      "end_generation": 10001
+    },
+    "io_delta": {
+      "physical_bytes": 0,
+      "logical_bytes": 2536000,
+      "end_generation": 8000
+    },
+    "application_written_bytes": 3208000,
+    "latencies_ns_file": "fixed-r3-update-c1-latencies_ns.json.gz"
+  }
+]

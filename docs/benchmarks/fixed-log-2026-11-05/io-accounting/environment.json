@@ -1,0 +1,311 @@
+{
+  "utc": "2026-11-04T19:37:09.259602+00:00",
+  "rows": 100000,
+  "write_measurement": "application WAL bytes plus separate cgroup-attributed block write bytes/requests; excludes complete device/firmware amplification",
+  "value_bytes": 256,
+  "ops": 8000,
+  "reps": 3,
+  "profile": false,
+  "profile_variants": [],
+  "fixed_variants": [
+    "fixed"
+  ],
+  "capacity": 67108864,
+  "fixed_metrics_variants": [],
+  "reopen_image": "sha256:28e7b07a7632eb35467a24b8c0306f9fbbb8c627b551d972bbbc4e55be5ea413",
+  "clients": [
+    4
+  ],
+  "workloads": [
+    "update"
+  ],
+  "server_cpus": 2,
+  "client_cpus": 2,
+  "memory_gib_each": 4,
+  "variants": {
+    "current": {
+      "image": "catdb-sync-cohort:local",
+      "id": "sha256:ae867014ca8bbe0daaf18994e6098a8d2e74d21726eea4ee948ca8d0ddff7b81"
+    },
+    "fixed": {
+      "image": "catdb-fixed-log:local",
+      "id": "sha256:28e7b07a7632eb35467a24b8c0306f9fbbb8c627b551d972bbbc4e55be5ea413"
+    }
+  },
+  "source_sha256": {
+    "benchmarks\\runner.py": "aa313e3ba0969e60f1c6917acfff090c572e4a25f5bbe60b04d319a410e754e0",
+    "benchmarks\\fixed-log\\client.py": "ee85f787f63b5f72a1ddb650adba98d4ff8215c5d828bf1cb395b2370bd24ab7",
+    "benchmarks\\fixed-log\\io_run.py": "50e22a95626d0dd2562ff74fb884c7e61802800717e7d997c3174f8ee432c768",
+    "src\\fixed_log.rs": "cbfa51c1435b724adfb5d30c1c92bb2310c77d3d982041ffa51b9326c9c11249",
+    "src\\transactions.rs": "e8ae23f0363cb896762f2876255ba5a4293fb0714b23e010da759b424a8144f3",
+    "Cargo.toml": "875fa5aee885a656af5f245216e98ed73f0485e4846cea6233565b55cf7ab447",
+    "src\\group_commit.rs": "f173e2d2d9e901e59e6bcedbf311deb960fc10f0c1a0f514718c9f6fe0ca4aba",
+    "src\\service.rs": "c2a51cf98e3cfee84e85771d8fe5f3fbd6a81303862cfd5269555125f3d34bb9"
+  },
+  "runs": [
+    {
+      "variant": "current",
+      "rep": 1,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        }
+      ],
+      "initial_io": {
+        "physical_bytes": 27317252,
+        "logical_bytes": 27317252,
+        "end_generation": 0,
+        "block_write_bytes": 0,
+        "block_write_requests": 0
+      },
+      "reopen_probe": {
+        "open_ns": 135239636,
+        "rows": 100000,
+        "version": 8100,
+        "wal_bytes": 29853252
+      }
+    },
+    {
+      "variant": "fixed",
+      "rep": 1,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        }
+      ],
+      "initial_io": {
+        "physical_bytes": 67117056,
+        "logical_bytes": 27317252,
+        "end_generation": 0,
+        "block_write_bytes": 67125248,
+        "block_write_requests": 28
+      },
+      "reopen_probe": {
+        "open_ns": 139896946,
+        "rows": 100000,
+        "version": 8100,
+        "wal_bytes": 29853252
+      }
+    },
+    {
+      "variant": "fixed",
+      "rep": 2,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "expected_sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "updated_keys": 7660,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "expected_sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "updated_keys": 7660,
+          "empty_and_last": true
+        }
+      ],
+      "initial_io": {
+        "physical_bytes": 67117056,
+        "logical_bytes": 27317252,
+        "end_generation": 0,
+        "block_write_bytes": 67125248,
+        "block_write_requests": 32
+      },
+      "reopen_probe": {
+        "open_ns": 140318423,
+        "rows": 100000,
+        "version": 8100,
+        "wal_bytes": 29853252
+      }
+    },
+    {
+      "variant": "current",
+      "rep": 2,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "expected_sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "updated_keys": 7660,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "expected_sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "updated_keys": 7660,
+          "empty_and_last": true
+        }
+      ],
+      "initial_io": {
+        "physical_bytes": 27317252,
+        "logical_bytes": 27317252,
+        "end_generation": 0,
+        "block_write_bytes": 0,
+        "block_write_requests": 0
+      },
+      "reopen_probe": {
+        "open_ns": 151590179,
+        "rows": 100000,
+        "version": 8100,
+        "wal_bytes": 29853252
+      }
+    },
+    {
+      "variant": "current",
+      "rep": 3,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "expected_sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "updated_keys": 7705,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "expected_sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "updated_keys": 7705,
+          "empty_and_last": true
+        }
+      ],
+      "initial_io": {
+        "physical_bytes": 27317252,
+        "logical_bytes": 27317252,
+        "end_generation": 0,
+        "block_write_bytes": 0,
+        "block_write_requests": 0
+      },
+      "reopen_probe": {
+        "open_ns": 143618765,
+        "rows": 100000,
+        "version": 8100,
+        "wal_bytes": 29853252
+      }
+    },
+    {
+      "variant": "fixed",
+      "rep": 3,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "expected_sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "updated_keys": 7705,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "expected_sha256": "3c3624f4f9182b0184134fa27156c875f305f99a30cdc4c243c25e9ed2e698f6",
+          "updated_keys": 7705,
+          "empty_and_last": true
+        }
+      ],
+      "initial_io": {
+        "physical_bytes": 67117056,
+        "logical_bytes": 27317252,
+        "end_generation": 0,
+        "block_write_bytes": 67125248,
+        "block_write_requests": 32
+      },
+      "reopen_probe": {
+        "open_ns": 144820965,
+        "rows": 100000,
+        "version": 8100,
+        "wal_bytes": 29853252
+      }
+    }
+  ]
+}

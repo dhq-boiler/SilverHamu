@@ -1,0 +1,36 @@
+{
+  "baseline_commit": "cd6df02254d61e5eeb80610a76e5a1913d104c02",
+  "prototype_commit": "06bd70bf89d837e853210f6a9b326d19bc0c66a0",
+  "prototype_feature": "service,fixed-log",
+  "default_unchanged": true,
+  "frozen_client_commit": "1c22601",
+  "ci_url": "https://github.com/dhq-boiler/catdb/actions/runs/41896592381",
+  "ci_status": "passed",
+  "local_verification": {
+    "windows_fixed_format_tests_passed": 11,
+    "worker_helpers_ignored": 2,
+    "linux_fixed_service_protocol_passed": 13,
+    "linux_c_abi_passed": 30,
+    "clippy": "passed"
+  },
+  "physical_write_counters": "proc/self/io absent; cgroup io.stat verified available after a 4 MiB fsynced write. Supplemental io-accounting run collects cgroup-attributed bytes. Main/observer application-byte measurements unchanged.",
+  "runtime_sources_sha256": {
+    "Cargo.toml": "875fa5aee885a656af5f245216e98ed73f0485e4846cea6233565b55cf7ab447",
+    "src\\transactions.rs": "e8ae23f0363cb896762f2876255ba5a4293fb0714b23e010da759b424a8144f3",
+    "src\\fixed_log.rs": "75e1d34def70fa99ee6390352e28943541481997ccca5cfdce6d23d9fbe36023",
+    "src\\group_commit.rs": "f173e2d2d9e901e59e6bcedbf311deb960fc10f0c1a0f514718c9f6fe0ca4aba",
+    "src\\service.rs": "c2a51cf98e3cfee84e85771d8fe5f3fbd6a81303862cfd5269555125f3d34bb9",
+    "src\\bin\\reopen-bench.rs": "b853eac328c79fffe703e62ca7178adfa7c91030acc59cebeb301e5949977dc6"
+  },
+  "docker_environment": {
+    "ServerVersion": "29.9.2",
+    "NCPU": 32,
+    "MemTotal": 67380625408,
+    "Driver": "overlay2",
+    "OSType": "linux",
+    "Architecture": "x86_64",
+    "KernelVersion": "6.18.54.1-microsoft-standard-WSL2"
+  },
+  "post_measurement_test_only_changes": "Gate hook moved to thread-local storage to avoid cross-test interference; empty fixed-file reopen assertion added. Release runtime remains the measured 06bd70b implementation.",
+  "post_measurement_harness_changes": "Corrected I/O counter availability description; added supplemental io_run.py and block-counter validation. Main operation implementation unchanged."
+}

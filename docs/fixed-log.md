@@ -46,6 +46,9 @@ Rust documents that [`sync_data`](https://doc.rust-lang.org/std/fs/struct.File.h
 may omit metadata not needed for file contents and can map to `sync_all` on some
 platforms. Performance measurements here are on Docker Desktop's Linux/WSL
 filesystem; Windows correctness tests do not imply the same speedup on Windows.
+The [Rust 1.89 implementation](https://github.com/rust-lang/rust/blob/1.89.0/library/std/src/sys/fs/unix.rs)
+uses `fdatasync` on Linux and `F_FULLFSYNC` for both sync methods on Apple targets.
+Apple/mobile builds and their performance were not tested here.
 
 ## Recovery and failures
 

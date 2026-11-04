@@ -107,6 +107,35 @@ candidates, I/O probes, timing overhead and limitations. See the
 [raw results](docs/benchmarks/log-sync-2026-11-05/results.json) and
 [reproduction commands](benchmarks/log-sync/README.md).
 
+### Follow-up: fixed-length WAL prototype
+
+A fixed-length prototype preinitializes 64 MiB and stores logical-end records on
+separate metadata pages. **Both payload sync and end-record sync complete before
+success.** It remains opt-in; the default service still uses the append log.
+
+In the same 100,000-record, 256-byte paired benchmark, four-client throughput
+changes from **773 to 787 updates/s (1.8% higher)**, but p99 changes
+from **7.297 to 7.390 ms (1.3% worse)**. Each mode runs three times;
+this is not a convincing four-client tail-latency improvement. Single-client
+results, all run ranges and the unfavorable result are included below.
+
+![Current append log versus opt-in fixed-length WAL prototype, throughput and p99 for 1 and 4 clients](docs/benchmarks/fixed-log-2026-11-05/fixed-log.svg)
+
+Steady-state application log writes increase by **6.6%** at four clients;
+initial zero filling and extra reserved space are additional costs. This is not
+physical-device write amplification. A separate block-I/O comparison measured
+**81.5% more server-attributed write bytes** (18.99 vs 10.47 MB per 8,000 updates);
+it excludes initialization and is not complete physical-media accounting.
+All 96,000 main-run operations and 24
+full-content checks, including restarts, passed. The new recovery format remains
+Experimental and actual power loss has not been tested.
+
+See the [report, synchronization breakdown and reopen times](docs/benchmarks/fixed-log-2026-11-05/README.md),
+[format and recovery design](docs/fixed-log.md),
+[raw data](docs/benchmarks/fixed-log-2026-11-05/results.json) and
+[reproduction commands](benchmarks/fixed-log/README.md). Earlier product results
+are retained; PostgreSQL and Oracle were not rerun for this prototype.
+
 ## Build
 
 Requires Rust **1.89 or newer**. Python 3 is used by the optional client and integration tests. Docker is needed only for containers.

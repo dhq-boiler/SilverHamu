@@ -239,18 +239,18 @@ pub(super) fn initialize(file: &mut File, end: u64, capacity: u64) -> Result<()>
 #[cfg(test)]
 thread_local! { static FAIL: std::cell::Cell<Option<&'static str>> = const { std::cell::Cell::new(None) }; }
 #[cfg(test)]
-static GATE: Mutex<Option<(&'static str, Arc<[std::sync::Barrier; 2]>)>> = Mutex::new(None);
+thread_local! { static GATE: std::cell::RefCell<Option<(&'static str, Arc<[std::sync::Barrier; 2]>)>> = const { std::cell::RefCell::new(None) }; }
 fn phase(_stage: &str) -> io::Result<()> {
     #[cfg(test)]
     {
-        let gate = {
-            let mut g = GATE.lock().unwrap();
+        let gate = GATE.with(|gate| {
+            let mut g = gate.borrow_mut();
             if g.as_ref().is_some_and(|(stage, _)| *stage == _stage) {
                 g.take()
             } else {
                 None
             }
-        };
+        });
         if let Some((_, g)) = gate {
             g[0].wait();
             g[1].wait();
@@ -341,6 +341,9 @@ mod tests {
     fn bv_exact_capacity_rejects_next_write_and_expansion_restores_progress() {
         let f = Fixture::new();
         let db = f.create(4096);
+        drop(db);
+        let db = Database::open(&f.0).unwrap();
+        assert!(rows(&db).is_empty());
         let empty = BTreeMap::from([(b"a".to_vec(), Some(Vec::new()))]);
         let n = 4096 - PREFIX_BYTES - HEADER_BYTES - encode_frame(1, &empty).len();
         put(&db, b"a", &vec![7; n]);
@@ -503,7 +506,6 @@ mod tests {
             db.set_group_commit(group);
             let mut old = db.begin().unwrap();
             let gate = Arc::new([std::sync::Barrier::new(2), std::sync::Barrier::new(2)]);
-            *GATE.lock().unwrap() = Some((stage, gate.clone()));
             struct Release(Arc<[std::sync::Barrier; 2]>);
             impl Drop for Release {
                 fn drop(&mut self) {
@@ -513,7 +515,9 @@ mod tests {
             std::thread::scope(|s| {
                 let (send, recv) = std::sync::mpsc::channel();
                 let d = db.clone();
+                let worker_gate = gate.clone();
                 s.spawn(move || {
+                    GATE.with(|g| *g.borrow_mut() = Some((stage, worker_gate)));
                     let mut t = d.begin().unwrap();
                     t.put(b"next", b"new").unwrap();
                     send.send(t.commit()).unwrap();

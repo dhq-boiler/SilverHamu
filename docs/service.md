@@ -30,6 +30,7 @@ Every message is a four-byte big-endian unsigned length followed by that many UT
 |---|---|---|
 | ping | none | version: decimal string |
 | begin | none | version: pinned snapshot version |
+| begin_read | none | version: pinned read-only snapshot version |
 | get | key | value: hexadecimal string or null |
 | put | key, value | none |
 | delete | key | none |
@@ -55,7 +56,7 @@ committed `version` and are returned only after durable synchronization.
 
 Each `scan_latest` request has its own snapshot. Its continuation key is a keyset
 position, not a snapshot token: later pages may reflect intervening commits.
-Use `begin` + repeated `scan` + `rollback` for a stable multi-page snapshot.
+Use `begin_read` (or `begin`) + repeated `scan` + `rollback` for a stable multi-page snapshot.
 Missing values remain null; empty values remain empty strings. Read failures
 and invalid mutations release the internal transaction. A lost mutation response
 still means the outcome may be unknown; requests are not automatically retried.
@@ -117,3 +118,26 @@ queued, and four queued writes wake it early.
 
 See the [paired service measurements](../benchmarks/service-update/README.md) for
 reproduction and the distinction between normal and diagnostic builds.
+
+## Read-only snapshots and reclamation
+
+`begin_read` pins a snapshot just like `begin`, but rejects `put` and `delete`
+without ending the transaction. Reads do not register dependencies that would
+only be needed to validate a later write. `get_latest` and `scan_latest` use this
+path internally. Existing `begin` transactions keep their conflict checks.
+This is a transaction mode, not an authorization role.
+
+Rust exposes `Database::begin_read()` and `Database::collect_garbage()`.
+Reclamation advances opportunistically when transactions begin or are dropped.
+Each step visits at most 64 history keys and detaches at most 128 old versions,
+with a target of 1 MiB of charged data (one larger value is allowed for progress).
+Detached value allocations are freed outside the shared state lock and remain
+charged until freed. A long-lived reader still pins its old versions.
+
+An idle embedded application can call `collect_garbage()` until it returns false.
+A true result means work remains, not necessarily that progress occurred: yield
+or back off if persistence is active. These are work bounds, not a wall-clock
+latency guarantee. Resource charges model retained data and buffers, not exact
+allocator capacity or process RSS. Delayed reclamation can temporarily require
+more retained-data budget. The C ABI is unchanged; the new explicit read-only
+entry point is currently available in Rust and the service protocol.

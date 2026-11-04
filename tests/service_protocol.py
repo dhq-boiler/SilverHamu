@@ -73,6 +73,15 @@ class ServiceTests(unittest.TestCase):
             self.ok(c, op="put", key=key, value=value)
             return self.ok(c, op="commit")
 
+    def test_st_read_only_snapshot_rejects_mutations_and_survives_updates(self):
+        self.seed(); c=self.client(); self.ok(c,op="begin_read")
+        self.assertFalse(c.request(op="put",key="01",value="aa")["ok"])
+        self.assertFalse(c.request(op="delete",key="01")["ok"])
+        self.seed(value="bb")
+        self.assertEqual(self.ok(c,op="get",key="01")["value"],"ff")
+        self.ok(c,op="commit")
+        self.assertEqual(self.ok(c,op="get_latest",key="01")["value"],"bb")
+
     def test_eq_single_requests_crud_pages_ping_and_reopen(self):
         c = self.client()
         self.assertIsNone(self.ok(c, op="get_latest", key="01")["value"])

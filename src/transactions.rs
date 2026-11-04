@@ -6,7 +6,7 @@
 
 use crate::resources::{ACTIVE, Budget, BufferPermit, DEPENDENCIES, RETAINED, STAGED};
 pub use crate::resources::{ResourceLimits, ResourceUsage};
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::fmt;
 use std::fs::{File, OpenOptions};
 use std::io::{self, Read, Seek, SeekFrom, Write};
@@ -150,6 +150,59 @@ struct Inner {
     budget: Arc<Budget>,
 }
 
+#[cfg(not(feature = "lock-timing"))]
+type StateGuard<'a> = MutexGuard<'a, State>;
+#[cfg(feature = "lock-timing")]
+struct StateGuard<'a> {
+    guard: MutexGuard<'a, State>,
+    start: std::time::Instant,
+}
+#[cfg(feature = "lock-timing")]
+impl std::ops::Deref for StateGuard<'_> {
+    type Target = State;
+    fn deref(&self) -> &State {
+        &self.guard
+    }
+}
+#[cfg(feature = "lock-timing")]
+impl std::ops::DerefMut for StateGuard<'_> {
+    fn deref_mut(&mut self) -> &mut State {
+        &mut self.guard
+    }
+}
+#[cfg(feature = "lock-timing")]
+thread_local! { static THREAD_HOLD: std::cell::Cell<[u64; 3]> = const { std::cell::Cell::new([0;3]) }; }
+#[cfg(feature = "lock-timing")]
+impl Drop for StateGuard<'_> {
+    fn drop(&mut self) {
+        let ns = self.start.elapsed().as_nanos() as u64;
+        THREAD_HOLD.with(|v| {
+            let mut a = v.get();
+            a[0] += 1;
+            a[1] += ns;
+            a[2] = a[2].max(ns);
+            v.set(a);
+        });
+    }
+}
+#[cfg(feature = "lock-timing")]
+pub fn take_state_hold_timing() -> [u64; 3] {
+    THREAD_HOLD.with(|v| v.replace([0; 3]))
+}
+fn wrap_state(guard: MutexGuard<'_, State>) -> StateGuard<'_> {
+    #[cfg(feature = "lock-timing")]
+    {
+        StateGuard {
+            guard,
+            start: std::time::Instant::now(),
+        }
+    }
+    #[cfg(not(feature = "lock-timing"))]
+    {
+        guard
+    }
+}
+
 struct State {
     file: Option<WalFile>,
     path: PathBuf,
@@ -157,12 +210,49 @@ struct State {
     wal_bytes: u64,
     reservation_enabled: bool,
     reserved_bytes: u64,
-    rows: BTreeMap<Vec<u8>, Vec<Version>>,
+    rows: BTreeMap<Vec<u8>, VecDeque<Version>>,
     active: BTreeMap<u64, usize>,
     history_keys: BTreeSet<Vec<u8>>,
     gc_floor: u64,
+    gc_target: u64,
+    gc_cursor: Option<Vec<u8>>,
     poisoned: bool,
     budget: Arc<Budget>,
+}
+
+struct RetiredVersions {
+    values: Vec<Version>,
+    charge: usize,
+    budget: Arc<Budget>,
+}
+impl Drop for RetiredVersions {
+    fn drop(&mut self) {
+        drop(std::mem::take(&mut self.values));
+        self.budget.release(RETAINED, self.charge);
+    }
+}
+
+#[cfg(test)]
+thread_local! { static READ_COPY_GATE: std::cell::RefCell<Option<Arc<[std::sync::Barrier; 2]>>> = const { std::cell::RefCell::new(None) }; }
+fn read_copy_hook() {
+    #[cfg(test)]
+    if let Some(gate) = READ_COPY_GATE.with(|g| g.borrow_mut().take()) {
+        gate[0].wait();
+        gate[1].wait();
+    }
+}
+
+enum ReadValue<'a> {
+    Borrowed(&'a [u8]),
+    Shared(Arc<[u8]>),
+}
+impl AsRef<[u8]> for ReadValue<'_> {
+    fn as_ref(&self) -> &[u8] {
+        match self {
+            Self::Borrowed(v) => v,
+            Self::Shared(v) => v,
+        }
+    }
 }
 
 struct Version {
@@ -201,6 +291,7 @@ impl KeyRange {
 pub struct Transaction {
     database: Database,
     snapshot: u64,
+    read_only: bool,
     reads: BTreeSet<Vec<u8>>,
     ranges: Vec<KeyRange>,
     writes: BTreeMap<Vec<u8>, Option<Vec<u8>>>,
@@ -412,7 +503,12 @@ impl Database {
                 return Err(Error::Invalid("WAL commit sequence"));
             }
             state.apply(sequence, writes)?;
-            state.collect();
+            loop {
+                drop(state.collect());
+                if state.gc_target == 0 {
+                    break;
+                }
+            }
             offset += frame_length;
         }
         if checkpoint_remaining > 0 {
@@ -449,7 +545,7 @@ impl Database {
         }
     }
 
-    fn state(&self) -> Result<MutexGuard<'_, State>> {
+    fn state(&self) -> Result<StateGuard<'_>> {
         #[cfg(feature = "lock-timing")]
         let started = std::time::Instant::now();
         let state = self.inner.state.lock().map_err(|_| Error::Poisoned)?;
@@ -464,14 +560,14 @@ impl Database {
         if state.poisoned || self.inner.writer.is_poisoned() {
             return Err(Error::Poisoned);
         }
-        Ok(state)
+        Ok(wrap_state(state))
     }
 
     fn persist_wal<'a>(
         &'a self,
-        mut state: MutexGuard<'a, State>,
+        mut state: StateGuard<'a>,
         persist: impl FnOnce(&mut WalFile) -> io::Result<()>,
-    ) -> io::Result<MutexGuard<'a, State>> {
+    ) -> io::Result<StateGuard<'a>> {
         let mut file = state
             .file
             .take()
@@ -860,20 +956,53 @@ impl Database {
     }
 
     pub fn begin(&self) -> Result<Transaction> {
+        self.begin_mode(false)
+    }
+
+    pub fn begin_read(&self) -> Result<Transaction> {
+        self.begin_mode(true)
+    }
+
+    /// Reclaims one bounded portion; true means another portion may remain.
+    pub fn collect_garbage(&self) -> Result<bool> {
         let mut state = self.state()?;
-        state.budget.replace(ACTIVE, 0, 1)?;
-        let snapshot = state.sequence;
-        *state.active.entry(snapshot).or_default() += 1;
-        Ok(Transaction {
-            database: self.clone(),
-            snapshot,
-            reads: BTreeSet::new(),
-            ranges: Vec::new(),
-            writes: BTreeMap::new(),
-            write_bytes: 12,
-            staged_charge: 0,
-            dependency_charge: 0,
-        })
+        let retired = state.collect();
+        let pending = state.gc_target != 0
+            || (!state.history_keys.is_empty()
+                && state
+                    .active
+                    .keys()
+                    .next()
+                    .copied()
+                    .unwrap_or(state.sequence)
+                    > state.gc_floor);
+        drop(state);
+        drop(retired);
+        Ok(pending)
+    }
+
+    fn begin_mode(&self, read_only: bool) -> Result<Transaction> {
+        let mut state = self.state()?;
+        let retired = state.collect();
+        let result = (|| {
+            state.budget.replace(ACTIVE, 0, 1)?;
+            let snapshot = state.sequence;
+            *state.active.entry(snapshot).or_default() += 1;
+            Ok(Transaction {
+                database: self.clone(),
+                snapshot,
+                read_only,
+                reads: BTreeSet::new(),
+                ranges: Vec::new(),
+                writes: BTreeMap::new(),
+                write_bytes: 12,
+                staged_charge: 0,
+                dependency_charge: 0,
+            })
+        })();
+        drop(state);
+        drop(retired);
+        result
     }
 
     pub fn current_version(&self) -> Result<u64> {
@@ -887,9 +1016,9 @@ impl Database {
             visible_records: state
                 .rows
                 .values()
-                .filter(|v| v.last().unwrap().value.is_some())
+                .filter(|v| v.back().unwrap().value.is_some())
                 .count(),
-            retained_versions: state.rows.values().map(Vec::len).sum(),
+            retained_versions: state.rows.values().map(VecDeque::len).sum(),
             active_transactions: state.active.values().sum(),
             wal_bytes: state.wal_bytes,
         })
@@ -928,6 +1057,9 @@ impl Transaction {
     }
 
     fn register_range(&mut self, range: KeyRange) -> Result<()> {
+        if self.read_only {
+            return Ok(());
+        }
         if !self.ranges.contains(&range) {
             let charge = 96 + range.start.len() + range.end.as_ref().map_or(0, Vec::len);
             self.database
@@ -948,9 +1080,10 @@ impl Transaction {
         let state = self.database.state()?;
         if let Some(value) = self.writes.get(key) {
             let _permit = self.reserve_buffer(value.as_ref().map_or(0, Vec::len))?;
+            drop(state);
             return Ok(value.clone());
         }
-        if !self.reads.contains(key) {
+        if !self.read_only && !self.reads.contains(key) {
             let charge = 96 + key.len();
             self.database
                 .inner
@@ -963,9 +1096,11 @@ impl Transaction {
             .rows
             .get(key)
             .and_then(|versions| visible(versions, self.snapshot))
-            .and_then(|v| v.value.as_deref());
-        let _permit = self.reserve_buffer(value.map_or(0, <[u8]>::len))?;
-        Ok(value.map(<[u8]>::to_vec))
+            .and_then(|v| v.value.clone());
+        let _permit = self.reserve_buffer(value.as_ref().map_or(0, |v| v.len()))?;
+        drop(state);
+        read_copy_hook();
+        Ok(value.map(|v| v.to_vec()))
     }
 
     /// Reads [start, end), with no upper bound when end is None; includes staged writes.
@@ -984,28 +1119,35 @@ impl Transaction {
         let mut permit = state.budget.buffer();
         let mut result = BTreeMap::new();
         for (key, versions) in state.rows.range::<[u8], _>(range.bounds()) {
-            if let Some(value) = visible(versions, self.snapshot).and_then(|v| v.value.as_deref()) {
+            if let Some(value) = visible(versions, self.snapshot).and_then(|v| v.value.as_ref()) {
                 permit.add(key.len() + value.len() + 160)?;
-                result.insert(key.clone(), value.to_vec());
+                result.insert(key.clone(), ReadValue::Shared(value.clone()));
             }
         }
         for (key, value) in self.writes.range::<[u8], _>(range.bounds()) {
             if let Some(value) = value {
                 permit.add(key.len() + value.len() + 160)?;
-                result.insert(key.clone(), value.clone());
+                result.insert(key.clone(), ReadValue::Borrowed(value));
             } else {
                 result.remove(key);
             }
         }
         permit.add(result.len() * 64)?;
-        Ok((result.into_iter().collect(), permit))
+        drop(state);
+        Ok((
+            result
+                .into_iter()
+                .map(|(key, value)| (key, value.as_ref().to_vec()))
+                .collect(),
+            permit,
+        ))
     }
 
     /// Reads a bounded page of [start, end), optionally continuing strictly after a key.
     /// Continue on this transaction with unchanged bounds to retain the same snapshot.
     /// Staged writes are read at each call; changing them between pages changes that local view.
     /// A visible record larger than max_bytes is rejected rather than skipped.
-    /// The entire requested range remains a commit dependency, including on continuation pages.
+    /// In writable transactions the entire range remains a commit dependency, including continuation pages.
     pub fn scan_page(
         &mut self,
         start: &[u8],
@@ -1034,6 +1176,7 @@ impl Transaction {
         let mut stored = state.rows.range::<[u8], _>((lower, upper)).peekable();
         let mut staged = self.writes.range::<[u8], _>((lower, upper)).peekable();
         let mut rows = Vec::new();
+        let mut sources = Vec::new();
         let mut payload_bytes = 0;
         let mut visited_entries = 0;
         let mut last_consumed: Option<&Vec<u8>> = None;
@@ -1044,29 +1187,30 @@ impl Transaction {
                 (Some((stored_key, _)), Some((staged_key, _))) if stored_key == staged_key => {
                     stored.next();
                     let (key, value) = staged.next().unwrap();
-                    (key, value.as_deref())
+                    (key, value.as_deref().map(ReadValue::Borrowed))
                 }
                 (Some((stored_key, _)), Some((staged_key, _))) if staged_key < stored_key => {
                     let (key, value) = staged.next().unwrap();
-                    (key, value.as_deref())
+                    (key, value.as_deref().map(ReadValue::Borrowed))
                 }
                 (None, Some(_)) => {
                     let (key, value) = staged.next().unwrap();
-                    (key, value.as_deref())
+                    (key, value.as_deref().map(ReadValue::Borrowed))
                 }
                 (Some(_), _) => {
                     let (key, versions) = stored.next().unwrap();
                     (
                         key,
                         visible(versions, self.snapshot)
-                            .and_then(|version| version.value.as_deref()),
+                            .and_then(|version| version.value.clone())
+                            .map(ReadValue::Shared),
                     )
                 }
                 (None, None) => break,
             };
             visited_entries += 1;
             if let Some(value) = value {
-                let size = key.len() + value.len();
+                let size = key.len() + value.as_ref().len();
                 if size > limits.max_bytes {
                     return Err(Error::Limit("scan record exceeds page bytes"));
                 }
@@ -1076,7 +1220,8 @@ impl Transaction {
                     break;
                 }
                 permit.add(size + 96)?;
-                rows.push((key.clone(), value.to_vec()));
+                rows.push((key.clone(), Vec::new()));
+                sources.push(value);
                 payload_bytes += size;
             }
             last_consumed = Some(key);
@@ -1086,6 +1231,11 @@ impl Transaction {
             permit.add(last_consumed.map_or(0, Vec::len))?;
         }
         let next_after = if more { last_consumed.cloned() } else { None };
+        drop(state);
+        read_copy_hook();
+        for (row, value) in rows.iter_mut().zip(sources) {
+            row.1 = value.as_ref().to_vec();
+        }
         Ok(ScanPage {
             rows,
             next_after,
@@ -1107,6 +1257,9 @@ impl Transaction {
     }
 
     fn stage(&mut self, key: &[u8], value: Option<&[u8]>) -> Result<()> {
+        if self.read_only {
+            return Err(Error::Invalid("read-only transaction"));
+        }
         validate_key(key)?;
         let previous = self
             .writes
@@ -1177,7 +1330,7 @@ impl Transaction {
             if state
                 .rows
                 .range::<[u8], _>(range.bounds())
-                .any(|(_, v)| v.last().unwrap().sequence > self.snapshot)
+                .any(|(_, v)| v.back().unwrap().sequence > self.snapshot)
                 || earlier.range::<[u8], _>(range.bounds()).next().is_some()
             {
                 return Err(Error::Conflict(ConflictKind::Range));
@@ -1250,14 +1403,17 @@ impl Drop for Transaction {
             .inner
             .budget
             .release(DEPENDENCIES, self.dependency_charge);
-        if let Ok(mut state) = self.database.inner.state.lock() {
+        if let Ok(state) = self.database.inner.state.lock() {
+            let mut state = wrap_state(state);
             if let Some(count) = state.active.get_mut(&self.snapshot) {
                 *count -= 1;
                 if *count == 0 {
                     state.active.remove(&self.snapshot);
                 }
             }
-            state.collect();
+            let retired = state.collect();
+            drop(state);
+            drop(retired);
         }
     }
 }
@@ -1360,6 +1516,8 @@ impl State {
             active: BTreeMap::new(),
             history_keys: BTreeSet::new(),
             gc_floor: 0,
+            gc_target: 0,
+            gc_cursor: None,
             poisoned: false,
             budget,
         }
@@ -1400,7 +1558,7 @@ impl State {
     fn changed(&self, key: &[u8], snapshot: u64) -> bool {
         self.rows
             .get(key)
-            .is_some_and(|v| v.last().unwrap().sequence > snapshot)
+            .is_some_and(|v| v.back().unwrap().sequence > snapshot)
     }
     fn retained_growth(&self, writes: &BTreeMap<Vec<u8>, Option<Vec<u8>>>) -> usize {
         writes
@@ -1427,7 +1585,7 @@ impl State {
             if !versions.is_empty() || value.is_none() {
                 self.history_keys.insert(key);
             }
-            versions.push(Version {
+            versions.push_back(Version {
                 sequence,
                 value: value.map(Arc::from),
             });
@@ -1435,39 +1593,62 @@ impl State {
         self.sequence = sequence;
         Ok(())
     }
-    fn collect(&mut self) {
-        // Reclaiming tombstones during persistence could invalidate the admitted memory charge.
+    fn collect(&mut self) -> RetiredVersions {
+        let mut retired = RetiredVersions {
+            values: Vec::new(),
+            charge: 0,
+            budget: self.budget.clone(),
+        };
+        // Persistence admission relies on tombstones and their retained charges staying stable.
         if self.file.is_none() {
-            return;
+            return retired;
         }
         let floor = self.active.keys().next().copied().unwrap_or(self.sequence);
-        if floor <= self.gc_floor {
-            return;
-        }
-        self.gc_floor = floor;
-        let mut deleted = Vec::new();
-        self.history_keys.retain(|key| {
-            let versions = self.rows.get_mut(key).unwrap();
-            let committed = versions.partition_point(|v| v.sequence <= floor);
-            if committed > 1 {
-                let charge: usize = versions[..committed - 1]
-                    .iter()
-                    .map(|version| 64 + version.value.as_ref().map_or(0, |value| value.len()))
-                    .sum();
-                self.budget.release(RETAINED, charge);
-                versions.drain(..committed - 1);
+        if self.gc_target == 0 {
+            if floor <= self.gc_floor {
+                return retired;
             }
-            if versions.len() == 1 && versions[0].sequence <= floor && versions[0].value.is_none() {
-                deleted.push(key.clone());
+            self.gc_target = floor;
+            self.gc_cursor = None;
+        }
+        for _ in 0..64 {
+            let lower = self.gc_cursor.as_deref().map_or(Unbounded, Excluded);
+            let Some(key) = self
+                .history_keys
+                .range::<[u8], _>((lower, Unbounded))
+                .next()
+                .cloned()
+            else {
+                self.gc_floor = self.gc_target;
+                self.gc_target = 0;
+                self.gc_cursor = None;
+                break;
+            };
+            let versions = self.rows.get_mut(&key).unwrap();
+            while versions.len() > 1 && versions[1].sequence <= self.gc_target {
+                let charge = 64 + versions[0].value.as_ref().map_or(0, |v| v.len());
+                // One oversized value must make progress; it still counts until freed.
+                if retired.values.len() >= 128
+                    || (!retired.values.is_empty() && retired.charge + charge > 1024 * 1024)
+                {
+                    return retired;
+                }
+                retired.charge += charge;
+                retired.values.push(versions.pop_front().unwrap());
+            }
+            let tombstone = versions.len() == 1
+                && versions[0].sequence <= self.gc_target
+                && versions[0].value.is_none();
+            if tombstone {
+                self.rows.remove(&key);
                 self.budget.release(RETAINED, 192 + 2 * key.len() + 64);
-                false
-            } else {
-                versions.len() > 1 || versions[0].value.is_none()
+                self.history_keys.remove(&key);
+            } else if versions.len() == 1 && versions[0].value.is_some() {
+                self.history_keys.remove(&key);
             }
-        });
-        for key in deleted {
-            self.rows.remove(&key);
+            self.gc_cursor = Some(key);
         }
+        retired
     }
 }
 
@@ -1478,7 +1659,7 @@ fn validate_key(key: &[u8]) -> Result<()> {
     Ok(())
 }
 
-fn visible(versions: &[Version], snapshot: u64) -> Option<&Version> {
+fn visible(versions: &VecDeque<Version>, snapshot: u64) -> Option<&Version> {
     let position = versions.partition_point(|v| v.sequence <= snapshot);
     position.checked_sub(1).map(|i| &versions[i])
 }
@@ -2794,5 +2975,87 @@ fn legacy_wal_file(file: File) -> WalFile {
     #[cfg(not(feature = "fixed-log"))]
     {
         file
+    }
+}
+
+#[cfg(test)]
+mod read_copy_tests {
+    use super::*;
+    #[test]
+    fn er_detached_versions_stay_charged_until_their_values_are_freed() {
+        let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("artifacts")
+            .join(format!("gc-charge-{}", std::process::id()));
+        let _ = std::fs::remove_file(&path);
+        let db = Database::create(&path, [27; 16]).unwrap();
+        let mut w = db.begin().unwrap();
+        w.put(b"k", &[1; 1024]).unwrap();
+        w.commit().unwrap();
+        let old = db.begin_read().unwrap();
+        let mut w = db.begin().unwrap();
+        w.put(b"k", &[2; 1024]).unwrap();
+        w.commit().unwrap();
+        let before = db.resource_usage().unwrap().current[RETAINED];
+        let mut state = db.state().unwrap();
+        state.active.remove(&old.snapshot);
+        let retired = state.collect();
+        assert_eq!(retired.charge, 1088);
+        assert_eq!(state.budget.snapshot().unwrap().current[RETAINED], before);
+        drop(state);
+        drop(retired);
+        assert_eq!(
+            db.resource_usage().unwrap().current[RETAINED],
+            before - 1088
+        );
+        drop(old);
+    }
+
+    #[test]
+    fn st_copy_is_unlocked_while_old_value_stays_pinned() {
+        for page in [false, true] {
+            let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                .join("artifacts")
+                .join(format!(
+                    "copy-gate-{}-{}",
+                    std::process::id(),
+                    u8::from(page)
+                ));
+            let _ = std::fs::remove_file(&path);
+            let db = Database::create(&path, [29; 16]).unwrap();
+            let mut w = db.begin().unwrap();
+            w.put(b"k", &vec![1; 65536]).unwrap();
+            w.commit().unwrap();
+            let gate = Arc::new([std::sync::Barrier::new(2), std::sync::Barrier::new(2)]);
+            std::thread::scope(|scope| {
+                let gate2 = gate.clone();
+                let db2 = db.clone();
+                let reader = scope.spawn(move || {
+                    let mut r = db2.begin_read().unwrap();
+                    READ_COPY_GATE.with(|g| *g.borrow_mut() = Some(gate2));
+                    if page {
+                        r.scan_page(b"", None, None, ScanLimits::default())
+                            .unwrap()
+                            .rows
+                            .remove(0)
+                            .1
+                    } else {
+                        r.get(b"k").unwrap().unwrap()
+                    }
+                });
+                gate[0].wait();
+                let mut w = db.begin().unwrap();
+                w.put(b"k", &vec![2; 65536]).unwrap();
+                let updated = w.commit();
+                let retained = db.resource_usage().unwrap().current[3];
+                gate[1].wait();
+                assert!(updated.is_ok());
+                assert!(retained >= 2 * 65536);
+                assert_eq!(reader.join().unwrap(), vec![1; 65536]);
+            });
+            assert_eq!(
+                db.begin_read().unwrap().get(b"k").unwrap().unwrap(),
+                vec![2; 65536]
+            );
+        }
     }
 }

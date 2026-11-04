@@ -1,0 +1,111 @@
+diff --git a/src/transactions.rs b/src/transactions.rs
+index f9b6a77..d0a97d8 100644
+--- a/src/transactions.rs
++++ b/src/transactions.rs
+@@ -150,6 +150,59 @@ struct Inner {
+     budget: Arc<Budget>,
+ }
+ 
++#[cfg(not(feature = "lock-timing"))]
++type StateGuard<'a> = MutexGuard<'a, State>;
++#[cfg(feature = "lock-timing")]
++struct StateGuard<'a> {
++    guard: MutexGuard<'a, State>,
++    start: std::time::Instant,
++}
++#[cfg(feature = "lock-timing")]
++impl std::ops::Deref for StateGuard<'_> {
++    type Target = State;
++    fn deref(&self) -> &State {
++        &self.guard
++    }
++}
++#[cfg(feature = "lock-timing")]
++impl std::ops::DerefMut for StateGuard<'_> {
++    fn deref_mut(&mut self) -> &mut State {
++        &mut self.guard
++    }
++}
++#[cfg(feature = "lock-timing")]
++thread_local! { static THREAD_HOLD: std::cell::Cell<[u64; 3]> = const { std::cell::Cell::new([0;3]) }; }
++#[cfg(feature = "lock-timing")]
++impl Drop for StateGuard<'_> {
++    fn drop(&mut self) {
++        let ns = self.start.elapsed().as_nanos() as u64;
++        THREAD_HOLD.with(|v| {
++            let mut a = v.get();
++            a[0] += 1;
++            a[1] += ns;
++            a[2] = a[2].max(ns);
++            v.set(a);
++        });
++    }
++}
++#[cfg(feature = "lock-timing")]
++pub fn take_state_hold_timing() -> [u64; 3] {
++    THREAD_HOLD.with(|v| v.replace([0; 3]))
++}
++fn wrap_state(guard: MutexGuard<'_, State>) -> StateGuard<'_> {
++    #[cfg(feature = "lock-timing")]
++    {
++        StateGuard {
++            guard,
++            start: std::time::Instant::now(),
++        }
++    }
++    #[cfg(not(feature = "lock-timing"))]
++    {
++        guard
++    }
++}
++
+ struct State {
+     file: Option<WalFile>,
+     path: PathBuf,
+@@ -449,7 +502,7 @@ impl Database {
+         }
+     }
+ 
+-    fn state(&self) -> Result<MutexGuard<'_, State>> {
++    fn state(&self) -> Result<StateGuard<'_>> {
+         #[cfg(feature = "lock-timing")]
+         let started = std::time::Instant::now();
+         let state = self.inner.state.lock().map_err(|_| Error::Poisoned)?;
+@@ -464,14 +517,14 @@ impl Database {
+         if state.poisoned || self.inner.writer.is_poisoned() {
+             return Err(Error::Poisoned);
+         }
+-        Ok(state)
++        Ok(wrap_state(state))
+     }
+ 
+     fn persist_wal<'a>(
+         &'a self,
+-        mut state: MutexGuard<'a, State>,
++        mut state: StateGuard<'a>,
+         persist: impl FnOnce(&mut WalFile) -> io::Result<()>,
+-    ) -> io::Result<MutexGuard<'a, State>> {
++    ) -> io::Result<StateGuard<'a>> {
+         let mut file = state
+             .file
+             .take()
+@@ -859,6 +912,9 @@ impl Database {
+         result.map_err(Error::Io)
+     }
+ 
++    pub fn begin_read(&self) -> Result<Transaction> { self.begin() }
++    pub fn collect_garbage(&self) -> Result<bool> { Ok(false) }
++
+     pub fn begin(&self) -> Result<Transaction> {
+         let mut state = self.state()?;
+         state.budget.replace(ACTIVE, 0, 1)?;
+@@ -1250,7 +1306,8 @@ impl Drop for Transaction {
+             .inner
+             .budget
+             .release(DEPENDENCIES, self.dependency_charge);
+-        if let Ok(mut state) = self.database.inner.state.lock() {
++        if let Ok(state) = self.database.inner.state.lock() {
++            let mut state = wrap_state(state);
+             if let Some(count) = state.active.get_mut(&self.snapshot) {
+                 *count -= 1;
+                 if *count == 0 {

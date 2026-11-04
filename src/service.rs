@@ -434,7 +434,11 @@ fn dispatch(db: &Database, tx: &mut Option<Transaction>, v: &Value) -> Result<Va
             // Reusing dispatch preserves the existing validation and response bounds.
             let mut request = v.clone();
             request["op"] = Value::String(operation.into());
-            let mut local = Some(db.begin()?);
+            let mut local = Some(if writes {
+                db.begin()?
+            } else {
+                db.begin_read()?
+            });
             let response = dispatch(db, &mut local, &request)?;
             if writes {
                 let version = local.take().unwrap().commit()?;
@@ -443,11 +447,15 @@ fn dispatch(db: &Database, tx: &mut Option<Transaction>, v: &Value) -> Result<Va
                 Ok(response)
             }
         }
-        "begin" => {
+        "begin" | "begin_read" => {
             if tx.is_some() {
                 return Err(Error::Invalid("transaction already active"));
             }
-            let next = db.begin()?;
+            let next = if op == "begin_read" {
+                db.begin_read()?
+            } else {
+                db.begin()?
+            };
             let version = next.version();
             *tx = Some(next);
             Ok(json!({"ok":true,"version":version.to_string()}))

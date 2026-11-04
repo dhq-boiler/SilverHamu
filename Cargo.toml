@@ -37,3 +37,8 @@ path = "src/main.rs"
 name = "catdb-server"
 path = "src/bin/catdb-server.rs"
 required-features = ["service"]
+
+[[bin]]
+name = "read-gc-bench"
+path = "src/bin/read-gc-bench.rs"
+required-features = ["service", "lock-timing"]

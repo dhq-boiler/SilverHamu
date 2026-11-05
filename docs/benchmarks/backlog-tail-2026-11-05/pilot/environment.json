@@ -1,0 +1,113 @@
+{
+  "utc": "2026-11-05T11:55:10.472073+00:00",
+  "rows": 100000,
+  "value_bytes": 256,
+  "ops": 1000,
+  "reps": 1,
+  "cases": [
+    "1:250",
+    "4:800"
+  ],
+  "scenarios": [
+    "normal",
+    "single",
+    "burst"
+  ],
+  "clients": [
+    1,
+    4
+  ],
+  "workloads": [
+    "update"
+  ],
+  "server_cpus": 2,
+  "client_cpus": 2,
+  "memory_gib_each": 4,
+  "variants": {
+    "candidate-profile": {
+      "image": "catdb-tail-profile:local",
+      "id": "sha256:5408a4805b5a2a18e6ad61214adc110a30a597b71896ce78ad670c316b1657b8"
+    }
+  },
+  "source_sha256": {
+    "benchmarks\\backlog-tail\\run.py": "776f5bcda6564c778032f62d73d0a17e89feac01e6623b4969d2665a36a84b80",
+    "benchmarks\\runner.py": "aa313e3ba0969e60f1c6917acfff090c572e4a25f5bbe60b04d319a410e754e0",
+    "benchmarks\\backlog-tail\\client.py": "623500bc54604c91cc208452f013ad50e05fc39f29be248949d338b1668d8f1c",
+    "benchmarks\\backlog-tail\\schedule.py": "805033372c824cb0b83fbda0f5153319cb929e7be9b479b30c3bd8604cb4e358",
+    "src\\group_commit.rs": "d30fbf55cea1d57e33d1f85334f00530f447d54c5422bf570b515d92658e55fd",
+    "src\\service.rs": "b730d771de4d9e944c7a2992f4a27c04bb9d9bdf046a70d3b316624df2fe6f12"
+  },
+  "runs": [
+    {
+      "variant": "candidate-profile",
+      "rep": 1,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4-800-single",
+          "rows": 100000,
+          "sha256": "c9f705a1fdb42aecc0f003108ca30994dbe44971b3e668d22784d4208c1896ab",
+          "expected_sha256": "c9f705a1fdb42aecc0f003108ca30994dbe44971b3e668d22784d4208c1896ab",
+          "updated_keys": 970,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-1-250-single",
+          "rows": 100000,
+          "sha256": "3e8dc8df7624e9afd32c99820b7bd46f6e243d17bae0e11d4fbc1a503f97f05a",
+          "expected_sha256": "3e8dc8df7624e9afd32c99820b7bd46f6e243d17bae0e11d4fbc1a503f97f05a",
+          "updated_keys": 1897,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-1-250-burst",
+          "rows": 100000,
+          "sha256": "50022c26f932a3cdba405f49fa333cbfc15429a1417377fa96f71baf5b544b49",
+          "expected_sha256": "50022c26f932a3cdba405f49fa333cbfc15429a1417377fa96f71baf5b544b49",
+          "updated_keys": 1897,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4-800-normal",
+          "rows": 100000,
+          "sha256": "7bce847756ae8579e13c6d44b7b7a882c274a92634ea1f91f296e5f6928665c5",
+          "expected_sha256": "7bce847756ae8579e13c6d44b7b7a882c274a92634ea1f91f296e5f6928665c5",
+          "updated_keys": 1920,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4-800-burst",
+          "rows": 100000,
+          "sha256": "415e448ddfe81abe4990e1beb86327f34828c971b175a9241ffaee848fc55e22",
+          "expected_sha256": "415e448ddfe81abe4990e1beb86327f34828c971b175a9241ffaee848fc55e22",
+          "updated_keys": 1920,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-1-250-normal",
+          "rows": 100000,
+          "sha256": "3372e0c3e9bc40a68426e337d294f0a0f87bd839f677b7d60eab11a327edb080",
+          "expected_sha256": "3372e0c3e9bc40a68426e337d294f0a0f87bd839f677b7d60eab11a327edb080",
+          "updated_keys": 1920,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "3372e0c3e9bc40a68426e337d294f0a0f87bd839f677b7d60eab11a327edb080",
+          "expected_sha256": "3372e0c3e9bc40a68426e337d294f0a0f87bd839f677b7d60eab11a327edb080",
+          "updated_keys": 1920,
+          "empty_and_last": true
+        }
+      ]
+    }
+  ]
+}

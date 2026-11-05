@@ -443,6 +443,33 @@ See the [full report and unfavorable cases](docs/benchmarks/backlog-2026-11-05/R
 [recovery observations](docs/benchmarks/backlog-2026-11-05/recovery.svg), and
 [API/reproduction instructions](benchmarks/backlog/README.md).
 
+### Follow-up: attributing the remaining long-tail request
+
+**The previous 1.47 s outlier did not recur, and no maximum-latency optimization
+is claimed.** A bounded deferred recorder now follows each independent batch
+transaction and separates real synchronization from injected sleep and coordinator
+wait. It adds no diagnostic round trip during timed updates.
+
+In 72 same-policy conditions (100k rows / 256B / 1 or 4 connections, three repeats),
+the largest response is 127.865 ms: **62.840 ms client waiting, 31.865 ms coordinator
+waiting, 20.075 ms injected pre-sync interval, 12.258 ms actual sync**, plus 0.827 ms
+elsewhere. Collection itself is only 0.000627 ms. Among 1,101 retained normal-load
+requests, the largest phase is actual sync in 928 and coordinator wait in 173.
+
+![Normal-load slow requests: sync, coordinator and collection intervals](docs/benchmarks/backlog-tail-2026-11-05/attribution.svg)
+
+The [observer-control figure](docs/benchmarks/backlog-tail-2026-11-05/observer.svg)
+retains adverse results: at normal 4/800, p99 is **9.192 → 10.706 ms** and worst
+response **17.535 → 72.555 ms** with recording enabled. This is a diagnostic
+comparison, not an improvement before/after chart. Default batching/durability
+remain unchanged; the old rare event cannot be attributed retroactively.
+
+All **575,125 successful updates**, **875 admission rejections**, **84 full-content
+checks including six reopens**, and **7,180 matched records without loss** are
+accounted for. See the [full report and decision](docs/benchmarks/backlog-tail-2026-11-05/README.md),
+[numerical table](docs/benchmarks/backlog-tail-2026-11-05/table.md), and
+[reproduction instructions](benchmarks/backlog-tail/README.md).
+
 ## Build
 
 Requires Rust **1.89 or newer**. Python 3 is used by the optional client and integration tests. Docker is needed only for containers.

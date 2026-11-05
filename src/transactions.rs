@@ -1501,6 +1501,8 @@ impl Transaction {
             #[cfg(feature = "lock-timing")]
             trace_mark(5);
             database.inner.group.record_sync();
+            #[cfg(feature = "lock-timing")]
+            sync_start_mark();
             let result = file.sync_all();
             #[cfg(feature = "lock-timing")]
             trace_mark(6);
@@ -3735,6 +3737,7 @@ pub fn take_checkpoint_timing() -> [u64; 8] {
 
 #[cfg(feature = "lock-timing")]
 thread_local! {
+    static COMMIT_SYNC_START: std::cell::Cell<u64> = const { std::cell::Cell::new(0) };
     static COMMIT_TRACE: std::cell::Cell<[u64; 8]> = const { std::cell::Cell::new([0; 8]) };
 }
 #[cfg(feature = "lock-timing")]
@@ -3756,6 +3759,14 @@ impl Drop for CommitCost {
             cell.set(value);
         });
     }
+}
+#[cfg(feature = "lock-timing")]
+pub fn take_commit_sync_start() -> u64 {
+    COMMIT_SYNC_START.with(|value| value.replace(0))
+}
+#[cfg(feature = "lock-timing")]
+fn sync_start_mark() {
+    COMMIT_SYNC_START.with(|value| value.set(diagnostic_now_ns()));
 }
 /// Cumulative validation and frame-construction nanoseconds for this batch.
 #[cfg(feature = "lock-timing")]

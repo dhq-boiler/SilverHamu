@@ -101,6 +101,8 @@ struct Reply {
     detail: [u64; 8],
     #[cfg(feature = "lock-timing")]
     costs: [u64; 2],
+    #[cfg(feature = "lock-timing")]
+    sync_start: u64,
 }
 
 #[cfg(any(feature = "commit-window", feature = "backlog-batch"))]
@@ -108,6 +110,12 @@ pub struct CommitOutcome {
     pub result: Result<u64>,
     #[cfg(feature = "lock-timing")]
     pub trace: [u64; 8],
+    #[cfg(feature = "lock-timing")]
+    pub detail: [u64; 8],
+    #[cfg(feature = "lock-timing")]
+    pub costs: [u64; 2],
+    #[cfg(feature = "lock-timing")]
+    pub sync_start: u64,
 }
 
 impl Database {
@@ -152,6 +160,12 @@ impl Database {
                     result: reply.result,
                     #[cfg(feature = "lock-timing")]
                     trace: reply.trace,
+                    #[cfg(feature = "lock-timing")]
+                    detail: reply.detail,
+                    #[cfg(feature = "lock-timing")]
+                    costs: reply.costs,
+                    #[cfg(feature = "lock-timing")]
+                    sync_start: reply.sync_start,
                 })
                 .collect()
         })
@@ -269,6 +283,7 @@ impl GroupCommit {
             take_commit_trace();
             take_commit_detail();
             take_commit_costs();
+            take_commit_sync_start();
             detail_mark(7);
         }
         #[cfg(feature = "wal-prepare")]
@@ -320,8 +335,16 @@ impl GroupCommit {
         receivers
             .into_iter()
             .map(|r| {
-                r.recv()
-                    .map_err(|e| Error::CommitUncertain(io::Error::other(e)))
+                let reply = r
+                    .recv()
+                    .map_err(|e| Error::CommitUncertain(io::Error::other(e)))?;
+                #[cfg(feature = "lock-timing")]
+                let reply = {
+                    let mut reply = reply;
+                    reply.detail[6] = diagnostic_now_ns();
+                    reply
+                };
+                Ok(reply)
             })
             .collect()
     }
@@ -468,6 +491,8 @@ impl GroupCommit {
             self.stall_sync();
             #[cfg(test)]
             crash_group_at("before-sync");
+            #[cfg(feature = "lock-timing")]
+            sync_start_mark();
             let result = file.sync_all();
             #[cfg(test)]
             crash_group_at("after-sync");
@@ -488,6 +513,8 @@ impl GroupCommit {
         let detail = take_commit_detail();
         #[cfg(feature = "lock-timing")]
         let costs = take_commit_costs();
+        #[cfg(feature = "lock-timing")]
+        let sync_start = take_commit_sync_start();
         #[cfg(feature = "handoff-refill")]
         {
             let successful = results.iter().filter(|result| result.is_ok()).count();
@@ -520,6 +547,8 @@ impl GroupCommit {
                 detail,
                 #[cfg(feature = "lock-timing")]
                 costs,
+                #[cfg(feature = "lock-timing")]
+                sync_start,
             });
         }
         Ok(())
@@ -573,6 +602,7 @@ impl GroupCommit {
             COMMIT_TRACE.with(|trace| trace.set(reply.trace));
             COMMIT_DETAIL.with(|trace| trace.set(reply.detail));
             COMMIT_COSTS.with(|value| value.set(reply.costs));
+            COMMIT_SYNC_START.with(|value| value.set(reply.sync_start));
             detail_mark(6);
         }
         reply.result

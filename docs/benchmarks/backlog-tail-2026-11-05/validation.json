@@ -1,0 +1,57 @@
+{
+  "status": "passed",
+  "checks": {
+    "analysis": {
+      "passed": 3,
+      "failed": 0
+    },
+    "build": {
+      "status": "passed"
+    },
+    "clippy": {
+      "status": "passed"
+    },
+    "default-build": {
+      "status": "passed"
+    },
+    "default-protocol": {
+      "passed": 19,
+      "failed": 0
+    },
+    "ffi": {
+      "passed": 35,
+      "failed": 0
+    },
+    "legacy": {
+      "passed": 21,
+      "failed": 0
+    },
+    "protocol": {
+      "passed": 30,
+      "failed": 0
+    },
+    "pull": {
+      "passed": 23,
+      "failed": 0
+    },
+    "release": {
+      "status": "passed"
+    },
+    "rust": {
+      "passed": 150,
+      "failed": 0,
+      "ignored": 13
+    }
+  },
+  "offered": 576000,
+  "completed": 575125,
+  "rejected": 875,
+  "operation_errors": 0,
+  "retries": 0,
+  "full_content_checks": 84,
+  "reopens": 6,
+  "matched_network_records": 7180,
+  "dropped_records": 0,
+  "default_policy_changed": false,
+  "physical_power_loss_tested": false
+}

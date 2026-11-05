@@ -303,6 +303,57 @@ impl CommitDiagnostic {
     }
 }
 
+#[cfg(feature = "lock-timing")]
+thread_local! {
+    static TAIL_ITEMS: std::cell::RefCell<Vec<CommitDiagnostic>> = const { std::cell::RefCell::new(Vec::new()) };
+    static TAIL_SYNC: std::cell::RefCell<Vec<u64>> = const { std::cell::RefCell::new(Vec::new()) };
+    static TAIL_ENABLED: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+}
+#[cfg(feature = "lock-timing")]
+struct TailRecord {
+    index: u64,
+    start: u64,
+    end: u64,
+    sent: u64,
+    items: Vec<CommitDiagnostic>,
+    sync_starts: Vec<u64>,
+}
+#[cfg(feature = "lock-timing")]
+impl TailRecord {
+    fn json(&self) -> Value {
+        json!({"request_index":self.index,"start_ns":self.start,"end_ns":self.end,
+            "sent_ns":self.sent,"items":self.items.iter().map(CommitDiagnostic::json).collect::<Vec<_>>(),
+            "sync_starts":self.sync_starts})
+    }
+}
+#[cfg(feature = "lock-timing")]
+#[derive(Default)]
+struct TailBuffer {
+    records: std::collections::VecDeque<TailRecord>,
+    dropped: u64,
+}
+#[cfg(feature = "lock-timing")]
+impl TailBuffer {
+    fn retain(&mut self, record: TailRecord) {
+        if record.sent.saturating_sub(record.start) < 10_000_000 {
+            return;
+        }
+        if self.records.len() == 8192 {
+            self.dropped += 1;
+        } else {
+            self.records.push_back(record);
+        }
+    }
+    fn drain(&mut self) -> Value {
+        let rows: Vec<Value> = self
+            .records
+            .drain(..self.records.len().min(128))
+            .map(|r| r.json())
+            .collect();
+        json!({"ok":true,"records":rows,"remaining":self.records.len(),"dropped":self.dropped,"threshold_ns":10_000_000,"capacity":8192})
+    }
+}
+
 fn connection(
     mut stream: TcpStream,
     db: Database,
@@ -329,7 +380,13 @@ fn connection(
         stop,
     )?;
     #[cfg(feature = "lock-timing")]
-    let diagnostic = std::env::var_os("CATDB_DIAGNOSTICS").is_some();
+    let buffered = std::env::var("CATDB_DIAGNOSTICS").as_deref() == Ok("buffer");
+    #[cfg(feature = "lock-timing")]
+    TAIL_ENABLED.with(|value| value.set(buffered));
+    #[cfg(feature = "lock-timing")]
+    let mut tail_buffer = TailBuffer::default();
+    #[cfg(feature = "lock-timing")]
+    let diagnostic = std::env::var_os("CATDB_DIAGNOSTICS").is_some() && !buffered;
     #[cfg(feature = "lock-timing")]
     let pull_diagnostic = std::env::var("CATDB_DIAGNOSTICS").as_deref() == Ok("pull");
     #[cfg(feature = "lock-timing")]
@@ -349,6 +406,10 @@ fn connection(
         }
         #[cfg(feature = "lock-timing")]
         {
+            if buffered && request.get("op").and_then(Value::as_str) == Some("diagnostic_drain") {
+                send(&mut stream, &tail_buffer.drain(), deadline, stop)?;
+                continue;
+            }
             if pull_diagnostic
                 && request.get("op").and_then(Value::as_str) == Some("diagnostic_last")
             {
@@ -364,6 +425,9 @@ fn connection(
             crate::transactions::take_commit_trace();
             crate::transactions::take_commit_detail();
             crate::transactions::take_commit_costs();
+            crate::transactions::take_commit_sync_start();
+            TAIL_ITEMS.with(|items| items.borrow_mut().clear());
+            TAIL_SYNC.with(|items| items.borrow_mut().clear());
             crate::transactions::diagnostic_now_ns()
         };
         let result = dispatch(&db, &mut transaction, &request);
@@ -431,6 +495,41 @@ fn connection(
             Instant::now() + config.request_timeout,
             stop,
         )?;
+        #[cfg(feature = "lock-timing")]
+        if buffered
+            && matches!(
+                request.get("op").and_then(Value::as_str),
+                Some("put_batch_commit" | "put_commit" | "delete_commit" | "commit")
+            )
+        {
+            let sent = crate::transactions::diagnostic_now_ns();
+            if sent.saturating_sub(dispatch_started) >= 10_000_000 {
+                let mut items = TAIL_ITEMS.with(|items| std::mem::take(&mut *items.borrow_mut()));
+                let mut sync_starts =
+                    TAIL_SYNC.with(|items| std::mem::take(&mut *items.borrow_mut()));
+                if items.is_empty() {
+                    items.push(CommitDiagnostic {
+                        request_index,
+                        dispatch_ns: dispatch_finished.saturating_sub(dispatch_started),
+                        finished_ns: dispatch_finished,
+                        trace: crate::transactions::take_commit_trace(),
+                        detail: crate::transactions::take_commit_detail(),
+                        costs: crate::transactions::take_commit_costs(),
+                        sync_attempts: db.commit_sync_attempts(),
+                        commit_ok: response.get("ok").and_then(Value::as_bool) == Some(true),
+                    });
+                    sync_starts.push(crate::transactions::take_commit_sync_start());
+                }
+                tail_buffer.retain(TailRecord {
+                    index: request_index,
+                    start: dispatch_started,
+                    end: dispatch_finished,
+                    sent,
+                    items,
+                    sync_starts,
+                });
+            }
+        }
         if fatal {
             break;
         }
@@ -575,29 +674,47 @@ fn dispatch_operation(
             let results: Vec<Value> = db
                 .commit_batch(transactions)?
                 .into_iter()
-                .map(|outcome| match outcome.result {
-                    Ok(version) => json!({"ok":true,"version":version.to_string()}),
-                    Err(e) => {
-                        let code = match e {
-                            Error::Conflict(_) => "conflict",
-                            Error::Invalid(_) => "invalid_request",
-                            Error::Limit(_) => "limit",
-                            Error::ResourceExhausted(_) => "resource_exhausted",
-                            Error::CommitUncertain(_) => {
-                                reopen = true;
-                                "commit_uncertain"
-                            }
-                            Error::CheckpointUncertain(_) => {
-                                reopen = true;
-                                "checkpoint_uncertain"
-                            }
-                            Error::Poisoned => {
-                                reopen = true;
-                                "reopen_required"
-                            }
-                            Error::Io(_) | Error::Locked(_) => "storage_error",
-                        };
-                        error(code)
+                .map(|outcome| {
+                    #[cfg(feature = "lock-timing")]
+                    if TAIL_ENABLED.with(|v| v.get()) {
+                        TAIL_SYNC.with(|items| items.borrow_mut().push(outcome.sync_start));
+                        TAIL_ITEMS.with(|items| {
+                            items.borrow_mut().push(CommitDiagnostic {
+                                request_index: 0,
+                                dispatch_ns: 0,
+                                finished_ns: outcome.detail[6],
+                                trace: outcome.trace,
+                                detail: outcome.detail,
+                                costs: outcome.costs,
+                                sync_attempts: 0,
+                                commit_ok: outcome.result.is_ok(),
+                            })
+                        });
+                    }
+                    match outcome.result {
+                        Ok(version) => json!({"ok":true,"version":version.to_string()}),
+                        Err(e) => {
+                            let code = match e {
+                                Error::Conflict(_) => "conflict",
+                                Error::Invalid(_) => "invalid_request",
+                                Error::Limit(_) => "limit",
+                                Error::ResourceExhausted(_) => "resource_exhausted",
+                                Error::CommitUncertain(_) => {
+                                    reopen = true;
+                                    "commit_uncertain"
+                                }
+                                Error::CheckpointUncertain(_) => {
+                                    reopen = true;
+                                    "checkpoint_uncertain"
+                                }
+                                Error::Poisoned => {
+                                    reopen = true;
+                                    "reopen_required"
+                                }
+                                Error::Io(_) | Error::Locked(_) => "storage_error",
+                            };
+                            error(code)
+                        }
                     }
                 })
                 .collect();
@@ -962,3 +1079,46 @@ mod tests {
 #[cfg(test)]
 #[path = "../benchmarks/work-elision/service_bench.rs"]
 mod work_elision_bench;
+
+#[cfg(all(test, feature = "lock-timing"))]
+mod tail_buffer_tests {
+    use super::*;
+    fn record(duration: u64) -> TailRecord {
+        TailRecord {
+            index: 1,
+            start: 1,
+            end: duration + 1,
+            sent: duration + 1,
+            items: Vec::new(),
+            sync_starts: Vec::new(),
+        }
+    }
+    #[test]
+    fn bv_tail_threshold_retains_at_and_above_ten_milliseconds() {
+        let mut buffer = TailBuffer::default();
+        buffer.retain(record(9_999_999));
+        assert!(buffer.records.is_empty());
+        buffer.retain(record(10_000_000));
+        buffer.retain(record(10_000_001));
+        assert_eq!(buffer.records.len(), 2);
+    }
+    #[test]
+    fn bv_tail_capacity_reports_loss_and_drain_reuses_slots() {
+        let mut buffer = TailBuffer::default();
+        for _ in 0..8192 {
+            buffer.retain(record(10_000_000));
+        }
+        assert_eq!(buffer.dropped, 0);
+        buffer.retain(record(10_000_000));
+        assert_eq!(buffer.dropped, 1);
+        assert_eq!(buffer.records.len(), 8192);
+        assert_eq!(buffer.drain()["records"].as_array().unwrap().len(), 128);
+        buffer.retain(record(10_000_000));
+        assert_eq!(buffer.records.len(), 8065);
+        while !buffer.records.is_empty() {
+            buffer.drain();
+        }
+        assert_eq!(buffer.drain()["remaining"], 0);
+        assert_eq!(buffer.dropped, 1);
+    }
+}

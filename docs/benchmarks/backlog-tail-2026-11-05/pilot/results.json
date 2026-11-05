@@ -1,0 +1,542 @@
+[
+  {
+    "clients": 4,
+    "rep": 1,
+    "rate": 800,
+    "scenario": "single",
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 1000,
+    "completed": 975,
+    "rejected": 25,
+    "errors": [],
+    "elapsed_s": 1.256425064,
+    "ops_s": 776.0112623795922,
+    "sync_attempts": 266,
+    "syncs_s": 211.71179055689387,
+    "updates_per_sync": 3.6654135338345863,
+    "injected_stalls": 1,
+    "schedule": {
+      "counters": {
+        "before": {
+          "injected_stall_ns": [
+            0,
+            0,
+            0
+          ],
+          "injected_stalls": 0,
+          "ok": true,
+          "sync_attempts": 0,
+          "version": "100"
+        },
+        "after": {
+          "injected_stall_ns": [
+            1101607588,
+            1201672451,
+            100064863
+          ],
+          "injected_stalls": 1,
+          "ok": true,
+          "sync_attempts": 266,
+          "version": "1075"
+        }
+      },
+      "origin_ns": 71746140195420,
+      "drained_ns": 71747397980403,
+      "outstanding_capacity": 64,
+      "batch_limit": 8,
+      "armed_client_ns": 71746039930321,
+      "armed_done_ns": 71746040096671
+    },
+    "stall": {
+      "start_ms": 1100,
+      "duration_ms": 10000,
+      "delay_ms": 100,
+      "count": 1
+    },
+    "response": {
+      "p50_ms": 5.872013,
+      "p99_ms": 104.35974,
+      "max_ms": 110.52107,
+      "above_ms": {
+        "10": 73,
+        "20": 64,
+        "50": 58
+      }
+    },
+    "operation": {
+      "p50_ms": 4.595174,
+      "p99_ms": 9.051033,
+      "max_ms": 108.55899,
+      "above_ms": {
+        "10": 5,
+        "20": 4,
+        "50": 4
+      }
+    },
+    "queue": {
+      "p50_ms": 0.880319,
+      "p99_ms": 93.481001,
+      "max_ms": 103.692931,
+      "above_ms": {
+        "10": 60,
+        "20": 60,
+        "50": 49
+      }
+    },
+    "variant": "candidate-profile",
+    "events_file": "candidate-profile-r1-update-c4-rate800-single-events.json.gz",
+    "batches_file": "candidate-profile-r1-update-c4-rate800-single-batches.json.gz",
+    "diagnostics_file": "candidate-profile-r1-update-c4-rate800-single-diagnostics.json.gz"
+  },
+  {
+    "clients": 1,
+    "rep": 1,
+    "rate": 250,
+    "scenario": "single",
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 1000,
+    "completed": 1000,
+    "rejected": 0,
+    "errors": [],
+    "elapsed_s": 4.00323892,
+    "ops_s": 249.79773128304817,
+    "sync_attempts": 974,
+    "syncs_s": 243.3029902696889,
+    "updates_per_sync": 1.0266940451745379,
+    "injected_stalls": 1,
+    "schedule": {
+      "counters": {
+        "before": {
+          "injected_stall_ns": [
+            1101607588,
+            1201672451,
+            100064863
+          ],
+          "injected_stalls": 1,
+          "ok": true,
+          "sync_attempts": 266,
+          "version": "1075"
+        },
+        "after": {
+          "injected_stall_ns": [
+            1100602580,
+            1200660145,
+            100057565
+          ],
+          "injected_stalls": 1,
+          "ok": true,
+          "sync_attempts": 1240,
+          "version": "2075"
+        }
+      },
+      "origin_ns": 71748759902458,
+      "drained_ns": 71752763686303,
+      "outstanding_capacity": 64,
+      "batch_limit": 8,
+      "armed_client_ns": 71748659670079,
+      "armed_done_ns": 71748659849612
+    },
+    "stall": {
+      "start_ms": 1100,
+      "duration_ms": 10000,
+      "delay_ms": 100,
+      "count": 1
+    },
+    "response": {
+      "p50_ms": 3.861664,
+      "p99_ms": 72.426266,
+      "max_ms": 104.815342,
+      "above_ms": {
+        "10": 28,
+        "20": 24,
+        "50": 16
+      }
+    },
+    "operation": {
+      "p50_ms": 3.689188,
+      "p99_ms": 5.565561,
+      "max_ms": 104.674413,
+      "above_ms": {
+        "10": 1,
+        "20": 1,
+        "50": 1
+      }
+    },
+    "queue": {
+      "p50_ms": 0.128193,
+      "p99_ms": 64.611892,
+      "max_ms": 100.845169,
+      "above_ms": {
+        "10": 26,
+        "20": 23,
+        "50": 14
+      }
+    },
+    "variant": "candidate-profile",
+    "events_file": "candidate-profile-r1-update-c1-rate250-single-events.json.gz",
+    "batches_file": "candidate-profile-r1-update-c1-rate250-single-batches.json.gz",
+    "diagnostics_file": "candidate-profile-r1-update-c1-rate250-single-diagnostics.json.gz"
+  },
+  {
+    "clients": 1,
+    "rep": 1,
+    "rate": 250,
+    "scenario": "burst",
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 1000,
+    "completed": 1000,
+    "rejected": 0,
+    "errors": [],
+    "elapsed_s": 4.000114279,
+    "ops_s": 249.99285776655182,
+    "sync_attempts": 787,
+    "syncs_s": 196.7443790622763,
+    "updates_per_sync": 1.2706480304955527,
+    "injected_stalls": 42,
+    "schedule": {
+      "counters": {
+        "before": {
+          "injected_stall_ns": [
+            1100602580,
+            1200660145,
+            100057565
+          ],
+          "injected_stalls": 1,
+          "ok": true,
+          "sync_attempts": 1240,
+          "version": "2075"
+        },
+        "after": {
+          "injected_stall_ns": [
+            1100923639,
+            2102664859,
+            842726296
+          ],
+          "injected_stalls": 42,
+          "ok": true,
+          "sync_attempts": 2027,
+          "version": "3075"
+        }
+      },
+      "origin_ns": 71754220100318,
+      "drained_ns": 71758222773078,
+      "outstanding_capacity": 64,
+      "batch_limit": 8,
+      "armed_client_ns": 71754119819949,
+      "armed_done_ns": 71754119946843
+    },
+    "stall": {
+      "start_ms": 1100,
+      "duration_ms": 1000,
+      "delay_ms": 20,
+      "count": 10000
+    },
+    "response": {
+      "p50_ms": 4.071219,
+      "p99_ms": 47.44472,
+      "max_ms": 48.685169,
+      "above_ms": {
+        "10": 254,
+        "20": 248,
+        "50": 0
+      }
+    },
+    "operation": {
+      "p50_ms": 3.900104,
+      "p99_ms": 24.539024,
+      "max_ms": 28.433239,
+      "above_ms": {
+        "10": 248,
+        "20": 246,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 0.147688,
+      "p99_ms": 23.493753,
+      "max_ms": 24.721085,
+      "above_ms": {
+        "10": 150,
+        "20": 43,
+        "50": 0
+      }
+    },
+    "variant": "candidate-profile",
+    "events_file": "candidate-profile-r1-update-c1-rate250-burst-events.json.gz",
+    "batches_file": "candidate-profile-r1-update-c1-rate250-burst-batches.json.gz",
+    "diagnostics_file": "candidate-profile-r1-update-c1-rate250-burst-diagnostics.json.gz"
+  },
+  {
+    "clients": 4,
+    "rep": 1,
+    "rate": 800,
+    "scenario": "normal",
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 1000,
+    "completed": 1000,
+    "rejected": 0,
+    "errors": [],
+    "elapsed_s": 1.254149595,
+    "ops_s": 797.353046228907,
+    "sync_attempts": 303,
+    "syncs_s": 241.59797300735883,
+    "updates_per_sync": 3.3003300330033003,
+    "injected_stalls": 0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "injected_stall_ns": [
+            1100923639,
+            2102664859,
+            842726296
+          ],
+          "injected_stalls": 42,
+          "ok": true,
+          "sync_attempts": 2027,
+          "version": "3075"
+        },
+        "after": {
+          "injected_stall_ns": [
+            0,
+            0,
+            0
+          ],
+          "injected_stalls": 0,
+          "ok": true,
+          "sync_attempts": 2330,
+          "version": "4075"
+        }
+      },
+      "origin_ns": 71759624971843,
+      "drained_ns": 71760880551989,
+      "outstanding_capacity": 64,
+      "batch_limit": 8,
+      "armed_client_ns": 71759524699626,
+      "armed_done_ns": 71759524807781
+    },
+    "stall": {
+      "start_ms": 1100,
+      "duration_ms": 0,
+      "delay_ms": 0,
+      "count": 0
+    },
+    "response": {
+      "p50_ms": 5.473043,
+      "p99_ms": 7.967261,
+      "max_ms": 9.40783,
+      "above_ms": {
+        "10": 0,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "operation": {
+      "p50_ms": 4.470006,
+      "p99_ms": 7.628864,
+      "max_ms": 9.295452,
+      "above_ms": {
+        "10": 0,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 0.479864,
+      "p99_ms": 2.980842,
+      "max_ms": 4.421346,
+      "above_ms": {
+        "10": 0,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "variant": "candidate-profile",
+    "events_file": "candidate-profile-r1-update-c4-rate800-normal-events.json.gz",
+    "batches_file": "candidate-profile-r1-update-c4-rate800-normal-batches.json.gz",
+    "diagnostics_file": "candidate-profile-r1-update-c4-rate800-normal-diagnostics.json.gz"
+  },
+  {
+    "clients": 4,
+    "rep": 1,
+    "rate": 800,
+    "scenario": "burst",
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 1000,
+    "completed": 976,
+    "rejected": 24,
+    "errors": [],
+    "elapsed_s": 1.336533476,
+    "ops_s": 730.2473282756742,
+    "sync_attempts": 246,
+    "syncs_s": 184.05824052849985,
+    "updates_per_sync": 3.967479674796748,
+    "injected_stalls": 14,
+    "schedule": {
+      "counters": {
+        "before": {
+          "injected_stall_ns": [
+            0,
+            0,
+            0
+          ],
+          "injected_stalls": 0,
+          "ok": true,
+          "sync_attempts": 2330,
+          "version": "4075"
+        },
+        "after": {
+          "injected_stall_ns": [
+            1104137529,
+            1432692693,
+            280930430
+          ],
+          "injected_stalls": 14,
+          "ok": true,
+          "sync_attempts": 2576,
+          "version": "5051"
+        }
+      },
+      "origin_ns": 71762312773167,
+      "drained_ns": 71763651494855,
+      "outstanding_capacity": 64,
+      "batch_limit": 8,
+      "armed_client_ns": 71762212549922,
+      "armed_done_ns": 71762212664221
+    },
+    "stall": {
+      "start_ms": 1100,
+      "duration_ms": 1000,
+      "delay_ms": 20,
+      "count": 10000
+    },
+    "response": {
+      "p50_ms": 6.248138,
+      "p99_ms": 94.582114,
+      "max_ms": 102.323052,
+      "above_ms": {
+        "10": 187,
+        "20": 176,
+        "50": 167
+      }
+    },
+    "operation": {
+      "p50_ms": 4.725154,
+      "p99_ms": 47.862633,
+      "max_ms": 48.151013,
+      "above_ms": {
+        "10": 178,
+        "20": 176,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 1.201307,
+      "p99_ms": 47.00753,
+      "max_ms": 55.156085,
+      "above_ms": {
+        "10": 156,
+        "20": 116,
+        "50": 5
+      }
+    },
+    "variant": "candidate-profile",
+    "events_file": "candidate-profile-r1-update-c4-rate800-burst-events.json.gz",
+    "batches_file": "candidate-profile-r1-update-c4-rate800-burst-batches.json.gz",
+    "diagnostics_file": "candidate-profile-r1-update-c4-rate800-burst-diagnostics.json.gz"
+  },
+  {
+    "clients": 1,
+    "rep": 1,
+    "rate": 250,
+    "scenario": "normal",
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 1000,
+    "completed": 1000,
+    "rejected": 0,
+    "errors": [],
+    "elapsed_s": 4.00000528,
+    "ops_s": 249.9996700004356,
+    "sync_attempts": 993,
+    "syncs_s": 248.24967231043254,
+    "updates_per_sync": 1.0070493454179255,
+    "injected_stalls": 0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "injected_stall_ns": [
+            1104137529,
+            1432692693,
+            280930430
+          ],
+          "injected_stalls": 14,
+          "ok": true,
+          "sync_attempts": 2576,
+          "version": "5051"
+        },
+        "after": {
+          "injected_stall_ns": [
+            0,
+            0,
+            0
+          ],
+          "injected_stalls": 0,
+          "ok": true,
+          "sync_attempts": 3569,
+          "version": "6051"
+        }
+      },
+      "origin_ns": 71765070430743,
+      "drained_ns": 71769070910790,
+      "outstanding_capacity": 64,
+      "batch_limit": 8,
+      "armed_client_ns": 71764970281849,
+      "armed_done_ns": 71764970387333
+    },
+    "stall": {
+      "start_ms": 1100,
+      "duration_ms": 0,
+      "delay_ms": 0,
+      "count": 0
+    },
+    "response": {
+      "p50_ms": 3.905094,
+      "p99_ms": 6.930043,
+      "max_ms": 34.09725,
+      "above_ms": {
+        "10": 8,
+        "20": 5,
+        "50": 0
+      }
+    },
+    "operation": {
+      "p50_ms": 3.745977,
+      "p99_ms": 5.429655,
+      "max_ms": 33.111293,
+      "above_ms": {
+        "10": 1,
+        "20": 1,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 0.119712,
+      "p99_ms": 2.767612,
+      "max_ms": 30.129891,
+      "above_ms": {
+        "10": 6,
+        "20": 3,
+        "50": 0
+      }
+    },
+    "variant": "candidate-profile",
+    "events_file": "candidate-profile-r1-update-c1-rate250-normal-events.json.gz",
+    "batches_file": "candidate-profile-r1-update-c1-rate250-normal-batches.json.gz",
+    "diagnostics_file": "candidate-profile-r1-update-c1-rate250-normal-diagnostics.json.gz"
+  }
+]

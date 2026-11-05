@@ -134,7 +134,7 @@ fn run(state: Arc<Mutex<State>>, stop: Arc<(Mutex<bool>, Condvar)>, counters: Ar
                     Some(pending)
                 }
             }
-            Err(std::sync::TryLockError::WouldBlock) => None,
+            Err(std::sync::TryLockError::WouldBlock) => Some(true),
             Err(std::sync::TryLockError::Poisoned(_)) => return,
         };
         drop(busy);

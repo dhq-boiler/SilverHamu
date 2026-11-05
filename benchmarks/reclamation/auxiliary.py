@@ -1,8 +1,8 @@
 """Native diagnostic comparison; isolated containers, alternating order, all samples retained."""
 import argparse, gzip, json, pathlib, subprocess
-p=argparse.ArgumentParser(); p.add_argument('--out',type=pathlib.Path,required=True); a=p.parse_args()
+p=argparse.ArgumentParser(); p.add_argument('--out',type=pathlib.Path,required=True); p.add_argument('--image-prefix',default='catdb-reclamation'); a=p.parse_args()
 a.out.mkdir(parents=True,exist_ok=False)
-images={'cooperative':'catdb-reclamation-diag:local','background':'catdb-reclamation-diag:local','cooperative-light':'catdb-reclamation-light:local','background-light':'catdb-reclamation-light:local'}
+images={'cooperative':a.image_prefix+'-diag:local','background':a.image_prefix+'-diag:local','cooperative-light':a.image_prefix+'-light:local','background-light':a.image_prefix+'-light:local'}
 meta={'cpus':2,'memory_gib':4,'reps':3,'images':{k:subprocess.check_output(['docker','image','inspect',v,'--format','{{.Id}}'],text=True).strip() for k,v in images.items()}}
 (a.out/'environment.json').write_text(json.dumps(meta,indent=2),encoding='utf-8')
 results=[]

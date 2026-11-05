@@ -271,6 +271,25 @@ All 36 native runs and the correctness/recovery suites pass. The longer service
 comparison is not rerun after this failed gate. See the [full result and limitations](docs/benchmarks/reclamation-plan-2026-11-05/README.md)
 and [reproduction commands](benchmarks/reclamation-plan/README.md).
 
+### Follow-up: reusing leading history keys
+
+A small collector change avoids repeated search and copying for fully reclaimable
+leading keys. It reduces detailed timed collection work by **23%**, but does not
+meet all acceptance targets. One follow-up combines it with 500 us contention
+backoff; the measured light release case improves completion **245.172 →
+145.638 ms** and worst read **0.941 → 0.636 ms**, while read p99 increases
+**0.021390 → 0.022422 ms**. Mixed-workload worst read also grows
+**1.015 → 3.415 ms**.
+
+**Neither condition is adopted; production keeps the previous collector.**
+All 72 native runs pass consistency/reopen checks, with identical final heap.
+
+![Leading-key reuse and shorter contention backoff: benefits and regressions](docs/benchmarks/reclamation-front-2026-11-05/half.svg)
+
+See [both cohorts, memory and recovery validation](docs/benchmarks/reclamation-front-2026-11-05/README.md)
+and [reproduction commands](benchmarks/reclamation-front/README.md). Service and
+other-product comparisons were not rerun after the failed native gate.
+
 ## Build
 
 Requires Rust **1.89 or newer**. Python 3 is used by the optional client and integration tests. Docker is needed only for containers.

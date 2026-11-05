@@ -4,8 +4,9 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 root=pathlib.Path(sys.argv[1]);plt.rcParams['svg.hashsalt']='catdb-reclamation-plan'
-rows=json.loads((root/'native/computed.json').read_text(encoding='utf-8'))
-raw=json.loads((root/'native/results.json').read_text(encoding='utf-8'))
+cohort=sys.argv[3] if len(sys.argv)>3 else 'native'
+rows=json.loads((root/cohort/'computed.json').read_text(encoding='utf-8'))
+raw=json.loads((root/cohort/'results.json').read_text(encoding='utf-8'))
 for r in rows:
  source=next(x for x in raw if (x['variant'],x['scenario'],x['rep'])==(r['variant'],r['scenario'],r['rep']))
  r['worker_hold_ms']=source['worker_max_lock_hold_ns']/1e6
@@ -19,6 +20,6 @@ for row,(suffix,label) in enumerate([('-light','Light: acceptance comparison'),(
    ax.annotate(f'{v:.3f}',(i,v if worst else max(values)),xytext=(0,4),textcoords='offset points',ha='center',fontsize=10)
    if not worst:ax.plot([i,i],[min(values),max(values)],color='black',lw=1)
   ax.set_title(label+'\n'+title,fontsize=11);ax.set_ylabel('ms; lower is better');ax.set_xticks([0,1],['Previous','Prototype']);ax.set_ylim(0,ax.get_ylim()[1]*1.2)
-fig.suptitle('Two-phase reclamation preparation: prototype NOT adopted\n100,000 records | two readers | 3 paired repeats; medians / worst across repeats',fontsize=15)
-fig.savefig(root/'native.svg');fig.savefig(root/'native.png',dpi=140)
-p=root/'native.svg';p.write_text('\n'.join(line.rstrip() for line in p.read_text(encoding='utf-8').splitlines())+'\n',encoding='utf-8')
+fig.suptitle((sys.argv[2] if len(sys.argv)>2 else 'Two-phase reclamation preparation: prototype NOT adopted')+'\n100,000 records | two readers | 3 paired repeats; medians / worst across repeats',fontsize=15)
+fig.savefig(root/(cohort+'.svg'));fig.savefig(root/(cohort+'.png'),dpi=140)
+p=root/(cohort+'.svg');p.write_text('\n'.join(line.rstrip() for line in p.read_text(encoding='utf-8').splitlines())+'\n',encoding='utf-8')

@@ -1,0 +1,17 @@
+{
+  "baseline": "4d09365",
+  "leading_key_candidate": "c8d205f",
+  "half_backoff_candidate": "a965e2d",
+  "restored_production": "eea36b1",
+  "adopted": false,
+  "primary_mode": "light",
+  "candidate_ci": [
+    41971111288,
+    41971642720
+  ],
+  "service_comparison_rerun": false,
+  "raw_summary_sha256": {
+    "half\\results.json": "1d28b2b9bba95372b0c9d5c880c62909a4c6f9b86c9522d0287405a3aed385c2",
+    "native\\results.json": "367df3915f661dfd05217c2cbe868c23c1053f70f052eb57cb1888345e12b14e"
+  }
+}

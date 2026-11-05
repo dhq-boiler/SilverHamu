@@ -253,6 +253,24 @@ match; the prototype registry adds 40 bytes to measured final heap. See the
 [report, safety tests, memory limits and service comparison](docs/benchmarks/reclamation-pins-2026-11-05/README.md)
 and [reproduction commands](benchmarks/reclamation-pins/README.md).
 
+### Follow-up: preparation outside the reclamation lock
+
+A bounded two-phase prototype captures version metadata, prepares removal counts
+outside the shared lock, then validates and applies the plan. **It fails the
+light-instrumentation comparison and is not adopted.** Production keeps the
+previous collector.
+
+Across three paired 100k-record release runs, read p99 stays approximately
+**0.021 ms**, but completion grows **203.396 → 324.006 ms** and worst read
+**0.793 → 1.374 ms**. Worst worker lock hold also grows. Final heap matches;
+peak requested heap increases by about 9.7 KiB.
+
+![Two-phase reclamation preparation, light acceptance and detailed diagnostics](docs/benchmarks/reclamation-plan-2026-11-05/native.svg)
+
+All 36 native runs and the correctness/recovery suites pass. The longer service
+comparison is not rerun after this failed gate. See the [full result and limitations](docs/benchmarks/reclamation-plan-2026-11-05/README.md)
+and [reproduction commands](benchmarks/reclamation-plan/README.md).
+
 ## Build
 
 Requires Rust **1.89 or newer**. Python 3 is used by the optional client and integration tests. Docker is needed only for containers.

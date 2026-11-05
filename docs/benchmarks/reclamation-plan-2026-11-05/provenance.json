@@ -1,0 +1,10 @@
+{
+  "baseline": "4d09365",
+  "prototype": "6c6667b",
+  "restored_production": "62af581",
+  "adopted": false,
+  "primary_mode": "light",
+  "prototype_ci": 41969847057,
+  "service_comparison_rerun": false,
+  "raw_summary_sha256": "ed46cc3b8780aa04eae801fa2436042d53f3a708387953158ce1ad4f0c647feb"
+}

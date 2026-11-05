@@ -673,3 +673,11 @@ A short pilot separated journal-thread scheduling, but did not establish ownersh
 ![Journal wait feasibility pilot](docs/benchmarks/journal-wait-2026-11-06/journal-waits.svg)
 
 See [the measured boundaries, preliminary observer results and raw evidence](docs/benchmarks/journal-wait-2026-11-06/README.md).
+
+## Follow-up: identifying I/O dispatches without inventing journal ownership
+
+A short observer pilot followed 6,422 dispatch attempts to data completion using opaque request identities and per-slot dispatch counters. Worker-to-journal parentage remains unresolved, so the long comparison was not started and no speedup is claimed.
+
+![I/O request context](docs/benchmarks/request-id-2026-11-06/request-context.svg)
+
+See [the identity evidence, limitations, observer results and retained attempts](docs/benchmarks/request-id-2026-11-06/README.md).

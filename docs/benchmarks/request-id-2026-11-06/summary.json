@@ -1,0 +1,69 @@
+[
+  {
+    "case": "candidate-profile-trace-r1-c4-rate800-normal",
+    "syncs": 283,
+    "dispatches": 1415,
+    "data_done": 1415,
+    "unresolved_data_end": 0,
+    "direct_journal_context": 283,
+    "unassigned_journal_context": 1132,
+    "reused_slots": 95,
+    "partial_updates": 0,
+    "requeues": 0,
+    "without_end_hook": 1132,
+    "worst": {
+      "slot": "R000003",
+      "attempt": 226,
+      "start_ns": 86259510569000,
+      "issuer": "kworker/2:1H",
+      "journal_context": null,
+      "state": "data_done",
+      "updates": [
+        {
+          "ns": 86259513328000,
+          "bytes": 0,
+          "return_ns": 86259513330000,
+          "more": 0
+        }
+      ],
+      "ends": 0,
+      "requeues": 0,
+      "data_end_ns": 86259513330000,
+      "dispatch_to_data_done_ns": 2761000
+    }
+  },
+  {
+    "case": "candidate-profile-trace-r1-c1-rate200-normal",
+    "syncs": 1000,
+    "dispatches": 5007,
+    "data_done": 5007,
+    "unresolved_data_end": 0,
+    "direct_journal_context": 1000,
+    "unassigned_journal_context": 4007,
+    "reused_slots": 322,
+    "partial_updates": 0,
+    "requeues": 0,
+    "without_end_hook": 4007,
+    "worst": {
+      "slot": "R000014",
+      "attempt": 8,
+      "start_ns": 86265236070000,
+      "issuer": "catdb-client",
+      "journal_context": null,
+      "state": "freed",
+      "updates": [
+        {
+          "ns": 86265241474000,
+          "bytes": 4096,
+          "return_ns": 86265241502000,
+          "more": 0
+        }
+      ],
+      "ends": 0,
+      "requeues": 0,
+      "data_end_ns": 86265241502000,
+      "dispatch_to_data_done_ns": 5432000,
+      "free_ns": 86265241504000
+    }
+  }
+]

@@ -500,6 +500,10 @@ fn dispatch_operation(
     match op {
         #[cfg(all(feature = "fixed-log", feature = "lock-timing"))]
         "fixed_log_metrics" => Ok(json!({"ok":true,"metrics":db.fixed_log_metrics()?})),
+        #[cfg(feature = "benchmark-metrics")]
+        "benchmark_counters" => Ok(json!({"ok":true,
+            "version":db.current_version()?.to_string(),
+            "sync_attempts":db.commit_sync_attempts()})),
         "ping" => Ok(json!({"ok":true,"version":db.current_version()?.to_string()})),
         "get_latest" | "scan_latest" | "put_commit" | "delete_commit" => {
             if tx.is_some() {

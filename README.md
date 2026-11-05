@@ -388,6 +388,32 @@ All 320,000 updates and 80 full-content/restart checks passed. See the
 [results, observer effect and unresolved causes](docs/benchmarks/commit-tail-2026-11-05/README.md),
 and [reproduction commands](benchmarks/commit-tail/README.md).
 
+### Follow-up: equal offered rates reveal backlog amplification
+
+The next experiment fixes planned arrivals independently of completion: one
+connection at **200/250 requests/s**, four at **400/800**, three repeats each.
+Run-average synchronization rates mostly converge, but maximum latency remains
+unstable. Actual sends do not stay perfectly matched during stalls; all rejection
+events and unfavorable results are retained.
+
+At one connection/200 offered per second, queue-inclusive p99 worsens
+**44.422 → 174.987 ms** and the worst response **113.919 → 691.487 ms**;
+at 250/s the comparison reverses. The largest baseline response is **1065.075 ms**,
+of which **1059.036 ms is client queue wait** and only **5.986 ms is that request's
+operation**. This does not identify the internal cause of preceding slow requests.
+**The default remains unchanged; a robust maximum-latency improvement is not proven.**
+
+![Equal-arrival comparison with queue-inclusive latency and synchronization frequency](docs/benchmarks/arrival-rate-2026-11-05/arrival-rate.svg)
+
+Across primary and separate observer cohorts: **286,849 completed updates,
+1,151 client-queue rejections, zero operation errors, and 60 successful full-content
+checks including restarts**. Response latency now includes scheduled-to-send wait,
+so it is not directly comparable to the older closed-loop charts. See the
+[full results, observer overhead and limitations](docs/benchmarks/arrival-rate-2026-11-05/README.md),
+[backlog timeline](docs/benchmarks/arrival-rate-2026-11-05/backlog.svg),
+[throughput and numerical table](docs/benchmarks/arrival-rate-2026-11-05/table.md),
+and [reproduction commands](benchmarks/arrival-rate/README.md).
+
 ## Build
 
 Requires Rust **1.89 or newer**. Python 3 is used by the optional client and integration tests. Docker is needed only for containers.

@@ -1,0 +1,2660 @@
+[
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 1,
+    "rate": 400,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 20.003573883,
+    "ops_s": 399.9285351103577,
+    "sync_attempts": 4458,
+    "syncs_s": 222.86017619024682,
+    "updates_per_sync": 1.7945266935845672,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 0,
+          "version": "100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 4458,
+          "version": "8100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "origin_ns": 65702071622025,
+      "drained_ns": 65722076350939
+    },
+    "operation": {
+      "p50_ms": 5.901668,
+      "p99_ms": 10.095829,
+      "max_ms": 16.440587,
+      "above_ms": {
+        "10": 84,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 6.045239,
+      "p99_ms": 10.227715,
+      "max_ms": 16.51085,
+      "above_ms": {
+        "10": 96,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 0.127388,
+      "p99_ms": 0.350872,
+      "max_ms": 6.518863,
+      "above_ms": {
+        "10": 0,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "p99_ms": 10.227715,
+    "variant": "before",
+    "events_file": "before-r1-update-c4-rate400-events.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 1,
+    "rep": 1,
+    "rate": 250,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 32.005130246,
+    "ops_s": 249.95992637773563,
+    "sync_attempts": 8000,
+    "syncs_s": 249.95992637773563,
+    "updates_per_sync": 1.0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 4458,
+          "version": "8100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 12458,
+          "version": "16100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        24
+      ],
+      "origin_ns": 65723888682959,
+      "drained_ns": 65755894558142
+    },
+    "operation": {
+      "p50_ms": 3.801179,
+      "p99_ms": 5.612001,
+      "max_ms": 59.161654,
+      "above_ms": {
+        "10": 15,
+        "20": 2,
+        "50": 1
+      }
+    },
+    "response": {
+      "p50_ms": 4.030923,
+      "p99_ms": 76.52345,
+      "max_ms": 97.259687,
+      "above_ms": {
+        "10": 685,
+        "20": 450,
+        "50": 219
+      }
+    },
+    "queue": {
+      "p50_ms": 0.114896,
+      "p99_ms": 72.532864,
+      "max_ms": 93.274839,
+      "above_ms": {
+        "10": 535,
+        "20": 412,
+        "50": 197
+      }
+    },
+    "p99_ms": 76.52345,
+    "variant": "before",
+    "events_file": "before-r1-update-c1-rate250-events.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 1,
+    "rate": 800,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 10.00357802,
+    "ops_s": 799.7138607811847,
+    "sync_attempts": 2261,
+    "syncs_s": 226.01912990328233,
+    "updates_per_sync": 3.5382574082264484,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 12458,
+          "version": "16100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 14719,
+          "version": "24100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        8,
+        8,
+        8,
+        7
+      ],
+      "origin_ns": 65757736861457,
+      "drained_ns": 65767741517244
+    },
+    "operation": {
+      "p50_ms": 4.511731,
+      "p99_ms": 8.611561,
+      "max_ms": 17.486485,
+      "above_ms": {
+        "10": 24,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 5.911638,
+      "p99_ms": 29.267988,
+      "max_ms": 42.707064,
+      "above_ms": {
+        "10": 438,
+        "20": 220,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 0.916855,
+      "p99_ms": 24.275131,
+      "max_ms": 37.715211,
+      "above_ms": {
+        "10": 257,
+        "20": 150,
+        "50": 0
+      }
+    },
+    "p99_ms": 29.267988,
+    "variant": "before",
+    "events_file": "before-r1-update-c4-rate800-events.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 1,
+    "rep": 1,
+    "rate": 200,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 39.998388094,
+    "ops_s": 200.0080598547932,
+    "sync_attempts": 8000,
+    "syncs_s": 200.0080598547932,
+    "updates_per_sync": 1.0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 14719,
+          "version": "24100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 22719,
+          "version": "32100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        22
+      ],
+      "origin_ns": 65769619640340,
+      "drained_ns": 65809618897876
+    },
+    "operation": {
+      "p50_ms": 3.968565,
+      "p99_ms": 6.195209,
+      "max_ms": 49.996484,
+      "above_ms": {
+        "10": 19,
+        "20": 5,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 4.14264,
+      "p99_ms": 68.999356,
+      "max_ms": 113.919345,
+      "above_ms": {
+        "10": 292,
+        "20": 202,
+        "50": 106
+      }
+    },
+    "queue": {
+      "p50_ms": 0.131803,
+      "p99_ms": 64.012793,
+      "max_ms": 108.944896,
+      "above_ms": {
+        "10": 222,
+        "20": 161,
+        "50": 98
+      }
+    },
+    "p99_ms": 68.999356,
+    "variant": "before",
+    "events_file": "before-r1-update-c1-rate200-events.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 1,
+    "rate": 800,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 7967,
+    "rejected": 33,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 10.087494133,
+    "ops_s": 789.7898025969539,
+    "sync_attempts": 2211,
+    "syncs_s": 219.18228361263525,
+    "updates_per_sync": 3.6033469018543647,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 0,
+          "version": "100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 2211,
+          "version": "8067"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "origin_ns": 65818190483620,
+      "drained_ns": 65828280114704
+    },
+    "operation": {
+      "p50_ms": 4.489626,
+      "p99_ms": 8.888244,
+      "max_ms": 21.819151,
+      "above_ms": {
+        "10": 63,
+        "20": 1,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 6.516666,
+      "p99_ms": 90.523258,
+      "max_ms": 128.1797,
+      "above_ms": {
+        "10": 1616,
+        "20": 1370,
+        "50": 687
+      }
+    },
+    "queue": {
+      "p50_ms": 1.522494,
+      "p99_ms": 85.184228,
+      "max_ms": 123.753937,
+      "above_ms": {
+        "10": 1468,
+        "20": 1318,
+        "50": 683
+      }
+    },
+    "p99_ms": 90.523258,
+    "variant": "before-light",
+    "events_file": "before-light-r1-update-c4-rate800-events.json.gz",
+    "profile_file": "before-light-r1-update-c4-rate800-profile.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 1,
+    "rep": 1,
+    "rate": 250,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 32.034254153,
+    "ops_s": 249.7326755850441,
+    "sync_attempts": 8000,
+    "syncs_s": 249.7326755850441,
+    "updates_per_sync": 1.0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 2211,
+          "version": "8067"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 10211,
+          "version": "16067"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        26
+      ],
+      "origin_ns": 65830380585706,
+      "drained_ns": 65862416147743
+    },
+    "operation": {
+      "p50_ms": 3.891305,
+      "p99_ms": 5.922785,
+      "max_ms": 22.186791,
+      "above_ms": {
+        "10": 6,
+        "20": 1,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 4.332363,
+      "p99_ms": 102.028669,
+      "max_ms": 106.603343,
+      "above_ms": {
+        "10": 2632,
+        "20": 2239,
+        "50": 1802
+      }
+    },
+    "queue": {
+      "p50_ms": 0.342689,
+      "p99_ms": 98.162476,
+      "max_ms": 102.792026,
+      "above_ms": {
+        "10": 2395,
+        "20": 2175,
+        "50": 1725
+      }
+    },
+    "p99_ms": 102.028669,
+    "variant": "before-light",
+    "events_file": "before-light-r1-update-c1-rate250-events.json.gz",
+    "profile_file": "before-light-r1-update-c1-rate250-profile.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 1,
+    "rate": 400,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 20.003888917,
+    "ops_s": 399.92223678073526,
+    "sync_attempts": 4501,
+    "syncs_s": 225.00624846876116,
+    "updates_per_sync": 1.777382803821373,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 0,
+          "version": "100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 4501,
+          "version": "8100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "origin_ns": 65871400096821,
+      "drained_ns": 65891405375372
+    },
+    "operation": {
+      "p50_ms": 5.821335,
+      "p99_ms": 9.864471,
+      "max_ms": 27.120081,
+      "above_ms": {
+        "10": 75,
+        "20": 8,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 5.978728,
+      "p99_ms": 10.320586,
+      "max_ms": 27.252321,
+      "above_ms": {
+        "10": 98,
+        "20": 10,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 0.129299,
+      "p99_ms": 0.410255,
+      "max_ms": 17.263785,
+      "above_ms": {
+        "10": 10,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "p99_ms": 10.320586,
+    "variant": "candidate",
+    "events_file": "candidate-r1-update-c4-rate400-events.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 1,
+    "rep": 1,
+    "rate": 250,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 32.000090291,
+    "ops_s": 249.99929460355284,
+    "sync_attempts": 8000,
+    "syncs_s": 249.99929460355284,
+    "updates_per_sync": 1.0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 4501,
+          "version": "8100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 12501,
+          "version": "16100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        34
+      ],
+      "origin_ns": 65893284413309,
+      "drained_ns": 65925285304809
+    },
+    "operation": {
+      "p50_ms": 3.670719,
+      "p99_ms": 5.844302,
+      "max_ms": 27.412466,
+      "above_ms": {
+        "10": 22,
+        "20": 3,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 3.904446,
+      "p99_ms": 100.293537,
+      "max_ms": 137.386961,
+      "above_ms": {
+        "10": 616,
+        "20": 329,
+        "50": 173
+      }
+    },
+    "queue": {
+      "p50_ms": 0.123629,
+      "p99_ms": 96.301436,
+      "max_ms": 133.3981,
+      "above_ms": {
+        "10": 449,
+        "20": 290,
+        "50": 163
+      }
+    },
+    "p99_ms": 100.293537,
+    "variant": "candidate",
+    "events_file": "candidate-r1-update-c1-rate250-events.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 1,
+    "rate": 800,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 10.004118332,
+    "ops_s": 799.670669069411,
+    "sync_attempts": 2244,
+    "syncs_s": 224.3076226739698,
+    "updates_per_sync": 3.5650623885918002,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 12501,
+          "version": "16100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 14745,
+          "version": "24100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        4,
+        4,
+        5,
+        4
+      ],
+      "origin_ns": 65927198146049,
+      "drained_ns": 65937203590927
+    },
+    "operation": {
+      "p50_ms": 4.552342,
+      "p99_ms": 8.19094,
+      "max_ms": 25.908477,
+      "above_ms": {
+        "10": 17,
+        "20": 4,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 5.979621,
+      "p99_ms": 18.796312,
+      "max_ms": 26.05696,
+      "above_ms": {
+        "10": 412,
+        "20": 56,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 0.984566,
+      "p99_ms": 13.803391,
+      "max_ms": 21.064278,
+      "above_ms": {
+        "10": 187,
+        "20": 2,
+        "50": 0
+      }
+    },
+    "p99_ms": 18.796312,
+    "variant": "candidate",
+    "events_file": "candidate-r1-update-c4-rate800-events.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 1,
+    "rep": 1,
+    "rate": 200,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 39.998949142,
+    "ops_s": 200.00525442804144,
+    "sync_attempts": 8000,
+    "syncs_s": 200.00525442804144,
+    "updates_per_sync": 1.0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 14745,
+          "version": "24100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 22745,
+          "version": "32100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        3
+      ],
+      "origin_ns": 65939165639317,
+      "drained_ns": 65979165430173
+    },
+    "operation": {
+      "p50_ms": 3.647607,
+      "p99_ms": 5.67347,
+      "max_ms": 19.759784,
+      "above_ms": {
+        "10": 7,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 3.78123,
+      "p99_ms": 7.506807,
+      "max_ms": 19.888834,
+      "above_ms": {
+        "10": 48,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 0.12771,
+      "p99_ms": 2.514116,
+      "max_ms": 14.901352,
+      "above_ms": {
+        "10": 10,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "p99_ms": 7.506807,
+    "variant": "candidate",
+    "events_file": "candidate-r1-update-c1-rate200-events.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 1,
+    "rate": 800,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 10.003141575,
+    "ops_s": 799.748752931151,
+    "sync_attempts": 2272,
+    "syncs_s": 227.12864583244686,
+    "updates_per_sync": 3.5211267605633805,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 0,
+          "version": "100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 2272,
+          "version": "8100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        6,
+        5,
+        6,
+        6
+      ],
+      "origin_ns": 65987776539454,
+      "drained_ns": 65997780913488
+    },
+    "operation": {
+      "p50_ms": 4.472106,
+      "p99_ms": 8.168526,
+      "max_ms": 15.616966,
+      "above_ms": {
+        "10": 17,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 5.881789,
+      "p99_ms": 28.536888,
+      "max_ms": 33.262959,
+      "above_ms": {
+        "10": 651,
+        "20": 414,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 0.888385,
+      "p99_ms": 24.197214,
+      "max_ms": 28.675728,
+      "above_ms": {
+        "10": 535,
+        "20": 246,
+        "50": 0
+      }
+    },
+    "p99_ms": 28.536888,
+    "variant": "candidate-light",
+    "events_file": "candidate-light-r1-update-c4-rate800-events.json.gz",
+    "profile_file": "candidate-light-r1-update-c4-rate800-profile.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 1,
+    "rep": 1,
+    "rate": 250,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 31.999907795,
+    "ops_s": 250.00072035363814,
+    "sync_attempts": 8000,
+    "syncs_s": 250.00072035363814,
+    "updates_per_sync": 1.0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 2272,
+          "version": "8100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 10272,
+          "version": "16100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        28
+      ],
+      "origin_ns": 65999654419010,
+      "drained_ns": 66031655624674
+    },
+    "operation": {
+      "p50_ms": 3.655912,
+      "p99_ms": 5.795373,
+      "max_ms": 33.094329,
+      "above_ms": {
+        "10": 16,
+        "20": 1,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 3.937395,
+      "p99_ms": 78.965993,
+      "max_ms": 112.426595,
+      "above_ms": {
+        "10": 1460,
+        "20": 1074,
+        "50": 562
+      }
+    },
+    "queue": {
+      "p50_ms": 0.138837,
+      "p99_ms": 75.120196,
+      "max_ms": 108.633946,
+      "above_ms": {
+        "10": 1263,
+        "20": 972,
+        "50": 469
+      }
+    },
+    "p99_ms": 78.965993,
+    "variant": "candidate-light",
+    "events_file": "candidate-light-r1-update-c1-rate250-events.json.gz",
+    "profile_file": "candidate-light-r1-update-c1-rate250-profile.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 2,
+    "rate": 400,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 20.002968699,
+    "ops_s": 399.94063483186574,
+    "sync_attempts": 4557,
+    "syncs_s": 227.81618411610154,
+    "updates_per_sync": 1.7555409260478385,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 0,
+          "version": "100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 4557,
+          "version": "8100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        1,
+        2,
+        1,
+        1
+      ],
+      "origin_ns": 66040446088660,
+      "drained_ns": 66060450040975
+    },
+    "operation": {
+      "p50_ms": 5.707526,
+      "p99_ms": 9.796851,
+      "max_ms": 20.81162,
+      "above_ms": {
+        "10": 63,
+        "20": 1,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 5.852499,
+      "p99_ms": 10.02984,
+      "max_ms": 20.951592,
+      "above_ms": {
+        "10": 82,
+        "20": 1,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 0.124128,
+      "p99_ms": 0.31035,
+      "max_ms": 10.960551,
+      "above_ms": {
+        "10": 1,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "p99_ms": 10.02984,
+    "variant": "before",
+    "events_file": "before-r2-update-c4-rate400-events.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 2,
+    "rate": 800,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 10.005146414,
+    "ops_s": 799.588498655628,
+    "sync_attempts": 2236,
+    "syncs_s": 223.484985374248,
+    "updates_per_sync": 3.5778175313059033,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 4557,
+          "version": "8100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 6793,
+          "version": "16100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "origin_ns": 66062202491062,
+      "drained_ns": 66072208853832
+    },
+    "operation": {
+      "p50_ms": 4.679444,
+      "p99_ms": 8.163305,
+      "max_ms": 14.371041,
+      "above_ms": {
+        "10": 12,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 6.00919,
+      "p99_ms": 12.857906,
+      "max_ms": 19.762118,
+      "above_ms": {
+        "10": 193,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 1.015594,
+      "p99_ms": 7.863221,
+      "max_ms": 14.769516,
+      "above_ms": {
+        "10": 34,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "p99_ms": 12.857906,
+    "variant": "before",
+    "events_file": "before-r2-update-c4-rate800-events.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 1,
+    "rep": 2,
+    "rate": 250,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 32.092357574,
+    "ops_s": 249.28053296032368,
+    "sync_attempts": 8000,
+    "syncs_s": 249.28053296032368,
+    "updates_per_sync": 1.0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 6793,
+          "version": "16100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 14793,
+          "version": "24100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        35
+      ],
+      "origin_ns": 66073995524262,
+      "drained_ns": 66106088798263
+    },
+    "operation": {
+      "p50_ms": 3.885525,
+      "p99_ms": 5.999283,
+      "max_ms": 14.869059,
+      "above_ms": {
+        "10": 18,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 4.209064,
+      "p99_ms": 136.369902,
+      "max_ms": 140.330095,
+      "above_ms": {
+        "10": 1379,
+        "20": 736,
+        "50": 533
+      }
+    },
+    "queue": {
+      "p50_ms": 0.21775,
+      "p99_ms": 132.376387,
+      "max_ms": 136.339073,
+      "above_ms": {
+        "10": 1078,
+        "20": 661,
+        "50": 531
+      }
+    },
+    "p99_ms": 136.369902,
+    "variant": "before",
+    "events_file": "before-r2-update-c1-rate250-events.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 1,
+    "rep": 2,
+    "rate": 200,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 39.999248247,
+    "ops_s": 200.0037588356429,
+    "sync_attempts": 8000,
+    "syncs_s": 200.0037588356429,
+    "updates_per_sync": 1.0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 14793,
+          "version": "24100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 22793,
+          "version": "32100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        5
+      ],
+      "origin_ns": 66107876231201,
+      "drained_ns": 66147876456851
+    },
+    "operation": {
+      "p50_ms": 3.930899,
+      "p99_ms": 5.988676,
+      "max_ms": 26.300284,
+      "above_ms": {
+        "10": 5,
+        "20": 1,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 4.084379,
+      "p99_ms": 7.074583,
+      "max_ms": 26.424061,
+      "above_ms": {
+        "10": 35,
+        "20": 7,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 0.126629,
+      "p99_ms": 2.088249,
+      "max_ms": 21.436409,
+      "above_ms": {
+        "10": 11,
+        "20": 3,
+        "50": 0
+      }
+    },
+    "p99_ms": 7.074583,
+    "variant": "before",
+    "events_file": "before-r2-update-c1-rate200-events.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 2,
+    "rate": 800,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 7863,
+    "rejected": 137,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 10.00553565,
+    "ops_s": 785.8649726564114,
+    "sync_attempts": 2193,
+    "syncs_s": 219.1786703593425,
+    "updates_per_sync": 3.585499316005472,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 0,
+          "version": "100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 2193,
+          "version": "7963"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "origin_ns": 66156484098650,
+      "drained_ns": 66166491301348
+    },
+    "operation": {
+      "p50_ms": 4.447413,
+      "p99_ms": 8.431801,
+      "max_ms": 96.002332,
+      "above_ms": {
+        "10": 36,
+        "20": 15,
+        "50": 9
+      }
+    },
+    "response": {
+      "p50_ms": 6.161618,
+      "p99_ms": 89.322514,
+      "max_ms": 255.859988,
+      "above_ms": {
+        "10": 1154,
+        "20": 855,
+        "50": 479
+      }
+    },
+    "queue": {
+      "p50_ms": 1.168667,
+      "p99_ms": 84.012178,
+      "max_ms": 251.493064,
+      "above_ms": {
+        "10": 961,
+        "20": 766,
+        "50": 437
+      }
+    },
+    "p99_ms": 89.322514,
+    "variant": "candidate-light",
+    "events_file": "candidate-light-r2-update-c4-rate800-events.json.gz",
+    "profile_file": "candidate-light-r2-update-c4-rate800-profile.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 1,
+    "rep": 2,
+    "rate": 250,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 32.023720731,
+    "ops_s": 249.8148190586655,
+    "sync_attempts": 8000,
+    "syncs_s": 249.8148190586655,
+    "updates_per_sync": 1.0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 2193,
+          "version": "7963"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 10193,
+          "version": "15963"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        32
+      ],
+      "origin_ns": 66168559409416,
+      "drained_ns": 66200584229131
+    },
+    "operation": {
+      "p50_ms": 3.564544,
+      "p99_ms": 5.85388,
+      "max_ms": 27.598916,
+      "above_ms": {
+        "10": 19,
+        "20": 2,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 3.840979,
+      "p99_ms": 86.003683,
+      "max_ms": 131.411167,
+      "above_ms": {
+        "10": 785,
+        "20": 497,
+        "50": 223
+      }
+    },
+    "queue": {
+      "p50_ms": 0.122997,
+      "p99_ms": 82.140517,
+      "max_ms": 127.561217,
+      "above_ms": {
+        "10": 590,
+        "20": 456,
+        "50": 155
+      }
+    },
+    "p99_ms": 86.003683,
+    "variant": "candidate-light",
+    "events_file": "candidate-light-r2-update-c1-rate250-events.json.gz",
+    "profile_file": "candidate-light-r2-update-c1-rate250-profile.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 2,
+    "rate": 400,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 20.003026785,
+    "ops_s": 399.9394734600412,
+    "sync_attempts": 4537,
+    "syncs_s": 226.81567388602585,
+    "updates_per_sync": 1.763279700242451,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 0,
+          "version": "100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 4537,
+          "version": "8100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        1,
+        2,
+        1,
+        2
+      ],
+      "origin_ns": 66209032386532,
+      "drained_ns": 66229036475768
+    },
+    "operation": {
+      "p50_ms": 5.772156,
+      "p99_ms": 9.999599,
+      "max_ms": 21.7208,
+      "above_ms": {
+        "10": 80,
+        "20": 2,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 5.913971,
+      "p99_ms": 10.332152,
+      "max_ms": 21.830643,
+      "above_ms": {
+        "10": 103,
+        "20": 2,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 0.123081,
+      "p99_ms": 0.385489,
+      "max_ms": 11.83657,
+      "above_ms": {
+        "10": 2,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "p99_ms": 10.332152,
+    "variant": "candidate",
+    "events_file": "candidate-r2-update-c4-rate400-events.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 2,
+    "rate": 800,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 10.005604621,
+    "ops_s": 799.5518814734504,
+    "sync_attempts": 2327,
+    "syncs_s": 232.5696535235899,
+    "updates_per_sync": 3.4379028792436612,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 4537,
+          "version": "8100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 6864,
+          "version": "16100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        2,
+        3,
+        2,
+        2
+      ],
+      "origin_ns": 66230805090157,
+      "drained_ns": 66240811820119
+    },
+    "operation": {
+      "p50_ms": 4.493788,
+      "p99_ms": 8.015,
+      "max_ms": 14.679511,
+      "above_ms": {
+        "10": 10,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 5.709412,
+      "p99_ms": 9.592878,
+      "max_ms": 15.512343,
+      "above_ms": {
+        "10": 63,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 0.71413,
+      "p99_ms": 4.598053,
+      "max_ms": 10.518416,
+      "above_ms": {
+        "10": 1,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "p99_ms": 9.592878,
+    "variant": "candidate",
+    "events_file": "candidate-r2-update-c4-rate800-events.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 1,
+    "rep": 2,
+    "rate": 250,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 31.999019033,
+    "ops_s": 250.00766403963033,
+    "sync_attempts": 8000,
+    "syncs_s": 250.00766403963033,
+    "updates_per_sync": 1.0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 6864,
+          "version": "16100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 14864,
+          "version": "24100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        42
+      ],
+      "origin_ns": 66242774263456,
+      "drained_ns": 66274774128057
+    },
+    "operation": {
+      "p50_ms": 3.600653,
+      "p99_ms": 5.897749,
+      "max_ms": 64.543339,
+      "above_ms": {
+        "10": 9,
+        "20": 4,
+        "50": 3
+      }
+    },
+    "response": {
+      "p50_ms": 3.918317,
+      "p99_ms": 113.343431,
+      "max_ms": 171.799077,
+      "above_ms": {
+        "10": 1066,
+        "20": 803,
+        "50": 160
+      }
+    },
+    "queue": {
+      "p50_ms": 0.138086,
+      "p99_ms": 109.348655,
+      "max_ms": 167.80741,
+      "above_ms": {
+        "10": 941,
+        "20": 744,
+        "50": 155
+      }
+    },
+    "p99_ms": 113.343431,
+    "variant": "candidate",
+    "events_file": "candidate-r2-update-c1-rate250-events.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 1,
+    "rep": 2,
+    "rate": 200,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 7926,
+    "rejected": 74,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 39.998055315,
+    "ops_s": 198.15963395169376,
+    "sync_attempts": 7926,
+    "syncs_s": 198.15963395169376,
+    "updates_per_sync": 1.0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 14864,
+          "version": "24100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 22790,
+          "version": "32026"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        64
+      ],
+      "origin_ns": 66276879309842,
+      "drained_ns": 66316878115732
+    },
+    "operation": {
+      "p50_ms": 3.635761,
+      "p99_ms": 6.000703,
+      "max_ms": 77.281774,
+      "above_ms": {
+        "10": 35,
+        "20": 21,
+        "50": 6
+      }
+    },
+    "response": {
+      "p50_ms": 3.806733,
+      "p99_ms": 268.977053,
+      "max_ms": 691.487151,
+      "above_ms": {
+        "10": 309,
+        "20": 234,
+        "50": 182
+      }
+    },
+    "queue": {
+      "p50_ms": 0.12605,
+      "p99_ms": 258.926549,
+      "max_ms": 686.503808,
+      "above_ms": {
+        "10": 264,
+        "20": 217,
+        "50": 177
+      }
+    },
+    "p99_ms": 268.977053,
+    "variant": "candidate",
+    "events_file": "candidate-r2-update-c1-rate200-events.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 2,
+    "rate": 800,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 10.006042663,
+    "ops_s": 799.5168788938032,
+    "sync_attempts": 2304,
+    "syncs_s": 230.26086112141533,
+    "updates_per_sync": 3.4722222222222223,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 0,
+          "version": "100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 2304,
+          "version": "8100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "origin_ns": 66325337278768,
+      "drained_ns": 66335344826127
+    },
+    "operation": {
+      "p50_ms": 4.457117,
+      "p99_ms": 8.028835,
+      "max_ms": 29.391685,
+      "above_ms": {
+        "10": 20,
+        "20": 4,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 5.755062,
+      "p99_ms": 17.852717,
+      "max_ms": 29.500074,
+      "above_ms": {
+        "10": 251,
+        "20": 52,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 0.762772,
+      "p99_ms": 13.338158,
+      "max_ms": 24.825412,
+      "above_ms": {
+        "10": 136,
+        "20": 21,
+        "50": 0
+      }
+    },
+    "p99_ms": 17.852717,
+    "variant": "before-light",
+    "events_file": "before-light-r2-update-c4-rate800-events.json.gz",
+    "profile_file": "before-light-r2-update-c4-rate800-profile.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 1,
+    "rep": 2,
+    "rate": 250,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 7979,
+    "rejected": 21,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 32.000202396,
+    "ops_s": 249.34217294192393,
+    "sync_attempts": 7979,
+    "syncs_s": 249.34217294192393,
+    "updates_per_sync": 1.0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 2304,
+          "version": "8100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 10283,
+          "version": "16079"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        64
+      ],
+      "origin_ns": 66337215772771,
+      "drained_ns": 66369217191844
+    },
+    "operation": {
+      "p50_ms": 3.797705,
+      "p99_ms": 6.096566,
+      "max_ms": 68.100655,
+      "above_ms": {
+        "10": 30,
+        "20": 7,
+        "50": 1
+      }
+    },
+    "response": {
+      "p50_ms": 4.274365,
+      "p99_ms": 237.802085,
+      "max_ms": 343.194543,
+      "above_ms": {
+        "10": 2632,
+        "20": 2140,
+        "50": 1299
+      }
+    },
+    "queue": {
+      "p50_ms": 0.284044,
+      "p99_ms": 233.97133,
+      "max_ms": 339.343988,
+      "above_ms": {
+        "10": 2425,
+        "20": 2040,
+        "50": 1205
+      }
+    },
+    "p99_ms": 237.802085,
+    "variant": "before-light",
+    "events_file": "before-light-r2-update-c1-rate250-events.json.gz",
+    "profile_file": "before-light-r2-update-c1-rate250-profile.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 1,
+    "rep": 3,
+    "rate": 200,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 39.999101279,
+    "ops_s": 200.0044937059647,
+    "sync_attempts": 8000,
+    "syncs_s": 200.0044937059647,
+    "updates_per_sync": 1.0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 0,
+          "version": "100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 8000,
+          "version": "8100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        55
+      ],
+      "origin_ns": 66377972286908,
+      "drained_ns": 66417972214041
+    },
+    "operation": {
+      "p50_ms": 3.587652,
+      "p99_ms": 5.71096,
+      "max_ms": 61.001617,
+      "above_ms": {
+        "10": 16,
+        "20": 7,
+        "50": 2
+      }
+    },
+    "response": {
+      "p50_ms": 3.740199,
+      "p99_ms": 174.986675,
+      "max_ms": 276.265094,
+      "above_ms": {
+        "10": 211,
+        "20": 184,
+        "50": 159
+      }
+    },
+    "queue": {
+      "p50_ms": 0.12214,
+      "p99_ms": 170.003734,
+      "max_ms": 271.276475,
+      "above_ms": {
+        "10": 191,
+        "20": 175,
+        "50": 155
+      }
+    },
+    "p99_ms": 174.986675,
+    "variant": "candidate",
+    "events_file": "candidate-r3-update-c1-rate200-events.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 3,
+    "rate": 400,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 20.005424381,
+    "ops_s": 399.89154179593106,
+    "sync_attempts": 4476,
+    "syncs_s": 223.73931763482344,
+    "updates_per_sync": 1.7873100983020553,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 8000,
+          "version": "8100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 12476,
+          "version": "16100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        10,
+        10,
+        10,
+        10
+      ],
+      "origin_ns": 66419993351153,
+      "drained_ns": 66440000024019
+    },
+    "operation": {
+      "p50_ms": 5.737309,
+      "p99_ms": 11.869327,
+      "max_ms": 87.194389,
+      "above_ms": {
+        "10": 137,
+        "20": 21,
+        "50": 4
+      }
+    },
+    "response": {
+      "p50_ms": 5.942262,
+      "p99_ms": 58.610765,
+      "max_ms": 109.321122,
+      "above_ms": {
+        "10": 275,
+        "20": 170,
+        "50": 102
+      }
+    },
+    "queue": {
+      "p50_ms": 0.124783,
+      "p99_ms": 48.620032,
+      "max_ms": 99.344278,
+      "above_ms": {
+        "10": 170,
+        "20": 147,
+        "50": 74
+      }
+    },
+    "p99_ms": 58.610765,
+    "variant": "candidate",
+    "events_file": "candidate-r3-update-c4-rate400-events.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 3,
+    "rate": 800,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 10.002329411,
+    "ops_s": 799.8136905191354,
+    "sync_attempts": 2287,
+    "syncs_s": 228.64673877715785,
+    "updates_per_sync": 3.4980323567993006,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 12476,
+          "version": "16100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 14763,
+          "version": "24100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        4,
+        4,
+        4,
+        5
+      ],
+      "origin_ns": 66441771588070,
+      "drained_ns": 66451774973540
+    },
+    "operation": {
+      "p50_ms": 4.509937,
+      "p99_ms": 8.062558,
+      "max_ms": 25.432328,
+      "above_ms": {
+        "10": 16,
+        "20": 4,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 5.775604,
+      "p99_ms": 11.081973,
+      "max_ms": 25.535082,
+      "above_ms": {
+        "10": 106,
+        "20": 17,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 0.780765,
+      "p99_ms": 6.091503,
+      "max_ms": 20.542504,
+      "above_ms": {
+        "10": 37,
+        "20": 1,
+        "50": 0
+      }
+    },
+    "p99_ms": 11.081973,
+    "variant": "candidate",
+    "events_file": "candidate-r3-update-c4-rate800-events.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 1,
+    "rep": 3,
+    "rate": 250,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 32.001367355,
+    "ops_s": 249.9893179955029,
+    "sync_attempts": 8000,
+    "syncs_s": 249.9893179955029,
+    "updates_per_sync": 1.0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 14763,
+          "version": "24100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 22763,
+          "version": "32100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        14
+      ],
+      "origin_ns": 66453718273831,
+      "drained_ns": 66485720791098
+    },
+    "operation": {
+      "p50_ms": 3.606797,
+      "p99_ms": 5.802513,
+      "max_ms": 56.140886,
+      "above_ms": {
+        "10": 5,
+        "20": 1,
+        "50": 1
+      }
+    },
+    "response": {
+      "p50_ms": 3.858996,
+      "p99_ms": 29.000763,
+      "max_ms": 57.91237,
+      "above_ms": {
+        "10": 756,
+        "20": 320,
+        "50": 12
+      }
+    },
+    "queue": {
+      "p50_ms": 0.130116,
+      "p99_ms": 25.013685,
+      "max_ms": 53.921367,
+      "above_ms": {
+        "10": 488,
+        "20": 144,
+        "50": 7
+      }
+    },
+    "p99_ms": 29.000763,
+    "variant": "candidate",
+    "events_file": "candidate-r3-update-c1-rate250-events.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 3,
+    "rate": 800,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 7917,
+    "rejected": 83,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 10.007216837,
+    "ops_s": 791.1290550563695,
+    "sync_attempts": 2172,
+    "syncs_s": 217.04336334248256,
+    "updates_per_sync": 3.6450276243093924,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 0,
+          "version": "100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 2172,
+          "version": "8017"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "origin_ns": 66496138585476,
+      "drained_ns": 66506147712052
+    },
+    "operation": {
+      "p50_ms": 4.455218,
+      "p99_ms": 8.282693,
+      "max_ms": 26.459308,
+      "above_ms": {
+        "10": 24,
+        "20": 4,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 6.933118,
+      "p99_ms": 104.926016,
+      "max_ms": 110.53993,
+      "above_ms": {
+        "10": 2446,
+        "20": 2188,
+        "50": 1762
+      }
+    },
+    "queue": {
+      "p50_ms": 1.94014,
+      "p99_ms": 99.371992,
+      "max_ms": 105.6972,
+      "above_ms": {
+        "10": 2282,
+        "20": 2102,
+        "50": 1699
+      }
+    },
+    "p99_ms": 104.926016,
+    "variant": "candidate-light",
+    "events_file": "candidate-light-r3-update-c4-rate800-events.json.gz",
+    "profile_file": "candidate-light-r3-update-c4-rate800-profile.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 1,
+    "rep": 3,
+    "rate": 250,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 7945,
+    "rejected": 55,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 32.15268614,
+    "ops_s": 247.1022161385114,
+    "sync_attempts": 7945,
+    "syncs_s": 247.1022161385114,
+    "updates_per_sync": 1.0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 2172,
+          "version": "8017"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 10117,
+          "version": "15962"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        64
+      ],
+      "origin_ns": 66508262325664,
+      "drained_ns": 66540416549333
+    },
+    "operation": {
+      "p50_ms": 3.682178,
+      "p99_ms": 6.33415,
+      "max_ms": 20.28304,
+      "above_ms": {
+        "10": 27,
+        "20": 2,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 9.875369,
+      "p99_ms": 285.961274,
+      "max_ms": 296.718447,
+      "above_ms": {
+        "10": 3969,
+        "20": 3611,
+        "50": 3107
+      }
+    },
+    "queue": {
+      "p50_ms": 5.847795,
+      "p99_ms": 281.830474,
+      "max_ms": 292.697772,
+      "above_ms": {
+        "10": 3818,
+        "20": 3518,
+        "50": 3094
+      }
+    },
+    "p99_ms": 285.961274,
+    "variant": "candidate-light",
+    "events_file": "candidate-light-r3-update-c1-rate250-events.json.gz",
+    "profile_file": "candidate-light-r3-update-c1-rate250-profile.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 1,
+    "rep": 3,
+    "rate": 200,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 39.998343462,
+    "ops_s": 200.00828303302896,
+    "sync_attempts": 8000,
+    "syncs_s": 200.00828303302896,
+    "updates_per_sync": 1.0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 0,
+          "version": "100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 8000,
+          "version": "8100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        18
+      ],
+      "origin_ns": 66549730456909,
+      "drained_ns": 66589729570720
+    },
+    "operation": {
+      "p50_ms": 3.948876,
+      "p99_ms": 6.378564,
+      "max_ms": 59.24458,
+      "above_ms": {
+        "10": 18,
+        "20": 5,
+        "50": 1
+      }
+    },
+    "response": {
+      "p50_ms": 4.128496,
+      "p99_ms": 44.421824,
+      "max_ms": 91.308072,
+      "above_ms": {
+        "10": 272,
+        "20": 167,
+        "50": 55
+      }
+    },
+    "queue": {
+      "p50_ms": 0.128907,
+      "p99_ms": 39.437863,
+      "max_ms": 86.336206,
+      "above_ms": {
+        "10": 198,
+        "20": 147,
+        "50": 43
+      }
+    },
+    "p99_ms": 44.421824,
+    "variant": "before",
+    "events_file": "before-r3-update-c1-rate200-events.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 3,
+    "rate": 400,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 20.003883666,
+    "ops_s": 399.9223417599333,
+    "sync_attempts": 4453,
+    "syncs_s": 222.6067734821229,
+    "updates_per_sync": 1.7965416573096789,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 8000,
+          "version": "8100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 12453,
+          "version": "16100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "origin_ns": 66591491056166,
+      "drained_ns": 66611496100177
+    },
+    "operation": {
+      "p50_ms": 5.835666,
+      "p99_ms": 10.850411,
+      "max_ms": 29.94415,
+      "above_ms": {
+        "10": 137,
+        "20": 4,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 6.010391,
+      "p99_ms": 12.297852,
+      "max_ms": 38.532225,
+      "above_ms": {
+        "10": 199,
+        "20": 18,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 0.126242,
+      "p99_ms": 2.305242,
+      "max_ms": 28.543755,
+      "above_ms": {
+        "10": 18,
+        "20": 7,
+        "50": 0
+      }
+    },
+    "p99_ms": 12.297852,
+    "variant": "before",
+    "events_file": "before-r3-update-c4-rate400-events.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 3,
+    "rate": 800,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 8000,
+    "rejected": 0,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 10.002485882,
+    "ops_s": 799.8011788645881,
+    "sync_attempts": 2218,
+    "syncs_s": 221.74487684020707,
+    "updates_per_sync": 3.606853020739405,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 12453,
+          "version": "16100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 14671,
+          "version": "24100"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "origin_ns": 66613733731929,
+      "drained_ns": 66623737350340
+    },
+    "operation": {
+      "p50_ms": 4.5689,
+      "p99_ms": 8.39764,
+      "max_ms": 22.781543,
+      "above_ms": {
+        "10": 42,
+        "20": 5,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 6.095626,
+      "p99_ms": 17.434751,
+      "max_ms": 29.807617,
+      "above_ms": {
+        "10": 430,
+        "20": 46,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 1.101732,
+      "p99_ms": 12.44219,
+      "max_ms": 24.813372,
+      "above_ms": {
+        "10": 150,
+        "20": 15,
+        "50": 0
+      }
+    },
+    "p99_ms": 17.434751,
+    "variant": "before",
+    "events_file": "before-r3-update-c4-rate800-events.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 1,
+    "rep": 3,
+    "rate": 250,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 7456,
+    "rejected": 544,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 32.000165138,
+    "ops_s": 232.99879759514258,
+    "sync_attempts": 7456,
+    "syncs_s": 232.99879759514258,
+    "updates_per_sync": 1.0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 14671,
+          "version": "24100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 22127,
+          "version": "31556"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        64
+      ],
+      "origin_ns": 66625553173527,
+      "drained_ns": 66657554132687
+    },
+    "operation": {
+      "p50_ms": 3.929369,
+      "p99_ms": 13.8628,
+      "max_ms": 91.859582,
+      "above_ms": {
+        "10": 114,
+        "20": 51,
+        "50": 11
+      }
+    },
+    "response": {
+      "p50_ms": 37.451882,
+      "p99_ms": 917.486304,
+      "max_ms": 1065.075212,
+      "above_ms": {
+        "10": 4570,
+        "20": 4063,
+        "50": 3568
+      }
+    },
+    "queue": {
+      "p50_ms": 33.458861,
+      "p99_ms": 913.146075,
+      "max_ms": 1060.459695,
+      "above_ms": {
+        "10": 4273,
+        "20": 3960,
+        "50": 3477
+      }
+    },
+    "p99_ms": 917.486304,
+    "variant": "before",
+    "events_file": "before-r3-update-c1-rate250-events.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 4,
+    "rep": 3,
+    "rate": 800,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 7869,
+    "rejected": 131,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 10.007141097,
+    "ops_s": 786.3384680724663,
+    "sync_attempts": 2111,
+    "syncs_s": 210.94935901651752,
+    "updates_per_sync": 3.7276172430127903,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 0,
+          "version": "100"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 2111,
+          "version": "7969"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "origin_ns": 66666933094571,
+      "drained_ns": 66676942176033
+    },
+    "operation": {
+      "p50_ms": 4.454167,
+      "p99_ms": 8.486351,
+      "max_ms": 23.746492,
+      "above_ms": {
+        "10": 33,
+        "20": 1,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 7.989312,
+      "p99_ms": 110.711046,
+      "max_ms": 144.09839,
+      "above_ms": {
+        "10": 3611,
+        "20": 3383,
+        "50": 2370
+      }
+    },
+    "queue": {
+      "p50_ms": 3.001561,
+      "p99_ms": 105.473439,
+      "max_ms": 137.570615,
+      "above_ms": {
+        "10": 3489,
+        "20": 3309,
+        "50": 1986
+      }
+    },
+    "p99_ms": 110.711046,
+    "variant": "before-light",
+    "events_file": "before-light-r3-update-c4-rate800-events.json.gz",
+    "profile_file": "before-light-r3-update-c4-rate800-profile.json.gz"
+  },
+  {
+    "engine": "catdb-service",
+    "workload": "update",
+    "clients": 1,
+    "rep": 3,
+    "rate": 250,
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 7927,
+    "rejected": 73,
+    "errors": [],
+    "retries": 0,
+    "elapsed_s": 31.998952573,
+    "ops_s": 247.7268586187607,
+    "sync_attempts": 7927,
+    "syncs_s": 247.7268586187607,
+    "updates_per_sync": 1.0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "ok": true,
+          "sync_attempts": 2111,
+          "version": "7969"
+        },
+        "after": {
+          "ok": true,
+          "sync_attempts": 10038,
+          "version": "15896"
+        }
+      },
+      "queue_capacity": 64,
+      "queue_high_water": [
+        64
+      ],
+      "origin_ns": 66679171904339,
+      "drained_ns": 66711172090790
+    },
+    "operation": {
+      "p50_ms": 3.823303,
+      "p99_ms": 6.181898,
+      "max_ms": 45.766594,
+      "above_ms": {
+        "10": 10,
+        "20": 2,
+        "50": 0
+      }
+    },
+    "response": {
+      "p50_ms": 29.824973,
+      "p99_ms": 324.247994,
+      "max_ms": 350.015876,
+      "above_ms": {
+        "10": 4608,
+        "20": 4072,
+        "50": 3640
+      }
+    },
+    "queue": {
+      "p50_ms": 26.031283,
+      "p99_ms": 320.257802,
+      "max_ms": 346.294123,
+      "above_ms": {
+        "10": 4359,
+        "20": 4008,
+        "50": 3614
+      }
+    },
+    "p99_ms": 324.247994,
+    "variant": "before-light",
+    "events_file": "before-light-r3-update-c1-rate250-events.json.gz",
+    "profile_file": "before-light-r3-update-c1-rate250-profile.json.gz"
+  }
+]

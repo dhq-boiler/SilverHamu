@@ -1,0 +1,4427 @@
+{
+  "summary": [
+    {
+      "clients": 1,
+      "rate": 200,
+      "variant": "before",
+      "rejected": 0,
+      "ops_s": {
+        "median": 200.0080598547932,
+        "min": 200.0037588356429,
+        "max": 200.00828303302896
+      },
+      "syncs_s": {
+        "median": 200.0080598547932,
+        "min": 200.0037588356429,
+        "max": 200.00828303302896
+      },
+      "updates_per_sync": {
+        "median": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "mean_send_rate": {
+        "median": 200.00014629339367,
+        "min": 200.000019137394,
+        "max": 200.0016833795894
+      },
+      "producer_p99_ms": {
+        "median": 0.170167,
+        "min": 0.147684,
+        "max": 0.174784
+      },
+      "client_queue_p99_ms": {
+        "median": 39.333776,
+        "min": 1.989658,
+        "max": 63.846718
+      },
+      "response": {
+        "p99_ms": {
+          "median": 44.421824,
+          "min": 7.074583,
+          "max": 68.999356
+        },
+        "max_ms": {
+          "median": 91.308072,
+          "min": 26.424061,
+          "max": 113.919345
+        },
+        "above_ms": {
+          "10": 599,
+          "20": 376,
+          "50": 161
+        }
+      },
+      "operation": {
+        "p99_ms": {
+          "median": 6.195209,
+          "min": 5.988676,
+          "max": 6.378564
+        },
+        "max_ms": {
+          "median": 49.996484,
+          "min": 26.300284,
+          "max": 59.24458
+        },
+        "above_ms": {
+          "10": 42,
+          "20": 11,
+          "50": 1
+        }
+      },
+      "queue": {
+        "p99_ms": {
+          "median": 39.437863,
+          "min": 2.088249,
+          "max": 64.012793
+        },
+        "max_ms": {
+          "median": 86.336206,
+          "min": 21.436409,
+          "max": 108.944896
+        },
+        "above_ms": {
+          "10": 431,
+          "20": 311,
+          "50": 141
+        }
+      }
+    },
+    {
+      "clients": 1,
+      "rate": 200,
+      "variant": "candidate",
+      "rejected": 74,
+      "ops_s": {
+        "median": 200.0044937059647,
+        "min": 198.15963395169376,
+        "max": 200.00525442804144
+      },
+      "syncs_s": {
+        "median": 200.0044937059647,
+        "min": 198.15963395169376,
+        "max": 200.00525442804144
+      },
+      "updates_per_sync": {
+        "median": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "mean_send_rate": {
+        "median": 200.0000323790526,
+        "min": 198.15035056324967,
+        "max": 200.00035691525127
+      },
+      "producer_p99_ms": {
+        "median": 0.149889,
+        "min": 0.147619,
+        "max": 0.157877
+      },
+      "client_queue_p99_ms": {
+        "median": 169.897513,
+        "min": 2.427738,
+        "max": 258.830208
+      },
+      "response": {
+        "p99_ms": {
+          "median": 174.986675,
+          "min": 7.506807,
+          "max": 268.977053
+        },
+        "max_ms": {
+          "median": 276.265094,
+          "min": 19.888834,
+          "max": 691.487151
+        },
+        "above_ms": {
+          "10": 568,
+          "20": 418,
+          "50": 341
+        }
+      },
+      "operation": {
+        "p99_ms": {
+          "median": 5.71096,
+          "min": 5.67347,
+          "max": 6.000703
+        },
+        "max_ms": {
+          "median": 61.001617,
+          "min": 19.759784,
+          "max": 77.281774
+        },
+        "above_ms": {
+          "10": 58,
+          "20": 28,
+          "50": 8
+        }
+      },
+      "queue": {
+        "p99_ms": {
+          "median": 170.003734,
+          "min": 2.514116,
+          "max": 258.926549
+        },
+        "max_ms": {
+          "median": 271.276475,
+          "min": 14.901352,
+          "max": 686.503808
+        },
+        "above_ms": {
+          "10": 465,
+          "20": 392,
+          "50": 332
+        }
+      }
+    },
+    {
+      "clients": 1,
+      "rate": 250,
+      "variant": "before",
+      "rejected": 544,
+      "ops_s": {
+        "median": 249.28053296032368,
+        "min": 232.99879759514258,
+        "max": 249.95992637773563
+      },
+      "syncs_s": {
+        "median": 249.28053296032368,
+        "min": 232.99879759514258,
+        "max": 249.95992637773563
+      },
+      "updates_per_sync": {
+        "median": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "mean_send_rate": {
+        "median": 249.284069692776,
+        "min": 232.9983192269161,
+        "max": 249.9569384098539
+      },
+      "producer_p99_ms": {
+        "median": 0.150428,
+        "min": 0.11601,
+        "max": 0.202283
+      },
+      "client_queue_p99_ms": {
+        "median": 132.257855,
+        "min": 72.444512,
+        "max": 913.022774
+      },
+      "response": {
+        "p99_ms": {
+          "median": 136.369902,
+          "min": 76.52345,
+          "max": 917.486304
+        },
+        "max_ms": {
+          "median": 140.330095,
+          "min": 97.259687,
+          "max": 1065.075212
+        },
+        "above_ms": {
+          "10": 6634,
+          "20": 5249,
+          "50": 4320
+        }
+      },
+      "operation": {
+        "p99_ms": {
+          "median": 5.999283,
+          "min": 5.612001,
+          "max": 13.8628
+        },
+        "max_ms": {
+          "median": 59.161654,
+          "min": 14.869059,
+          "max": 91.859582
+        },
+        "above_ms": {
+          "10": 147,
+          "20": 53,
+          "50": 12
+        }
+      },
+      "queue": {
+        "p99_ms": {
+          "median": 132.376387,
+          "min": 72.532864,
+          "max": 913.146075
+        },
+        "max_ms": {
+          "median": 136.339073,
+          "min": 93.274839,
+          "max": 1060.459695
+        },
+        "above_ms": {
+          "10": 5886,
+          "20": 5033,
+          "50": 4205
+        }
+      }
+    },
+    {
+      "clients": 1,
+      "rate": 250,
+      "variant": "candidate",
+      "rejected": 0,
+      "ops_s": {
+        "median": 249.99929460355284,
+        "min": 249.9893179955029,
+        "max": 250.00766403963033
+      },
+      "syncs_s": {
+        "median": 249.99929460355284,
+        "min": 249.9893179955029,
+        "max": 250.00766403963033
+      },
+      "updates_per_sync": {
+        "median": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "mean_send_rate": {
+        "median": 250.00026178299697,
+        "min": 250.00020925289422,
+        "max": 250.00064435564252
+      },
+      "producer_p99_ms": {
+        "median": 0.15483,
+        "min": 0.144195,
+        "max": 0.156428
+      },
+      "client_queue_p99_ms": {
+        "median": 96.226035,
+        "min": 24.896386,
+        "max": 109.26601
+      },
+      "response": {
+        "p99_ms": {
+          "median": 100.293537,
+          "min": 29.000763,
+          "max": 113.343431
+        },
+        "max_ms": {
+          "median": 137.386961,
+          "min": 57.91237,
+          "max": 171.799077
+        },
+        "above_ms": {
+          "10": 2438,
+          "20": 1452,
+          "50": 345
+        }
+      },
+      "operation": {
+        "p99_ms": {
+          "median": 5.844302,
+          "min": 5.802513,
+          "max": 5.897749
+        },
+        "max_ms": {
+          "median": 56.140886,
+          "min": 27.412466,
+          "max": 64.543339
+        },
+        "above_ms": {
+          "10": 36,
+          "20": 8,
+          "50": 4
+        }
+      },
+      "queue": {
+        "p99_ms": {
+          "median": 96.301436,
+          "min": 25.013685,
+          "max": 109.348655
+        },
+        "max_ms": {
+          "median": 133.3981,
+          "min": 53.921367,
+          "max": 167.80741
+        },
+        "above_ms": {
+          "10": 1878,
+          "20": 1178,
+          "50": 325
+        }
+      }
+    },
+    {
+      "clients": 1,
+      "rate": 250,
+      "variant": "before-light",
+      "rejected": 94,
+      "ops_s": {
+        "median": 249.34217294192393,
+        "min": 247.7268586187607,
+        "max": 249.7326755850441
+      },
+      "syncs_s": {
+        "median": 249.34217294192393,
+        "min": 247.7268586187607,
+        "max": 249.7326755850441
+      },
+      "updates_per_sync": {
+        "median": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "mean_send_rate": {
+        "median": 249.34458498329005,
+        "min": 247.71958409090362,
+        "max": 249.73516590964988
+      },
+      "producer_p99_ms": {
+        "median": 0.150203,
+        "min": 0.122858,
+        "max": 0.197284
+      },
+      "client_queue_p99_ms": {
+        "median": 233.901047,
+        "min": 98.069357,
+        "max": 320.125299
+      },
+      "response": {
+        "p99_ms": {
+          "median": 237.802085,
+          "min": 102.028669,
+          "max": 324.247994
+        },
+        "max_ms": {
+          "median": 343.194543,
+          "min": 106.603343,
+          "max": 350.015876
+        },
+        "above_ms": {
+          "10": 9872,
+          "20": 8451,
+          "50": 6741
+        }
+      },
+      "operation": {
+        "p99_ms": {
+          "median": 6.096566,
+          "min": 5.922785,
+          "max": 6.181898
+        },
+        "max_ms": {
+          "median": 45.766594,
+          "min": 22.186791,
+          "max": 68.100655
+        },
+        "above_ms": {
+          "10": 46,
+          "20": 10,
+          "50": 1
+        }
+      },
+      "queue": {
+        "p99_ms": {
+          "median": 233.97133,
+          "min": 98.162476,
+          "max": 320.257802
+        },
+        "max_ms": {
+          "median": 339.343988,
+          "min": 102.792026,
+          "max": 346.294123
+        },
+        "above_ms": {
+          "10": 9179,
+          "20": 8223,
+          "50": 6544
+        }
+      }
+    },
+    {
+      "clients": 1,
+      "rate": 250,
+      "variant": "candidate-light",
+      "rejected": 55,
+      "ops_s": {
+        "median": 249.8148190586655,
+        "min": 247.1022161385114,
+        "max": 250.00072035363814
+      },
+      "syncs_s": {
+        "median": 249.8148190586655,
+        "min": 247.1022161385114,
+        "max": 250.00072035363814
+      },
+      "updates_per_sync": {
+        "median": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "mean_send_rate": {
+        "median": 249.81492530434983,
+        "min": 247.10111271991957,
+        "max": 250.00055442209464
+      },
+      "producer_p99_ms": {
+        "median": 0.169535,
+        "min": 0.156442,
+        "max": 0.193649
+      },
+      "client_queue_p99_ms": {
+        "median": 82.071717,
+        "min": 75.033234,
+        "max": 281.690977
+      },
+      "response": {
+        "p99_ms": {
+          "median": 86.003683,
+          "min": 78.965993,
+          "max": 285.961274
+        },
+        "max_ms": {
+          "median": 131.411167,
+          "min": 112.426595,
+          "max": 296.718447
+        },
+        "above_ms": {
+          "10": 6214,
+          "20": 5182,
+          "50": 3892
+        }
+      },
+      "operation": {
+        "p99_ms": {
+          "median": 5.85388,
+          "min": 5.795373,
+          "max": 6.33415
+        },
+        "max_ms": {
+          "median": 27.598916,
+          "min": 20.28304,
+          "max": 33.094329
+        },
+        "above_ms": {
+          "10": 62,
+          "20": 5,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p99_ms": {
+          "median": 82.140517,
+          "min": 75.120196,
+          "max": 281.830474
+        },
+        "max_ms": {
+          "median": 127.561217,
+          "min": 108.633946,
+          "max": 292.697772
+        },
+        "above_ms": {
+          "10": 5671,
+          "20": 4946,
+          "50": 3718
+        }
+      }
+    },
+    {
+      "clients": 4,
+      "rate": 400,
+      "variant": "before",
+      "rejected": 0,
+      "ops_s": {
+        "median": 399.9285351103577,
+        "min": 399.9223417599333,
+        "max": 399.94063483186574
+      },
+      "syncs_s": {
+        "median": 222.86017619024682,
+        "min": 222.6067734821229,
+        "max": 227.81618411610154
+      },
+      "updates_per_sync": {
+        "median": 1.7945266935845672,
+        "min": 1.7555409260478385,
+        "max": 1.7965416573096789
+      },
+      "mean_send_rate": {
+        "median": 400.0039301498787,
+        "min": 400.00202936396494,
+        "max": 400.0040908331858
+      },
+      "producer_p99_ms": {
+        "median": 0.156705,
+        "min": 0.147378,
+        "max": 0.161396
+      },
+      "client_queue_p99_ms": {
+        "median": 0.224183,
+        "min": 0.186265,
+        "max": 2.208737
+      },
+      "response": {
+        "p99_ms": {
+          "median": 10.227715,
+          "min": 10.02984,
+          "max": 12.297852
+        },
+        "max_ms": {
+          "median": 20.951592,
+          "min": 16.51085,
+          "max": 38.532225
+        },
+        "above_ms": {
+          "10": 377,
+          "20": 19,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p99_ms": {
+          "median": 10.095829,
+          "min": 9.796851,
+          "max": 10.850411
+        },
+        "max_ms": {
+          "median": 20.81162,
+          "min": 16.440587,
+          "max": 29.94415
+        },
+        "above_ms": {
+          "10": 284,
+          "20": 5,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p99_ms": {
+          "median": 0.350872,
+          "min": 0.31035,
+          "max": 2.305242
+        },
+        "max_ms": {
+          "median": 10.960551,
+          "min": 6.518863,
+          "max": 28.543755
+        },
+        "above_ms": {
+          "10": 19,
+          "20": 7,
+          "50": 0
+        }
+      }
+    },
+    {
+      "clients": 4,
+      "rate": 400,
+      "variant": "candidate",
+      "rejected": 0,
+      "ops_s": {
+        "median": 399.92223678073526,
+        "min": 399.89154179593106,
+        "max": 399.9394734600412
+      },
+      "syncs_s": {
+        "median": 225.00624846876116,
+        "min": 223.73931763482344,
+        "max": 226.81567388602585
+      },
+      "updates_per_sync": {
+        "median": 1.777382803821373,
+        "min": 1.763279700242451,
+        "max": 1.7873100983020553
+      },
+      "mean_send_rate": {
+        "median": 400.0025712779362,
+        "min": 400.00163019041673,
+        "max": 400.009131989951
+      },
+      "producer_p99_ms": {
+        "median": 0.164226,
+        "min": 0.160613,
+        "max": 0.168889
+      },
+      "client_queue_p99_ms": {
+        "median": 0.286482,
+        "min": 0.252957,
+        "max": 48.530073
+      },
+      "response": {
+        "p99_ms": {
+          "median": 10.332152,
+          "min": 10.320586,
+          "max": 58.610765
+        },
+        "max_ms": {
+          "median": 27.252321,
+          "min": 21.830643,
+          "max": 109.321122
+        },
+        "above_ms": {
+          "10": 476,
+          "20": 182,
+          "50": 102
+        }
+      },
+      "operation": {
+        "p99_ms": {
+          "median": 9.999599,
+          "min": 9.864471,
+          "max": 11.869327
+        },
+        "max_ms": {
+          "median": 27.120081,
+          "min": 21.7208,
+          "max": 87.194389
+        },
+        "above_ms": {
+          "10": 292,
+          "20": 31,
+          "50": 4
+        }
+      },
+      "queue": {
+        "p99_ms": {
+          "median": 0.410255,
+          "min": 0.385489,
+          "max": 48.620032
+        },
+        "max_ms": {
+          "median": 17.263785,
+          "min": 11.83657,
+          "max": 99.344278
+        },
+        "above_ms": {
+          "10": 182,
+          "20": 147,
+          "50": 74
+        }
+      }
+    },
+    {
+      "clients": 4,
+      "rate": 800,
+      "variant": "before",
+      "rejected": 0,
+      "ops_s": {
+        "median": 799.7138607811847,
+        "min": 799.588498655628,
+        "max": 799.8011788645881
+      },
+      "syncs_s": {
+        "median": 223.484985374248,
+        "min": 221.74487684020707,
+        "max": 226.01912990328233
+      },
+      "updates_per_sync": {
+        "median": 3.5778175313059033,
+        "min": 3.5382574082264484,
+        "max": 3.606853020739405
+      },
+      "mean_send_rate": {
+        "median": 799.9602141252615,
+        "min": 799.8421235839058,
+        "max": 800.0080279640449
+      },
+      "producer_p99_ms": {
+        "median": 0.290013,
+        "min": 0.282605,
+        "max": 0.346329
+      },
+      "client_queue_p99_ms": {
+        "median": 12.306536,
+        "min": 7.764946,
+        "max": 24.211877
+      },
+      "response": {
+        "p99_ms": {
+          "median": 17.434751,
+          "min": 12.857906,
+          "max": 29.267988
+        },
+        "max_ms": {
+          "median": 29.807617,
+          "min": 19.762118,
+          "max": 42.707064
+        },
+        "above_ms": {
+          "10": 1061,
+          "20": 266,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p99_ms": {
+          "median": 8.39764,
+          "min": 8.163305,
+          "max": 8.611561
+        },
+        "max_ms": {
+          "median": 17.486485,
+          "min": 14.371041,
+          "max": 22.781543
+        },
+        "above_ms": {
+          "10": 78,
+          "20": 5,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p99_ms": {
+          "median": 12.44219,
+          "min": 7.863221,
+          "max": 24.275131
+        },
+        "max_ms": {
+          "median": 24.813372,
+          "min": 14.769516,
+          "max": 37.715211
+        },
+        "above_ms": {
+          "10": 441,
+          "20": 165,
+          "50": 0
+        }
+      }
+    },
+    {
+      "clients": 4,
+      "rate": 800,
+      "variant": "candidate",
+      "rejected": 0,
+      "ops_s": {
+        "median": 799.670669069411,
+        "min": 799.5518814734504,
+        "max": 799.8136905191354
+      },
+      "syncs_s": {
+        "median": 228.64673877715785,
+        "min": 224.3076226739698,
+        "max": 232.5696535235899
+      },
+      "updates_per_sync": {
+        "median": 3.4980323567993006,
+        "min": 3.4379028792436612,
+        "max": 3.5650623885918002
+      },
+      "mean_send_rate": {
+        "median": 800.010524654023,
+        "min": 799.9691805347635,
+        "max": 800.0147841211888
+      },
+      "producer_p99_ms": {
+        "median": 0.250976,
+        "min": 0.250216,
+        "max": 0.347386
+      },
+      "client_queue_p99_ms": {
+        "median": 5.994323,
+        "min": 4.514465,
+        "max": 13.665821
+      },
+      "response": {
+        "p99_ms": {
+          "median": 11.081973,
+          "min": 9.592878,
+          "max": 18.796312
+        },
+        "max_ms": {
+          "median": 25.535082,
+          "min": 15.512343,
+          "max": 26.05696
+        },
+        "above_ms": {
+          "10": 581,
+          "20": 73,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p99_ms": {
+          "median": 8.062558,
+          "min": 8.015,
+          "max": 8.19094
+        },
+        "max_ms": {
+          "median": 25.432328,
+          "min": 14.679511,
+          "max": 25.908477
+        },
+        "above_ms": {
+          "10": 43,
+          "20": 8,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p99_ms": {
+          "median": 6.091503,
+          "min": 4.598053,
+          "max": 13.803391
+        },
+        "max_ms": {
+          "median": 20.542504,
+          "min": 10.518416,
+          "max": 21.064278
+        },
+        "above_ms": {
+          "10": 225,
+          "20": 3,
+          "50": 0
+        }
+      }
+    },
+    {
+      "clients": 4,
+      "rate": 800,
+      "variant": "before-light",
+      "rejected": 164,
+      "ops_s": {
+        "median": 789.7898025969539,
+        "min": 786.3384680724663,
+        "max": 799.5168788938032
+      },
+      "syncs_s": {
+        "median": 219.18228361263525,
+        "min": 210.94935901651752,
+        "max": 230.26086112141533
+      },
+      "updates_per_sync": {
+        "median": 3.6033469018543647,
+        "min": 3.4722222222222223,
+        "max": 3.7276172430127903
+      },
+      "mean_send_rate": {
+        "median": 790.0888004507474,
+        "min": 786.5784900582577,
+        "max": 799.8158235436143
+      },
+      "producer_p99_ms": {
+        "median": 0.339747,
+        "min": 0.229641,
+        "max": 0.502609
+      },
+      "client_queue_p99_ms": {
+        "median": 85.111858,
+        "min": 13.218833,
+        "max": 105.384816
+      },
+      "response": {
+        "p99_ms": {
+          "median": 90.523258,
+          "min": 17.852717,
+          "max": 110.711046
+        },
+        "max_ms": {
+          "median": 128.1797,
+          "min": 29.500074,
+          "max": 144.09839
+        },
+        "above_ms": {
+          "10": 5478,
+          "20": 4805,
+          "50": 3057
+        }
+      },
+      "operation": {
+        "p99_ms": {
+          "median": 8.486351,
+          "min": 8.028835,
+          "max": 8.888244
+        },
+        "max_ms": {
+          "median": 23.746492,
+          "min": 21.819151,
+          "max": 29.391685
+        },
+        "above_ms": {
+          "10": 116,
+          "20": 6,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p99_ms": {
+          "median": 85.184228,
+          "min": 13.338158,
+          "max": 105.473439
+        },
+        "max_ms": {
+          "median": 123.753937,
+          "min": 24.825412,
+          "max": 137.570615
+        },
+        "above_ms": {
+          "10": 5093,
+          "20": 4648,
+          "50": 2669
+        }
+      }
+    },
+    {
+      "clients": 4,
+      "rate": 800,
+      "variant": "candidate-light",
+      "rejected": 220,
+      "ops_s": {
+        "median": 791.1290550563695,
+        "min": 785.8649726564114,
+        "max": 799.748752931151
+      },
+      "syncs_s": {
+        "median": 219.1786703593425,
+        "min": 217.04336334248256,
+        "max": 227.12864583244686
+      },
+      "updates_per_sync": {
+        "median": 3.585499316005472,
+        "min": 3.5211267605633805,
+        "max": 3.6450276243093924
+      },
+      "mean_send_rate": {
+        "median": 791.455736693284,
+        "min": 786.2939181693912,
+        "max": 799.9783225976544
+      },
+      "producer_p99_ms": {
+        "median": 0.42839,
+        "min": 0.308353,
+        "max": 0.452103
+      },
+      "client_queue_p99_ms": {
+        "median": 83.780732,
+        "min": 24.091038,
+        "max": 99.253566
+      },
+      "response": {
+        "p99_ms": {
+          "median": 89.322514,
+          "min": 28.536888,
+          "max": 104.926016
+        },
+        "max_ms": {
+          "median": 110.53993,
+          "min": 33.262959,
+          "max": 255.859988
+        },
+        "above_ms": {
+          "10": 4251,
+          "20": 3457,
+          "50": 2241
+        }
+      },
+      "operation": {
+        "p99_ms": {
+          "median": 8.282693,
+          "min": 8.168526,
+          "max": 8.431801
+        },
+        "max_ms": {
+          "median": 26.459308,
+          "min": 15.616966,
+          "max": 96.002332
+        },
+        "above_ms": {
+          "10": 77,
+          "20": 19,
+          "50": 9
+        }
+      },
+      "queue": {
+        "p99_ms": {
+          "median": 84.012178,
+          "min": 24.197214,
+          "max": 99.371992
+        },
+        "max_ms": {
+          "median": 105.6972,
+          "min": 28.675728,
+          "max": 251.493064
+        },
+        "above_ms": {
+          "10": 3778,
+          "20": 3114,
+          "50": 2136
+        }
+      }
+    }
+  ],
+  "trials": [
+    {
+      "variant": "before",
+      "clients": 4,
+      "rate": 400,
+      "rep": 1,
+      "ops_s": 399.9285351103577,
+      "syncs_s": 222.86017619024682,
+      "sync_attempts": 4458,
+      "updates_per_sync": 1.7945266935845672,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 6.045239,
+        "p99_ms": 10.227715,
+        "max_ms": 16.51085,
+        "above_ms": {
+          "10": 96,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p50_ms": 5.901668,
+        "p99_ms": 10.095829,
+        "max_ms": 16.440587,
+        "above_ms": {
+          "10": 84,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.127388,
+        "p99_ms": 0.350872,
+        "max_ms": 6.518863,
+        "above_ms": {
+          "10": 0,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "mean_send_rate": 400.00202936396494,
+      "producer_p99_ms": 0.156705,
+      "client_queue_p99_ms": 0.224183,
+      "response_maximum_event": {
+        "id": 1791,
+        "worker": 3,
+        "sequence": 447,
+        "planned_ns": 65706549122025,
+        "admitted_ns": 65706549149555,
+        "status": "completed",
+        "sent_ns": 65706549192288,
+        "key_index": 20163,
+        "stamp": 1040004024448,
+        "finished_ns": 65706565632875,
+        "producer_ms": 0.02753,
+        "client_queue_ms": 0.042733,
+        "operation_ms": 16.440587
+      },
+      "sends_per_100ms": {
+        "min": 40,
+        "max": 40,
+        "median": 40
+      },
+      "sends_per_1000ms": {
+        "min": 400,
+        "max": 400,
+        "median": 400
+      }
+    },
+    {
+      "variant": "before",
+      "clients": 1,
+      "rate": 250,
+      "rep": 1,
+      "ops_s": 249.95992637773563,
+      "syncs_s": 249.95992637773563,
+      "sync_attempts": 8000,
+      "updates_per_sync": 1.0,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 4.030923,
+        "p99_ms": 76.52345,
+        "max_ms": 97.259687,
+        "above_ms": {
+          "10": 685,
+          "20": 450,
+          "50": 219
+        }
+      },
+      "operation": {
+        "p50_ms": 3.801179,
+        "p99_ms": 5.612001,
+        "max_ms": 59.161654,
+        "above_ms": {
+          "10": 15,
+          "20": 2,
+          "50": 1
+        }
+      },
+      "queue": {
+        "p50_ms": 0.114896,
+        "p99_ms": 72.532864,
+        "max_ms": 93.274839,
+        "above_ms": {
+          "10": 535,
+          "20": 412,
+          "50": 197
+        }
+      },
+      "mean_send_rate": 249.9569384098539,
+      "producer_p99_ms": 0.11601,
+      "client_queue_p99_ms": 72.444512,
+      "response_maximum_event": {
+        "id": 1807,
+        "worker": 0,
+        "sequence": 1807,
+        "planned_ns": 65731116682959,
+        "admitted_ns": 65731116757274,
+        "status": "completed",
+        "sent_ns": 65731209400286,
+        "key_index": 1979,
+        "stamp": 1025001001808,
+        "finished_ns": 65731213942646,
+        "producer_ms": 0.074315,
+        "client_queue_ms": 92.643012,
+        "operation_ms": 4.54236
+      },
+      "sends_per_100ms": {
+        "min": 7,
+        "max": 29,
+        "median": 25
+      },
+      "sends_per_1000ms": {
+        "min": 237,
+        "max": 263,
+        "median": 250
+      }
+    },
+    {
+      "variant": "before",
+      "clients": 4,
+      "rate": 800,
+      "rep": 1,
+      "ops_s": 799.7138607811847,
+      "syncs_s": 226.01912990328233,
+      "sync_attempts": 2261,
+      "updates_per_sync": 3.5382574082264484,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 5.911638,
+        "p99_ms": 29.267988,
+        "max_ms": 42.707064,
+        "above_ms": {
+          "10": 438,
+          "20": 220,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p50_ms": 4.511731,
+        "p99_ms": 8.611561,
+        "max_ms": 17.486485,
+        "above_ms": {
+          "10": 24,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.916855,
+        "p99_ms": 24.275131,
+        "max_ms": 37.715211,
+        "above_ms": {
+          "10": 257,
+          "20": 150,
+          "50": 0
+        }
+      },
+      "mean_send_rate": 799.9602141252615,
+      "producer_p99_ms": 0.290013,
+      "client_queue_p99_ms": 24.211877,
+      "response_maximum_event": {
+        "id": 7412,
+        "worker": 0,
+        "sequence": 1853,
+        "planned_ns": 65767001861457,
+        "admitted_ns": 65767001938254,
+        "status": "completed",
+        "sent_ns": 65767039475459,
+        "key_index": 65968,
+        "stamp": 1080004001854,
+        "finished_ns": 65767044568521,
+        "producer_ms": 0.076797,
+        "client_queue_ms": 37.537205,
+        "operation_ms": 5.093062
+      },
+      "sends_per_100ms": {
+        "min": 66,
+        "max": 92,
+        "median": 80
+      },
+      "sends_per_1000ms": {
+        "min": 797,
+        "max": 803,
+        "median": 800
+      }
+    },
+    {
+      "variant": "before",
+      "clients": 1,
+      "rate": 200,
+      "rep": 1,
+      "ops_s": 200.0080598547932,
+      "syncs_s": 200.0080598547932,
+      "sync_attempts": 8000,
+      "updates_per_sync": 1.0,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 4.14264,
+        "p99_ms": 68.999356,
+        "max_ms": 113.919345,
+        "above_ms": {
+          "10": 292,
+          "20": 202,
+          "50": 106
+        }
+      },
+      "operation": {
+        "p50_ms": 3.968565,
+        "p99_ms": 6.195209,
+        "max_ms": 49.996484,
+        "above_ms": {
+          "10": 19,
+          "20": 5,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.131803,
+        "p99_ms": 64.012793,
+        "max_ms": 108.944896,
+        "above_ms": {
+          "10": 222,
+          "20": 161,
+          "50": 98
+        }
+      },
+      "mean_send_rate": 200.00014629339367,
+      "producer_p99_ms": 0.174784,
+      "client_queue_p99_ms": 63.846718,
+      "response_maximum_event": {
+        "id": 5780,
+        "worker": 0,
+        "sequence": 5780,
+        "planned_ns": 65798519640340,
+        "admitted_ns": 65798519920995,
+        "status": "completed",
+        "sent_ns": 65798627087486,
+        "key_index": 11738,
+        "stamp": 1020001005781,
+        "finished_ns": 65798633559685,
+        "producer_ms": 0.280655,
+        "client_queue_ms": 107.166491,
+        "operation_ms": 6.472199
+      },
+      "sends_per_100ms": {
+        "min": 4,
+        "max": 26,
+        "median": 20
+      },
+      "sends_per_1000ms": {
+        "min": 179,
+        "max": 221,
+        "median": 200
+      }
+    },
+    {
+      "variant": "before-light",
+      "clients": 4,
+      "rate": 800,
+      "rep": 1,
+      "ops_s": 789.7898025969539,
+      "syncs_s": 219.18228361263525,
+      "sync_attempts": 2211,
+      "updates_per_sync": 3.6033469018543647,
+      "rejected": 33,
+      "completed": 7967,
+      "response": {
+        "p50_ms": 6.516666,
+        "p99_ms": 90.523258,
+        "max_ms": 128.1797,
+        "above_ms": {
+          "10": 1616,
+          "20": 1370,
+          "50": 687
+        }
+      },
+      "operation": {
+        "p50_ms": 4.489626,
+        "p99_ms": 8.888244,
+        "max_ms": 21.819151,
+        "above_ms": {
+          "10": 63,
+          "20": 1,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 1.522494,
+        "p99_ms": 85.184228,
+        "max_ms": 123.753937,
+        "above_ms": {
+          "10": 1468,
+          "20": 1318,
+          "50": 683
+        }
+      },
+      "mean_send_rate": 790.0888004507474,
+      "producer_p99_ms": 0.339747,
+      "client_queue_p99_ms": 85.111858,
+      "response_maximum_event": {
+        "id": 7306,
+        "worker": 2,
+        "sequence": 1826,
+        "planned_ns": 65827322983620,
+        "admitted_ns": 65827323031459,
+        "status": "completed",
+        "sent_ns": 65827437933476,
+        "key_index": 38990,
+        "stamp": 1080004017827,
+        "finished_ns": 65827451163320,
+        "producer_ms": 0.047839,
+        "client_queue_ms": 114.902017,
+        "operation_ms": 13.229844
+      },
+      "sends_per_100ms": {
+        "min": 28,
+        "max": 88,
+        "median": 80
+      },
+      "sends_per_1000ms": {
+        "min": 797,
+        "max": 802,
+        "median": 799
+      },
+      "probe_count": 1647,
+      "probe_total_ms": 935.240716,
+      "maximum_record": {
+        "id": 7306,
+        "worker": 2,
+        "sequence": 1826,
+        "operation_ns": 13229844,
+        "response_ns": 128179700,
+        "request_ns": 13220920,
+        "request_index": 1877,
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            1537,
+            6565
+          ],
+          "detail": [
+            10353515825,
+            10353300229,
+            10353712130,
+            10353766890,
+            10366078223,
+            10366132935,
+            10366169035,
+            10353515410
+          ],
+          "dispatch_ns": 12662398,
+          "finished_ns": 10366172686,
+          "request_index": 1877,
+          "sync_attempts": 2047,
+          "trace": [
+            10353515957,
+            10353711225,
+            10353711385,
+            10353711574,
+            10353767022,
+            10353803113,
+            10366076364,
+            10366104305
+          ]
+        },
+        "probe_ns": 564652,
+        "phases": {
+          "dispatch preparation": 5122,
+          "queue submission": 547,
+          "leader queue": 0,
+          "batch collection": 195268,
+          "selection overhead": 160,
+          "writer lock": 189,
+          "state lock": 556,
+          "validation / encoding / bookkeeping": 54760,
+          "log reservation": 132,
+          "log write": 36091,
+          "log sync": 12273251,
+          "publication lock": 1859,
+          "publication": 26082,
+          "cleanup / replies ahead": 28630,
+          "reply wake / leader exit": 36100,
+          "dispatch finish": 3651,
+          "transport / client residual": 558522,
+          "outside protocol request": 8924,
+          "producer scheduling delay": 47839,
+          "client queue": 114902017
+        },
+        "largest_phase": "client queue"
+      },
+      "tail_largest_phase": {
+        "client queue": 1585,
+        "log sync": 31
+      }
+    },
+    {
+      "variant": "before-light",
+      "clients": 1,
+      "rate": 250,
+      "rep": 1,
+      "ops_s": 249.7326755850441,
+      "syncs_s": 249.7326755850441,
+      "sync_attempts": 8000,
+      "updates_per_sync": 1.0,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 4.332363,
+        "p99_ms": 102.028669,
+        "max_ms": 106.603343,
+        "above_ms": {
+          "10": 2632,
+          "20": 2239,
+          "50": 1802
+        }
+      },
+      "operation": {
+        "p50_ms": 3.891305,
+        "p99_ms": 5.922785,
+        "max_ms": 22.186791,
+        "above_ms": {
+          "10": 6,
+          "20": 1,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.342689,
+        "p99_ms": 98.162476,
+        "max_ms": 102.792026,
+        "above_ms": {
+          "10": 2395,
+          "20": 2175,
+          "50": 1725
+        }
+      },
+      "mean_send_rate": 249.73516590964988,
+      "producer_p99_ms": 0.122858,
+      "client_queue_p99_ms": 98.069357,
+      "response_maximum_event": {
+        "id": 423,
+        "worker": 0,
+        "sequence": 423,
+        "planned_ns": 65832072585706,
+        "admitted_ns": 65832072668532,
+        "status": "completed",
+        "sent_ns": 65832174959257,
+        "key_index": 32783,
+        "stamp": 1025001000424,
+        "finished_ns": 65832179189049,
+        "producer_ms": 0.082826,
+        "client_queue_ms": 102.290725,
+        "operation_ms": 4.229792
+      },
+      "sends_per_100ms": {
+        "min": 16,
+        "max": 28,
+        "median": 25
+      },
+      "sends_per_1000ms": {
+        "min": 231,
+        "max": 269,
+        "median": 250
+      },
+      "probe_count": 2636,
+      "probe_total_ms": 422.839869,
+      "maximum_record": {
+        "id": 423,
+        "worker": 0,
+        "sequence": 423,
+        "operation_ns": 4229792,
+        "response_ns": 106603343,
+        "request_ns": 4215595,
+        "request_index": 475,
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            160,
+            2990
+          ],
+          "detail": [
+            15090495289,
+            15090496025,
+            15090755470,
+            15090763809,
+            15094505773,
+            15094516432,
+            15094519196,
+            15090494789
+          ],
+          "dispatch_ns": 4031492,
+          "finished_ns": 15094520800,
+          "request_index": 475,
+          "sync_attempts": 2635,
+          "trace": [
+            15090495345,
+            15090754999,
+            15090755140,
+            15090755197,
+            15090763857,
+            15090778619,
+            15094505141,
+            15094512687
+          ]
+        },
+        "probe_ns": 169580,
+        "phases": {
+          "dispatch preparation": 5481,
+          "queue submission": 556,
+          "leader queue": 680,
+          "batch collection": 258974,
+          "selection overhead": 141,
+          "writer lock": 57,
+          "state lock": 273,
+          "validation / encoding / bookkeeping": 8339,
+          "log reservation": 48,
+          "log write": 14762,
+          "log sync": 3726522,
+          "publication lock": 632,
+          "publication": 6914,
+          "cleanup / replies ahead": 3745,
+          "reply wake / leader exit": 2764,
+          "dispatch finish": 1604,
+          "transport / client residual": 184103,
+          "outside protocol request": 14197,
+          "producer scheduling delay": 82826,
+          "client queue": 102290725
+        },
+        "largest_phase": "client queue"
+      },
+      "tail_largest_phase": {
+        "client queue": 2626,
+        "log sync": 6
+      }
+    },
+    {
+      "variant": "candidate",
+      "clients": 4,
+      "rate": 400,
+      "rep": 1,
+      "ops_s": 399.92223678073526,
+      "syncs_s": 225.00624846876116,
+      "sync_attempts": 4501,
+      "updates_per_sync": 1.777382803821373,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 5.978728,
+        "p99_ms": 10.320586,
+        "max_ms": 27.252321,
+        "above_ms": {
+          "10": 98,
+          "20": 10,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p50_ms": 5.821335,
+        "p99_ms": 9.864471,
+        "max_ms": 27.120081,
+        "above_ms": {
+          "10": 75,
+          "20": 8,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.129299,
+        "p99_ms": 0.410255,
+        "max_ms": 17.263785,
+        "above_ms": {
+          "10": 10,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "mean_send_rate": 400.0025712779362,
+      "producer_p99_ms": 0.168889,
+      "client_queue_p99_ms": 0.286482,
+      "response_maximum_event": {
+        "id": 6847,
+        "worker": 3,
+        "sequence": 1711,
+        "planned_ns": 65888517596821,
+        "admitted_ns": 65888517684995,
+        "status": "completed",
+        "sent_ns": 65888517729061,
+        "key_index": 15475,
+        "stamp": 1040004025712,
+        "finished_ns": 65888544849142,
+        "producer_ms": 0.088174,
+        "client_queue_ms": 0.044066,
+        "operation_ms": 27.120081
+      },
+      "sends_per_100ms": {
+        "min": 40,
+        "max": 40,
+        "median": 40
+      },
+      "sends_per_1000ms": {
+        "min": 400,
+        "max": 400,
+        "median": 400
+      }
+    },
+    {
+      "variant": "candidate",
+      "clients": 1,
+      "rate": 250,
+      "rep": 1,
+      "ops_s": 249.99929460355284,
+      "syncs_s": 249.99929460355284,
+      "sync_attempts": 8000,
+      "updates_per_sync": 1.0,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 3.904446,
+        "p99_ms": 100.293537,
+        "max_ms": 137.386961,
+        "above_ms": {
+          "10": 616,
+          "20": 329,
+          "50": 173
+        }
+      },
+      "operation": {
+        "p50_ms": 3.670719,
+        "p99_ms": 5.844302,
+        "max_ms": 27.412466,
+        "above_ms": {
+          "10": 22,
+          "20": 3,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.123629,
+        "p99_ms": 96.301436,
+        "max_ms": 133.3981,
+        "above_ms": {
+          "10": 449,
+          "20": 290,
+          "50": 163
+        }
+      },
+      "mean_send_rate": 250.00064435564252,
+      "producer_p99_ms": 0.144195,
+      "client_queue_p99_ms": 96.226035,
+      "response_maximum_event": {
+        "id": 4889,
+        "worker": 0,
+        "sequence": 4889,
+        "planned_ns": 65912840413309,
+        "admitted_ns": 65912840515594,
+        "status": "completed",
+        "sent_ns": 65912966188868,
+        "key_index": 99823,
+        "stamp": 1025001004890,
+        "finished_ns": 65912977800270,
+        "producer_ms": 0.102285,
+        "client_queue_ms": 125.673274,
+        "operation_ms": 11.611402
+      },
+      "sends_per_100ms": {
+        "min": 8,
+        "max": 30,
+        "median": 25
+      },
+      "sends_per_1000ms": {
+        "min": 227,
+        "max": 273,
+        "median": 250
+      }
+    },
+    {
+      "variant": "candidate",
+      "clients": 4,
+      "rate": 800,
+      "rep": 1,
+      "ops_s": 799.670669069411,
+      "syncs_s": 224.3076226739698,
+      "sync_attempts": 2244,
+      "updates_per_sync": 3.5650623885918002,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 5.979621,
+        "p99_ms": 18.796312,
+        "max_ms": 26.05696,
+        "above_ms": {
+          "10": 412,
+          "20": 56,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p50_ms": 4.552342,
+        "p99_ms": 8.19094,
+        "max_ms": 25.908477,
+        "above_ms": {
+          "10": 17,
+          "20": 4,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.984566,
+        "p99_ms": 13.803391,
+        "max_ms": 21.064278,
+        "above_ms": {
+          "10": 187,
+          "20": 2,
+          "50": 0
+        }
+      },
+      "mean_send_rate": 799.9691805347635,
+      "producer_p99_ms": 0.347386,
+      "client_queue_p99_ms": 13.665821,
+      "response_maximum_event": {
+        "id": 5310,
+        "worker": 2,
+        "sequence": 1327,
+        "planned_ns": 65933835646049,
+        "admitted_ns": 65933835726635,
+        "status": "completed",
+        "sent_ns": 65933835794532,
+        "key_index": 40818,
+        "stamp": 1080004017328,
+        "finished_ns": 65933861703009,
+        "producer_ms": 0.080586,
+        "client_queue_ms": 0.067897,
+        "operation_ms": 25.908477
+      },
+      "sends_per_100ms": {
+        "min": 71,
+        "max": 90,
+        "median": 80
+      },
+      "sends_per_1000ms": {
+        "min": 799,
+        "max": 801,
+        "median": 800
+      }
+    },
+    {
+      "variant": "candidate",
+      "clients": 1,
+      "rate": 200,
+      "rep": 1,
+      "ops_s": 200.00525442804144,
+      "syncs_s": 200.00525442804144,
+      "sync_attempts": 8000,
+      "updates_per_sync": 1.0,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 3.78123,
+        "p99_ms": 7.506807,
+        "max_ms": 19.888834,
+        "above_ms": {
+          "10": 48,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p50_ms": 3.647607,
+        "p99_ms": 5.67347,
+        "max_ms": 19.759784,
+        "above_ms": {
+          "10": 7,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.12771,
+        "p99_ms": 2.514116,
+        "max_ms": 14.901352,
+        "above_ms": {
+          "10": 10,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "mean_send_rate": 200.00035691525127,
+      "producer_p99_ms": 0.149889,
+      "client_queue_p99_ms": 2.427738,
+      "response_maximum_event": {
+        "id": 3251,
+        "worker": 0,
+        "sequence": 3251,
+        "planned_ns": 65955420639317,
+        "admitted_ns": 65955420725905,
+        "status": "completed",
+        "sent_ns": 65955420768367,
+        "key_index": 33427,
+        "stamp": 1020001003252,
+        "finished_ns": 65955440528151,
+        "producer_ms": 0.086588,
+        "client_queue_ms": 0.042462,
+        "operation_ms": 19.759784
+      },
+      "sends_per_100ms": {
+        "min": 19,
+        "max": 21,
+        "median": 20
+      },
+      "sends_per_1000ms": {
+        "min": 200,
+        "max": 200,
+        "median": 200
+      }
+    },
+    {
+      "variant": "candidate-light",
+      "clients": 4,
+      "rate": 800,
+      "rep": 1,
+      "ops_s": 799.748752931151,
+      "syncs_s": 227.12864583244686,
+      "sync_attempts": 2272,
+      "updates_per_sync": 3.5211267605633805,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 5.881789,
+        "p99_ms": 28.536888,
+        "max_ms": 33.262959,
+        "above_ms": {
+          "10": 651,
+          "20": 414,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p50_ms": 4.472106,
+        "p99_ms": 8.168526,
+        "max_ms": 15.616966,
+        "above_ms": {
+          "10": 17,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.888385,
+        "p99_ms": 24.197214,
+        "max_ms": 28.675728,
+        "above_ms": {
+          "10": 535,
+          "20": 246,
+          "50": 0
+        }
+      },
+      "mean_send_rate": 799.9783225976544,
+      "producer_p99_ms": 0.308353,
+      "client_queue_p99_ms": 24.091038,
+      "response_maximum_event": {
+        "id": 6118,
+        "worker": 2,
+        "sequence": 1529,
+        "planned_ns": 65995424039454,
+        "admitted_ns": 65995424124805,
+        "status": "completed",
+        "sent_ns": 65995452587796,
+        "key_index": 87346,
+        "stamp": 1080004017530,
+        "finished_ns": 65995457302413,
+        "producer_ms": 0.085351,
+        "client_queue_ms": 28.462991,
+        "operation_ms": 4.714617
+      },
+      "sends_per_100ms": {
+        "min": 72,
+        "max": 88,
+        "median": 80
+      },
+      "sends_per_1000ms": {
+        "min": 794,
+        "max": 806,
+        "median": 800
+      },
+      "probe_count": 679,
+      "probe_total_ms": 363.362367,
+      "maximum_record": {
+        "id": 6118,
+        "worker": 2,
+        "sequence": 1529,
+        "operation_ns": 4714617,
+        "response_ns": 33262959,
+        "request_ns": 4706437,
+        "request_index": 1580,
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            1148,
+            5616
+          ],
+          "detail": [
+            8720818577,
+            8720707894,
+            8721018106,
+            8721035082,
+            8724772539,
+            8724805251,
+            8724834890,
+            8720818185
+          ],
+          "dispatch_ns": 4023775,
+          "finished_ns": 8724837567,
+          "request_index": 1580,
+          "sync_attempts": 1743,
+          "trace": [
+            8720818754,
+            8721017183,
+            8721017481,
+            8721017593,
+            8721035129,
+            8721063317,
+            8724771961,
+            8724784749
+          ]
+        },
+        "probe_ns": 404364,
+        "phases": {
+          "dispatch preparation": 4393,
+          "queue submission": 569,
+          "leader queue": 0,
+          "batch collection": 198429,
+          "selection overhead": 298,
+          "writer lock": 112,
+          "state lock": 513,
+          "validation / encoding / bookkeeping": 16976,
+          "log reservation": 47,
+          "log write": 28188,
+          "log sync": 3708644,
+          "publication lock": 578,
+          "publication": 12210,
+          "cleanup / replies ahead": 20502,
+          "reply wake / leader exit": 29639,
+          "dispatch finish": 2677,
+          "transport / client residual": 682662,
+          "outside protocol request": 8180,
+          "producer scheduling delay": 85351,
+          "client queue": 28462991
+        },
+        "largest_phase": "client queue"
+      },
+      "tail_largest_phase": {
+        "client queue": 621,
+        "leader queue": 4,
+        "log sync": 26
+      }
+    },
+    {
+      "variant": "candidate-light",
+      "clients": 1,
+      "rate": 250,
+      "rep": 1,
+      "ops_s": 250.00072035363814,
+      "syncs_s": 250.00072035363814,
+      "sync_attempts": 8000,
+      "updates_per_sync": 1.0,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 3.937395,
+        "p99_ms": 78.965993,
+        "max_ms": 112.426595,
+        "above_ms": {
+          "10": 1460,
+          "20": 1074,
+          "50": 562
+        }
+      },
+      "operation": {
+        "p50_ms": 3.655912,
+        "p99_ms": 5.795373,
+        "max_ms": 33.094329,
+        "above_ms": {
+          "10": 16,
+          "20": 1,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.138837,
+        "p99_ms": 75.120196,
+        "max_ms": 108.633946,
+        "above_ms": {
+          "10": 1263,
+          "20": 972,
+          "50": 469
+        }
+      },
+      "mean_send_rate": 250.00055442209464,
+      "producer_p99_ms": 0.169535,
+      "client_queue_p99_ms": 75.033234,
+      "response_maximum_event": {
+        "id": 2959,
+        "worker": 0,
+        "sequence": 2959,
+        "planned_ns": 66011490419010,
+        "admitted_ns": 66011490506920,
+        "status": "completed",
+        "sent_ns": 66011598849901,
+        "key_index": 92246,
+        "stamp": 1025001002960,
+        "finished_ns": 66011602845605,
+        "producer_ms": 0.08791,
+        "client_queue_ms": 108.342981,
+        "operation_ms": 3.995704
+      },
+      "sends_per_100ms": {
+        "min": 7,
+        "max": 29,
+        "median": 25
+      },
+      "sends_per_1000ms": {
+        "min": 225,
+        "max": 275,
+        "median": 250
+      },
+      "probe_count": 1468,
+      "probe_total_ms": 265.242313,
+      "maximum_record": {
+        "id": 2959,
+        "worker": 0,
+        "sequence": 2959,
+        "operation_ns": 3995704,
+        "response_ns": 112426595,
+        "request_ns": 3980673,
+        "request_index": 3011,
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            431,
+            3227
+          ],
+          "detail": [
+            24867070026,
+            24867070410,
+            24867070962,
+            24867080933,
+            24870797117,
+            24870810830,
+            24870814628,
+            24867069484
+          ],
+          "dispatch_ns": 3756509,
+          "finished_ns": 24870817743,
+          "request_index": 3011,
+          "sync_attempts": 5232,
+          "trace": [
+            24867070092,
+            24867070597,
+            24867070653,
+            24867070747,
+            24867081036,
+            24867101886,
+            24870795967,
+            24870806247
+          ]
+        },
+        "probe_ns": 193571,
+        "phases": {
+          "dispatch preparation": 8250,
+          "queue submission": 608,
+          "leader queue": 318,
+          "batch collection": 187,
+          "selection overhead": 56,
+          "writer lock": 94,
+          "state lock": 215,
+          "validation / encoding / bookkeeping": 9971,
+          "log reservation": 103,
+          "log write": 20850,
+          "log sync": 3694081,
+          "publication lock": 1150,
+          "publication": 9130,
+          "cleanup / replies ahead": 4583,
+          "reply wake / leader exit": 3798,
+          "dispatch finish": 3115,
+          "transport / client residual": 224164,
+          "outside protocol request": 15031,
+          "producer scheduling delay": 87910,
+          "client queue": 108342981
+        },
+        "largest_phase": "client queue"
+      },
+      "tail_largest_phase": {
+        "client queue": 1448,
+        "log sync": 12
+      }
+    },
+    {
+      "variant": "before",
+      "clients": 4,
+      "rate": 400,
+      "rep": 2,
+      "ops_s": 399.94063483186574,
+      "syncs_s": 227.81618411610154,
+      "sync_attempts": 4557,
+      "updates_per_sync": 1.7555409260478385,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 5.852499,
+        "p99_ms": 10.02984,
+        "max_ms": 20.951592,
+        "above_ms": {
+          "10": 82,
+          "20": 1,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p50_ms": 5.707526,
+        "p99_ms": 9.796851,
+        "max_ms": 20.81162,
+        "above_ms": {
+          "10": 63,
+          "20": 1,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.124128,
+        "p99_ms": 0.31035,
+        "max_ms": 10.960551,
+        "above_ms": {
+          "10": 1,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "mean_send_rate": 400.0040908331858,
+      "producer_p99_ms": 0.161396,
+      "client_queue_p99_ms": 0.186265,
+      "response_maximum_event": {
+        "id": 7093,
+        "worker": 1,
+        "sequence": 1773,
+        "planned_ns": 66058178588660,
+        "admitted_ns": 66058178677773,
+        "status": "completed",
+        "sent_ns": 66058178728632,
+        "key_index": 40437,
+        "stamp": 2040004009774,
+        "finished_ns": 66058199540252,
+        "producer_ms": 0.089113,
+        "client_queue_ms": 0.050859,
+        "operation_ms": 20.81162
+      },
+      "sends_per_100ms": {
+        "min": 40,
+        "max": 40,
+        "median": 40
+      },
+      "sends_per_1000ms": {
+        "min": 400,
+        "max": 400,
+        "median": 400
+      }
+    },
+    {
+      "variant": "before",
+      "clients": 4,
+      "rate": 800,
+      "rep": 2,
+      "ops_s": 799.588498655628,
+      "syncs_s": 223.484985374248,
+      "sync_attempts": 2236,
+      "updates_per_sync": 3.5778175313059033,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 6.00919,
+        "p99_ms": 12.857906,
+        "max_ms": 19.762118,
+        "above_ms": {
+          "10": 193,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p50_ms": 4.679444,
+        "p99_ms": 8.163305,
+        "max_ms": 14.371041,
+        "above_ms": {
+          "10": 12,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 1.015594,
+        "p99_ms": 7.863221,
+        "max_ms": 14.769516,
+        "above_ms": {
+          "10": 34,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "mean_send_rate": 799.8421235839058,
+      "producer_p99_ms": 0.282605,
+      "client_queue_p99_ms": 7.764946,
+      "response_maximum_event": {
+        "id": 2151,
+        "worker": 3,
+        "sequence": 537,
+        "planned_ns": 66064891241062,
+        "admitted_ns": 66064891267354,
+        "status": "completed",
+        "sent_ns": 66064905264586,
+        "key_index": 51019,
+        "stamp": 2080004024538,
+        "finished_ns": 66064911003180,
+        "producer_ms": 0.026292,
+        "client_queue_ms": 13.997232,
+        "operation_ms": 5.738594
+      },
+      "sends_per_100ms": {
+        "min": 72,
+        "max": 84,
+        "median": 80
+      },
+      "sends_per_1000ms": {
+        "min": 798,
+        "max": 802,
+        "median": 800
+      }
+    },
+    {
+      "variant": "before",
+      "clients": 1,
+      "rate": 250,
+      "rep": 2,
+      "ops_s": 249.28053296032368,
+      "syncs_s": 249.28053296032368,
+      "sync_attempts": 8000,
+      "updates_per_sync": 1.0,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 4.209064,
+        "p99_ms": 136.369902,
+        "max_ms": 140.330095,
+        "above_ms": {
+          "10": 1379,
+          "20": 736,
+          "50": 533
+        }
+      },
+      "operation": {
+        "p50_ms": 3.885525,
+        "p99_ms": 5.999283,
+        "max_ms": 14.869059,
+        "above_ms": {
+          "10": 18,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.21775,
+        "p99_ms": 132.376387,
+        "max_ms": 136.339073,
+        "above_ms": {
+          "10": 1078,
+          "20": 661,
+          "50": 531
+        }
+      },
+      "mean_send_rate": 249.284069692776,
+      "producer_p99_ms": 0.150428,
+      "client_queue_p99_ms": 132.257855,
+      "response_maximum_event": {
+        "id": 7530,
+        "worker": 0,
+        "sequence": 7530,
+        "planned_ns": 66104115524262,
+        "admitted_ns": 66104115639547,
+        "status": "completed",
+        "sent_ns": 66104250051531,
+        "key_index": 63763,
+        "stamp": 2025001007531,
+        "finished_ns": 66104255854357,
+        "producer_ms": 0.115285,
+        "client_queue_ms": 134.411984,
+        "operation_ms": 5.802826
+      },
+      "sends_per_100ms": {
+        "min": 8,
+        "max": 28,
+        "median": 25
+      },
+      "sends_per_1000ms": {
+        "min": 225,
+        "max": 256,
+        "median": 250
+      }
+    },
+    {
+      "variant": "before",
+      "clients": 1,
+      "rate": 200,
+      "rep": 2,
+      "ops_s": 200.0037588356429,
+      "syncs_s": 200.0037588356429,
+      "sync_attempts": 8000,
+      "updates_per_sync": 1.0,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 4.084379,
+        "p99_ms": 7.074583,
+        "max_ms": 26.424061,
+        "above_ms": {
+          "10": 35,
+          "20": 7,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p50_ms": 3.930899,
+        "p99_ms": 5.988676,
+        "max_ms": 26.300284,
+        "above_ms": {
+          "10": 5,
+          "20": 1,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.126629,
+        "p99_ms": 2.088249,
+        "max_ms": 21.436409,
+        "above_ms": {
+          "10": 11,
+          "20": 3,
+          "50": 0
+        }
+      },
+      "mean_send_rate": 200.000019137394,
+      "producer_p99_ms": 0.147684,
+      "client_queue_p99_ms": 1.989658,
+      "response_maximum_event": {
+        "id": 2390,
+        "worker": 0,
+        "sequence": 2390,
+        "planned_ns": 66119826231201,
+        "admitted_ns": 66119826317009,
+        "status": "completed",
+        "sent_ns": 66119826354978,
+        "key_index": 98514,
+        "stamp": 2020001002391,
+        "finished_ns": 66119852655262,
+        "producer_ms": 0.085808,
+        "client_queue_ms": 0.037969,
+        "operation_ms": 26.300284
+      },
+      "sends_per_100ms": {
+        "min": 17,
+        "max": 23,
+        "median": 20
+      },
+      "sends_per_1000ms": {
+        "min": 197,
+        "max": 203,
+        "median": 200
+      }
+    },
+    {
+      "variant": "candidate-light",
+      "clients": 4,
+      "rate": 800,
+      "rep": 2,
+      "ops_s": 785.8649726564114,
+      "syncs_s": 219.1786703593425,
+      "sync_attempts": 2193,
+      "updates_per_sync": 3.585499316005472,
+      "rejected": 137,
+      "completed": 7863,
+      "response": {
+        "p50_ms": 6.161618,
+        "p99_ms": 89.322514,
+        "max_ms": 255.859988,
+        "above_ms": {
+          "10": 1154,
+          "20": 855,
+          "50": 479
+        }
+      },
+      "operation": {
+        "p50_ms": 4.447413,
+        "p99_ms": 8.431801,
+        "max_ms": 96.002332,
+        "above_ms": {
+          "10": 36,
+          "20": 15,
+          "50": 9
+        }
+      },
+      "queue": {
+        "p50_ms": 1.168667,
+        "p99_ms": 84.012178,
+        "max_ms": 251.493064,
+        "above_ms": {
+          "10": 961,
+          "20": 766,
+          "50": 437
+        }
+      },
+      "mean_send_rate": 786.2939181693912,
+      "producer_p99_ms": 0.42839,
+      "client_queue_p99_ms": 83.780732,
+      "response_maximum_event": {
+        "id": 1691,
+        "worker": 3,
+        "sequence": 422,
+        "planned_ns": 66158597848650,
+        "admitted_ns": 66158598185095,
+        "status": "completed",
+        "sent_ns": 66158849274274,
+        "key_index": 63631,
+        "stamp": 2080004024423,
+        "finished_ns": 66158853708638,
+        "producer_ms": 0.336445,
+        "client_queue_ms": 251.089179,
+        "operation_ms": 4.434364
+      },
+      "sends_per_100ms": {
+        "min": 6,
+        "max": 91,
+        "median": 80
+      },
+      "sends_per_1000ms": {
+        "min": 641,
+        "max": 821,
+        "median": 800
+      },
+      "probe_count": 1179,
+      "probe_total_ms": 659.511388,
+      "maximum_record": {
+        "id": 1691,
+        "worker": 3,
+        "sequence": 422,
+        "operation_ns": 4434364,
+        "response_ns": 255859988,
+        "request_ns": 4420330,
+        "request_index": 473,
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            884,
+            6177
+          ],
+          "detail": [
+            3528999392,
+            3528571515,
+            3529271203,
+            3529292698,
+            3533005065,
+            3533027762,
+            3533060568,
+            3528999035
+          ],
+          "dispatch_ns": 4069381,
+          "finished_ns": 3533063910,
+          "request_index": 473,
+          "sync_attempts": 482,
+          "trace": [
+            3528999551,
+            3529270574,
+            3529270799,
+            3529270837,
+            3529292811,
+            3529314842,
+            3533004145,
+            3533022233
+          ]
+        },
+        "probe_ns": 523878,
+        "phases": {
+          "dispatch preparation": 4506,
+          "queue submission": 516,
+          "leader queue": 0,
+          "batch collection": 271023,
+          "selection overhead": 225,
+          "writer lock": 38,
+          "state lock": 366,
+          "validation / encoding / bookkeeping": 21495,
+          "log reservation": 113,
+          "log write": 22031,
+          "log sync": 3689303,
+          "publication lock": 920,
+          "publication": 17168,
+          "cleanup / replies ahead": 5529,
+          "reply wake / leader exit": 32806,
+          "dispatch finish": 3342,
+          "transport / client residual": 350949,
+          "outside protocol request": 14034,
+          "producer scheduling delay": 336445,
+          "client queue": 251089179
+        },
+        "largest_phase": "client queue"
+      },
+      "tail_largest_phase": {
+        "client queue": 1111,
+        "leader queue": 5,
+        "log sync": 38
+      }
+    },
+    {
+      "variant": "candidate-light",
+      "clients": 1,
+      "rate": 250,
+      "rep": 2,
+      "ops_s": 249.8148190586655,
+      "syncs_s": 249.8148190586655,
+      "sync_attempts": 8000,
+      "updates_per_sync": 1.0,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 3.840979,
+        "p99_ms": 86.003683,
+        "max_ms": 131.411167,
+        "above_ms": {
+          "10": 785,
+          "20": 497,
+          "50": 223
+        }
+      },
+      "operation": {
+        "p50_ms": 3.564544,
+        "p99_ms": 5.85388,
+        "max_ms": 27.598916,
+        "above_ms": {
+          "10": 19,
+          "20": 2,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.122997,
+        "p99_ms": 82.140517,
+        "max_ms": 127.561217,
+        "above_ms": {
+          "10": 590,
+          "20": 456,
+          "50": 155
+        }
+      },
+      "mean_send_rate": 249.81492530434983,
+      "producer_p99_ms": 0.156442,
+      "client_queue_p99_ms": 82.071717,
+      "response_maximum_event": {
+        "id": 7781,
+        "worker": 0,
+        "sequence": 7781,
+        "planned_ns": 66199683409416,
+        "admitted_ns": 66199683479235,
+        "status": "completed",
+        "sent_ns": 66199802565936,
+        "key_index": 85090,
+        "stamp": 2025001007782,
+        "finished_ns": 66199814820583,
+        "producer_ms": 0.069819,
+        "client_queue_ms": 119.086701,
+        "operation_ms": 12.254647
+      },
+      "sends_per_100ms": {
+        "min": 8,
+        "max": 30,
+        "median": 25
+      },
+      "sends_per_1000ms": {
+        "min": 245,
+        "max": 255,
+        "median": 250
+      },
+      "probe_count": 791,
+      "probe_total_ms": 140.414224,
+      "maximum_record": {
+        "id": 7781,
+        "worker": 0,
+        "sequence": 7781,
+        "operation_ns": 12254647,
+        "response_ns": 131411167,
+        "request_ns": 12240563,
+        "request_index": 7833,
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            630,
+            3372
+          ],
+          "detail": [
+            44482256039,
+            44482256377,
+            44482256843,
+            44482265699,
+            44494272698,
+            44494285941,
+            44494288116,
+            44482255207
+          ],
+          "dispatch_ns": 12041417,
+          "finished_ns": 44494291351,
+          "request_index": 7833,
+          "sync_attempts": 9975,
+          "trace": [
+            44482256094,
+            44482256587,
+            44482256624,
+            44482256660,
+            44482265745,
+            44482295292,
+            44494271519,
+            44494280905
+          ]
+        },
+        "probe_ns": 138917,
+        "phases": {
+          "dispatch preparation": 5273,
+          "queue submission": 887,
+          "leader queue": 283,
+          "batch collection": 210,
+          "selection overhead": 37,
+          "writer lock": 36,
+          "state lock": 183,
+          "validation / encoding / bookkeeping": 8856,
+          "log reservation": 46,
+          "log write": 29547,
+          "log sync": 11976227,
+          "publication lock": 1179,
+          "publication": 8207,
+          "cleanup / replies ahead": 5036,
+          "reply wake / leader exit": 2175,
+          "dispatch finish": 3235,
+          "transport / client residual": 199146,
+          "outside protocol request": 14084,
+          "producer scheduling delay": 69819,
+          "client queue": 119086701
+        },
+        "largest_phase": "client queue"
+      },
+      "tail_largest_phase": {
+        "client queue": 768,
+        "log sync": 17
+      }
+    },
+    {
+      "variant": "candidate",
+      "clients": 4,
+      "rate": 400,
+      "rep": 2,
+      "ops_s": 399.9394734600412,
+      "syncs_s": 226.81567388602585,
+      "sync_attempts": 4537,
+      "updates_per_sync": 1.763279700242451,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 5.913971,
+        "p99_ms": 10.332152,
+        "max_ms": 21.830643,
+        "above_ms": {
+          "10": 103,
+          "20": 2,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p50_ms": 5.772156,
+        "p99_ms": 9.999599,
+        "max_ms": 21.7208,
+        "above_ms": {
+          "10": 80,
+          "20": 2,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.123081,
+        "p99_ms": 0.385489,
+        "max_ms": 11.83657,
+        "above_ms": {
+          "10": 2,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "mean_send_rate": 400.009131989951,
+      "producer_p99_ms": 0.160613,
+      "client_queue_p99_ms": 0.252957,
+      "response_maximum_event": {
+        "id": 5065,
+        "worker": 1,
+        "sequence": 1266,
+        "planned_ns": 66221694886532,
+        "admitted_ns": 66221694960635,
+        "status": "completed",
+        "sent_ns": 66221694996375,
+        "key_index": 661,
+        "stamp": 2040004009267,
+        "finished_ns": 66221716717175,
+        "producer_ms": 0.074103,
+        "client_queue_ms": 0.03574,
+        "operation_ms": 21.7208
+      },
+      "sends_per_100ms": {
+        "min": 39,
+        "max": 41,
+        "median": 40
+      },
+      "sends_per_1000ms": {
+        "min": 400,
+        "max": 400,
+        "median": 400
+      }
+    },
+    {
+      "variant": "candidate",
+      "clients": 4,
+      "rate": 800,
+      "rep": 2,
+      "ops_s": 799.5518814734504,
+      "syncs_s": 232.5696535235899,
+      "sync_attempts": 2327,
+      "updates_per_sync": 3.4379028792436612,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 5.709412,
+        "p99_ms": 9.592878,
+        "max_ms": 15.512343,
+        "above_ms": {
+          "10": 63,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p50_ms": 4.493788,
+        "p99_ms": 8.015,
+        "max_ms": 14.679511,
+        "above_ms": {
+          "10": 10,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.71413,
+        "p99_ms": 4.598053,
+        "max_ms": 10.518416,
+        "above_ms": {
+          "10": 1,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "mean_send_rate": 800.010524654023,
+      "producer_p99_ms": 0.250976,
+      "client_queue_p99_ms": 4.514465,
+      "response_maximum_event": {
+        "id": 4237,
+        "worker": 1,
+        "sequence": 1059,
+        "planned_ns": 66236101340157,
+        "admitted_ns": 66236101415822,
+        "status": "completed",
+        "sent_ns": 66236103150328,
+        "key_index": 16897,
+        "stamp": 2080004009060,
+        "finished_ns": 66236116852500,
+        "producer_ms": 0.075665,
+        "client_queue_ms": 1.734506,
+        "operation_ms": 13.702172
+      },
+      "sends_per_100ms": {
+        "min": 77,
+        "max": 83,
+        "median": 80
+      },
+      "sends_per_1000ms": {
+        "min": 799,
+        "max": 801,
+        "median": 800
+      }
+    },
+    {
+      "variant": "candidate",
+      "clients": 1,
+      "rate": 250,
+      "rep": 2,
+      "ops_s": 250.00766403963033,
+      "syncs_s": 250.00766403963033,
+      "sync_attempts": 8000,
+      "updates_per_sync": 1.0,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 3.918317,
+        "p99_ms": 113.343431,
+        "max_ms": 171.799077,
+        "above_ms": {
+          "10": 1066,
+          "20": 803,
+          "50": 160
+        }
+      },
+      "operation": {
+        "p50_ms": 3.600653,
+        "p99_ms": 5.897749,
+        "max_ms": 64.543339,
+        "above_ms": {
+          "10": 9,
+          "20": 4,
+          "50": 3
+        }
+      },
+      "queue": {
+        "p50_ms": 0.138086,
+        "p99_ms": 109.348655,
+        "max_ms": 167.80741,
+        "above_ms": {
+          "10": 941,
+          "20": 744,
+          "50": 155
+        }
+      },
+      "mean_send_rate": 250.00020925289422,
+      "producer_p99_ms": 0.15483,
+      "client_queue_p99_ms": 109.26601,
+      "response_maximum_event": {
+        "id": 3999,
+        "worker": 0,
+        "sequence": 3999,
+        "planned_ns": 66258770263456,
+        "admitted_ns": 66258770330846,
+        "status": "completed",
+        "sent_ns": 66258885448378,
+        "key_index": 24296,
+        "stamp": 2025001004000,
+        "finished_ns": 66258942062533,
+        "producer_ms": 0.06739,
+        "client_queue_ms": 115.117532,
+        "operation_ms": 56.614155
+      },
+      "sends_per_100ms": {
+        "min": 1,
+        "max": 32,
+        "median": 25
+      },
+      "sends_per_1000ms": {
+        "min": 244,
+        "max": 259,
+        "median": 250
+      }
+    },
+    {
+      "variant": "candidate",
+      "clients": 1,
+      "rate": 200,
+      "rep": 2,
+      "ops_s": 198.15963395169376,
+      "syncs_s": 198.15963395169376,
+      "sync_attempts": 7926,
+      "updates_per_sync": 1.0,
+      "rejected": 74,
+      "completed": 7926,
+      "response": {
+        "p50_ms": 3.806733,
+        "p99_ms": 268.977053,
+        "max_ms": 691.487151,
+        "above_ms": {
+          "10": 309,
+          "20": 234,
+          "50": 182
+        }
+      },
+      "operation": {
+        "p50_ms": 3.635761,
+        "p99_ms": 6.000703,
+        "max_ms": 77.281774,
+        "above_ms": {
+          "10": 35,
+          "20": 21,
+          "50": 6
+        }
+      },
+      "queue": {
+        "p50_ms": 0.12605,
+        "p99_ms": 258.926549,
+        "max_ms": 686.503808,
+        "above_ms": {
+          "10": 264,
+          "20": 217,
+          "50": 177
+        }
+      },
+      "mean_send_rate": 198.15035056324967,
+      "producer_p99_ms": 0.147619,
+      "client_queue_p99_ms": 258.830208,
+      "response_maximum_event": {
+        "id": 6785,
+        "worker": 0,
+        "sequence": 6785,
+        "planned_ns": 66310804309842,
+        "admitted_ns": 66310804412803,
+        "status": "completed",
+        "sent_ns": 66311490789185,
+        "key_index": 86380,
+        "stamp": 2020001006786,
+        "finished_ns": 66311495796993,
+        "producer_ms": 0.102961,
+        "client_queue_ms": 686.376382,
+        "operation_ms": 5.007808
+      },
+      "sends_per_100ms": {
+        "min": 1,
+        "max": 32,
+        "median": 20
+      },
+      "sends_per_1000ms": {
+        "min": 144,
+        "max": 221,
+        "median": 200
+      }
+    },
+    {
+      "variant": "before-light",
+      "clients": 4,
+      "rate": 800,
+      "rep": 2,
+      "ops_s": 799.5168788938032,
+      "syncs_s": 230.26086112141533,
+      "sync_attempts": 2304,
+      "updates_per_sync": 3.4722222222222223,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 5.755062,
+        "p99_ms": 17.852717,
+        "max_ms": 29.500074,
+        "above_ms": {
+          "10": 251,
+          "20": 52,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p50_ms": 4.457117,
+        "p99_ms": 8.028835,
+        "max_ms": 29.391685,
+        "above_ms": {
+          "10": 20,
+          "20": 4,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.762772,
+        "p99_ms": 13.338158,
+        "max_ms": 24.825412,
+        "above_ms": {
+          "10": 136,
+          "20": 21,
+          "50": 0
+        }
+      },
+      "mean_send_rate": 799.8158235436143,
+      "producer_p99_ms": 0.229641,
+      "client_queue_p99_ms": 13.218833,
+      "response_maximum_event": {
+        "id": 3802,
+        "worker": 2,
+        "sequence": 950,
+        "planned_ns": 66330089778768,
+        "admitted_ns": 66330089851939,
+        "status": "completed",
+        "sent_ns": 66330089887157,
+        "key_index": 41654,
+        "stamp": 2080004016951,
+        "finished_ns": 66330119278842,
+        "producer_ms": 0.073171,
+        "client_queue_ms": 0.035218,
+        "operation_ms": 29.391685
+      },
+      "sends_per_100ms": {
+        "min": 66,
+        "max": 92,
+        "median": 80
+      },
+      "sends_per_1000ms": {
+        "min": 799,
+        "max": 801,
+        "median": 800
+      },
+      "probe_count": 279,
+      "probe_total_ms": 119.660482,
+      "maximum_record": {
+        "id": 3802,
+        "worker": 2,
+        "sequence": 950,
+        "operation_ns": 29391685,
+        "response_ns": 29500074,
+        "request_ns": 29381499,
+        "request_index": 1001,
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            2846,
+            4271
+          ],
+          "detail": [
+            5898288860,
+            5901496920,
+            5902044824,
+            5902058823,
+            5927145034,
+            5927183970,
+            5927230735,
+            5898288569
+          ],
+          "dispatch_ns": 28948409,
+          "finished_ns": 5927233570,
+          "request_index": 1001,
+          "sync_attempts": 1084,
+          "trace": [
+            5898288916,
+            5902044364,
+            5902044496,
+            5902044543,
+            5902058898,
+            5902074521,
+            5927143429,
+            5927169154
+          ]
+        },
+        "probe_ns": 316138,
+        "phases": {
+          "dispatch preparation": 3408,
+          "queue submission": 347,
+          "leader queue": 3208004,
+          "batch collection": 547444,
+          "selection overhead": 132,
+          "writer lock": 47,
+          "state lock": 281,
+          "validation / encoding / bookkeeping": 13999,
+          "log reservation": 75,
+          "log write": 15623,
+          "log sync": 25068908,
+          "publication lock": 1605,
+          "publication": 24120,
+          "cleanup / replies ahead": 14816,
+          "reply wake / leader exit": 46765,
+          "dispatch finish": 2835,
+          "transport / client residual": 433090,
+          "outside protocol request": 10186,
+          "producer scheduling delay": 73171,
+          "client queue": 35218
+        },
+        "largest_phase": "log sync"
+      },
+      "tail_largest_phase": {
+        "client queue": 223,
+        "leader queue": 5,
+        "log sync": 23
+      }
+    },
+    {
+      "variant": "before-light",
+      "clients": 1,
+      "rate": 250,
+      "rep": 2,
+      "ops_s": 249.34217294192393,
+      "syncs_s": 249.34217294192393,
+      "sync_attempts": 7979,
+      "updates_per_sync": 1.0,
+      "rejected": 21,
+      "completed": 7979,
+      "response": {
+        "p50_ms": 4.274365,
+        "p99_ms": 237.802085,
+        "max_ms": 343.194543,
+        "above_ms": {
+          "10": 2632,
+          "20": 2140,
+          "50": 1299
+        }
+      },
+      "operation": {
+        "p50_ms": 3.797705,
+        "p99_ms": 6.096566,
+        "max_ms": 68.100655,
+        "above_ms": {
+          "10": 30,
+          "20": 7,
+          "50": 1
+        }
+      },
+      "queue": {
+        "p50_ms": 0.284044,
+        "p99_ms": 233.97133,
+        "max_ms": 339.343988,
+        "above_ms": {
+          "10": 2425,
+          "20": 2040,
+          "50": 1205
+        }
+      },
+      "mean_send_rate": 249.34458498329005,
+      "producer_p99_ms": 0.150203,
+      "client_queue_p99_ms": 233.901047,
+      "response_maximum_event": {
+        "id": 6099,
+        "worker": 0,
+        "sequence": 6099,
+        "planned_ns": 66361611772771,
+        "admitted_ns": 66361611852699,
+        "status": "completed",
+        "sent_ns": 66361950752960,
+        "key_index": 97444,
+        "stamp": 2025001006100,
+        "finished_ns": 66361954967314,
+        "producer_ms": 0.079928,
+        "client_queue_ms": 338.900261,
+        "operation_ms": 4.214354
+      },
+      "sends_per_100ms": {
+        "min": 4,
+        "max": 29,
+        "median": 25
+      },
+      "sends_per_1000ms": {
+        "min": 192,
+        "max": 275,
+        "median": 250
+      },
+      "probe_count": 2637,
+      "probe_total_ms": 420.505443,
+      "maximum_record": {
+        "id": 6099,
+        "worker": 0,
+        "sequence": 6099,
+        "operation_ns": 4214354,
+        "response_ns": 343194543,
+        "request_ns": 4204642,
+        "request_index": 6151,
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            179,
+            2566
+          ],
+          "detail": [
+            37759156207,
+            37759156451,
+            37759413731,
+            37759421487,
+            37763108827,
+            37763119639,
+            37763121980,
+            37759155690
+          ],
+          "dispatch_ns": 4010712,
+          "finished_ns": 37763161146,
+          "request_index": 6151,
+          "sync_attempts": 8404,
+          "trace": [
+            37759156263,
+            37759413411,
+            37759413534,
+            37759413581,
+            37759421534,
+            37759431453,
+            37763107915,
+            37763115662
+          ]
+        },
+        "probe_ns": 138070,
+        "phases": {
+          "dispatch preparation": 5256,
+          "queue submission": 573,
+          "leader queue": 188,
+          "batch collection": 256960,
+          "selection overhead": 123,
+          "writer lock": 47,
+          "state lock": 150,
+          "validation / encoding / bookkeeping": 7756,
+          "log reservation": 47,
+          "log write": 9919,
+          "log sync": 3676462,
+          "publication lock": 912,
+          "publication": 6835,
+          "cleanup / replies ahead": 3977,
+          "reply wake / leader exit": 2341,
+          "dispatch finish": 39166,
+          "transport / client residual": 193930,
+          "outside protocol request": 9712,
+          "producer scheduling delay": 79928,
+          "client queue": 338900261
+        },
+        "largest_phase": "client queue"
+      },
+      "tail_largest_phase": {
+        "client queue": 2619,
+        "log sync": 13
+      }
+    },
+    {
+      "variant": "candidate",
+      "clients": 1,
+      "rate": 200,
+      "rep": 3,
+      "ops_s": 200.0044937059647,
+      "syncs_s": 200.0044937059647,
+      "sync_attempts": 8000,
+      "updates_per_sync": 1.0,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 3.740199,
+        "p99_ms": 174.986675,
+        "max_ms": 276.265094,
+        "above_ms": {
+          "10": 211,
+          "20": 184,
+          "50": 159
+        }
+      },
+      "operation": {
+        "p50_ms": 3.587652,
+        "p99_ms": 5.71096,
+        "max_ms": 61.001617,
+        "above_ms": {
+          "10": 16,
+          "20": 7,
+          "50": 2
+        }
+      },
+      "queue": {
+        "p50_ms": 0.12214,
+        "p99_ms": 170.003734,
+        "max_ms": 271.276475,
+        "above_ms": {
+          "10": 191,
+          "20": 175,
+          "50": 155
+        }
+      },
+      "mean_send_rate": 200.0000323790526,
+      "producer_p99_ms": 0.157877,
+      "client_queue_p99_ms": 169.897513,
+      "response_maximum_event": {
+        "id": 4571,
+        "worker": 0,
+        "sequence": 4571,
+        "planned_ns": 66400827286908,
+        "admitted_ns": 66400827377918,
+        "status": "completed",
+        "sent_ns": 66401092572876,
+        "key_index": 23557,
+        "stamp": 3020001004572,
+        "finished_ns": 66401103552002,
+        "producer_ms": 0.09101,
+        "client_queue_ms": 265.194958,
+        "operation_ms": 10.979126
+      },
+      "sends_per_100ms": {
+        "min": 2,
+        "max": 31,
+        "median": 20
+      },
+      "sends_per_1000ms": {
+        "min": 167,
+        "max": 233,
+        "median": 200
+      }
+    },
+    {
+      "variant": "candidate",
+      "clients": 4,
+      "rate": 400,
+      "rep": 3,
+      "ops_s": 399.89154179593106,
+      "syncs_s": 223.73931763482344,
+      "sync_attempts": 4476,
+      "updates_per_sync": 1.7873100983020553,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 5.942262,
+        "p99_ms": 58.610765,
+        "max_ms": 109.321122,
+        "above_ms": {
+          "10": 275,
+          "20": 170,
+          "50": 102
+        }
+      },
+      "operation": {
+        "p50_ms": 5.737309,
+        "p99_ms": 11.869327,
+        "max_ms": 87.194389,
+        "above_ms": {
+          "10": 137,
+          "20": 21,
+          "50": 4
+        }
+      },
+      "queue": {
+        "p50_ms": 0.124783,
+        "p99_ms": 48.620032,
+        "max_ms": 99.344278,
+        "above_ms": {
+          "10": 170,
+          "20": 147,
+          "50": 74
+        }
+      },
+      "mean_send_rate": 400.00163019041673,
+      "producer_p99_ms": 0.164226,
+      "client_queue_p99_ms": 48.530073,
+      "response_maximum_event": {
+        "id": 1234,
+        "worker": 2,
+        "sequence": 308,
+        "planned_ns": 66423078351153,
+        "admitted_ns": 66423078524144,
+        "status": "completed",
+        "sent_ns": 66423155733891,
+        "key_index": 81882,
+        "stamp": 3040004016309,
+        "finished_ns": 66423187672275,
+        "producer_ms": 0.172991,
+        "client_queue_ms": 77.209747,
+        "operation_ms": 31.938384
+      },
+      "sends_per_100ms": {
+        "min": 8,
+        "max": 78,
+        "median": 40
+      },
+      "sends_per_1000ms": {
+        "min": 400,
+        "max": 400,
+        "median": 400
+      }
+    },
+    {
+      "variant": "candidate",
+      "clients": 4,
+      "rate": 800,
+      "rep": 3,
+      "ops_s": 799.8136905191354,
+      "syncs_s": 228.64673877715785,
+      "sync_attempts": 2287,
+      "updates_per_sync": 3.4980323567993006,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 5.775604,
+        "p99_ms": 11.081973,
+        "max_ms": 25.535082,
+        "above_ms": {
+          "10": 106,
+          "20": 17,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p50_ms": 4.509937,
+        "p99_ms": 8.062558,
+        "max_ms": 25.432328,
+        "above_ms": {
+          "10": 16,
+          "20": 4,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.780765,
+        "p99_ms": 6.091503,
+        "max_ms": 20.542504,
+        "above_ms": {
+          "10": 37,
+          "20": 1,
+          "50": 0
+        }
+      },
+      "mean_send_rate": 800.0147841211888,
+      "producer_p99_ms": 0.250216,
+      "client_queue_p99_ms": 5.994323,
+      "response_maximum_event": {
+        "id": 5923,
+        "worker": 3,
+        "sequence": 1480,
+        "planned_ns": 66449175338070,
+        "admitted_ns": 66449175409556,
+        "status": "completed",
+        "sent_ns": 66449175440824,
+        "key_index": 9099,
+        "stamp": 3080004025481,
+        "finished_ns": 66449200873152,
+        "producer_ms": 0.071486,
+        "client_queue_ms": 0.031268,
+        "operation_ms": 25.432328
+      },
+      "sends_per_100ms": {
+        "min": 74,
+        "max": 86,
+        "median": 80
+      },
+      "sends_per_1000ms": {
+        "min": 799,
+        "max": 801,
+        "median": 800
+      }
+    },
+    {
+      "variant": "candidate",
+      "clients": 1,
+      "rate": 250,
+      "rep": 3,
+      "ops_s": 249.9893179955029,
+      "syncs_s": 249.9893179955029,
+      "sync_attempts": 8000,
+      "updates_per_sync": 1.0,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 3.858996,
+        "p99_ms": 29.000763,
+        "max_ms": 57.91237,
+        "above_ms": {
+          "10": 756,
+          "20": 320,
+          "50": 12
+        }
+      },
+      "operation": {
+        "p50_ms": 3.606797,
+        "p99_ms": 5.802513,
+        "max_ms": 56.140886,
+        "above_ms": {
+          "10": 5,
+          "20": 1,
+          "50": 1
+        }
+      },
+      "queue": {
+        "p50_ms": 0.130116,
+        "p99_ms": 25.013685,
+        "max_ms": 53.921367,
+        "above_ms": {
+          "10": 488,
+          "20": 144,
+          "50": 7
+        }
+      },
+      "mean_send_rate": 250.00026178299697,
+      "producer_p99_ms": 0.156428,
+      "client_queue_p99_ms": 24.896386,
+      "response_maximum_event": {
+        "id": 181,
+        "worker": 0,
+        "sequence": 181,
+        "planned_ns": 66454442273831,
+        "admitted_ns": 66454442369125,
+        "status": "completed",
+        "sent_ns": 66454494531771,
+        "key_index": 34641,
+        "stamp": 3025001000182,
+        "finished_ns": 66454500186201,
+        "producer_ms": 0.095294,
+        "client_queue_ms": 52.162646,
+        "operation_ms": 5.65443
+      },
+      "sends_per_100ms": {
+        "min": 13,
+        "max": 29,
+        "median": 25
+      },
+      "sends_per_1000ms": {
+        "min": 244,
+        "max": 256,
+        "median": 250
+      }
+    },
+    {
+      "variant": "candidate-light",
+      "clients": 4,
+      "rate": 800,
+      "rep": 3,
+      "ops_s": 791.1290550563695,
+      "syncs_s": 217.04336334248256,
+      "sync_attempts": 2172,
+      "updates_per_sync": 3.6450276243093924,
+      "rejected": 83,
+      "completed": 7917,
+      "response": {
+        "p50_ms": 6.933118,
+        "p99_ms": 104.926016,
+        "max_ms": 110.53993,
+        "above_ms": {
+          "10": 2446,
+          "20": 2188,
+          "50": 1762
+        }
+      },
+      "operation": {
+        "p50_ms": 4.455218,
+        "p99_ms": 8.282693,
+        "max_ms": 26.459308,
+        "above_ms": {
+          "10": 24,
+          "20": 4,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 1.94014,
+        "p99_ms": 99.371992,
+        "max_ms": 105.6972,
+        "above_ms": {
+          "10": 2282,
+          "20": 2102,
+          "50": 1699
+        }
+      },
+      "mean_send_rate": 791.455736693284,
+      "producer_p99_ms": 0.452103,
+      "client_queue_p99_ms": 99.253566,
+      "response_maximum_event": {
+        "id": 1198,
+        "worker": 2,
+        "sequence": 299,
+        "planned_ns": 66497636085476,
+        "admitted_ns": 66497636195335,
+        "status": "completed",
+        "sent_ns": 66497741782676,
+        "key_index": 66218,
+        "stamp": 3080004016300,
+        "finished_ns": 66497746625406,
+        "producer_ms": 0.109859,
+        "client_queue_ms": 105.587341,
+        "operation_ms": 4.84273
+      },
+      "sends_per_100ms": {
+        "min": 60,
+        "max": 91,
+        "median": 80
+      },
+      "sends_per_1000ms": {
+        "min": 686,
+        "max": 848,
+        "median": 800
+      },
+      "probe_count": 2463,
+      "probe_total_ms": 1487.857064,
+      "maximum_record": {
+        "id": 1198,
+        "worker": 2,
+        "sequence": 299,
+        "operation_ns": 4842730,
+        "response_ns": 110539930,
+        "request_ns": 4831703,
+        "request_index": 334,
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            1127,
+            6682
+          ],
+          "detail": [
+            2917925394,
+            2917581531,
+            2917956156,
+            2917977074,
+            2921849713,
+            2921928836,
+            2921978393,
+            2917924771
+          ],
+          "dispatch_ns": 4063485,
+          "finished_ns": 2921984214,
+          "request_index": 334,
+          "sync_attempts": 292,
+          "trace": [
+            2917925495,
+            2917955487,
+            2917955671,
+            2917955716,
+            2917977193,
+            2918003968,
+            2921847201,
+            2921875286
+          ]
+        },
+        "probe_ns": 986633,
+        "phases": {
+          "dispatch preparation": 4042,
+          "queue submission": 724,
+          "leader queue": 0,
+          "batch collection": 29992,
+          "selection overhead": 184,
+          "writer lock": 45,
+          "state lock": 440,
+          "validation / encoding / bookkeeping": 20918,
+          "log reservation": 119,
+          "log write": 26775,
+          "log sync": 3843233,
+          "publication lock": 2512,
+          "publication": 25573,
+          "cleanup / replies ahead": 53550,
+          "reply wake / leader exit": 49557,
+          "dispatch finish": 5821,
+          "transport / client residual": 768218,
+          "outside protocol request": 11027,
+          "producer scheduling delay": 109859,
+          "client queue": 105587341
+        },
+        "largest_phase": "client queue"
+      },
+      "tail_largest_phase": {
+        "client queue": 2418,
+        "leader queue": 5,
+        "log sync": 23
+      }
+    },
+    {
+      "variant": "candidate-light",
+      "clients": 1,
+      "rate": 250,
+      "rep": 3,
+      "ops_s": 247.1022161385114,
+      "syncs_s": 247.1022161385114,
+      "sync_attempts": 7945,
+      "updates_per_sync": 1.0,
+      "rejected": 55,
+      "completed": 7945,
+      "response": {
+        "p50_ms": 9.875369,
+        "p99_ms": 285.961274,
+        "max_ms": 296.718447,
+        "above_ms": {
+          "10": 3969,
+          "20": 3611,
+          "50": 3107
+        }
+      },
+      "operation": {
+        "p50_ms": 3.682178,
+        "p99_ms": 6.33415,
+        "max_ms": 20.28304,
+        "above_ms": {
+          "10": 27,
+          "20": 2,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 5.847795,
+        "p99_ms": 281.830474,
+        "max_ms": 292.697772,
+        "above_ms": {
+          "10": 3818,
+          "20": 3518,
+          "50": 3094
+        }
+      },
+      "mean_send_rate": 247.10111271991957,
+      "producer_p99_ms": 0.193649,
+      "client_queue_p99_ms": 281.690977,
+      "response_maximum_event": {
+        "id": 5819,
+        "worker": 0,
+        "sequence": 5819,
+        "planned_ns": 66531538325664,
+        "admitted_ns": 66531538407649,
+        "status": "completed",
+        "sent_ns": 66531830831260,
+        "key_index": 44315,
+        "stamp": 3025001005820,
+        "finished_ns": 66531835044111,
+        "producer_ms": 0.081985,
+        "client_queue_ms": 292.423611,
+        "operation_ms": 4.212851
+      },
+      "sends_per_100ms": {
+        "min": 9,
+        "max": 31,
+        "median": 25
+      },
+      "sends_per_1000ms": {
+        "min": 225,
+        "max": 259,
+        "median": 250
+      },
+      "probe_count": 3980,
+      "probe_total_ms": 825.723086,
+      "maximum_record": {
+        "id": 5819,
+        "worker": 0,
+        "sequence": 5819,
+        "operation_ns": 4212851,
+        "response_ns": 296718447,
+        "request_ns": 4193488,
+        "request_index": 5854,
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            120,
+            3121
+          ],
+          "detail": [
+            37006968913,
+            37006969189,
+            37006969567,
+            37006978268,
+            37010885261,
+            37010902156,
+            37010906668,
+            37006968499
+          ],
+          "dispatch_ns": 3948702,
+          "finished_ns": 37010911179,
+          "request_index": 5854,
+          "sync_attempts": 7975,
+          "trace": [
+            37006968968,
+            37006969355,
+            37006969383,
+            37006969429,
+            37006978323,
+            37007000973,
+            37010883787,
+            37010895831
+          ]
+        },
+        "probe_ns": 173714,
+        "phases": {
+          "dispatch preparation": 6022,
+          "queue submission": 469,
+          "leader queue": 221,
+          "batch collection": 166,
+          "selection overhead": 28,
+          "writer lock": 46,
+          "state lock": 138,
+          "validation / encoding / bookkeeping": 8701,
+          "log reservation": 55,
+          "log write": 22650,
+          "log sync": 3882814,
+          "publication lock": 1474,
+          "publication": 10570,
+          "cleanup / replies ahead": 6325,
+          "reply wake / leader exit": 4512,
+          "dispatch finish": 4511,
+          "transport / client residual": 244786,
+          "outside protocol request": 19363,
+          "producer scheduling delay": 81985,
+          "client queue": 292423611
+        },
+        "largest_phase": "client queue"
+      },
+      "tail_largest_phase": {
+        "client queue": 3957,
+        "log sync": 12
+      }
+    },
+    {
+      "variant": "before",
+      "clients": 1,
+      "rate": 200,
+      "rep": 3,
+      "ops_s": 200.00828303302896,
+      "syncs_s": 200.00828303302896,
+      "sync_attempts": 8000,
+      "updates_per_sync": 1.0,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 4.128496,
+        "p99_ms": 44.421824,
+        "max_ms": 91.308072,
+        "above_ms": {
+          "10": 272,
+          "20": 167,
+          "50": 55
+        }
+      },
+      "operation": {
+        "p50_ms": 3.948876,
+        "p99_ms": 6.378564,
+        "max_ms": 59.24458,
+        "above_ms": {
+          "10": 18,
+          "20": 5,
+          "50": 1
+        }
+      },
+      "queue": {
+        "p50_ms": 0.128907,
+        "p99_ms": 39.437863,
+        "max_ms": 86.336206,
+        "above_ms": {
+          "10": 198,
+          "20": 147,
+          "50": 43
+        }
+      },
+      "mean_send_rate": 200.0016833795894,
+      "producer_p99_ms": 0.170167,
+      "client_queue_p99_ms": 39.333776,
+      "response_maximum_event": {
+        "id": 4888,
+        "worker": 0,
+        "sequence": 4888,
+        "planned_ns": 66574170456909,
+        "admitted_ns": 66574170980328,
+        "status": "completed",
+        "sent_ns": 66574256433611,
+        "key_index": 53149,
+        "stamp": 3020001004889,
+        "finished_ns": 66574261764981,
+        "producer_ms": 0.523419,
+        "client_queue_ms": 85.453283,
+        "operation_ms": 5.33137
+      },
+      "sends_per_100ms": {
+        "min": 8,
+        "max": 28,
+        "median": 20
+      },
+      "sends_per_1000ms": {
+        "min": 199,
+        "max": 201,
+        "median": 200
+      }
+    },
+    {
+      "variant": "before",
+      "clients": 4,
+      "rate": 400,
+      "rep": 3,
+      "ops_s": 399.9223417599333,
+      "syncs_s": 222.6067734821229,
+      "sync_attempts": 4453,
+      "updates_per_sync": 1.7965416573096789,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 6.010391,
+        "p99_ms": 12.297852,
+        "max_ms": 38.532225,
+        "above_ms": {
+          "10": 199,
+          "20": 18,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p50_ms": 5.835666,
+        "p99_ms": 10.850411,
+        "max_ms": 29.94415,
+        "above_ms": {
+          "10": 137,
+          "20": 4,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.126242,
+        "p99_ms": 2.305242,
+        "max_ms": 28.543755,
+        "above_ms": {
+          "10": 18,
+          "20": 7,
+          "50": 0
+        }
+      },
+      "mean_send_rate": 400.0039301498787,
+      "producer_p99_ms": 0.147378,
+      "client_queue_p99_ms": 2.208737,
+      "response_maximum_event": {
+        "id": 1908,
+        "worker": 0,
+        "sequence": 477,
+        "planned_ns": 66596261056166,
+        "admitted_ns": 66596261130403,
+        "status": "completed",
+        "sent_ns": 66596281147001,
+        "key_index": 61700,
+        "stamp": 3040004000478,
+        "finished_ns": 66596299588391,
+        "producer_ms": 0.074237,
+        "client_queue_ms": 20.016598,
+        "operation_ms": 18.44139
+      },
+      "sends_per_100ms": {
+        "min": 32,
+        "max": 48,
+        "median": 40
+      },
+      "sends_per_1000ms": {
+        "min": 400,
+        "max": 400,
+        "median": 400
+      }
+    },
+    {
+      "variant": "before",
+      "clients": 4,
+      "rate": 800,
+      "rep": 3,
+      "ops_s": 799.8011788645881,
+      "syncs_s": 221.74487684020707,
+      "sync_attempts": 2218,
+      "updates_per_sync": 3.606853020739405,
+      "rejected": 0,
+      "completed": 8000,
+      "response": {
+        "p50_ms": 6.095626,
+        "p99_ms": 17.434751,
+        "max_ms": 29.807617,
+        "above_ms": {
+          "10": 430,
+          "20": 46,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p50_ms": 4.5689,
+        "p99_ms": 8.39764,
+        "max_ms": 22.781543,
+        "above_ms": {
+          "10": 42,
+          "20": 5,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 1.101732,
+        "p99_ms": 12.44219,
+        "max_ms": 24.813372,
+        "above_ms": {
+          "10": 150,
+          "20": 15,
+          "50": 0
+        }
+      },
+      "mean_send_rate": 800.0080279640449,
+      "producer_p99_ms": 0.346329,
+      "client_queue_p99_ms": 12.306536,
+      "response_maximum_event": {
+        "id": 4764,
+        "worker": 0,
+        "sequence": 1191,
+        "planned_ns": 66619688731929,
+        "admitted_ns": 66619688767273,
+        "status": "completed",
+        "sent_ns": 66619697690378,
+        "key_index": 75480,
+        "stamp": 3080004001192,
+        "finished_ns": 66619718539546,
+        "producer_ms": 0.035344,
+        "client_queue_ms": 8.923105,
+        "operation_ms": 20.849168
+      },
+      "sends_per_100ms": {
+        "min": 65,
+        "max": 95,
+        "median": 80
+      },
+      "sends_per_1000ms": {
+        "min": 784,
+        "max": 815,
+        "median": 800
+      }
+    },
+    {
+      "variant": "before",
+      "clients": 1,
+      "rate": 250,
+      "rep": 3,
+      "ops_s": 232.99879759514258,
+      "syncs_s": 232.99879759514258,
+      "sync_attempts": 7456,
+      "updates_per_sync": 1.0,
+      "rejected": 544,
+      "completed": 7456,
+      "response": {
+        "p50_ms": 37.451882,
+        "p99_ms": 917.486304,
+        "max_ms": 1065.075212,
+        "above_ms": {
+          "10": 4570,
+          "20": 4063,
+          "50": 3568
+        }
+      },
+      "operation": {
+        "p50_ms": 3.929369,
+        "p99_ms": 13.8628,
+        "max_ms": 91.859582,
+        "above_ms": {
+          "10": 114,
+          "20": 51,
+          "50": 11
+        }
+      },
+      "queue": {
+        "p50_ms": 33.458861,
+        "p99_ms": 913.146075,
+        "max_ms": 1060.459695,
+        "above_ms": {
+          "10": 4273,
+          "20": 3960,
+          "50": 3477
+        }
+      },
+      "mean_send_rate": 232.9983192269161,
+      "producer_p99_ms": 0.202283,
+      "client_queue_p99_ms": 913.022774,
+      "response_maximum_event": {
+        "id": 3481,
+        "worker": 0,
+        "sequence": 3481,
+        "planned_ns": 66639477173527,
+        "admitted_ns": 66639477226462,
+        "status": "completed",
+        "sent_ns": 66640536262961,
+        "key_index": 63145,
+        "stamp": 3025001003482,
+        "finished_ns": 66640542248739,
+        "producer_ms": 0.052935,
+        "client_queue_ms": 1059.036499,
+        "operation_ms": 5.985778
+      },
+      "sends_per_100ms": {
+        "min": 1,
+        "max": 30,
+        "median": 25
+      },
+      "sends_per_1000ms": {
+        "min": 55,
+        "max": 282,
+        "median": 250
+      }
+    },
+    {
+      "variant": "before-light",
+      "clients": 4,
+      "rate": 800,
+      "rep": 3,
+      "ops_s": 786.3384680724663,
+      "syncs_s": 210.94935901651752,
+      "sync_attempts": 2111,
+      "updates_per_sync": 3.7276172430127903,
+      "rejected": 131,
+      "completed": 7869,
+      "response": {
+        "p50_ms": 7.989312,
+        "p99_ms": 110.711046,
+        "max_ms": 144.09839,
+        "above_ms": {
+          "10": 3611,
+          "20": 3383,
+          "50": 2370
+        }
+      },
+      "operation": {
+        "p50_ms": 4.454167,
+        "p99_ms": 8.486351,
+        "max_ms": 23.746492,
+        "above_ms": {
+          "10": 33,
+          "20": 1,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 3.001561,
+        "p99_ms": 105.473439,
+        "max_ms": 137.570615,
+        "above_ms": {
+          "10": 3489,
+          "20": 3309,
+          "50": 1986
+        }
+      },
+      "mean_send_rate": 786.5784900582577,
+      "producer_p99_ms": 0.502609,
+      "client_queue_p99_ms": 105.384816,
+      "response_maximum_event": {
+        "id": 1662,
+        "worker": 2,
+        "sequence": 415,
+        "planned_ns": 66669010594571,
+        "admitted_ns": 66669010653559,
+        "status": "completed",
+        "sent_ns": 66669148165186,
+        "key_index": 87134,
+        "stamp": 3080004016416,
+        "finished_ns": 66669154692961,
+        "producer_ms": 0.058988,
+        "client_queue_ms": 137.511627,
+        "operation_ms": 6.527775
+      },
+      "sends_per_100ms": {
+        "min": 50,
+        "max": 92,
+        "median": 80
+      },
+      "sends_per_1000ms": {
+        "min": 721,
+        "max": 826,
+        "median": 800
+      },
+      "probe_count": 3648,
+      "probe_total_ms": 2260.850027,
+      "maximum_record": {
+        "id": 1662,
+        "worker": 2,
+        "sequence": 415,
+        "operation_ns": 6527775,
+        "response_ns": 144098390,
+        "request_ns": 6505798,
+        "request_index": 449,
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            1798,
+            6839
+          ],
+          "detail": [
+            3398866426,
+            3398149477,
+            3398911722,
+            3398943993,
+            3404083048,
+            3404154870,
+            3404201503,
+            3398865704
+          ],
+          "dispatch_ns": 5344904,
+          "finished_ns": 3404204810,
+          "request_index": 449,
+          "sync_attempts": 435,
+          "trace": [
+            3398866529,
+            3398910626,
+            3398911103,
+            3398911225,
+            3398944152,
+            3398978972,
+            3404081558,
+            3404107760
+          ]
+        },
+        "probe_ns": 1016053,
+        "phases": {
+          "dispatch preparation": 5798,
+          "queue submission": 825,
+          "leader queue": 0,
+          "batch collection": 44097,
+          "selection overhead": 477,
+          "writer lock": 122,
+          "state lock": 497,
+          "validation / encoding / bookkeeping": 32271,
+          "log reservation": 159,
+          "log write": 34820,
+          "log sync": 5102586,
+          "publication lock": 1490,
+          "publication": 24712,
+          "cleanup / replies ahead": 47110,
+          "reply wake / leader exit": 46633,
+          "dispatch finish": 3307,
+          "transport / client residual": 1160894,
+          "outside protocol request": 21977,
+          "producer scheduling delay": 58988,
+          "client queue": 137511627
+        },
+        "largest_phase": "client queue"
+      },
+      "tail_largest_phase": {
+        "client queue": 3589,
+        "leader queue": 3,
+        "log sync": 19
+      }
+    },
+    {
+      "variant": "before-light",
+      "clients": 1,
+      "rate": 250,
+      "rep": 3,
+      "ops_s": 247.7268586187607,
+      "syncs_s": 247.7268586187607,
+      "sync_attempts": 7927,
+      "updates_per_sync": 1.0,
+      "rejected": 73,
+      "completed": 7927,
+      "response": {
+        "p50_ms": 29.824973,
+        "p99_ms": 324.247994,
+        "max_ms": 350.015876,
+        "above_ms": {
+          "10": 4608,
+          "20": 4072,
+          "50": 3640
+        }
+      },
+      "operation": {
+        "p50_ms": 3.823303,
+        "p99_ms": 6.181898,
+        "max_ms": 45.766594,
+        "above_ms": {
+          "10": 10,
+          "20": 2,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 26.031283,
+        "p99_ms": 320.257802,
+        "max_ms": 346.294123,
+        "above_ms": {
+          "10": 4359,
+          "20": 4008,
+          "50": 3614
+        }
+      },
+      "mean_send_rate": 247.71958409090362,
+      "producer_p99_ms": 0.197284,
+      "client_queue_p99_ms": 320.125299,
+      "response_maximum_event": {
+        "id": 1844,
+        "worker": 0,
+        "sequence": 1844,
+        "planned_ns": 66686547904339,
+        "admitted_ns": 66686548038750,
+        "status": "completed",
+        "sent_ns": 66686893306976,
+        "key_index": 29014,
+        "stamp": 3025001001845,
+        "finished_ns": 66686897920215,
+        "producer_ms": 0.134411,
+        "client_queue_ms": 345.268226,
+        "operation_ms": 4.613239
+      },
+      "sends_per_100ms": {
+        "min": 10,
+        "max": 28,
+        "median": 25
+      },
+      "sends_per_1000ms": {
+        "min": 201,
+        "max": 269,
+        "median": 250
+      },
+      "probe_count": 4615,
+      "probe_total_ms": 791.270597,
+      "maximum_record": {
+        "id": 1844,
+        "worker": 0,
+        "sequence": 1844,
+        "operation_ns": 4613239,
+        "response_ns": 350015876,
+        "request_ns": 4595568,
+        "request_index": 1896,
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            306,
+            5169
+          ],
+          "detail": [
+            21143819475,
+            21143819976,
+            21144093810,
+            21144105959,
+            21148112723,
+            21148125958,
+            21148130673,
+            21143818816
+          ],
+          "dispatch_ns": 4323133,
+          "finished_ns": 21148134274,
+          "request_index": 1896,
+          "sync_attempts": 3956,
+          "trace": [
+            21143819568,
+            21144092557,
+            21144092891,
+            21144093021,
+            21144106024,
+            21144137794,
+            21148112185,
+            21148119832
+          ]
+        },
+        "probe_ns": 260771,
+        "phases": {
+          "dispatch preparation": 7675,
+          "queue submission": 752,
+          "leader queue": 408,
+          "batch collection": 272581,
+          "selection overhead": 334,
+          "writer lock": 130,
+          "state lock": 789,
+          "validation / encoding / bookkeeping": 12149,
+          "log reservation": 65,
+          "log write": 31770,
+          "log sync": 3974391,
+          "publication lock": 538,
+          "publication": 7109,
+          "cleanup / replies ahead": 6126,
+          "reply wake / leader exit": 4715,
+          "dispatch finish": 3601,
+          "transport / client residual": 272435,
+          "outside protocol request": 17671,
+          "producer scheduling delay": 134411,
+          "client queue": 345268226
+        },
+        "largest_phase": "client queue"
+      },
+      "tail_largest_phase": {
+        "client queue": 4599,
+        "log sync": 9
+      }
+    }
+  ]
+}

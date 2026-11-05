@@ -1,0 +1,41 @@
+{
+  "rust_features": "service,benchmark-metrics,single-client-commit,lock-timing",
+  "suites": {
+    "attribution": {
+      "passed": 3
+    },
+    "collector": {
+      "passed": 4
+    },
+    "default-protocol": {
+      "passed": 19
+    },
+    "diagnostics": {
+      "passed": 21
+    },
+    "ffi": {
+      "passed": 35
+    },
+    "metrics": {
+      "passed": 19
+    },
+    "pull": {
+      "passed": 23
+    },
+    "report": {
+      "passed": 5
+    },
+    "schedule": {
+      "passed": 6
+    }
+  },
+  "clippy": "passed; -D warnings",
+  "measured_full_content_checks": 60,
+  "measured_reopens": 12,
+  "physical_power_loss_tested": false,
+  "rust": {
+    "passed": 142,
+    "failed": 0,
+    "ignored": 12
+  }
+}

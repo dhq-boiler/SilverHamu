@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        features: [service, "service,fixed-log", "service,wal-direct", "service,wal-prepare", "service,fixed-log,wal-prepare", "service,single-client-commit,lock-timing"]
+        features: [service, "service,fixed-log", "service,wal-direct", "service,wal-prepare", "service,fixed-log,wal-prepare", "service,single-client-commit,lock-timing,benchmark-metrics"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -29,6 +29,11 @@ jobs:
         run: python benchmarks/commit-tail/test_protocol.py
         env:
           CATDB_DIAGNOSTICS: 'pull'
+      - run: python benchmarks/arrival-rate/test_schedule.py
+      - run: python benchmarks/arrival-rate/test_report.py
+      - run: python benchmarks/arrival-rate/test_metrics.py
+        env:
+          CATDB_EXPECT_METRICS: ${{ contains(matrix.features, 'benchmark-metrics') && '1' || '0' }}
       - run: python benchmarks/commit-tail/test_collector.py
       - run: python benchmarks/commit-tail/test_attribution.py
       - run: python tests/service_protocol.py

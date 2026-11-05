@@ -327,6 +327,26 @@ are not peak memory or RSS. See the [report and limitations](docs/benchmarks/sca
 [reproduction instructions](benchmarks/scan-copy/README.md).
 
 
+### Follow-up: speculative WAL preparation (default unchanged)
+
+Three variants compare the current encoder, removal of the intermediate body
+copy, and sequence-independent preparation before the writer lock. In the same
+100k-row / 256-byte / four-connection workload, median throughput was
+**1011 / 1016 / 984 updates/s**, with p99 **5.910 / 5.861 / 6.089 ms**.
+Neither candidate demonstrated a consistent overall improvement, so both remain
+opt-in experiments (`wal-direct`, `wal-prepare`); the default is retained.
+
+![WAL preparation service comparison, including adverse results](docs/benchmarks/wal-preparation-2026-11-05/service.svg)
+
+Direct framing reduced isolated allocations **5 → 1**, but the instrumented
+large-value and hot-key experiments did not improve commit p99. Hot-key
+preparation discarded 384 of 512 prepared frames per trial. See the
+[full report and safety limits](docs/benchmarks/wal-preparation-2026-11-05/README.md),
+[auxiliary figure](docs/benchmarks/wal-preparation-2026-11-05/auxiliary.svg),
+[all results](docs/benchmarks/wal-preparation-2026-11-05/table.md) and
+[reproduction commands](benchmarks/wal-preparation/README.md).
+
+
 ## Build
 
 Requires Rust **1.89 or newer**. Python 3 is used by the optional client and integration tests. Docker is needed only for containers.

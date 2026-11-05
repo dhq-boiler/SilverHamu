@@ -185,6 +185,14 @@ impl GroupCommit {
 
     #[cfg(feature = "commit-window")]
     fn submit_many(&self, transactions: Vec<Transaction>) -> Result<Vec<Reply>> {
+        #[cfg(feature = "wal-prepare")]
+        let transactions = {
+            let mut txs = transactions;
+            for tx in &mut txs {
+                tx.prepare_log()?;
+            }
+            txs
+        };
         if transactions.is_empty() {
             return Ok(Vec::new());
         }
@@ -391,6 +399,12 @@ impl GroupCommit {
     }
 
     pub fn submit(&self, transaction: Transaction) -> Result<u64> {
+        #[cfg(feature = "wal-prepare")]
+        let transaction = {
+            let mut tx = transaction;
+            tx.prepare_log()?;
+            tx
+        };
         let (response, receiver) = mpsc::channel();
         let mut pending = self.pending.lock().map_err(|_| Error::Poisoned)?;
         let bytes: usize = pending
@@ -459,8 +473,8 @@ fn persist_group(
     let mut sequence = state.sequence;
     let mut wal_bytes = state.wal_bytes;
     let mut retained = 0usize;
-    for (index, request) in requests.iter().enumerate() {
-        let transaction = &request.transaction;
+    for (index, request) in requests.iter_mut().enumerate() {
+        let transaction = &mut request.transaction;
         let result = (|| {
             transaction.validate_commit(&state, &earlier)?;
             let next = sequence
@@ -476,21 +490,18 @@ fn persist_group(
                 .checked_add(state.retained_growth(&transaction.writes))
                 .ok_or(Error::ResourceExhausted("group retained bytes"))?;
             state.budget.check_add(RETAINED, growth)?;
-            let permit = transaction.reserve_buffer(
-                transaction.write_bytes * 4
-                    + PREFIX_BYTES
-                    + TRAILER_BYTES
-                    + 64 * transaction.writes.len(),
-            )?;
-            frames.push(encode_frame(next, &transaction.writes));
+            let (frame, permit) = transaction.commit_frame(next, 64 * transaction.writes.len())?;
+            frames.push(frame);
             reservations.push(permit);
-            earlier.extend(transaction.writes.keys().map(Vec::as_slice));
             sequence = next;
             wal_bytes = next_bytes;
             retained = growth;
             accepted.push((index, next));
             Ok(next)
         })();
+        if result.is_ok() {
+            earlier.extend(transaction.writes.keys().map(Vec::as_slice));
+        }
         results.push(result);
     }
     drop(earlier);
@@ -540,6 +551,55 @@ fn persist_group(
 
 #[cfg(test)]
 mod tests {
+    #[cfg(feature = "wal-prepare")]
+    #[test]
+    fn wal_preparation_group_preserves_earlier_write_read_and_range_conflicts() {
+        let f = Fixture::new();
+        let db = Database::create(&f.0, [113; 16]).unwrap();
+        let mut old = db.begin_read().unwrap();
+        let first = write(&db, b"a");
+        let duplicate = write(&db, b"a");
+        let mut read = write(&db, b"r");
+        read.get(b"a").unwrap();
+        let mut range = write(&db, b"s");
+        range.scan(b"a", Some(b"b")).unwrap();
+        let last = write(&db, b"z");
+        let mut requests: Vec<_> = [first, duplicate, read, range, last]
+            .into_iter()
+            .map(|mut tx| {
+                tx.prepare_log().unwrap();
+                request(tx)
+            })
+            .collect();
+        let outcome = persist_group(&db, &mut requests, |file, frames| {
+            for frame in frames {
+                file.write_all(frame)?;
+            }
+            file.sync_all()
+        });
+        assert!(matches!(outcome[0], Ok(1)));
+        assert!(matches!(
+            outcome[1],
+            Err(Error::Conflict(ConflictKind::Write))
+        ));
+        assert!(matches!(
+            outcome[2],
+            Err(Error::Conflict(ConflictKind::Read))
+        ));
+        assert!(matches!(
+            outcome[3],
+            Err(Error::Conflict(ConflictKind::Range))
+        ));
+        assert!(matches!(outcome[4], Ok(2)));
+        assert_eq!(old.get(b"a").unwrap(), None);
+        drop(requests);
+        drop(old);
+        assert_eq!(
+            db.resource_usage().unwrap().current[crate::resources::BUFFER],
+            0
+        );
+    }
+
     #[test]
     fn global_guard_keeps_group_range_conflicts_for_insert_update_delete_and_boundaries() {
         for operation in ["insert", "update", "delete"] {

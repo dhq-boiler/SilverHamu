@@ -1,0 +1,936 @@
+{
+  "service": [
+    {
+      "clients": 1,
+      "variant": "baseline",
+      "ops_s": {
+        "median": 268.7945977902576,
+        "minimum": 261.10243787270434,
+        "maximum": 274.33391398626674
+      },
+      "p50_ms": {
+        "median": 3.816614,
+        "minimum": 3.761602,
+        "maximum": 3.871962
+      },
+      "p95_ms": {
+        "median": 4.404856,
+        "minimum": 4.326588,
+        "maximum": 4.598504
+      },
+      "p99_ms": {
+        "median": 5.614885,
+        "minimum": 5.528194,
+        "maximum": 6.070785
+      },
+      "max_ms": {
+        "median": 58.821471,
+        "minimum": 13.492608,
+        "maximum": 85.026387
+      }
+    },
+    {
+      "clients": 1,
+      "variant": "direct",
+      "ops_s": {
+        "median": 270.56545635134364,
+        "minimum": 269.65110450976596,
+        "maximum": 272.01946282717745
+      },
+      "p50_ms": {
+        "median": 3.788305,
+        "minimum": 3.777407,
+        "maximum": 3.827057
+      },
+      "p95_ms": {
+        "median": 4.44796,
+        "minimum": 4.403077,
+        "maximum": 4.450255
+      },
+      "p99_ms": {
+        "median": 5.702693,
+        "minimum": 5.498863,
+        "maximum": 5.855006
+      },
+      "max_ms": {
+        "median": 23.520097,
+        "minimum": 13.281606,
+        "maximum": 28.003773
+      }
+    },
+    {
+      "clients": 1,
+      "variant": "prepare",
+      "ops_s": {
+        "median": 261.9556861080728,
+        "minimum": 257.91738192528607,
+        "maximum": 277.6565615130211
+      },
+      "p50_ms": {
+        "median": 3.909416,
+        "minimum": 3.730067,
+        "maximum": 3.912851
+      },
+      "p95_ms": {
+        "median": 4.667999,
+        "minimum": 4.271042,
+        "maximum": 4.719059
+      },
+      "p99_ms": {
+        "median": 5.850075,
+        "minimum": 5.511686,
+        "maximum": 6.277846
+      },
+      "max_ms": {
+        "median": 22.071923,
+        "minimum": 17.514235,
+        "maximum": 46.167816
+      }
+    },
+    {
+      "clients": 4,
+      "variant": "baseline",
+      "ops_s": {
+        "median": 1011.0618180616158,
+        "minimum": 1002.0996848138826,
+        "maximum": 1014.0000047663069
+      },
+      "p50_ms": {
+        "median": 3.996818,
+        "minimum": 3.988096,
+        "maximum": 4.02878
+      },
+      "p95_ms": {
+        "median": 4.775389,
+        "minimum": 4.769211,
+        "maximum": 4.870975
+      },
+      "p99_ms": {
+        "median": 5.910065,
+        "minimum": 5.784722,
+        "maximum": 5.943666
+      },
+      "max_ms": {
+        "median": 13.653639,
+        "minimum": 10.427668,
+        "maximum": 13.680016
+      }
+    },
+    {
+      "clients": 4,
+      "variant": "direct",
+      "ops_s": {
+        "median": 1015.471486970628,
+        "minimum": 987.9775167310046,
+        "maximum": 1038.0326349747854
+      },
+      "p50_ms": {
+        "median": 3.982855,
+        "minimum": 3.883904,
+        "maximum": 4.061127
+      },
+      "p95_ms": {
+        "median": 4.779461,
+        "minimum": 4.710782,
+        "maximum": 4.963254
+      },
+      "p99_ms": {
+        "median": 5.860505,
+        "minimum": 5.809316,
+        "maximum": 5.972248
+      },
+      "max_ms": {
+        "median": 13.790588,
+        "minimum": 12.3761,
+        "maximum": 26.283231
+      }
+    },
+    {
+      "clients": 4,
+      "variant": "prepare",
+      "ops_s": {
+        "median": 983.5654978709998,
+        "minimum": 980.222583641289,
+        "maximum": 1035.4863223279572
+      },
+      "p50_ms": {
+        "median": 4.088961,
+        "minimum": 3.890037,
+        "maximum": 4.097703
+      },
+      "p95_ms": {
+        "median": 4.992625,
+        "minimum": 4.76274,
+        "maximum": 5.035117
+      },
+      "p99_ms": {
+        "median": 6.089189,
+        "minimum": 5.787706,
+        "maximum": 6.214651
+      },
+      "max_ms": {
+        "median": 13.609098,
+        "minimum": 8.216221,
+        "maximum": 13.854811
+      }
+    }
+  ],
+  "auxiliary": [
+    {
+      "variant": "baseline",
+      "shape": "hot",
+      "repeat": 1,
+      "attempts": 512,
+      "accepted": 128,
+      "rejected": 384,
+      "ops_s": 683.3908787605852,
+      "all_p99_ms": 2.1987,
+      "accepted_p99_ms": 2.1987,
+      "maximum_ms": 2.2178,
+      "writer_preparation_p99_us": 10.1,
+      "prepare_p99_us": 0.0,
+      "prepared_bytes": 0,
+      "discarded_bytes": 0,
+      "commit_thread_alloc_calls": 3339,
+      "commit_thread_alloc_bytes": 2120216,
+      "metadata": {
+        "elapsed_ns": 187301300,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 48800000,
+        "counted": true
+      },
+      "encode_ns": 600.0,
+      "encode_calls": 5.0,
+      "encode_bytes": 648.0
+    },
+    {
+      "variant": "baseline",
+      "shape": "hot",
+      "repeat": 2,
+      "attempts": 512,
+      "accepted": 128,
+      "rejected": 384,
+      "ops_s": 682.6164260977058,
+      "all_p99_ms": 2.2011,
+      "accepted_p99_ms": 2.2011,
+      "maximum_ms": 2.8915,
+      "writer_preparation_p99_us": 19.2,
+      "prepare_p99_us": 0.0,
+      "prepared_bytes": 0,
+      "discarded_bytes": 0,
+      "commit_thread_alloc_calls": 3339,
+      "commit_thread_alloc_bytes": 2120216,
+      "metadata": {
+        "elapsed_ns": 187513800,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 48800000,
+        "counted": true
+      },
+      "encode_ns": 600.0,
+      "encode_calls": 5.0,
+      "encode_bytes": 648.0
+    },
+    {
+      "variant": "baseline",
+      "shape": "hot",
+      "repeat": 3,
+      "attempts": 512,
+      "accepted": 128,
+      "rejected": 384,
+      "ops_s": 647.4164794806911,
+      "all_p99_ms": 3.1012,
+      "accepted_p99_ms": 3.1006,
+      "maximum_ms": 4.6055,
+      "writer_preparation_p99_us": 22.2,
+      "prepare_p99_us": 0.0,
+      "prepared_bytes": 0,
+      "discarded_bytes": 0,
+      "commit_thread_alloc_calls": 3339,
+      "commit_thread_alloc_bytes": 2120216,
+      "metadata": {
+        "elapsed_ns": 197708900,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 48800000,
+        "counted": true
+      },
+      "encode_ns": 600.0,
+      "encode_calls": 5.0,
+      "encode_bytes": 648.0
+    },
+    {
+      "variant": "baseline",
+      "shape": "large",
+      "repeat": 1,
+      "attempts": 512,
+      "accepted": 512,
+      "rejected": 0,
+      "ops_s": 1322.1108843036775,
+      "all_p99_ms": 7.7607,
+      "accepted_p99_ms": 7.7607,
+      "maximum_ms": 7.7975,
+      "writer_preparation_p99_us": 5119.1,
+      "prepare_p99_us": 0.0,
+      "prepared_bytes": 0,
+      "discarded_bytes": 0,
+      "commit_thread_alloc_calls": 6102,
+      "commit_thread_alloc_bytes": 102762032,
+      "metadata": {
+        "elapsed_ns": 387259500,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 82223360,
+        "counted": true
+      },
+      "encode_ns": 31600.0,
+      "encode_calls": 5.0,
+      "encode_bytes": 131208.0
+    },
+    {
+      "variant": "baseline",
+      "shape": "large",
+      "repeat": 2,
+      "attempts": 512,
+      "accepted": 512,
+      "rejected": 0,
+      "ops_s": 1627.9157019464403,
+      "all_p99_ms": 3.9619,
+      "accepted_p99_ms": 3.9619,
+      "maximum_ms": 7.4203,
+      "writer_preparation_p99_us": 1523.2,
+      "prepare_p99_us": 0.0,
+      "prepared_bytes": 0,
+      "discarded_bytes": 0,
+      "commit_thread_alloc_calls": 6103,
+      "commit_thread_alloc_bytes": 102762408,
+      "metadata": {
+        "elapsed_ns": 314512600,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 82223360,
+        "counted": true
+      },
+      "encode_ns": 31800.0,
+      "encode_calls": 5.0,
+      "encode_bytes": 131208.0
+    },
+    {
+      "variant": "baseline",
+      "shape": "large",
+      "repeat": 3,
+      "attempts": 512,
+      "accepted": 512,
+      "rejected": 0,
+      "ops_s": 1806.0079393802148,
+      "all_p99_ms": 4.1846,
+      "accepted_p99_ms": 4.1846,
+      "maximum_ms": 4.3418,
+      "writer_preparation_p99_us": 879.2,
+      "prepare_p99_us": 0.0,
+      "prepared_bytes": 0,
+      "discarded_bytes": 0,
+      "commit_thread_alloc_calls": 6103,
+      "commit_thread_alloc_bytes": 102762408,
+      "metadata": {
+        "elapsed_ns": 283498200,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 82223360,
+        "counted": true
+      },
+      "encode_ns": 31700.0,
+      "encode_calls": 5.0,
+      "encode_bytes": 131208.0
+    },
+    {
+      "variant": "baseline",
+      "shape": "small",
+      "repeat": 1,
+      "attempts": 512,
+      "accepted": 512,
+      "rejected": 0,
+      "ops_s": 2621.539324881941,
+      "all_p99_ms": 2.2471,
+      "accepted_p99_ms": 2.2471,
+      "maximum_ms": 2.3675,
+      "writer_preparation_p99_us": 120.1,
+      "prepare_p99_us": 0.0,
+      "prepared_bytes": 0,
+      "discarded_bytes": 0,
+      "commit_thread_alloc_calls": 6101,
+      "commit_thread_alloc_bytes": 2491576,
+      "metadata": {
+        "elapsed_ns": 195305100,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 48800000,
+        "counted": true
+      },
+      "encode_ns": 600.0,
+      "encode_calls": 5.0,
+      "encode_bytes": 648.0
+    },
+    {
+      "variant": "baseline",
+      "shape": "small",
+      "repeat": 2,
+      "attempts": 512,
+      "accepted": 512,
+      "rejected": 0,
+      "ops_s": 2647.341076805983,
+      "all_p99_ms": 2.3042,
+      "accepted_p99_ms": 2.3042,
+      "maximum_ms": 2.9578,
+      "writer_preparation_p99_us": 276.3,
+      "prepare_p99_us": 0.0,
+      "prepared_bytes": 0,
+      "discarded_bytes": 0,
+      "commit_thread_alloc_calls": 6102,
+      "commit_thread_alloc_bytes": 2491952,
+      "metadata": {
+        "elapsed_ns": 193401600,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 48800000,
+        "counted": true
+      },
+      "encode_ns": 600.0,
+      "encode_calls": 5.0,
+      "encode_bytes": 648.0
+    },
+    {
+      "variant": "baseline",
+      "shape": "small",
+      "repeat": 3,
+      "attempts": 512,
+      "accepted": 512,
+      "rejected": 0,
+      "ops_s": 2590.2633417533757,
+      "all_p99_ms": 2.2954,
+      "accepted_p99_ms": 2.2954,
+      "maximum_ms": 11.6892,
+      "writer_preparation_p99_us": 87.6,
+      "prepare_p99_us": 0.0,
+      "prepared_bytes": 0,
+      "discarded_bytes": 0,
+      "commit_thread_alloc_calls": 6101,
+      "commit_thread_alloc_bytes": 2491576,
+      "metadata": {
+        "elapsed_ns": 197663300,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 48800000,
+        "counted": true
+      },
+      "encode_ns": 600.0,
+      "encode_calls": 5.0,
+      "encode_bytes": 648.0
+    },
+    {
+      "variant": "direct",
+      "shape": "hot",
+      "repeat": 1,
+      "attempts": 512,
+      "accepted": 128,
+      "rejected": 384,
+      "ops_s": 681.3065970172611,
+      "all_p99_ms": 2.2825,
+      "accepted_p99_ms": 2.2807,
+      "maximum_ms": 2.4462,
+      "writer_preparation_p99_us": 46.2,
+      "prepare_p99_us": 0.0,
+      "prepared_bytes": 0,
+      "discarded_bytes": 0,
+      "commit_thread_alloc_calls": 2827,
+      "commit_thread_alloc_bytes": 2076568,
+      "metadata": {
+        "elapsed_ns": 187874300,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 48800000,
+        "counted": true
+      },
+      "encode_ns": 300.0,
+      "encode_calls": 1.0,
+      "encode_bytes": 312.0
+    },
+    {
+      "variant": "direct",
+      "shape": "hot",
+      "repeat": 2,
+      "attempts": 512,
+      "accepted": 128,
+      "rejected": 384,
+      "ops_s": 673.0465874434747,
+      "all_p99_ms": 2.2737,
+      "accepted_p99_ms": 2.2729,
+      "maximum_ms": 3.7549,
+      "writer_preparation_p99_us": 8.3,
+      "prepare_p99_us": 0.0,
+      "prepared_bytes": 0,
+      "discarded_bytes": 0,
+      "commit_thread_alloc_calls": 2827,
+      "commit_thread_alloc_bytes": 2076568,
+      "metadata": {
+        "elapsed_ns": 190180000,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 48800000,
+        "counted": true
+      },
+      "encode_ns": 300.0,
+      "encode_calls": 1.0,
+      "encode_bytes": 312.0
+    },
+    {
+      "variant": "direct",
+      "shape": "hot",
+      "repeat": 3,
+      "attempts": 512,
+      "accepted": 128,
+      "rejected": 384,
+      "ops_s": 670.4993386676445,
+      "all_p99_ms": 2.2469,
+      "accepted_p99_ms": 2.2447,
+      "maximum_ms": 2.2493,
+      "writer_preparation_p99_us": 11.8,
+      "prepare_p99_us": 0.0,
+      "prepared_bytes": 0,
+      "discarded_bytes": 0,
+      "commit_thread_alloc_calls": 2827,
+      "commit_thread_alloc_bytes": 2076568,
+      "metadata": {
+        "elapsed_ns": 190902500,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 48800000,
+        "counted": true
+      },
+      "encode_ns": 400.0,
+      "encode_calls": 1.0,
+      "encode_bytes": 312.0
+    },
+    {
+      "variant": "direct",
+      "shape": "large",
+      "repeat": 1,
+      "attempts": 512,
+      "accepted": 512,
+      "rejected": 0,
+      "ops_s": 1449.0276232211204,
+      "all_p99_ms": 6.9969,
+      "accepted_p99_ms": 6.9969,
+      "maximum_ms": 7.6485,
+      "writer_preparation_p99_us": 4386.8,
+      "prepare_p99_us": 0.0,
+      "prepared_bytes": 0,
+      "discarded_bytes": 0,
+      "commit_thread_alloc_calls": 4055,
+      "commit_thread_alloc_bytes": 69164456,
+      "metadata": {
+        "elapsed_ns": 353340400,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 82223360,
+        "counted": true
+      },
+      "encode_ns": 28400.0,
+      "encode_calls": 1.0,
+      "encode_bytes": 65592.0
+    },
+    {
+      "variant": "direct",
+      "shape": "large",
+      "repeat": 2,
+      "attempts": 512,
+      "accepted": 512,
+      "rejected": 0,
+      "ops_s": 1530.27722227187,
+      "all_p99_ms": 4.462,
+      "accepted_p99_ms": 4.462,
+      "maximum_ms": 4.6467,
+      "writer_preparation_p99_us": 1384.7,
+      "prepare_p99_us": 0.0,
+      "prepared_bytes": 0,
+      "discarded_bytes": 0,
+      "commit_thread_alloc_calls": 4055,
+      "commit_thread_alloc_bytes": 69164456,
+      "metadata": {
+        "elapsed_ns": 334579900,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 82223360,
+        "counted": true
+      },
+      "encode_ns": 28500.0,
+      "encode_calls": 1.0,
+      "encode_bytes": 65592.0
+    },
+    {
+      "variant": "direct",
+      "shape": "large",
+      "repeat": 3,
+      "attempts": 512,
+      "accepted": 512,
+      "rejected": 0,
+      "ops_s": 1670.8759469248866,
+      "all_p99_ms": 3.7851,
+      "accepted_p99_ms": 3.7851,
+      "maximum_ms": 4.2686,
+      "writer_preparation_p99_us": 1008.1,
+      "prepare_p99_us": 0.0,
+      "prepared_bytes": 0,
+      "discarded_bytes": 0,
+      "commit_thread_alloc_calls": 4054,
+      "commit_thread_alloc_bytes": 69164080,
+      "metadata": {
+        "elapsed_ns": 306426100,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 82223360,
+        "counted": true
+      },
+      "encode_ns": 28800.0,
+      "encode_calls": 1.0,
+      "encode_bytes": 65592.0
+    },
+    {
+      "variant": "direct",
+      "shape": "small",
+      "repeat": 1,
+      "attempts": 512,
+      "accepted": 512,
+      "rejected": 0,
+      "ops_s": 2605.7372022423588,
+      "all_p99_ms": 2.4476,
+      "accepted_p99_ms": 2.4476,
+      "maximum_ms": 3.0693,
+      "writer_preparation_p99_us": 84.1,
+      "prepare_p99_us": 0.0,
+      "prepared_bytes": 0,
+      "discarded_bytes": 0,
+      "commit_thread_alloc_calls": 4055,
+      "commit_thread_alloc_bytes": 2317736,
+      "metadata": {
+        "elapsed_ns": 196489500,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 48800000,
+        "counted": true
+      },
+      "encode_ns": 400.0,
+      "encode_calls": 1.0,
+      "encode_bytes": 312.0
+    },
+    {
+      "variant": "direct",
+      "shape": "small",
+      "repeat": 2,
+      "attempts": 512,
+      "accepted": 512,
+      "rejected": 0,
+      "ops_s": 2601.5083667456092,
+      "all_p99_ms": 2.5029,
+      "accepted_p99_ms": 2.5029,
+      "maximum_ms": 2.5691,
+      "writer_preparation_p99_us": 102.4,
+      "prepare_p99_us": 0.0,
+      "prepared_bytes": 0,
+      "discarded_bytes": 0,
+      "commit_thread_alloc_calls": 4054,
+      "commit_thread_alloc_bytes": 2317360,
+      "metadata": {
+        "elapsed_ns": 196808900,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 48800000,
+        "counted": true
+      },
+      "encode_ns": 300.0,
+      "encode_calls": 1.0,
+      "encode_bytes": 312.0
+    },
+    {
+      "variant": "direct",
+      "shape": "small",
+      "repeat": 3,
+      "attempts": 512,
+      "accepted": 512,
+      "rejected": 0,
+      "ops_s": 2683.4747224018774,
+      "all_p99_ms": 2.261,
+      "accepted_p99_ms": 2.261,
+      "maximum_ms": 2.278,
+      "writer_preparation_p99_us": 84.9,
+      "prepare_p99_us": 0.0,
+      "prepared_bytes": 0,
+      "discarded_bytes": 0,
+      "commit_thread_alloc_calls": 4055,
+      "commit_thread_alloc_bytes": 2317736,
+      "metadata": {
+        "elapsed_ns": 190797400,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 48800000,
+        "counted": true
+      },
+      "encode_ns": 300.0,
+      "encode_calls": 1.0,
+      "encode_bytes": 312.0
+    },
+    {
+      "variant": "prepare",
+      "shape": "hot",
+      "repeat": 1,
+      "attempts": 512,
+      "accepted": 128,
+      "rejected": 384,
+      "ops_s": 651.8108119118426,
+      "all_p99_ms": 3.0536,
+      "accepted_p99_ms": 3.0522,
+      "maximum_ms": 3.1055,
+      "writer_preparation_p99_us": 9.2,
+      "prepare_p99_us": 2.1,
+      "prepared_bytes": 162304,
+      "discarded_bytes": 121728,
+      "commit_thread_alloc_calls": 3211,
+      "commit_thread_alloc_bytes": 2218776,
+      "metadata": {
+        "elapsed_ns": 196376000,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 48800000,
+        "counted": true
+      },
+      "encode_ns": 300.0,
+      "encode_calls": 1.0,
+      "encode_bytes": 312.0
+    },
+    {
+      "variant": "prepare",
+      "shape": "hot",
+      "repeat": 2,
+      "attempts": 512,
+      "accepted": 128,
+      "rejected": 384,
+      "ops_s": 646.7050378322447,
+      "all_p99_ms": 3.1088,
+      "accepted_p99_ms": 3.1086,
+      "maximum_ms": 3.2164,
+      "writer_preparation_p99_us": 12.3,
+      "prepare_p99_us": 2.0,
+      "prepared_bytes": 162304,
+      "discarded_bytes": 121728,
+      "commit_thread_alloc_calls": 3211,
+      "commit_thread_alloc_bytes": 2218776,
+      "metadata": {
+        "elapsed_ns": 197926400,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 48800000,
+        "counted": true
+      },
+      "encode_ns": 300.0,
+      "encode_calls": 1.0,
+      "encode_bytes": 312.0
+    },
+    {
+      "variant": "prepare",
+      "shape": "hot",
+      "repeat": 3,
+      "attempts": 512,
+      "accepted": 128,
+      "rejected": 384,
+      "ops_s": 671.6561624190535,
+      "all_p99_ms": 2.7002,
+      "accepted_p99_ms": 2.7,
+      "maximum_ms": 2.7093,
+      "writer_preparation_p99_us": 9.3,
+      "prepare_p99_us": 2.0,
+      "prepared_bytes": 162304,
+      "discarded_bytes": 121728,
+      "commit_thread_alloc_calls": 3211,
+      "commit_thread_alloc_bytes": 2218776,
+      "metadata": {
+        "elapsed_ns": 190573700,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 48800000,
+        "counted": true
+      },
+      "encode_ns": 300.0,
+      "encode_calls": 1.0,
+      "encode_bytes": 312.0
+    },
+    {
+      "variant": "prepare",
+      "shape": "large",
+      "repeat": 1,
+      "attempts": 512,
+      "accepted": 512,
+      "rejected": 0,
+      "ops_s": 1486.6045893109645,
+      "all_p99_ms": 8.0831,
+      "accepted_p99_ms": 8.0831,
+      "maximum_ms": 8.6665,
+      "writer_preparation_p99_us": 5267.2,
+      "prepare_p99_us": 99.0,
+      "prepared_bytes": 33585664,
+      "discarded_bytes": 0,
+      "commit_thread_alloc_calls": 4055,
+      "commit_thread_alloc_bytes": 69184936,
+      "metadata": {
+        "elapsed_ns": 344409000,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 82223360,
+        "counted": true
+      },
+      "encode_ns": 28100.0,
+      "encode_calls": 1.0,
+      "encode_bytes": 65592.0
+    },
+    {
+      "variant": "prepare",
+      "shape": "large",
+      "repeat": 2,
+      "attempts": 512,
+      "accepted": 512,
+      "rejected": 0,
+      "ops_s": 1587.2828879124067,
+      "all_p99_ms": 4.3324,
+      "accepted_p99_ms": 4.3324,
+      "maximum_ms": 4.3922,
+      "writer_preparation_p99_us": 2101.0,
+      "prepare_p99_us": 103.2,
+      "prepared_bytes": 33585664,
+      "discarded_bytes": 0,
+      "commit_thread_alloc_calls": 4055,
+      "commit_thread_alloc_bytes": 69184936,
+      "metadata": {
+        "elapsed_ns": 322563800,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 82223360,
+        "counted": true
+      },
+      "encode_ns": 28900.0,
+      "encode_calls": 1.0,
+      "encode_bytes": 65592.0
+    },
+    {
+      "variant": "prepare",
+      "shape": "large",
+      "repeat": 3,
+      "attempts": 512,
+      "accepted": 512,
+      "rejected": 0,
+      "ops_s": 1651.2166112391092,
+      "all_p99_ms": 4.6704,
+      "accepted_p99_ms": 4.6704,
+      "maximum_ms": 4.7681,
+      "writer_preparation_p99_us": 1000.9,
+      "prepare_p99_us": 97.2,
+      "prepared_bytes": 33585664,
+      "discarded_bytes": 0,
+      "commit_thread_alloc_calls": 4054,
+      "commit_thread_alloc_bytes": 69184560,
+      "metadata": {
+        "elapsed_ns": 310074400,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 82223360,
+        "counted": true
+      },
+      "encode_ns": 28600.0,
+      "encode_calls": 1.0,
+      "encode_bytes": 65592.0
+    },
+    {
+      "variant": "prepare",
+      "shape": "small",
+      "repeat": 1,
+      "attempts": 512,
+      "accepted": 512,
+      "rejected": 0,
+      "ops_s": 2572.0293814168867,
+      "all_p99_ms": 3.0578,
+      "accepted_p99_ms": 3.0578,
+      "maximum_ms": 3.1661,
+      "writer_preparation_p99_us": 93.1,
+      "prepare_p99_us": 2.9,
+      "prepared_bytes": 162304,
+      "discarded_bytes": 0,
+      "commit_thread_alloc_calls": 4053,
+      "commit_thread_alloc_bytes": 2337464,
+      "metadata": {
+        "elapsed_ns": 199064600,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 48800000,
+        "counted": true
+      },
+      "encode_ns": 300.0,
+      "encode_calls": 1.0,
+      "encode_bytes": 312.0
+    },
+    {
+      "variant": "prepare",
+      "shape": "small",
+      "repeat": 2,
+      "attempts": 512,
+      "accepted": 512,
+      "rejected": 0,
+      "ops_s": 2372.559495868178,
+      "all_p99_ms": 3.7051,
+      "accepted_p99_ms": 3.7051,
+      "maximum_ms": 11.5555,
+      "writer_preparation_p99_us": 91.7,
+      "prepare_p99_us": 2.1,
+      "prepared_bytes": 162304,
+      "discarded_bytes": 0,
+      "commit_thread_alloc_calls": 4055,
+      "commit_thread_alloc_bytes": 2338216,
+      "metadata": {
+        "elapsed_ns": 215800700,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 48800000,
+        "counted": true
+      },
+      "encode_ns": 300.0,
+      "encode_calls": 1.0,
+      "encode_bytes": 312.0
+    },
+    {
+      "variant": "prepare",
+      "shape": "small",
+      "repeat": 3,
+      "attempts": 512,
+      "accepted": 512,
+      "rejected": 0,
+      "ops_s": 2615.923206304375,
+      "all_p99_ms": 2.3763,
+      "accepted_p99_ms": 2.3763,
+      "maximum_ms": 3.0781,
+      "writer_preparation_p99_us": 84.5,
+      "prepare_p99_us": 1.9,
+      "prepared_bytes": 162304,
+      "discarded_bytes": 0,
+      "commit_thread_alloc_calls": 4054,
+      "commit_thread_alloc_bytes": 2337840,
+      "metadata": {
+        "elapsed_ns": 195724400,
+        "attempted": 512,
+        "sync_attempts_including_seed": 226,
+        "buffer_peak": 48800000,
+        "counted": true
+      },
+      "encode_ns": 300.0,
+      "encode_calls": 1.0,
+      "encode_bytes": 312.0
+    }
+  ]
+}

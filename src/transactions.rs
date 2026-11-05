@@ -332,6 +332,8 @@ impl KeyRange {
 }
 
 pub struct Transaction {
+    #[cfg(feature = "wal-prepare")]
+    prepared: Option<PreparedFrame>,
     database: Database,
     snapshot: u64,
     read_only: bool,
@@ -1047,6 +1049,8 @@ impl Database {
             let snapshot = state.sequence;
             *state.active.entry(snapshot).or_default() += 1;
             Ok(Transaction {
+                #[cfg(feature = "wal-prepare")]
+                prepared: None,
                 database: self.clone(),
                 snapshot,
                 read_only,
@@ -1107,6 +1111,36 @@ impl Database {
 }
 
 impl Transaction {
+    #[cfg(feature = "wal-prepare")]
+    fn prepare_log(&mut self) -> Result<()> {
+        if self.writes.is_empty() || self.prepared.is_some() {
+            return Ok(());
+        }
+        let permit = self.reserve_buffer(
+            self.write_bytes * 4 + PREFIX_BYTES + TRAILER_BYTES + 64 * self.writes.len(),
+        )?;
+        let frame = prepare_frame(&self.writes);
+        self.prepared = Some(PreparedFrame {
+            frame,
+            permit: Some(permit),
+        });
+        Ok(())
+    }
+
+    fn commit_frame(&mut self, sequence: u64, extra: usize) -> Result<(Vec<u8>, BufferPermit)> {
+        #[cfg(feature = "wal-prepare")]
+        if let Some(mut prepared) = self.prepared.take() {
+            finish_frame(&mut prepared.frame, sequence);
+            return Ok((
+                std::mem::take(&mut prepared.frame),
+                prepared.permit.take().unwrap(),
+            ));
+        }
+        let permit =
+            self.reserve_buffer(self.write_bytes * 4 + PREFIX_BYTES + TRAILER_BYTES + extra)?;
+        Ok((encode_frame(sequence, &self.writes), permit))
+    }
+
     pub(crate) fn reserve_buffer(&self, bytes: usize) -> Result<BufferPermit> {
         let mut permit = self.database.inner.budget.buffer();
         permit.add(bytes)?;
@@ -1511,6 +1545,8 @@ impl Transaction {
             trace_mark(1);
             trace_mark(2);
         }
+        #[cfg(feature = "wal-prepare")]
+        self.prepare_log()?;
         let _writer = database.inner.writer.lock().map_err(|_| Error::Poisoned)?;
         #[cfg(feature = "lock-timing")]
         trace_mark(3);
@@ -1521,8 +1557,7 @@ impl Transaction {
             .checked_add(1)
             .ok_or(Error::Limit("commit sequence"))?;
         state.check_retained(&self.writes)?;
-        let _buffer = self.reserve_buffer(self.write_bytes * 4 + PREFIX_BYTES + TRAILER_BYTES)?;
-        let frame = encode_frame(sequence, &self.writes);
+        let (frame, _buffer) = self.commit_frame(sequence, 0)?;
         let bytes = state
             .wal_bytes
             .checked_add(frame.len() as u64)
@@ -1834,7 +1869,62 @@ fn read_u32(bytes: &[u8], at: usize) -> u32 {
     u32::from_le_bytes(bytes[at..at + 4].try_into().unwrap())
 }
 
+#[cfg(not(feature = "wal-direct"))]
 fn encode_frame(sequence: u64, writes: &BTreeMap<Vec<u8>, Option<Vec<u8>>>) -> Vec<u8> {
+    encode_frame_legacy(sequence, writes)
+}
+
+#[cfg(feature = "wal-prepare")]
+struct PreparedFrame {
+    frame: Vec<u8>,
+    permit: Option<BufferPermit>,
+}
+
+#[cfg(feature = "wal-direct")]
+fn prepare_frame(writes: &BTreeMap<Vec<u8>, Option<Vec<u8>>>) -> Vec<u8> {
+    let length = 12
+        + writes
+            .iter()
+            .map(|(k, v)| operation_size(k, v.as_deref()))
+            .sum::<usize>();
+    let mut frame = Vec::with_capacity(PREFIX_BYTES + length + TRAILER_BYTES);
+    frame.extend_from_slice(FRAME);
+    frame.extend_from_slice(&(length as u32).to_le_bytes());
+    frame.extend_from_slice(&(!(length as u32)).to_le_bytes());
+    frame.extend_from_slice(&crate::crc32(&frame).to_le_bytes());
+    frame.extend_from_slice(&0u64.to_le_bytes());
+    frame.extend_from_slice(&(writes.len() as u32).to_le_bytes());
+    for (key, value) in writes {
+        frame.push(u8::from(value.is_some()));
+        frame.extend_from_slice(&(key.len() as u32).to_le_bytes());
+        frame.extend_from_slice(&(value.as_ref().map_or(0, Vec::len) as u32).to_le_bytes());
+        frame.extend_from_slice(key);
+        if let Some(value) = value {
+            frame.extend_from_slice(value);
+        }
+    }
+    frame.extend_from_slice(&0u32.to_le_bytes());
+    frame.extend_from_slice(SEAL);
+    frame
+}
+
+#[cfg(feature = "wal-direct")]
+fn finish_frame(frame: &mut [u8], sequence: u64) {
+    let end = frame.len() - TRAILER_BYTES;
+    frame[PREFIX_BYTES..PREFIX_BYTES + 8].copy_from_slice(&sequence.to_le_bytes());
+    let crc = crate::crc32(&frame[PREFIX_BYTES..end]);
+    frame[end..end + 4].copy_from_slice(&crc.to_le_bytes());
+}
+
+#[cfg(feature = "wal-direct")]
+fn encode_frame(sequence: u64, writes: &BTreeMap<Vec<u8>, Option<Vec<u8>>>) -> Vec<u8> {
+    let mut frame = prepare_frame(writes);
+    finish_frame(&mut frame, sequence);
+    frame
+}
+
+#[cfg(any(not(feature = "wal-direct"), test))]
+fn encode_frame_legacy(sequence: u64, writes: &BTreeMap<Vec<u8>, Option<Vec<u8>>>) -> Vec<u8> {
     let mut body = Vec::new();
     body.extend_from_slice(&sequence.to_le_bytes());
     body.extend_from_slice(&(writes.len() as u32).to_le_bytes());
@@ -1917,6 +2007,160 @@ impl<'a> Decoder<'a> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn wal_preparation_eq_encoding_matches_legacy_bytes_and_decoding() {
+        for n in [0u64, 1, 2, 17, 100] {
+            let mut writes = BTreeMap::new();
+            for i in 0..n {
+                writes.insert(
+                    i.to_be_bytes().to_vec(),
+                    if i % 3 == 0 {
+                        None
+                    } else {
+                        Some(vec![i as u8; if i % 5 == 0 { 65536 } else { i as usize }])
+                    },
+                );
+            }
+            writes.insert(vec![], Some(vec![]));
+            writes.insert(vec![255; MAX_KEY_BYTES], Some(vec![7; 256]));
+            for seq in [0, 1, u64::MAX] {
+                let expected = encode_frame_legacy(seq, &writes);
+                assert_eq!(encode_frame(seq, &writes), expected);
+                let body = &expected[PREFIX_BYTES..expected.len() - TRAILER_BYTES];
+                let (got_seq, got_writes) = decode_frame(body).unwrap();
+                assert_eq!(got_seq, seq);
+                assert_eq!(got_writes, writes);
+            }
+        }
+    }
+
+    #[cfg(feature = "wal-prepare")]
+    #[test]
+    fn wal_preparation_bv_er_reservation_rejection_and_drop_restore_capacity() {
+        let key = b"key";
+        let value = [3; 256];
+        let body = 12 + operation_size(key, Some(&value));
+        let needed = 4 * body + PREFIX_BYTES + TRAILER_BYTES + 64;
+        for limit in [needed - 1, needed, needed + 1] {
+            let f = Fixture::new();
+            let db = Database::create_with_limits(
+                &f.0,
+                [110; 16],
+                ResourceLimits {
+                    max_buffer_bytes: limit,
+                    ..ResourceLimits::default()
+                },
+            )
+            .unwrap();
+            let mut tx = db.begin().unwrap();
+            tx.put(key, &value).unwrap();
+            let result = tx.prepare_log();
+            if limit < needed {
+                assert!(matches!(result, Err(Error::ResourceExhausted(_))));
+                assert!(tx.prepared.is_none());
+                assert_eq!(
+                    tx.writes.get(key.as_slice()).unwrap().as_deref(),
+                    Some(value.as_slice())
+                );
+            } else {
+                result.unwrap();
+                assert_eq!(
+                    db.resource_usage().unwrap().current[crate::resources::BUFFER],
+                    needed
+                );
+                tx.prepare_log().unwrap();
+                assert_eq!(
+                    db.resource_usage().unwrap().current[crate::resources::BUFFER],
+                    needed
+                );
+            }
+            drop(tx);
+            assert_eq!(
+                db.resource_usage().unwrap().current[crate::resources::BUFFER],
+                0
+            );
+            assert_eq!(db.resource_usage().unwrap().current[STAGED], 0);
+            let mut next = db.begin().unwrap();
+            next.put(b"x", b"y").unwrap();
+            next.commit().unwrap();
+        }
+    }
+
+    #[cfg(feature = "wal-prepare")]
+    #[test]
+    fn wal_preparation_st_prepares_before_writer_lock_without_early_publication() {
+        let f = Fixture::new();
+        let db = Database::create(&f.0, [111; 16]).unwrap();
+        let mut old = db.begin_read().unwrap();
+        let guard = db.inner.writer.lock().unwrap();
+        let other = db.clone();
+        let (send, recv) = std::sync::mpsc::channel();
+        let child = std::thread::spawn(move || {
+            let mut tx = other.begin().unwrap();
+            tx.put(b"k", b"v").unwrap();
+            tx.prepare_log().unwrap();
+            send.send(()).unwrap();
+            tx.commit().unwrap()
+        });
+        recv.recv_timeout(std::time::Duration::from_secs(2))
+            .unwrap();
+        assert_eq!(old.get(b"k").unwrap(), None);
+        assert_eq!(db.current_version().unwrap(), 0);
+        drop(guard);
+        assert_eq!(child.join().unwrap(), 1);
+        assert_eq!(old.get(b"k").unwrap(), None);
+        drop(old);
+        assert_eq!(
+            db.begin_read().unwrap().get(b"k").unwrap(),
+            Some(b"v".to_vec())
+        );
+        assert_eq!(
+            db.resource_usage().unwrap().current[crate::resources::BUFFER],
+            0
+        );
+        drop(db);
+        assert_eq!(
+            Database::open(&f.0)
+                .unwrap()
+                .begin_read()
+                .unwrap()
+                .get(b"k")
+                .unwrap(),
+            Some(b"v".to_vec())
+        );
+    }
+
+    #[cfg(feature = "wal-prepare")]
+    #[test]
+    fn wal_preparation_st_conflict_discards_only_uncommitted_preparation() {
+        let f = Fixture::new();
+        let db = Database::create(&f.0, [112; 16]).unwrap();
+        let mut loser = db.begin().unwrap();
+        loser.put(b"k", b"loser").unwrap();
+        loser.prepare_log().unwrap();
+        let mut winner = db.begin().unwrap();
+        winner.put(b"k", b"winner").unwrap();
+        winner.commit().unwrap();
+        assert!(matches!(
+            loser.commit(),
+            Err(Error::Conflict(ConflictKind::Write))
+        ));
+        assert_eq!(
+            db.resource_usage().unwrap().current[crate::resources::BUFFER],
+            0
+        );
+        drop(db);
+        assert_eq!(
+            Database::open(&f.0)
+                .unwrap()
+                .begin_read()
+                .unwrap()
+                .get(b"k")
+                .unwrap(),
+            Some(b"winner".to_vec())
+        );
+    }
+
     #[test]
     fn copy_scan_eq_st_shared_rows_match_owned_ranges_and_survive_mutation() {
         let f = Fixture::new();
@@ -3647,3 +3891,7 @@ mod scan_merge_bench;
 #[cfg(test)]
 #[path = "../benchmarks/scan-copy/engine_bench.rs"]
 mod scan_copy_bench;
+
+#[cfg(all(test, feature = "lock-timing"))]
+#[path = "../benchmarks/wal-preparation/engine_bench.rs"]
+mod wal_preparation_bench;

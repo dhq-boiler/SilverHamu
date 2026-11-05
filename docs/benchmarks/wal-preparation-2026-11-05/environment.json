@@ -1,0 +1,46 @@
+{
+  "date": "2026-11-05",
+  "baseline_commit": "f6b1fa840b5158ebbc31cf3603892633865f5ee7",
+  "host": "Windows-10-10.0.26100-SP0",
+  "cpu": "AMD Ryzen 9 5950X 16-Core Processor",
+  "service_compiler": "Rust 1.89 / Debian bookworm container",
+  "aux_compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+  "source_sha256": {
+    "baseline-transactions.rs": "c1b929338f5e040bf983d606a5680a01d33a3cb26b7e93ab92fce7ddc8de634b",
+    "baseline-group_commit.rs": "92e225455e470ff42f30e16d3631ef2c1271567e3dc8786cf3dbf43b527123e7",
+    "baseline-service.rs": "970b760030866fe3b77390a16ee1cc148fcea9af5ae5dc36149e1d45dba05103",
+    "baseline-resources.rs": "25dfd649cc9a2ece00989cc4cd20fff438ac4045dfdfa79e6907167eb9b82b2f",
+    "baseline-Cargo.toml": "d2aee8bb41bc554baae1e1dc3770c8afdfa502bc05f9d764e7bd5c6c471e9143",
+    "baseline-Cargo.lock": "df9a4a2f931c9a3e3d2d1076aea9650b9297334ec81f574cb2f333d77dc5bef6",
+    "candidate-transactions.rs": "7d08706d7a9b790b9f6f73f95779e91e976d3dc54f152f7527e60bb1f597a603",
+    "candidate-group_commit.rs": "5249bd4c3df6bb6d967b5aef082462554a2f4094316b92cdc77a3677f230d32a",
+    "candidate-service.rs": "970b760030866fe3b77390a16ee1cc148fcea9af5ae5dc36149e1d45dba05103",
+    "candidate-resources.rs": "25dfd649cc9a2ece00989cc4cd20fff438ac4045dfdfa79e6907167eb9b82b2f",
+    "candidate-Cargo.toml": "ca24a2b890e9d813787a76709201fa76ea72a205f9efd19b01ec4fe6fc2604e1",
+    "candidate-Cargo.lock": "df9a4a2f931c9a3e3d2d1076aea9650b9297334ec81f574cb2f333d77dc5bef6",
+    "engine_bench.rs": "af6cf7f74ddaf8eea6103fb1177b8509cda194f7e2948eb3a4075fd5096d117b"
+  },
+  "git_lf_source_sha256": {
+    "baseline-transactions.rs": "c1b929338f5e040bf983d606a5680a01d33a3cb26b7e93ab92fce7ddc8de634b",
+    "baseline-group_commit.rs": "92e225455e470ff42f30e16d3631ef2c1271567e3dc8786cf3dbf43b527123e7",
+    "baseline-service.rs": "970b760030866fe3b77390a16ee1cc148fcea9af5ae5dc36149e1d45dba05103",
+    "baseline-resources.rs": "25dfd649cc9a2ece00989cc4cd20fff438ac4045dfdfa79e6907167eb9b82b2f",
+    "baseline-Cargo.toml": "d2aee8bb41bc554baae1e1dc3770c8afdfa502bc05f9d764e7bd5c6c471e9143",
+    "baseline-Cargo.lock": "df9a4a2f931c9a3e3d2d1076aea9650b9297334ec81f574cb2f333d77dc5bef6",
+    "candidate-transactions.rs": "7d08706d7a9b790b9f6f73f95779e91e976d3dc54f152f7527e60bb1f597a603",
+    "candidate-group_commit.rs": "5249bd4c3df6bb6d967b5aef082462554a2f4094316b92cdc77a3677f230d32a",
+    "candidate-service.rs": "970b760030866fe3b77390a16ee1cc148fcea9af5ae5dc36149e1d45dba05103",
+    "candidate-resources.rs": "25dfd649cc9a2ece00989cc4cd20fff438ac4045dfdfa79e6907167eb9b82b2f",
+    "candidate-Cargo.toml": "449920200af43079a7adad684215cc7aa256e8cb0d50602e920f98cd267b0e9b",
+    "candidate-Cargo.lock": "df9a4a2f931c9a3e3d2d1076aea9650b9297334ec81f574cb2f333d77dc5bef6",
+    "engine_bench.rs": "af6cf7f74ddaf8eea6103fb1177b8509cda194f7e2948eb3a4075fd5096d117b"
+  },
+  "aux_binary_sha256": {
+    "baseline": "be3bece52be57bac280ef6fa60541ca80a9ed27ae24302b0f0bc3e47cbd0df6b",
+    "direct": "aa8e9c52234fd499e20b24e60a584df7dad4ca86b26b3915e29ccd3b2ca277bf",
+    "prepare": "e8ad485d29e606049700cc81170c708d6ff186ad90c3be0fae52e869f576ba30"
+  },
+  "service_instrumentation": "disabled",
+  "aux_instrumentation": "lock-timing and CATDB_ELISION_ALLOC=1; timing overhead not separately quantified",
+  "client_image_id": "sha256:39802503b80b1a6c6f55632fb407b2a47d410316450c48fab246be81adf22f38"
+}

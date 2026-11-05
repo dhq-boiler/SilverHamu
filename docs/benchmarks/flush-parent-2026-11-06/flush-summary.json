@@ -1,0 +1,821 @@
+[
+  {
+    "case": "candidate-profile-trace-r1-c4-rate800-normal",
+    "valid": true,
+    "callbacks": 4482,
+    "members": 4480,
+    "journal_members": 4480,
+    "unknown_members": 0,
+    "shared_callbacks": 0,
+    "empty_callbacks": 2,
+    "missing_dispatch": 0,
+    "syncs": 2239,
+    "max_dispatch_to_callback_ms": 10.612,
+    "unresolved_dispatches": 0,
+    "gate": true,
+    "worst_sync": {
+      "tid": 2229,
+      "start_ns": 89457957609000,
+      "scheduled_ns": 72000,
+      "runnable_ns": 8000,
+      "blocked_ns": 12258000,
+      "io_stack_blocked_ns": 0,
+      "other_blocked_ns": 12258000,
+      "stacks": [
+        {
+          "start_ns": 89457957655000,
+          "end_ns": 89457957786000,
+          "kind": "other_blocked_ns",
+          "stack": []
+        },
+        {
+          "start_ns": 89457957792000,
+          "end_ns": 89457957827000,
+          "kind": "other_blocked_ns",
+          "stack": []
+        },
+        {
+          "start_ns": 89457957846000,
+          "end_ns": 89457969938000,
+          "kind": "other_blocked_ns",
+          "stack": []
+        }
+      ],
+      "end_ns": 89457969947000,
+      "duration_ns": 12338000,
+      "return": "0x0"
+    },
+    "worst_journal": {
+      "tid": 2020,
+      "device": "8,64",
+      "transaction": 3251171,
+      "start_ns": 89457957866000,
+      "scheduled_ns": 45000,
+      "runnable_ns": 10000,
+      "blocked_ns": 11991000,
+      "phases": [
+        [
+          "start",
+          89457957866000
+        ],
+        [
+          "locking",
+          89457957866000
+        ],
+        [
+          "flushing",
+          89457957868000
+        ],
+        [
+          "logging",
+          89457957869000
+        ],
+        [
+          "end",
+          89457969912000
+        ]
+      ],
+      "end_ns": 89457969912000,
+      "duration_ns": 12046000
+    },
+    "worst_flush": {
+      "flush": "R000005",
+      "dispatch": [
+        2987,
+        89457957999000
+      ],
+      "entry_ns": 89457968611000,
+      "members": [
+        {
+          "parent": {
+            "slot": "R000321",
+            "insertion": 27,
+            "ns": 89457957991000,
+            "journal": {
+              "device": "8,64",
+              "transaction": 3251171
+            }
+          },
+          "slot": "R000321",
+          "phase": 1,
+          "ns": 89457968612000,
+          "error": 0,
+          "queue": "R000004"
+        }
+      ],
+      "error": 0,
+      "return_ns": 89457968619000
+    },
+    "max_journal_runnable_ns": 232000,
+    "worst_journal_flushes": [
+      {
+        "flush": "R000005",
+        "dispatch": [
+          2987,
+          89457957999000
+        ],
+        "entry_ns": 89457968611000,
+        "members": [
+          {
+            "parent": {
+              "slot": "R000321",
+              "insertion": 27,
+              "ns": 89457957991000,
+              "journal": {
+                "device": "8,64",
+                "transaction": 3251171
+              }
+            },
+            "slot": "R000321",
+            "phase": 1,
+            "ns": 89457968612000,
+            "error": 0,
+            "queue": "R000004"
+          }
+        ],
+        "error": 0,
+        "return_ns": 89457968619000
+      },
+      {
+        "flush": "R000005",
+        "dispatch": [
+          2988,
+          89457968767000
+        ],
+        "entry_ns": 89457969892000,
+        "members": [
+          {
+            "parent": {
+              "slot": "R000321",
+              "insertion": 27,
+              "ns": 89457957991000,
+              "journal": {
+                "device": "8,64",
+                "transaction": 3251171
+              }
+            },
+            "slot": "R000321",
+            "phase": 4,
+            "ns": 89457969892000,
+            "error": 0,
+            "queue": "R000004"
+          }
+        ],
+        "error": 0,
+        "return_ns": 89457969901000
+      }
+    ]
+  },
+  {
+    "case": "candidate-profile-trace-r1-c1-rate200-normal",
+    "valid": true,
+    "callbacks": 15987,
+    "members": 15982,
+    "journal_members": 15982,
+    "unknown_members": 0,
+    "shared_callbacks": 0,
+    "empty_callbacks": 5,
+    "missing_dispatch": 0,
+    "syncs": 7988,
+    "max_dispatch_to_callback_ms": 13.451,
+    "unresolved_dispatches": 0,
+    "gate": true,
+    "worst_sync": {
+      "tid": 2348,
+      "start_ns": 89472066377000,
+      "scheduled_ns": 36000,
+      "runnable_ns": 8000,
+      "blocked_ns": 20369000,
+      "io_stack_blocked_ns": 0,
+      "other_blocked_ns": 20369000,
+      "stacks": [
+        {
+          "start_ns": 89472066394000,
+          "end_ns": 89472066480000,
+          "kind": "other_blocked_ns",
+          "stack": []
+        },
+        {
+          "start_ns": 89472066498000,
+          "end_ns": 89472086781000,
+          "kind": "other_blocked_ns",
+          "stack": []
+        }
+      ],
+      "end_ns": 89472086790000,
+      "duration_ns": 20413000,
+      "return": "0x0"
+    },
+    "worst_journal": {
+      "tid": 2020,
+      "device": "8,64",
+      "transaction": 3253131,
+      "start_ns": 89472066505000,
+      "scheduled_ns": 36000,
+      "runnable_ns": 11000,
+      "blocked_ns": 20201000,
+      "phases": [
+        [
+          "start",
+          89472066505000
+        ],
+        [
+          "locking",
+          89472066505000
+        ],
+        [
+          "flushing",
+          89472066507000
+        ],
+        [
+          "logging",
+          89472066508000
+        ],
+        [
+          "end",
+          89472086753000
+        ]
+      ],
+      "end_ns": 89472086753000,
+      "duration_ns": 20248000
+    },
+    "worst_flush": {
+      "flush": "R000133",
+      "dispatch": [
+        2183,
+        89472066610000
+      ],
+      "entry_ns": 89472080061000,
+      "members": [
+        {
+          "parent": {
+            "slot": "R000146",
+            "insertion": 2,
+            "ns": 89472066604000,
+            "journal": {
+              "device": "8,64",
+              "transaction": 3253131
+            }
+          },
+          "slot": "R000146",
+          "phase": 1,
+          "ns": 89472080063000,
+          "error": 0,
+          "queue": "R000132"
+        }
+      ],
+      "error": 0,
+      "return_ns": 89472080069000
+    },
+    "max_journal_runnable_ns": 270000,
+    "worst_journal_flushes": [
+      {
+        "flush": "R000133",
+        "dispatch": [
+          2183,
+          89472066610000
+        ],
+        "entry_ns": 89472080061000,
+        "members": [
+          {
+            "parent": {
+              "slot": "R000146",
+              "insertion": 2,
+              "ns": 89472066604000,
+              "journal": {
+                "device": "8,64",
+                "transaction": 3253131
+              }
+            },
+            "slot": "R000146",
+            "phase": 1,
+            "ns": 89472080063000,
+            "error": 0,
+            "queue": "R000132"
+          }
+        ],
+        "error": 0,
+        "return_ns": 89472080069000
+      },
+      {
+        "flush": "R000133",
+        "dispatch": [
+          2184,
+          89472084823000
+        ],
+        "entry_ns": 89472086731000,
+        "members": [
+          {
+            "parent": {
+              "slot": "R000146",
+              "insertion": 2,
+              "ns": 89472066604000,
+              "journal": {
+                "device": "8,64",
+                "transaction": 3253131
+              }
+            },
+            "slot": "R000146",
+            "phase": 4,
+            "ns": 89472086732000,
+            "error": 0,
+            "queue": "R000132"
+          }
+        ],
+        "error": 0,
+        "return_ns": 89472086743000
+      }
+    ]
+  },
+  {
+    "case": "candidate-profile-trace-r2-c4-rate800-normal",
+    "valid": true,
+    "callbacks": 4506,
+    "members": 4504,
+    "journal_members": 4504,
+    "unknown_members": 0,
+    "shared_callbacks": 0,
+    "empty_callbacks": 2,
+    "missing_dispatch": 0,
+    "syncs": 2250,
+    "max_dispatch_to_callback_ms": 10.906,
+    "unresolved_dispatches": 0,
+    "gate": true,
+    "worst_sync": {
+      "tid": 2803,
+      "start_ns": 89528263409000,
+      "scheduled_ns": 40000,
+      "runnable_ns": 8000,
+      "blocked_ns": 12381000,
+      "io_stack_blocked_ns": 0,
+      "other_blocked_ns": 12381000,
+      "stacks": [
+        {
+          "start_ns": 89528263431000,
+          "end_ns": 89528263536000,
+          "kind": "other_blocked_ns",
+          "stack": []
+        },
+        {
+          "start_ns": 89528263552000,
+          "end_ns": 89528275828000,
+          "kind": "other_blocked_ns",
+          "stack": []
+        }
+      ],
+      "end_ns": 89528275838000,
+      "duration_ns": 12429000,
+      "return": "0x0"
+    },
+    "worst_journal": {
+      "tid": 2020,
+      "device": "8,64",
+      "transaction": 3261646,
+      "start_ns": 89528263562000,
+      "scheduled_ns": 41000,
+      "runnable_ns": 15000,
+      "blocked_ns": 12183000,
+      "phases": [
+        [
+          "start",
+          89528263562000
+        ],
+        [
+          "locking",
+          89528263563000
+        ],
+        [
+          "flushing",
+          89528263565000
+        ],
+        [
+          "logging",
+          89528263566000
+        ],
+        [
+          "end",
+          89528275801000
+        ]
+      ],
+      "end_ns": 89528275801000,
+      "duration_ns": 12239000
+    },
+    "worst_flush": {
+      "flush": "R000005",
+      "dispatch": [
+        3082,
+        89528264868000
+      ],
+      "entry_ns": 89528275774000,
+      "members": [
+        {
+          "parent": {
+            "slot": "R000561",
+            "insertion": 15,
+            "ns": 89528263664000,
+            "journal": {
+              "device": "8,64",
+              "transaction": 3261646
+            }
+          },
+          "slot": "R000561",
+          "phase": 4,
+          "ns": 89528275776000,
+          "error": 0,
+          "queue": "R000004"
+        }
+      ],
+      "error": 0,
+      "return_ns": 89528275789000
+    },
+    "max_journal_runnable_ns": 65000,
+    "worst_journal_flushes": [
+      {
+        "flush": "R000005",
+        "dispatch": [
+          3081,
+          89528263670000
+        ],
+        "entry_ns": 89528264778000,
+        "members": [
+          {
+            "parent": {
+              "slot": "R000561",
+              "insertion": 15,
+              "ns": 89528263664000,
+              "journal": {
+                "device": "8,64",
+                "transaction": 3261646
+              }
+            },
+            "slot": "R000561",
+            "phase": 1,
+            "ns": 89528264778000,
+            "error": 0,
+            "queue": "R000004"
+          }
+        ],
+        "error": 0,
+        "return_ns": 89528264782000
+      },
+      {
+        "flush": "R000005",
+        "dispatch": [
+          3082,
+          89528264868000
+        ],
+        "entry_ns": 89528275774000,
+        "members": [
+          {
+            "parent": {
+              "slot": "R000561",
+              "insertion": 15,
+              "ns": 89528263664000,
+              "journal": {
+                "device": "8,64",
+                "transaction": 3261646
+              }
+            },
+            "slot": "R000561",
+            "phase": 4,
+            "ns": 89528275776000,
+            "error": 0,
+            "queue": "R000004"
+          }
+        ],
+        "error": 0,
+        "return_ns": 89528275789000
+      }
+    ]
+  },
+  {
+    "case": "candidate-profile-trace-r2-c1-rate200-normal",
+    "valid": true,
+    "callbacks": 16001,
+    "members": 15998,
+    "journal_members": 15998,
+    "unknown_members": 0,
+    "shared_callbacks": 0,
+    "empty_callbacks": 3,
+    "missing_dispatch": 0,
+    "syncs": 7996,
+    "max_dispatch_to_callback_ms": 10.886,
+    "unresolved_dispatches": 0,
+    "gate": true,
+    "worst_sync": {
+      "tid": 2921,
+      "start_ns": 89573219089000,
+      "scheduled_ns": 39000,
+      "runnable_ns": 7000,
+      "blocked_ns": 12961000,
+      "io_stack_blocked_ns": 0,
+      "other_blocked_ns": 12961000,
+      "stacks": [
+        {
+          "start_ns": 89573219111000,
+          "end_ns": 89573219221000,
+          "kind": "other_blocked_ns",
+          "stack": []
+        },
+        {
+          "start_ns": 89573219236000,
+          "end_ns": 89573232087000,
+          "kind": "other_blocked_ns",
+          "stack": []
+        }
+      ],
+      "end_ns": 89573232096000,
+      "duration_ns": 13007000,
+      "return": "0x0"
+    },
+    "worst_journal": {
+      "tid": 2020,
+      "device": "8,64",
+      "transaction": 3269736,
+      "start_ns": 89573219243000,
+      "scheduled_ns": 39000,
+      "runnable_ns": 15000,
+      "blocked_ns": 12762000,
+      "phases": [
+        [
+          "start",
+          89573219243000
+        ],
+        [
+          "locking",
+          89573219244000
+        ],
+        [
+          "flushing",
+          89573219246000
+        ],
+        [
+          "logging",
+          89573219247000
+        ],
+        [
+          "end",
+          89573232059000
+        ]
+      ],
+      "end_ns": 89573232059000,
+      "duration_ns": 12816000
+    },
+    "worst_flush": {
+      "flush": "R000005",
+      "dispatch": [
+        7889,
+        89559654416000
+      ],
+      "entry_ns": 89559665302000,
+      "members": [
+        {
+          "parent": {
+            "slot": "R000068",
+            "insertion": 91,
+            "ns": 89559654407000,
+            "journal": {
+              "device": "8,64",
+              "transaction": 3267025
+            }
+          },
+          "slot": "R000068",
+          "phase": 1,
+          "ns": 89559665304000,
+          "error": 0,
+          "queue": "R000004"
+        }
+      ],
+      "error": 0,
+      "return_ns": 89559665311000
+    },
+    "max_journal_runnable_ns": 84000,
+    "worst_journal_flushes": [
+      {
+        "flush": "R000005",
+        "dispatch": [
+          13311,
+          89573219352000
+        ],
+        "entry_ns": 89573220474000,
+        "members": [
+          {
+            "parent": {
+              "slot": "R000291",
+              "insertion": 16,
+              "ns": 89573219346000,
+              "journal": {
+                "device": "8,64",
+                "transaction": 3269736
+              }
+            },
+            "slot": "R000291",
+            "phase": 1,
+            "ns": 89573220474000,
+            "error": 0,
+            "queue": "R000004"
+          }
+        ],
+        "error": 0,
+        "return_ns": 89573220477000
+      },
+      {
+        "flush": "R000005",
+        "dispatch": [
+          13312,
+          89573221465000
+        ],
+        "entry_ns": 89573232032000,
+        "members": [
+          {
+            "parent": {
+              "slot": "R000291",
+              "insertion": 16,
+              "ns": 89573219346000,
+              "journal": {
+                "device": "8,64",
+                "transaction": 3269736
+              }
+            },
+            "slot": "R000291",
+            "phase": 4,
+            "ns": 89573232034000,
+            "error": 0,
+            "queue": "R000004"
+          }
+        ],
+        "error": 0,
+        "return_ns": 89573232046000
+      }
+    ]
+  },
+  {
+    "case": "candidate-profile-trace-r3-c4-rate800-normal",
+    "valid": false,
+    "quality_errors": [
+      "missing or missed probes"
+    ],
+    "gate": false
+  },
+  {
+    "case": "candidate-profile-trace-r3-c1-rate200-normal",
+    "valid": true,
+    "callbacks": 15956,
+    "members": 15952,
+    "journal_members": 15952,
+    "unknown_members": 0,
+    "shared_callbacks": 0,
+    "empty_callbacks": 4,
+    "missing_dispatch": 0,
+    "syncs": 7975,
+    "max_dispatch_to_callback_ms": 11.995,
+    "unresolved_dispatches": 0,
+    "gate": true,
+    "worst_sync": {
+      "tid": 4740,
+      "start_ns": 89747376557000,
+      "scheduled_ns": 46000,
+      "runnable_ns": 11000,
+      "blocked_ns": 21086000,
+      "io_stack_blocked_ns": 0,
+      "other_blocked_ns": 21086000,
+      "stacks": [
+        {
+          "start_ns": 89747376576000,
+          "end_ns": 89747388601000,
+          "kind": "other_blocked_ns",
+          "stack": []
+        },
+        {
+          "start_ns": 89747388630000,
+          "end_ns": 89747397691000,
+          "kind": "other_blocked_ns",
+          "stack": []
+        }
+      ],
+      "end_ns": 89747397700000,
+      "duration_ns": 21143000,
+      "return": "0x0"
+    },
+    "worst_journal": {
+      "tid": 2020,
+      "device": "8,64",
+      "transaction": 3295907,
+      "start_ns": 89737677490000,
+      "scheduled_ns": 47000,
+      "runnable_ns": 16000,
+      "blocked_ns": 16509000,
+      "phases": [
+        [
+          "start",
+          89737677490000
+        ],
+        [
+          "locking",
+          89737677491000
+        ],
+        [
+          "flushing",
+          89737677493000
+        ],
+        [
+          "logging",
+          89737677494000
+        ],
+        [
+          "end",
+          89737694062000
+        ]
+      ],
+      "end_ns": 89737694062000,
+      "duration_ns": 16572000
+    },
+    "worst_flush": {
+      "flush": "R000005",
+      "dispatch": [
+        10077,
+        89752442959000
+      ],
+      "entry_ns": 89752454954000,
+      "members": [
+        {
+          "parent": {
+            "slot": "R000276",
+            "insertion": 26,
+            "ns": 89752442950000,
+            "journal": {
+              "device": "8,64",
+              "transaction": 3298849
+            }
+          },
+          "slot": "R000276",
+          "phase": 1,
+          "ns": 89752454956000,
+          "error": 0,
+          "queue": "R000004"
+        }
+      ],
+      "error": 0,
+      "return_ns": 89752454964000
+    },
+    "max_journal_runnable_ns": 275000,
+    "worst_journal_flushes": [
+      {
+        "flush": "R000005",
+        "dispatch": [
+          4193,
+          89737677611000
+        ],
+        "entry_ns": 89737682744000,
+        "members": [
+          {
+            "parent": {
+              "slot": "R000053",
+              "insertion": 66,
+              "ns": 89737677603000,
+              "journal": {
+                "device": "8,64",
+                "transaction": 3295907
+              }
+            },
+            "slot": "R000053",
+            "phase": 1,
+            "ns": 89737682746000,
+            "error": 0,
+            "queue": "R000004"
+          }
+        ],
+        "error": 0,
+        "return_ns": 89737682750000
+      },
+      {
+        "flush": "R000005",
+        "dispatch": [
+          4194,
+          89737682868000
+        ],
+        "entry_ns": 89737694035000,
+        "members": [
+          {
+            "parent": {
+              "slot": "R000053",
+              "insertion": 66,
+              "ns": 89737677603000,
+              "journal": {
+                "device": "8,64",
+                "transaction": 3295907
+              }
+            },
+            "slot": "R000053",
+            "phase": 4,
+            "ns": 89737694036000,
+            "error": 0,
+            "queue": "R000004"
+          }
+        ],
+        "error": 0,
+        "return_ns": 89737694049000
+      }
+    ]
+  }
+]

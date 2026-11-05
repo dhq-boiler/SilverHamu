@@ -1,0 +1,30 @@
+[
+  {
+    "case": "candidate-profile-trace-r1-c4-rate800-normal",
+    "callbacks": 582,
+    "members": 582,
+    "journal_members": 582,
+    "unknown_members": 0,
+    "shared_callbacks": 0,
+    "empty_callbacks": 0,
+    "missing_dispatch": 0,
+    "syncs": 291,
+    "max_dispatch_to_callback_ms": 2.918,
+    "unresolved_dispatches": 0,
+    "gate": true
+  },
+  {
+    "case": "candidate-profile-trace-r1-c1-rate200-normal",
+    "callbacks": 1999,
+    "members": 1998,
+    "journal_members": 1998,
+    "unknown_members": 0,
+    "shared_callbacks": 0,
+    "empty_callbacks": 1,
+    "missing_dispatch": 0,
+    "syncs": 998,
+    "max_dispatch_to_callback_ms": 3.243,
+    "unresolved_dispatches": 0,
+    "gate": true
+  }
+]

@@ -681,3 +681,11 @@ A short observer pilot followed 6,422 dispatch attempts to data completion using
 ![I/O request context](docs/benchmarks/request-id-2026-11-06/request-context.svg)
 
 See [the identity evidence, limitations, observer results and retained attempts](docs/benchmarks/request-id-2026-11-06/README.md).
+
+## Follow-up: tracing journal parents through shared flush completion
+
+A bounded observer now records journal-to-flush membership across worker handoff. The same unchanged engine was measured with tracing off/on, 100k rows, 1/4 connections, 8k updates and three repetitions. This is diagnostic progress; no speedup or durability-policy change is claimed.
+
+![Shared-flush observer cost](docs/benchmarks/flush-parent-2026-11-06/observer-cost.svg)
+
+See [parentage evidence, overhead, raw data and remaining limits](docs/benchmarks/flush-parent-2026-11-06/README.md).

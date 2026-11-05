@@ -689,3 +689,11 @@ A bounded observer now records journal-to-flush membership across worker handoff
 ![Shared-flush observer cost](docs/benchmarks/flush-parent-2026-11-06/observer-cost.svg)
 
 See [parentage evidence, overhead, raw data and remaining limits](docs/benchmarks/flush-parent-2026-11-06/README.md).
+
+## Follow-up: locating the virtual storage completion interval
+
+The same flush is now followed from block dispatch through virtual-storage driver submission and completion notification. Host-internal time remains unresolved; no speedup or durability change is claimed.
+
+![Virtual storage stages](docs/benchmarks/storage-stage-2026-11-06/flush-stages.svg)
+
+See [observer overhead, matched requests, failed captures and limits](docs/benchmarks/storage-stage-2026-11-06/README.md).

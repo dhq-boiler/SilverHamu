@@ -1,0 +1,146 @@
+[
+  {
+    "case": "candidate-profile-trace-r1-c4-rate800-normal",
+    "valid": true,
+    "issues": [],
+    "flushes": 4390,
+    "worst": {
+      "slot": "R000007",
+      "attempt": 2475,
+      "start_ns": 92910155979000,
+      "queue_ns": 92910155980000,
+      "queue_return_ns": 92910155983000,
+      "queue_result": 0,
+      "done_ns": 92910167531000,
+      "channel_entry_ns": 92910167527000,
+      "flush_callback_ns": 92910167540000,
+      "pre_driver_ns": 1000,
+      "driver_to_done_ns": 11551000,
+      "after_done_ns": 9000,
+      "total_ns": 11561000,
+      "members": [
+        {
+          "parent": {
+            "slot": "R000265",
+            "insertion": 33,
+            "ns": 92910155972000,
+            "journal": {
+              "device": "8,64",
+              "transaction": 3316650
+            }
+          },
+          "slot": "R000265",
+          "phase": 1,
+          "ns": 92910167542000,
+          "error": 0,
+          "queue": "R000006"
+        }
+      ]
+    },
+    "max_after_done_ns": 60000,
+    "max_pre_driver_ns": 56000
+  },
+  {
+    "case": "candidate-profile-trace-r1-c1-rate200-normal",
+    "valid": true,
+    "issues": [],
+    "flushes": 15996,
+    "worst": {
+      "slot": "R000007",
+      "attempt": 14161,
+      "start_ns": 92956538553000,
+      "queue_ns": 92956538554000,
+      "queue_return_ns": 92956538557000,
+      "queue_result": 0,
+      "done_ns": 92956550142000,
+      "channel_entry_ns": 92956550140000,
+      "flush_callback_ns": 92956550152000,
+      "pre_driver_ns": 1000,
+      "driver_to_done_ns": 11588000,
+      "after_done_ns": 10000,
+      "total_ns": 11599000,
+      "members": [
+        {
+          "parent": {
+            "slot": "R000530",
+            "insertion": 30,
+            "ns": 92956538547000,
+            "journal": {
+              "device": "8,64",
+              "transaction": 3324845
+            }
+          },
+          "slot": "R000530",
+          "phase": 1,
+          "ns": 92956550154000,
+          "error": 0,
+          "queue": "R000006"
+        }
+      ]
+    },
+    "max_after_done_ns": 408000,
+    "max_pre_driver_ns": 76000
+  },
+  {
+    "case": "candidate-profile-trace-r2-c4-rate800-normal",
+    "valid": false,
+    "issues": [
+      "missing or missed probes"
+    ]
+  },
+  {
+    "case": "candidate-profile-trace-r2-c1-rate200-normal",
+    "valid": false,
+    "issues": [
+      "missing or missed probes"
+    ]
+  },
+  {
+    "case": "candidate-profile-trace-r3-c4-rate800-normal",
+    "valid": false,
+    "issues": [
+      "missing or missed probes"
+    ]
+  },
+  {
+    "case": "candidate-profile-trace-r3-c1-rate200-normal",
+    "valid": true,
+    "issues": [],
+    "flushes": 15950,
+    "worst": {
+      "slot": "R000213",
+      "attempt": 6084,
+      "start_ns": 93222194625000,
+      "queue_ns": 93222194626000,
+      "queue_return_ns": 93222194629000,
+      "queue_result": 0,
+      "done_ns": 93222206294000,
+      "channel_entry_ns": 93222206291000,
+      "flush_callback_ns": 93222206302000,
+      "pre_driver_ns": 1000,
+      "driver_to_done_ns": 11668000,
+      "after_done_ns": 8000,
+      "total_ns": 11677000,
+      "members": [
+        {
+          "parent": {
+            "slot": "R000262",
+            "insertion": 12,
+            "ns": 93222193266000,
+            "journal": {
+              "device": "8,64",
+              "transaction": 3365233
+            }
+          },
+          "slot": "R000262",
+          "phase": 4,
+          "ns": 93222206303000,
+          "error": 0,
+          "queue": "R000212"
+        }
+      ]
+    },
+    "max_after_done_ns": 116000,
+    "max_pre_driver_ns": 80000
+  }
+]

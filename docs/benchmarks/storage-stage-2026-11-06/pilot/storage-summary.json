@@ -1,0 +1,84 @@
+[
+  {
+    "case": "candidate-profile-trace-r1-c4-rate800-normal",
+    "valid": true,
+    "issues": [],
+    "flushes": 568,
+    "worst": {
+      "slot": "R000007",
+      "attempt": 452,
+      "start_ns": 92725456538000,
+      "queue_ns": 92725456539000,
+      "queue_return_ns": 92725456541000,
+      "queue_result": 0,
+      "done_ns": 92725459450000,
+      "channel_entry_ns": 92725459449000,
+      "flush_callback_ns": 92725459454000,
+      "pre_driver_ns": 1000,
+      "driver_to_done_ns": 2911000,
+      "after_done_ns": 4000,
+      "total_ns": 2916000,
+      "members": [
+        {
+          "parent": {
+            "slot": "R000155",
+            "insertion": 6,
+            "ns": 92725455250000,
+            "journal": {
+              "device": "8,64",
+              "transaction": 3303794
+            }
+          },
+          "slot": "R000155",
+          "phase": 4,
+          "ns": 92725459455000,
+          "error": 0,
+          "queue": "R000006"
+        }
+      ]
+    },
+    "max_after_done_ns": 244000,
+    "max_pre_driver_ns": 3000
+  },
+  {
+    "case": "candidate-profile-trace-r1-c1-rate200-normal",
+    "valid": true,
+    "issues": [],
+    "flushes": 1998,
+    "worst": {
+      "slot": "R000007",
+      "attempt": 738,
+      "start_ns": 92730893418000,
+      "queue_ns": 92730893419000,
+      "queue_return_ns": 92730893423000,
+      "queue_result": 0,
+      "done_ns": 92730905049000,
+      "channel_entry_ns": 92730905047000,
+      "flush_callback_ns": 92730905060000,
+      "pre_driver_ns": 1000,
+      "driver_to_done_ns": 11630000,
+      "after_done_ns": 11000,
+      "total_ns": 11642000,
+      "members": [
+        {
+          "parent": {
+            "slot": "R000055",
+            "insertion": 12,
+            "ns": 92730891316000,
+            "journal": {
+              "device": "8,64",
+              "transaction": 3304241
+            }
+          },
+          "slot": "R000055",
+          "phase": 4,
+          "ns": 92730905061000,
+          "error": 0,
+          "queue": "R000006"
+        }
+      ]
+    },
+    "max_after_done_ns": 59000,
+    "max_pre_driver_ns": 3000
+  }
+]

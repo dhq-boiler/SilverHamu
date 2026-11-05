@@ -720,3 +720,19 @@ the workloads, 431,803 requests succeeded, 197 were refused by bounded client
 queues, and 109 full-content checks passed, including crash recovery and an
 isolated OOM/rescue case. No production engine or durability setting changed.
 See [the measured limits, all trials, safety checks and reproduction](docs/benchmarks/resource-envelope-2026-11-06/README.md).
+
+## Follow-up: explicit budgets enable million-row service workloads
+
+The service now exposes resource budgets while retaining its existing defaults
+and APIs. With an explicit 640-MiB retained-data budget, all twelve 1M-row trials
+in 1/2-CPU, 1/2-GiB containers passed. All six 512-MiB trials hit OOM; their data
+was verified after reopening at 1 GiB. This removes a configuration barrier,
+not the memory cost: successful cases used approximately 540 MiB at peak.
+
+![Explicit service budgets](docs/benchmarks/resource-config-2026-11-06/comparison.svg)
+
+Across the passing trials and the unchanged-default 100k control, 240,000 requests
+completed without refusals or errors, and 66 full-content checks passed including
+crash recovery and OOM rescue. Million-row mixed p99 trial medians were
+4.453–4.633 ms at 1,000 offered requests/s; this is not a saturation benchmark.
+See [all results, safety checks, raw failures and reproduction](docs/benchmarks/resource-config-2026-11-06/README.md).

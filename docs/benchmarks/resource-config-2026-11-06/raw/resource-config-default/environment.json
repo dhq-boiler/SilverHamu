@@ -1,0 +1,33 @@
+{
+  "commit": "c46066218aac182da238c2690e861c377da1005a",
+  "image": "sha256:10562126d4e0c99d2e14b52803a938af0093d517d5190d53e9a7741e0d9b0d30",
+  "utc": "2026-11-05T22:55:24.732840+00:00",
+  "arguments": {
+    "out": "C:\\Git\\NewDBMS\\artifacts\\resource-config-default",
+    "rows": [
+      100000
+    ],
+    "cpus": [
+      1
+    ],
+    "memory": [
+      512
+    ],
+    "reps": 3,
+    "ops": 8000,
+    "sample": 1,
+    "rate": 1000,
+    "recover_memory": null,
+    "retained_bytes": null,
+    "image": "catdb-resource-config:local"
+  },
+  "docker": {
+    "ServerVersion": "29.9.2",
+    "NCPU": 32,
+    "MemTotal": 67380625408,
+    "Driver": "overlay2",
+    "OSType": "linux",
+    "Architecture": "x86_64",
+    "KernelVersion": "6.18.54.1-microsoft-standard-WSL2"
+  }
+}

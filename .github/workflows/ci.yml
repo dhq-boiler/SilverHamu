@@ -22,6 +22,9 @@ jobs:
       - run: cargo test --locked --features "${{ matrix.features }}" -- --test-threads=1
       - run: cargo build --locked --features "${{ matrix.features }}" --bin catdb-server
       - run: python tests/service_protocol.py
+      - run: python tests/service_protocol.py
+        env:
+          CATDB_BACKGROUND_RECLAMATION: '1'
       - if: contains(matrix.features, 'fixed-log')
         run: python tests/service_protocol.py
         env:

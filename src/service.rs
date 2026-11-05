@@ -107,6 +107,13 @@ impl Server {
                 return Err("experimental fixed-log build feature required".into());
             }
         }
+        if let Ok(value) = std::env::var("CATDB_BACKGROUND_RECLAMATION") {
+            match value.as_str() {
+                "1" => db.set_background_reclamation(true)?,
+                "0" => {}
+                _ => return Err("CATDB_BACKGROUND_RECLAMATION must be 0 or 1".into()),
+            }
+        }
         db.set_group_commit(true);
         db.set_group_commit_wake_on_four(true);
         Ok(Self {

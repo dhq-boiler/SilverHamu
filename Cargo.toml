@@ -42,3 +42,8 @@ required-features = ["service"]
 name = "read-gc-bench"
 path = "src/bin/read-gc-bench.rs"
 required-features = ["service", "lock-timing"]
+
+[[bin]]
+name = "reclamation-bench"
+path = "src/bin/reclamation-bench.rs"
+required-features = ["service"]

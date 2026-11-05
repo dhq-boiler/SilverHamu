@@ -23,10 +23,13 @@ mod group_commit;
 use fixed_log::LogFile as WalFile;
 #[cfg(not(feature = "fixed-log"))]
 type WalFile = File;
+#[path = "reclamation.rs"]
+mod reclamation;
 #[path = "retirement.rs"]
 mod retirement;
 #[cfg(feature = "commit-window")]
 pub use group_commit::CommitOutcome;
+pub use reclamation::ReclamationStatus;
 pub use retirement::RetirementStatus;
 
 const MAGIC: &[u8; 8] = b"NDTXN001";
@@ -141,7 +144,8 @@ pub struct Database {
 
 struct Inner {
     group: group_commit::GroupCommit,
-    state: Mutex<State>,
+    reclaimer: reclamation::Reclaimer,
+    state: Arc<Mutex<State>>,
     writer: Mutex<()>,
     checkpoint: Mutex<()>,
     retirement: Mutex<retirement::Retirement>,
@@ -534,7 +538,8 @@ impl Database {
         Self {
             inner: Arc::new(Inner {
                 group: group_commit::GroupCommit::default(),
-                state: Mutex::new(state),
+                reclaimer: reclamation::Reclaimer::default(),
+                state: Arc::new(Mutex::new(state)),
                 writer: Mutex::new(()),
                 checkpoint: Mutex::new(()),
                 retirement: Mutex::new(retirement),
@@ -967,23 +972,33 @@ impl Database {
     pub fn collect_garbage(&self) -> Result<bool> {
         let mut state = self.state()?;
         let retired = state.collect();
-        let pending = state.gc_target != 0
-            || (!state.history_keys.is_empty()
-                && state
-                    .active
-                    .keys()
-                    .next()
-                    .copied()
-                    .unwrap_or(state.sequence)
-                    > state.gc_floor);
+        let pending = state.gc_pending();
         drop(state);
         drop(retired);
         Ok(pending)
     }
 
+    pub fn set_background_reclamation(&self, enabled: bool) -> Result<()> {
+        self.inner.reclaimer.set(enabled, &self.inner.state)?;
+        Ok(())
+    }
+
+    pub fn reclamation_status(&self) -> ReclamationStatus {
+        self.inner.reclaimer.status()
+    }
+
+    pub fn reclamation_pending(&self) -> Result<bool> {
+        let state = self.state()?;
+        Ok(state.gc_pending() || self.inner.reclaimer.status().busy)
+    }
+
+    pub fn background_reclamation_enabled(&self) -> bool {
+        self.inner.reclaimer.enabled()
+    }
+
     fn begin_mode(&self, read_only: bool) -> Result<Transaction> {
         let mut state = self.state()?;
-        let retired = state.collect();
+        let retired = (!self.inner.reclaimer.enabled()).then(|| state.collect());
         let result = (|| {
             state.budget.replace(ACTIVE, 0, 1)?;
             let snapshot = state.sequence;
@@ -1411,7 +1426,7 @@ impl Drop for Transaction {
                     state.active.remove(&self.snapshot);
                 }
             }
-            let retired = state.collect();
+            let retired = (!self.database.inner.reclaimer.enabled()).then(|| state.collect());
             drop(state);
             drop(retired);
         }
@@ -1592,6 +1607,11 @@ impl State {
         }
         self.sequence = sequence;
         Ok(())
+    }
+    fn gc_pending(&self) -> bool {
+        self.gc_target != 0
+            || (!self.history_keys.is_empty()
+                && self.active.keys().next().copied().unwrap_or(self.sequence) > self.gc_floor)
     }
     fn collect(&mut self) -> RetiredVersions {
         let mut retired = RetiredVersions {
@@ -2981,6 +3001,27 @@ fn legacy_wal_file(file: File) -> WalFile {
 #[cfg(test)]
 mod read_copy_tests {
     use super::*;
+    #[test]
+    fn er_worker_start_failure_leaves_cooperative_reclamation_available() {
+        let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("artifacts")
+            .join(format!("gc-spawn-{}", std::process::id()));
+        let _ = std::fs::remove_file(&path);
+        let db = Database::create(&path, [31; 16]).unwrap();
+        reclamation::FAIL_START.with(|f| f.set(true));
+        assert!(db.set_background_reclamation(true).is_err());
+        assert!(!db.background_reclamation_enabled());
+        let mut w = db.begin().unwrap();
+        w.put(b"k", b"v").unwrap();
+        w.commit().unwrap();
+        db.set_background_reclamation(true).unwrap();
+        assert_eq!(
+            db.begin_read().unwrap().get(b"k").unwrap(),
+            Some(b"v".to_vec())
+        );
+        db.set_background_reclamation(false).unwrap();
+    }
+
     #[test]
     fn er_detached_versions_stay_charged_until_their_values_are_freed() {
         let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))

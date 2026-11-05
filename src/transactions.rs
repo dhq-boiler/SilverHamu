@@ -259,6 +259,45 @@ impl AsRef<[u8]> for ReadValue<'_> {
     }
 }
 
+pub(crate) struct SharedScanRow {
+    key_start: usize,
+    key_end: usize,
+    value: Arc<[u8]>,
+}
+impl AsRef<[u8]> for SharedScanRow {
+    fn as_ref(&self) -> &[u8] {
+        &self.value
+    }
+}
+pub(crate) struct SharedScan {
+    keys: Vec<u8>,
+    pub(crate) rows: Vec<SharedScanRow>,
+    pub(crate) permit: BufferPermit,
+}
+impl SharedScan {
+    pub(crate) fn iter(&self) -> impl Iterator<Item = (&[u8], &[u8])> {
+        self.rows
+            .iter()
+            .map(|r| (&self.keys[r.key_start..r.key_end], r.value.as_ref()))
+    }
+}
+
+fn grow_scan_vec<T>(values: &mut Vec<T>, additional: usize) -> Result<()> {
+    let needed = values
+        .len()
+        .checked_add(additional)
+        .ok_or(Error::Limit("scan capacity"))?;
+    if needed > values.capacity() {
+        let target = values
+            .capacity()
+            .checked_mul(2)
+            .ok_or(Error::Limit("scan capacity"))?
+            .max(needed);
+        values.reserve_exact(target - values.len());
+    }
+    Ok(())
+}
+
 struct Version {
     sequence: u64,
     value: Option<Arc<[u8]>>,
@@ -1057,13 +1096,12 @@ impl Database {
         end: Option<&[u8]>,
     ) -> Result<ExportInfo> {
         let mut transaction = self.begin_read()?;
-        let (rows, mut buffer) = transaction.scan_reserved(start, end)?;
-        buffer.add(rows.len() * std::mem::size_of::<&[u8]>() + 64 * 1024)?;
-        let values: Vec<_> = rows.iter().map(|(_, value)| value.as_slice()).collect();
-        crate::create(path, generation, &values)?;
+        let mut scan = transaction.scan_shared(start, end, false)?;
+        scan.permit.add(64 * 1024)?;
+        crate::create(path, generation, &scan.rows)?;
         Ok(ExportInfo {
             version: transaction.version(),
-            records: values.len(),
+            records: scan.rows.len(),
         })
     }
 }
@@ -1182,6 +1220,79 @@ impl Transaction {
                 .collect(),
             permit,
         ))
+    }
+
+    pub(crate) fn scan_shared(
+        &mut self,
+        start: &[u8],
+        end: Option<&[u8]>,
+        include_keys: bool,
+    ) -> Result<SharedScan> {
+        let range = KeyRange::new(start, end)?;
+        self.register_range(range.clone())?;
+        let state = self.database.state()?;
+        let mut permit = state.budget.buffer();
+        let mut keys = Vec::new();
+        let mut result = Vec::new();
+        let mut stored = state.rows.range::<[u8], _>(range.bounds()).peekable();
+        let mut staged = self.writes.range::<[u8], _>(range.bounds()).peekable();
+        loop {
+            let (key, value) = match (stored.peek(), staged.peek()) {
+                (Some((stored_key, _)), Some((staged_key, _))) if stored_key == staged_key => {
+                    stored.next();
+                    let (key, value) = staged.next().unwrap();
+                    (key, value.as_deref().map(ReadValue::Borrowed))
+                }
+                (Some((stored_key, _)), Some((staged_key, _))) if staged_key < stored_key => {
+                    let (key, value) = staged.next().unwrap();
+                    (key, value.as_deref().map(ReadValue::Borrowed))
+                }
+                (None, Some(_)) => {
+                    let (key, value) = staged.next().unwrap();
+                    (key, value.as_deref().map(ReadValue::Borrowed))
+                }
+                (Some(_), _) => {
+                    let (key, versions) = stored.next().unwrap();
+                    let value = visible(versions, self.snapshot)
+                        .and_then(|version| version.value.clone())
+                        .map(ReadValue::Shared);
+                    (key, value)
+                }
+                (None, None) => break,
+            };
+            if let Some(value) = value {
+                let key_len = if include_keys { key.len() } else { 0 };
+                let charge = key_len
+                    .checked_mul(3)
+                    .and_then(|n| n.checked_add(value.as_ref().len()))
+                    .and_then(|n| n.checked_add(160))
+                    .ok_or(Error::Limit("scan capacity"))?;
+                // Shared payloads remain charged here even if history reclamation releases its charge.
+                permit.add(charge)?;
+                grow_scan_vec(&mut result, 1)?;
+                grow_scan_vec(&mut keys, key_len)?;
+                let key_start = keys.len();
+                if include_keys {
+                    keys.extend_from_slice(key);
+                }
+                let value = match value {
+                    ReadValue::Shared(value) => value,
+                    ReadValue::Borrowed(value) => Arc::from(value),
+                };
+                result.push(SharedScanRow {
+                    key_start,
+                    key_end: keys.len(),
+                    value,
+                });
+            }
+        }
+        drop(state);
+        read_copy_hook();
+        Ok(SharedScan {
+            keys,
+            rows: result,
+            permit,
+        })
     }
 
     /// Reads a bounded page of [start, end), optionally continuing strictly after a key.
@@ -1806,6 +1917,159 @@ impl<'a> Decoder<'a> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn copy_scan_eq_st_shared_rows_match_owned_ranges_and_survive_mutation() {
+        let f = Fixture::new();
+        let db = Database::create(&f.0, [101; 16]).unwrap();
+        let mut tx = db.begin().unwrap();
+        for i in 0..100u64 {
+            tx.put(&i.to_be_bytes(), &vec![i as u8; i as usize])
+                .unwrap();
+        }
+        tx.commit().unwrap();
+        let mut reader = db.begin().unwrap();
+        reader.put(&[255; 1024], &[3; 65536]).unwrap();
+        reader.delete(&10u64.to_be_bytes()).unwrap();
+        reader.put(&20u64.to_be_bytes(), b"staged").unwrap();
+        for start in [vec![], 10u64.to_be_bytes().to_vec(), vec![255; 1024]] {
+            for end in [None, Some(vec![255; 1024])] {
+                let owned = reader.scan(&start, end.as_deref()).unwrap();
+                let shared = reader.scan_shared(&start, end.as_deref(), true).unwrap();
+                assert_eq!(
+                    shared
+                        .iter()
+                        .map(|(k, v)| (k.to_vec(), v.to_vec()))
+                        .collect::<Rows>(),
+                    owned
+                );
+            }
+        }
+        let held = reader.scan_shared(b"", None, true).unwrap();
+        let want = held
+            .iter()
+            .map(|(k, v)| (k.to_vec(), v.to_vec()))
+            .collect::<Rows>();
+        reader.put(&20u64.to_be_bytes(), b"replaced").unwrap();
+        let mut writer = db.begin().unwrap();
+        writer.delete(&0u64.to_be_bytes()).unwrap();
+        writer.commit().unwrap();
+        assert!(matches!(reader.commit(), Err(Error::Conflict(_))));
+        db.checkpoint().unwrap();
+        assert_eq!(
+            held.iter()
+                .map(|(k, v)| (k.to_vec(), v.to_vec()))
+                .collect::<Rows>(),
+            want
+        );
+        assert!(db.resource_usage().unwrap().current[crate::resources::BUFFER] >= 65536);
+        drop(held);
+        assert_eq!(
+            db.resource_usage().unwrap().current[crate::resources::BUFFER],
+            0
+        );
+    }
+
+    #[test]
+    fn copy_scan_bv_er_budget_edges_release_and_preserve_staged_writes() {
+        assert!(3 * std::mem::size_of::<SharedScanRow>() + 16 <= 160);
+        for count in [0usize, 1, 2, 3, 4, 5, 8, 9, 16, 17] {
+            for keys in [false, true] {
+                let charge = count * (160 + 1 + if keys { 3 } else { 0 });
+                for limit in [charge.saturating_sub(1).max(1), charge.max(1), charge + 1] {
+                    let f = Fixture::new();
+                    let db = Database::create_with_limits(
+                        &f.0,
+                        [102; 16],
+                        ResourceLimits {
+                            max_buffer_bytes: limit,
+                            ..ResourceLimits::default()
+                        },
+                    )
+                    .unwrap();
+                    let mut tx = db.begin().unwrap();
+                    for i in 0..count {
+                        tx.put(&[i as u8], &[i as u8]).unwrap();
+                    }
+                    let result = tx.scan_shared(b"", None, keys);
+                    if limit < charge {
+                        assert!(matches!(result, Err(Error::ResourceExhausted(_))));
+                    } else {
+                        let scan = result.unwrap();
+                        assert_eq!(scan.rows.len(), count);
+                        assert_eq!(scan.keys.len(), if keys { count } else { 0 });
+                        assert_eq!(
+                            db.resource_usage().unwrap().current[crate::resources::BUFFER],
+                            charge
+                        );
+                        drop(scan);
+                    }
+                    assert_eq!(
+                        db.resource_usage().unwrap().current[crate::resources::BUFFER],
+                        0
+                    );
+                    for i in 0..count {
+                        assert_eq!(tx.get(&[i as u8]).unwrap(), Some(vec![i as u8]));
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn copy_scan_st_shared_payloads_are_stable_after_unlock_and_owner_drop() {
+        let f = Fixture::new();
+        let db = Database::create(&f.0, [103; 16]).unwrap();
+        let mut seed = db.begin().unwrap();
+        seed.put(b"k", &[1; 65536]).unwrap();
+        seed.commit().unwrap();
+        let gate = Arc::new([std::sync::Barrier::new(2), std::sync::Barrier::new(2)]);
+        let child_db = db.clone();
+        let child_gate = gate.clone();
+        let child = std::thread::spawn(move || {
+            let mut tx = child_db.begin_read().unwrap();
+            READ_COPY_GATE.with(|g| *g.borrow_mut() = Some(child_gate));
+            tx.scan_shared(b"", None, true).unwrap()
+        });
+        gate[0].wait();
+        let mut writer = db.begin().unwrap();
+        writer.put(b"k", &[2; 65536]).unwrap();
+        writer.commit().unwrap();
+        gate[1].wait();
+        let held = child.join().unwrap();
+        drop(db);
+        assert_eq!(
+            held.iter().next().unwrap(),
+            (b"k".as_slice(), [1; 65536].as_slice())
+        );
+    }
+
+    #[test]
+    fn copy_scan_eq_export_avoids_keys_and_preserves_empty_and_large_values() {
+        let f = Fixture::new();
+        let db = Database::create(&f.0, [104; 16]).unwrap();
+        let mut tx = db.begin().unwrap();
+        tx.put(b"", b"").unwrap();
+        tx.put(&[255; 1024], &[7; 65536]).unwrap();
+        tx.commit().unwrap();
+        let mut reader = db.begin_read().unwrap();
+        let scan = reader.scan_shared(b"", None, false).unwrap();
+        assert!(scan.keys.is_empty());
+        assert_eq!(
+            scan.rows.iter().map(AsRef::as_ref).collect::<Vec<_>>(),
+            vec![b"".as_slice(), [7; 65536].as_slice()]
+        );
+        drop(scan);
+        let out = Fixture::new();
+        db.export_values(&out.0, [105; 16], b"", None).unwrap();
+        let mut s = crate::Snapshot::open(&out.0, [105; 16]).unwrap();
+        assert_eq!(s.read_page(0, 10).unwrap(), vec![vec![], vec![7; 65536]]);
+        assert!(db.export_values(&out.0, [105; 16], b"", None).is_err());
+        assert_eq!(
+            db.resource_usage().unwrap().current[crate::resources::BUFFER],
+            0
+        );
+    }
+
     #[test]
     fn scan_merge_matches_oracle_for_staged_changes_boundaries_and_old_versions() {
         let f = Fixture::new();
@@ -3379,3 +3643,7 @@ mod work_elision_bench;
 #[cfg(test)]
 #[path = "../benchmarks/scan-merge/engine_bench.rs"]
 mod scan_merge_bench;
+
+#[cfg(test)]
+#[path = "../benchmarks/scan-copy/engine_bench.rs"]
+mod scan_copy_bench;

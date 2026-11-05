@@ -1,0 +1,12 @@
+// BEGIN ADAPTER
+type Shared = (Rows,BufferPermit);
+fn shared(tx:&mut Transaction)->Shared {tx.scan_reserved(b"",None).unwrap()}
+fn check_shared(r:&Shared,want:&Rows) {assert_eq!(&r.0,want);}
+fn frames(tx:&mut Transaction)->(Vec<u8>,BufferPermit) {
+    let (rows,mut permit)=tx.scan_reserved(b"",None).unwrap();
+    let length=rows.iter().map(|(k,v)|8+k.len()+v.len()).sum();
+    permit.add(length).unwrap();let mut bytes=Vec::with_capacity(length);
+    for (k,v) in rows {bytes.extend_from_slice(&(k.len() as u32).to_le_bytes());bytes.extend_from_slice(&(v.len() as u32).to_le_bytes());bytes.extend_from_slice(&k);bytes.extend_from_slice(&v);}
+    (bytes,permit)
+}
+// END ADAPTER

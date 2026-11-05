@@ -1,0 +1,34 @@
+"""Build and freeze matched time/allocation executables in a new directory."""
+import io,json,os,shutil,subprocess,sys,zipfile
+from pathlib import Path
+repo=Path(__file__).resolve().parents[2]
+out=Path(sys.argv[1]).resolve();out.mkdir(parents=True,exist_ok=False)
+baseline=out/'before';baseline.mkdir()
+archive=subprocess.check_output(['git','archive','--format=zip','6fbe8ff5cdeb0095ca2a22a48d0aa603f9698a80'],cwd=repo)
+with zipfile.ZipFile(io.BytesIO(archive)) as z:
+ for name in z.namelist():
+  if not (baseline/name).resolve().is_relative_to(baseline):raise ValueError('Archive path escapes output')
+ z.extractall(baseline)
+folder=baseline/'benchmarks/scan-copy';folder.mkdir()
+source=(repo/'benchmarks/scan-copy/engine_bench.rs').read_text(encoding='utf-8')
+adapter=(repo/'benchmarks/scan-copy/baseline_adapter.rs.txt').read_text(encoding='utf-8')
+source=source[:source.index('// BEGIN ADAPTER')]+adapter+'\n'
+(folder/'engine_bench.rs').write_text(source,encoding='utf-8')
+p=baseline/'src/transactions.rs'
+p.write_text(p.read_text(encoding='utf-8')+'\n#[cfg(test)]\n#[path = "../benchmarks/scan-copy/engine_bench.rs"]\nmod scan_copy_bench;\n',encoding='utf-8')
+result={}
+for label,root in [('before',baseline),('after',repo)]:
+ for mode in ['time','alloc']:
+  env=os.environ.copy();env.pop('CATDB_ELISION_ALLOC',None)
+  if mode=='alloc':env['CATDB_ELISION_ALLOC']='1'
+  run=subprocess.run([os.environ.get('CARGO','cargo'),'test','--locked','--release','--features','service','--lib','--no-run','--message-format=json'],cwd=root,env=env,text=True,capture_output=True)
+  print(run.stderr)
+  if run.returncode:print(run.stdout);raise SystemExit(run.returncode)
+  executable=None
+  for line in run.stdout.splitlines():
+   record=json.loads(line)
+   if record.get('reason')=='compiler-artifact' and record.get('executable') and record['profile']['test']:executable=record['executable']
+  assert executable
+  target=out/(label+'-'+mode+('.exe' if os.name=='nt' else ''))
+  shutil.copy2(executable,target);result[label+'-'+mode]=str(target)
+(out/'binaries.json').write_text(json.dumps(result,indent=2),encoding='utf-8')

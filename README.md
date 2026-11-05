@@ -308,6 +308,25 @@ contents, old snapshots and reopened committed state. See the
 [reproduction instructions](benchmarks/scan-merge/README.md).
 
 
+### Follow-up: fewer key/value copies in full-scan output
+
+The existing C ABI and file export now use an internal shared result. Keys are
+packed into one buffer; committed values reuse their existing shared storage.
+The public owned Rust scan remains unchanged. At 1M rows / plain, internal frame
+construction changed **250.972 → 154.015 ms**, and real durable file export
+changed **264.044 → 167.661 ms** (medians of three trial medians).
+
+![Existing output paths and unchanged owned control](docs/benchmarks/scan-copy-2026-11-05/comparison.svg)
+
+The frame benchmark excludes DLL dispatch and caller-buffer copies. A separate
+[shared-result figure](docs/benchmarks/scan-copy-2026-11-05/shared.svg) compares
+different return representations; it is not an owned-API speedup. All 48 runs
+verified contents, old snapshots, exports and reopened values. Allocation requests
+are not peak memory or RSS. See the [report and limitations](docs/benchmarks/scan-copy-2026-11-05/README.md),
+[complete table](docs/benchmarks/scan-copy-2026-11-05/table.md) and
+[reproduction instructions](benchmarks/scan-copy/README.md).
+
+
 ## Build
 
 Requires Rust **1.89 or newer**. Python 3 is used by the optional client and integration tests. Docker is needed only for containers.

@@ -42,6 +42,22 @@ class Checks(unittest.TestCase):
   self.assertEqual(N.ndb_tx_get(tx,None,1025,None,0,c.byref(required),c.byref(count)),1)
   self.assertEqual(N.ndb_tx_scan(tx,None,0,None,0,2,None,0,c.byref(required),c.byref(count)),1)
   self.assertEqual(N.ndb_tx_db_info(self.db,None,None),1)
+ def test_eq_scan_copy_mixed_large_empty_and_exact_capacity(self):
+  tx=self.begin();original={b'':b'',b'a':b'old',b'b':b'delete'}
+  for k,v in original.items():self.assertEqual(N.ndb_tx_put(tx,buf(k),len(k),buf(v),len(v)),0)
+  version=U64();self.assertEqual(N.ndb_tx_commit(tx,c.byref(version)),0)
+  tx=self.begin();want={b'':b'',b'a':b'new',b'z'*1024:bytes(range(256))*256}
+  for k,v in want.items():self.assertEqual(N.ndb_tx_put(tx,buf(k),len(k),buf(v),len(v)),0)
+  self.assertEqual(N.ndb_tx_delete(tx,buf(b'b'),1),0)
+  expected=b''.join(struct.pack('<II',len(k),len(v))+k+v for k,v in sorted(want.items()))
+  required,count=U64(),U64()
+  for capacity in [0,len(expected)-1,len(expected),len(expected)+1]:
+   output=buf(bytes([123])*max(1,capacity))
+   status=N.ndb_tx_scan(tx,None,0,None,0,0,output,capacity,c.byref(required),c.byref(count))
+   self.assertEqual((required.value,count.value),(len(expected),len(want)))
+   self.assertEqual(status,3 if capacity<len(expected) else 0)
+   if status==0:self.assertEqual(bytes(output)[:len(expected)],expected)
+   else:self.assertEqual(bytes(output),bytes([123])*max(1,capacity))
  def test_st_duplicate_owner_and_stale_handle_have_distinct_status(self):
   output=U64(99);self.assertEqual(N.ndb_tx_db_open(buf(self.path),len(self.path),c.byref(output)),23);self.assertEqual(output.value,0)
   tx=self.begin();self.assertEqual(N.ndb_tx_rollback(tx),0);self.assertEqual(N.ndb_tx_put(tx,None,0,None,0),1)

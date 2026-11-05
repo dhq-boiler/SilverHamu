@@ -532,8 +532,8 @@ pub unsafe extern "C" fn ndb_tx_scan(
         }
         let start = unsafe { bytes(start, start_len, MAX_KEY_BYTES)? };
         let end = unsafe { end(finish, finish_len, has_end)? };
-        let (rows, mut permit) = with_transaction(id, |tx| tx.scan_reserved(start, end))?;
-        let length = rows.iter().try_fold(0_usize, |total, (k, v)| {
+        let mut scan = with_transaction(id, |tx| tx.scan_shared(start, end, true))?;
+        let length = scan.iter().try_fold(0_usize, |total, (k, v)| {
             total
                 .checked_add(8 + k.len() + v.len())
                 .filter(|n| *n <= 64 * 1024 * 1024)
@@ -541,7 +541,7 @@ pub unsafe extern "C" fn ndb_tx_scan(
         })?;
         unsafe {
             *required = length as u64;
-            *count = rows.len() as u64;
+            *count = scan.rows.len() as u64;
         }
         if capacity < length as u64 {
             return Ok(3);
@@ -549,13 +549,13 @@ pub unsafe extern "C" fn ndb_tx_scan(
         if length > 0 && buffer.is_null() {
             return Err(1);
         }
-        permit.add(length).map_err(code)?;
+        scan.permit.add(length).map_err(code)?;
         let mut framed = Vec::with_capacity(length);
-        for (k, v) in rows {
+        for (k, v) in scan.iter() {
             framed.extend_from_slice(&(k.len() as u32).to_le_bytes());
             framed.extend_from_slice(&(v.len() as u32).to_le_bytes());
-            framed.extend_from_slice(&k);
-            framed.extend_from_slice(&v);
+            framed.extend_from_slice(k);
+            framed.extend_from_slice(v);
         }
         unsafe { output(&framed, buffer, capacity, required) }
     })

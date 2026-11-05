@@ -4,10 +4,10 @@ use std::path::Path;
 
 mod ffi;
 mod resources;
-mod transaction_ffi;
-pub mod transactions;
 #[cfg(feature = "service")]
 pub mod service;
+mod transaction_ffi;
+pub mod transactions;
 
 const MAGIC: &[u8; 8] = b"NDBMS001";
 const HEADER_SIZE: u64 = 64;
@@ -252,3 +252,7 @@ impl Snapshot {
         Ok(records)
     }
 }
+
+#[cfg(test)]
+#[path = "../benchmarks/work-elision/metrics.rs"]
+mod work_elision_metrics;

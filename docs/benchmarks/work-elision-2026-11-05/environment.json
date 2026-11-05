@@ -1,0 +1,50 @@
+{
+  "date": "2026-11-05",
+  "timezone": "Asia/Tokyo",
+  "cpu": "AMD Ryzen 9 5950X 16-Core Processor",
+  "os": "Windows-10-10.0.26100-SP0",
+  "rust": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+  "before_commit": "8b39b889a332246c08240fb7f623d523237bf3b1",
+  "build": "cargo test --locked --release --features service --lib --no-run",
+  "allocation_build_env": {
+    "CATDB_ELISION_ALLOC": "1"
+  },
+  "time_build_env": "CATDB_ELISION_ALLOC unset",
+  "trials": 36,
+  "time_trials": 18,
+  "allocation_trials": 18,
+  "source_sha256": {
+    "before-lib.rs": "122c64fabbe360c6cb38dbbbeb367dcb08d9f965664e9ae71e4dcd0de2a95e71",
+    "before-transactions.rs": "d471fd7aff2375e9cec19bd394c53cb42ca4208f8d2d3c9911aedacc3493d2c0",
+    "before-service.rs": "ac17b2ab470755a7a7671f903186b6a6b9a4fbfac3f073442247bb0cfd00f96e",
+    "before-metrics.rs": "5668d960bab968320a0fbcbb78552d383fc64c4b01d972bf423b9f9e2b9e5656",
+    "before-tx_bench.rs": "4b8305155a3fd022aaf4451ac369df45c6d52458e993ef6f5b3552f49711b7f3",
+    "before-service_bench.rs": "9af9c86bce732ad8f8d285ba8f7f0d5c88c6bea7571af5085d4f198e953dbf54",
+    "after-lib.rs": "6f44643de4f04f698763dbc64f9f4af03ae44f5f89ad6fb099aeb57372e53c17",
+    "after-transactions.rs": "48b86b806a8046f91c9372d4f20234beaf5418224cfbbc2be22f50a24225cb8d",
+    "after-service.rs": "970b760030866fe3b77390a16ee1cc148fcea9af5ae5dc36149e1d45dba05103",
+    "after-metrics.rs": "88487ca98b8c95ea6c8b62b1a4c559edfe9ccdda131f15e4d795d658d393af7f",
+    "after-tx_bench.rs": "5f7bada41dcacfe4467f4797d359966f3f926efb0dd827a66fa1e1df5fbe3f08",
+    "after-service_bench.rs": "1917cbab7ecad077de8a0a07fcf5a06dfd70cce16602ffb9779727580b94cb82"
+  },
+  "git_lf_source_sha256": {
+    "before-lib.rs": "968f847fcadee7873e4680eed656996b662e449daf8b3867c25acd0db1d9ae01",
+    "before-transactions.rs": "c2c2cfda40787f7b3460082b3b321c32ec90e1cf5ee40eb6e82671b11c47342d",
+    "before-service.rs": "752305688a7f2eebd790845ec274c9f47a0675e9bf850fb1d3f1b6ebf4bfeb4e",
+    "before-metrics.rs": "5668d960bab968320a0fbcbb78552d383fc64c4b01d972bf423b9f9e2b9e5656",
+    "before-tx_bench.rs": "4b8305155a3fd022aaf4451ac369df45c6d52458e993ef6f5b3552f49711b7f3",
+    "before-service_bench.rs": "9af9c86bce732ad8f8d285ba8f7f0d5c88c6bea7571af5085d4f198e953dbf54",
+    "after-lib.rs": "6f44643de4f04f698763dbc64f9f4af03ae44f5f89ad6fb099aeb57372e53c17",
+    "after-transactions.rs": "48b86b806a8046f91c9372d4f20234beaf5418224cfbbc2be22f50a24225cb8d",
+    "after-service.rs": "970b760030866fe3b77390a16ee1cc148fcea9af5ae5dc36149e1d45dba05103",
+    "after-metrics.rs": "88487ca98b8c95ea6c8b62b1a4c559edfe9ccdda131f15e4d795d658d393af7f",
+    "after-tx_bench.rs": "5f7bada41dcacfe4467f4797d359966f3f926efb0dd827a66fa1e1df5fbe3f08",
+    "after-service_bench.rs": "1917cbab7ecad077de8a0a07fcf5a06dfd70cce16602ffb9779727580b94cb82"
+  },
+  "binary_sha256": {
+    "before-time": "10a5db01d292f8a4234400ed781397bd2939e1316e367e5416a6e5e70bdbdc1c",
+    "before-alloc": "e604565db6c3a727b7a354b1ad4dc3caa2b90c3f74a4a7b0b9ad1c68a737d100",
+    "after-time": "83395bbe54fa33aa1dd0628b844fcec37e5a741b3fd08c76e8924a788b92bc58",
+    "after-alloc": "fcd946702ebfb8373208c5b5d51b73e7d7833b3831665d985fcb2126aef527fa"
+  }
+}

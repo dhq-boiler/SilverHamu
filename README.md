@@ -421,6 +421,23 @@ worsens from 365 to 820 µs. The [full report](docs/benchmarks/global-generation
 includes that result, all-trial maxima, safety checks, raw samples and reproduction
 commands. No persistent metadata or file-format change is needed.
 
+### Follow-up: remove redundant copies and point lookups
+
+Three small production changes remove single-request JSON cloning, committed-row
+lookups for unchanged-generation point dependencies, and unused export dependencies.
+At 1M rows with 10k read dependencies, validation p99 changes **7.962 ms → 45.9 µs**
+and durable commit p99 **11.750 → 3.706 ms**. A 256-KiB in-process single-request
+put saves **524,947 allocated bytes and nine allocation calls** per operation.
+
+![Work elimination: gains and adverse results](docs/benchmarks/work-elision-2026-11-05/comparison.svg)
+
+Not every latency improves: 1M-row single-key commit p99 worsens **2.379 → 3.142 ms**,
+and export has no demonstrated speedup (only one allocation / 194 bytes removed).
+Time and allocation use separate builds, with three paired trials per condition.
+See the [full results, safety evidence and reproduction steps](docs/benchmarks/work-elision-2026-11-05/README.md)
+and [cross-path audit with deferred candidates](docs/benchmarks/work-elision-2026-11-05/audit.md).
+These are targeted engine/in-process measurements, not four-client TCP throughput.
+
 ## Tests
 
 ```sh

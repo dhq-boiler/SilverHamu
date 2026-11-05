@@ -423,7 +423,15 @@ fn limit(v: &Value, name: &str, default: usize, max: usize) -> Result<usize, Err
 }
 
 fn dispatch(db: &Database, tx: &mut Option<Transaction>, v: &Value) -> Result<Value, Error> {
-    let op = text(v, "op")?;
+    dispatch_operation(db, tx, v, text(v, "op")?)
+}
+
+fn dispatch_operation(
+    db: &Database,
+    tx: &mut Option<Transaction>,
+    v: &Value,
+    op: &str,
+) -> Result<Value, Error> {
     match op {
         #[cfg(all(feature = "fixed-log", feature = "lock-timing"))]
         "fixed_log_metrics" => Ok(json!({"ok":true,"metrics":db.fixed_log_metrics()?})),
@@ -438,15 +446,12 @@ fn dispatch(db: &Database, tx: &mut Option<Transaction>, v: &Value) -> Result<Va
                 "put_commit" => ("put", true),
                 _ => ("delete", true),
             };
-            // Reusing dispatch preserves the existing validation and response bounds.
-            let mut request = v.clone();
-            request["op"] = Value::String(operation.into());
             let mut local = Some(if writes {
                 db.begin()?
             } else {
                 db.begin_read()?
             });
-            let response = dispatch(db, &mut local, &request)?;
+            let response = dispatch_operation(db, &mut local, v, operation)?;
             if writes {
                 let version = local.take().unwrap().commit()?;
                 Ok(json!({"ok":true,"version":version.to_string()}))
@@ -559,6 +564,36 @@ pub fn healthcheck(address: SocketAddr, token: &[u8]) -> io::Result<()> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn elision_single_dispatch_preserves_request_and_validation() {
+        let f = Fixture::new();
+        let db = f.db();
+        for request in [
+            json!({"op":"get_latest","key":""}),
+            json!({"op":"get_latest","key":"zz"}),
+            json!({"op":"put_commit","key":"00","value":""}),
+            json!({"op":"put_commit","key":"01","value":"ab".repeat(MAX_VALUE)}),
+            json!({"op":"put_commit","key":"02","value":"ab".repeat(MAX_VALUE+1)}),
+            json!({"op":"put_commit","key":"03"}),
+            json!({"op":"scan_latest","start":"","rows":1}),
+            json!({"op":"scan_latest","start":"","rows":0}),
+            json!({"op":"delete_commit","key":"01"}),
+        ] {
+            let original = request.clone();
+            let result = dispatch(&db, &mut None, &request);
+            let invalid = request["key"] == "zz"
+                || request["key"] == "02"
+                || request["key"] == "03"
+                || request["rows"] == 0;
+            assert_eq!(result.is_err(), invalid, "{result:?}");
+            assert_eq!(request, original);
+        }
+        let mut active = Some(db.begin().unwrap());
+        let request = json!({"op":"put_commit","key":"00","value":"ff"});
+        assert!(dispatch(&db, &mut active, &request).is_err());
+        assert!(active.is_some());
+    }
+
     use super::*;
 
     struct Fixture(PathBuf);
@@ -751,3 +786,7 @@ mod tests {
         assert!(!same_token(b"abc", b"abc\0"));
     }
 }
+
+#[cfg(test)]
+#[path = "../benchmarks/work-elision/service_bench.rs"]
+mod work_elision_bench;

@@ -1056,7 +1056,7 @@ impl Database {
         start: &[u8],
         end: Option<&[u8]>,
     ) -> Result<ExportInfo> {
-        let mut transaction = self.begin()?;
+        let mut transaction = self.begin_read()?;
         let (rows, mut buffer) = transaction.scan_reserved(start, end)?;
         buffer.add(rows.len() * std::mem::size_of::<&[u8]>() + 64 * 1024)?;
         let values: Vec<_> = rows.iter().map(|(_, value)| value.as_slice()).collect();
@@ -1336,12 +1336,16 @@ impl Transaction {
 
     fn validate_commit(&self, state: &State, earlier: &BTreeSet<&[u8]>) -> Result<()> {
         for key in self.writes.keys() {
-            if state.changed(key, self.snapshot) || earlier.contains(key.as_slice()) {
+            if (state.sequence != self.snapshot && state.changed(key, self.snapshot))
+                || earlier.contains(key.as_slice())
+            {
                 return Err(Error::Conflict(ConflictKind::Write));
             }
         }
         for key in &self.reads {
-            if state.changed(key, self.snapshot) || earlier.contains(key.as_slice()) {
+            if (state.sequence != self.snapshot && state.changed(key, self.snapshot))
+                || earlier.contains(key.as_slice())
+            {
                 return Err(Error::Conflict(ConflictKind::Read));
             }
         }
@@ -1780,6 +1784,71 @@ impl<'a> Decoder<'a> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn elision_export_uses_no_write_dependencies_and_preserves_file_content() {
+        let f = Fixture::new();
+        let db = Database::create_with_limits(
+            &f.0,
+            [90; 16],
+            ResourceLimits {
+                max_dependency_bytes: 1,
+                ..ResourceLimits::default()
+            },
+        )
+        .unwrap();
+        let mut tx = db.begin().unwrap();
+        tx.put(b"a", b"value").unwrap();
+        tx.commit().unwrap();
+        let out = Fixture::new();
+        let info = db.export_values(&out.0, [91; 16], b"", None).unwrap();
+        assert_eq!(info.records, 1);
+        assert_eq!(info.version, 1);
+        let mut snapshot = crate::Snapshot::open(&out.0, [91; 16]).unwrap();
+        assert_eq!(snapshot.read_page(0, 10).unwrap(), vec![b"value".to_vec()]);
+        assert_eq!(db.resource_usage().unwrap().current[DEPENDENCIES], 0);
+        assert!(db.export_values(&out.0, [91; 16], b"", None).is_err());
+    }
+
+    #[test]
+    fn elision_point_validation_keeps_advanced_generation_and_earlier_group_conflicts() {
+        for read in [false, true] {
+            for deletion in [false, true] {
+                let f = Fixture::new();
+                let db = Database::create(&f.0, [92; 16]).unwrap();
+                let mut seed = db.begin().unwrap();
+                seed.put(b"key", b"old").unwrap();
+                seed.commit().unwrap();
+                let mut tx = db.begin().unwrap();
+                if read {
+                    tx.get(b"key").unwrap();
+                    tx.put(b"side", b"v").unwrap();
+                } else {
+                    tx.put(b"key", b"mine").unwrap();
+                }
+                let kind = if read {
+                    ConflictKind::Read
+                } else {
+                    ConflictKind::Write
+                };
+                {
+                    let state = db.state().unwrap();
+                    assert!(tx.validate_commit(&state, &BTreeSet::new()).is_ok());
+                    assert!(
+                        matches!(tx.validate_commit(&state,&BTreeSet::from([b"key".as_slice()])),Err(Error::Conflict(k)) if k==kind)
+                    );
+                }
+                let mut other = db.begin().unwrap();
+                if deletion {
+                    other.delete(b"key").unwrap();
+                } else {
+                    other.put(b"key", b"new").unwrap();
+                }
+                other.commit().unwrap();
+                assert!(matches!(tx.commit(),Err(Error::Conflict(k)) if k==kind));
+            }
+        }
+    }
+
     use super::*;
 
     #[test]
@@ -3110,3 +3179,7 @@ mod read_copy_tests {
 #[cfg(test)]
 #[path = "../benchmarks/global-generation/engine_bench.rs"]
 mod generation_guard_bench;
+
+#[cfg(test)]
+#[path = "../benchmarks/work-elision/tx_bench.rs"]
+mod work_elision_bench;

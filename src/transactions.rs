@@ -29,7 +29,7 @@ mod reclamation;
 mod retirement;
 #[cfg(feature = "commit-window")]
 pub use group_commit::CommitOutcome;
-pub use reclamation::ReclamationStatus;
+pub use reclamation::{ReclamationProfile, ReclamationStatus};
 pub use retirement::RetirementStatus;
 
 const MAGIC: &[u8; 8] = b"NDTXN001";
@@ -981,6 +981,10 @@ impl Database {
     pub fn set_background_reclamation(&self, enabled: bool) -> Result<()> {
         self.inner.reclaimer.set(enabled, &self.inner.state)?;
         Ok(())
+    }
+
+    pub fn reclamation_profile(&self) -> ReclamationProfile {
+        self.inner.reclaimer.profile()
     }
 
     pub fn reclamation_status(&self) -> ReclamationStatus {

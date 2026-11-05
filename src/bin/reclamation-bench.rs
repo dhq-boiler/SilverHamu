@@ -252,6 +252,7 @@ mod probe {
         let heap_drained = LIVE.load(Ordering::Relaxed);
         let budget_drained = db.resource_usage().unwrap();
         let worker = db.reclamation_status();
+        let profile = db.reclamation_profile();
         let reader_results: Vec<_> = reader_results.into_iter().map(encode).collect();
         let writer_results: Vec<_> = writer_results.into_iter().map(encode).collect();
         {
@@ -274,7 +275,7 @@ mod probe {
         }
         println!(
             "{}",
-            json!({"scenario":scenario,"rows":rows,"value_bytes":bytes,"writers":writer_results,"readers":reader_results,"elapsed_s":elapsed,"drop_ns":drop_ns,"drain_ns":drain_ns,"drain_steps":steps,"main_hold":holds,"main_wait_ns":waits,"heap_start":heap_start,"heap_peak":heap_peak,"heap_end":heap_end,"budget_current":budget.current,"budget_peak":budget.peak,"verified":true,"background":background,"lock_timing":cfg!(feature="lock-timing"),"heap_drained":heap_drained,"budget_drained":budget_drained.current,"sample_capacity_bytes":32_000_000+if gc {0}else{updates*4*8},"worker_batches":worker.batches,"worker_reclaimed_bytes":worker.reclaimed_bytes,"worker_max_lock_hold_ns":worker.max_lock_hold_ns})
+            json!({"scenario":scenario,"rows":rows,"value_bytes":bytes,"writers":writer_results,"readers":reader_results,"elapsed_s":elapsed,"drop_ns":drop_ns,"drain_ns":drain_ns,"drain_steps":steps,"main_hold":holds,"main_wait_ns":waits,"heap_start":heap_start,"heap_peak":heap_peak,"heap_end":heap_end,"budget_current":budget.current,"budget_peak":budget.peak,"verified":true,"background":background,"lock_timing":cfg!(feature="lock-timing"),"heap_drained":heap_drained,"budget_drained":budget_drained.current,"sample_capacity_bytes":32_000_000+if gc {0}else{updates*4*8},"worker_batches":worker.batches,"worker_reclaimed_bytes":worker.reclaimed_bytes,"worker_max_lock_hold_ns":worker.max_lock_hold_ns,"worker_profile":{"lock_misses":profile.lock_misses,"io_deferrals":profile.io_deferrals,"work_ns":profile.work_ns,"free_ns":profile.free_ns,"yield_ns":profile.yield_ns,"pause_requested_ns":profile.pause_requested_ns,"pause_elapsed_ns":profile.pause_elapsed_ns,"worker_elapsed_ns":profile.worker_elapsed_ns}})
         );
     }
 }

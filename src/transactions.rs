@@ -146,6 +146,7 @@ struct Inner {
     group: group_commit::GroupCommit,
     reclaimer: reclamation::Reclaimer,
     state: Arc<Mutex<State>>,
+    snapshots: Arc<SnapshotRegistry>,
     writer: Mutex<()>,
     checkpoint: Mutex<()>,
     retirement: Mutex<retirement::Retirement>,
@@ -215,13 +216,51 @@ struct State {
     reservation_enabled: bool,
     reserved_bytes: u64,
     rows: BTreeMap<Vec<u8>, VecDeque<Version>>,
-    active: BTreeMap<u64, usize>,
+    active: Arc<SnapshotRegistry>,
     history_keys: BTreeSet<Vec<u8>>,
     gc_floor: u64,
     gc_target: u64,
     gc_cursor: Option<Vec<u8>>,
     poisoned: bool,
     budget: Arc<Budget>,
+}
+
+#[derive(Default)]
+struct SnapshotRegistry(Mutex<BTreeMap<u64, usize>>);
+impl SnapshotRegistry {
+    fn pin(&self, sequence: u64) {
+        *self
+            .0
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .entry(sequence)
+            .or_default() += 1;
+    }
+    fn unpin(&self, sequence: u64) {
+        let mut active = self.0.lock().unwrap_or_else(|e| e.into_inner());
+        if let Some(count) = active.get_mut(&sequence) {
+            *count -= 1;
+            if *count == 0 {
+                active.remove(&sequence);
+            }
+        }
+    }
+    fn floor(&self, current: u64) -> u64 {
+        self.0
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .keys()
+            .next()
+            .copied()
+            .unwrap_or(current)
+    }
+    fn count(&self) -> usize {
+        self.0
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .values()
+            .sum()
+    }
 }
 
 struct RetiredVersions {
@@ -533,6 +572,7 @@ impl Database {
 
     fn from_state(state: State, id: [u8; 16], owner: File) -> Self {
         let budget = state.budget.clone();
+        let snapshots = state.active.clone();
         let mut retirement = retirement::Retirement::new(state.path.clone(), id);
         retirement.cleanup();
         Self {
@@ -540,6 +580,7 @@ impl Database {
                 group: group_commit::GroupCommit::default(),
                 reclaimer: reclamation::Reclaimer::default(),
                 state: Arc::new(Mutex::new(state)),
+                snapshots,
                 writer: Mutex::new(()),
                 checkpoint: Mutex::new(()),
                 retirement: Mutex::new(retirement),
@@ -1006,7 +1047,8 @@ impl Database {
         let result = (|| {
             state.budget.replace(ACTIVE, 0, 1)?;
             let snapshot = state.sequence;
-            *state.active.entry(snapshot).or_default() += 1;
+            // Pinning outside the state lock could resurrect a generation already reclaimed.
+            state.active.pin(snapshot);
             Ok(Transaction {
                 database: self.clone(),
                 snapshot,
@@ -1038,7 +1080,7 @@ impl Database {
                 .filter(|v| v.back().unwrap().value.is_some())
                 .count(),
             retained_versions: state.rows.values().map(VecDeque::len).sum(),
-            active_transactions: state.active.values().sum(),
+            active_transactions: state.active.count(),
             wal_bytes: state.wal_bytes,
         })
     }
@@ -1413,6 +1455,8 @@ impl Transaction {
 
 impl Drop for Transaction {
     fn drop(&mut self) {
+        // Releasing a pin never acquires state while holding the registry lock.
+        self.database.inner.snapshots.unpin(self.snapshot);
         self.database.inner.budget.release(ACTIVE, 1);
         self.database
             .inner
@@ -1422,17 +1466,13 @@ impl Drop for Transaction {
             .inner
             .budget
             .release(DEPENDENCIES, self.dependency_charge);
-        if let Ok(state) = self.database.inner.state.lock() {
-            let mut state = wrap_state(state);
-            if let Some(count) = state.active.get_mut(&self.snapshot) {
-                *count -= 1;
-                if *count == 0 {
-                    state.active.remove(&self.snapshot);
-                }
+        if !self.database.inner.reclaimer.enabled() {
+            if let Ok(state) = self.database.inner.state.lock() {
+                let mut state = wrap_state(state);
+                let retired = state.collect();
+                drop(state);
+                drop(retired);
             }
-            let retired = (!self.database.inner.reclaimer.enabled()).then(|| state.collect());
-            drop(state);
-            drop(retired);
         }
     }
 }
@@ -1532,7 +1572,7 @@ impl State {
             reservation_enabled: cfg!(windows),
             reserved_bytes: 0,
             rows: BTreeMap::new(),
-            active: BTreeMap::new(),
+            active: Arc::new(SnapshotRegistry::default()),
             history_keys: BTreeSet::new(),
             gc_floor: 0,
             gc_target: 0,
@@ -1614,8 +1654,7 @@ impl State {
     }
     fn gc_pending(&self) -> bool {
         self.gc_target != 0
-            || (!self.history_keys.is_empty()
-                && self.active.keys().next().copied().unwrap_or(self.sequence) > self.gc_floor)
+            || (!self.history_keys.is_empty() && self.active.floor(self.sequence) > self.gc_floor)
     }
     fn collect(&mut self) -> RetiredVersions {
         let mut retired = RetiredVersions {
@@ -1627,7 +1666,7 @@ impl State {
         if self.file.is_none() {
             return retired;
         }
-        let floor = self.active.keys().next().copied().unwrap_or(self.sequence);
+        let floor = self.active.floor(self.sequence);
         if self.gc_target == 0 {
             if floor <= self.gc_floor {
                 return retired;
@@ -3027,6 +3066,63 @@ mod read_copy_tests {
     }
 
     #[test]
+    fn st_background_transaction_release_does_not_wait_for_data_state() {
+        for read_only in [false, true] {
+            let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                .join("artifacts")
+                .join(format!("pin-release-{}-{read_only}", std::process::id()));
+            let _ = std::fs::remove_file(&path);
+            let db = Database::create(&path, [37; 16]).unwrap();
+            db.set_background_reclamation(true).unwrap();
+            let old = db.begin_read().unwrap();
+            let transaction = if read_only {
+                db.begin_read()
+            } else {
+                db.begin()
+            }
+            .unwrap();
+            let state = db.state().unwrap();
+            assert_eq!(state.active.count(), 2);
+            let (sent, received) = std::sync::mpsc::channel();
+            let releaser = std::thread::spawn(move || {
+                drop(transaction);
+                sent.send(()).unwrap();
+            });
+            let completed = received
+                .recv_timeout(std::time::Duration::from_secs(2))
+                .is_ok();
+            let remaining = state.active.count();
+            drop(state);
+            releaser.join().unwrap();
+            assert!(completed, "transaction release waited for the data lock");
+            assert_eq!(remaining, 1);
+            assert_eq!(db.resource_usage().unwrap().current[ACTIVE], 1);
+            drop(old);
+            assert_eq!(db.stats().unwrap().active_transactions, 0);
+            db.set_background_reclamation(false).unwrap();
+        }
+    }
+
+    #[test]
+    fn bv_snapshot_registry_keeps_duplicate_and_out_of_order_generations() {
+        let registry = SnapshotRegistry::default();
+        assert_eq!(registry.floor(9), 9);
+        registry.pin(3);
+        registry.pin(3);
+        registry.pin(7);
+        registry.pin(5);
+        assert_eq!(registry.count(), 4);
+        registry.unpin(3);
+        assert_eq!(registry.floor(9), 3);
+        registry.unpin(5);
+        registry.unpin(3);
+        assert_eq!(registry.floor(9), 7);
+        registry.unpin(7);
+        assert_eq!(registry.floor(9), 9);
+        assert_eq!(registry.count(), 0);
+    }
+
+    #[test]
     fn er_detached_versions_stay_charged_until_their_values_are_freed() {
         let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .join("artifacts")
@@ -3042,7 +3138,7 @@ mod read_copy_tests {
         w.commit().unwrap();
         let before = db.resource_usage().unwrap().current[RETAINED];
         let mut state = db.state().unwrap();
-        state.active.remove(&old.snapshot);
+        state.active.unpin(old.snapshot);
         let retired = state.collect();
         assert_eq!(retired.charge, 1088);
         assert_eq!(state.budget.snapshot().unwrap().current[RETAINED], before);

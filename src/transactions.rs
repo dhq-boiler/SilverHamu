@@ -1635,14 +1635,21 @@ impl State {
             self.gc_target = floor;
             self.gc_cursor = None;
         }
+        let mut leading = self
+            .gc_cursor
+            .as_ref()
+            .is_none_or(|cursor| self.history_keys.first().is_none_or(|first| first > cursor));
         for _ in 0..64 {
-            let lower = self.gc_cursor.as_deref().map_or(Unbounded, Excluded);
-            let Some(key) = self
-                .history_keys
-                .range::<[u8], _>((lower, Unbounded))
-                .next()
-                .cloned()
-            else {
+            let key = if leading {
+                self.history_keys.pop_first()
+            } else {
+                let lower = self.gc_cursor.as_deref().map_or(Unbounded, Excluded);
+                self.history_keys
+                    .range::<[u8], _>((lower, Unbounded))
+                    .next()
+                    .cloned()
+            };
+            let Some(key) = key else {
                 self.gc_floor = self.gc_target;
                 self.gc_target = 0;
                 self.gc_cursor = None;
@@ -1655,6 +1662,9 @@ impl State {
                 if retired.values.len() >= 128
                     || (!retired.values.is_empty() && retired.charge + charge > 1024 * 1024)
                 {
+                    if leading {
+                        self.history_keys.insert(key);
+                    }
                     return retired;
                 }
                 retired.charge += charge;
@@ -1666,9 +1676,17 @@ impl State {
             if tombstone {
                 self.rows.remove(&key);
                 self.budget.release(RETAINED, 192 + 2 * key.len() + 64);
-                self.history_keys.remove(&key);
+                if !leading {
+                    self.history_keys.remove(&key);
+                }
             } else if versions.len() == 1 && versions[0].value.is_some() {
-                self.history_keys.remove(&key);
+                if !leading {
+                    self.history_keys.remove(&key);
+                }
+            } else if leading {
+                // A pinned prefix must remain discoverable on the next collection pass.
+                self.history_keys.insert(key.clone());
+                leading = false;
             }
             self.gc_cursor = Some(key);
         }

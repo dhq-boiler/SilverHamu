@@ -1,0 +1,62 @@
+{
+  "worst_sync": {
+    "case": "candidate-profile-trace-r2-c1-rate200-normal",
+    "tid": 22118,
+    "start_ns": 80277746167000,
+    "scheduled_ns": 83000,
+    "runnable_ns": 14000,
+    "blocked_ns": 129481000,
+    "io_stack_blocked_ns": 129481000,
+    "other_blocked_ns": 0,
+    "end_ns": 80277875745000,
+    "duration_ns": 129578000,
+    "return": "0x0"
+  },
+  "worst_wait_stacks": [
+    {
+      "duration_ns": 175000,
+      "stack": [
+        "trace_event_raw_event_sched_switch",
+        "__traceiter_sched_switch",
+        "__schedule",
+        "schedule",
+        "io_schedule",
+        "folio_wait_bit_common",
+        "folio_wait_bit",
+        "folio_wait_writeback",
+        "__filemap_fdatawait_range",
+        "file_write_and_wait_range",
+        "ext4_sync_file",
+        "vfs_fsync_range",
+        "do_fsync",
+        "__x64_sys_fsync",
+        "x64_sys_call",
+        "do_syscall_64",
+        "entry_SYSCALL_64_after_hwframe"
+      ]
+    },
+    {
+      "duration_ns": 129306000,
+      "stack": [
+        "trace_event_raw_event_sched_switch",
+        "__traceiter_sched_switch",
+        "__schedule",
+        "schedule",
+        "jbd2_log_wait_commit",
+        "jbd2_complete_transaction",
+        "ext4_fc_commit",
+        "ext4_sync_file",
+        "vfs_fsync_range",
+        "do_fsync",
+        "__x64_sys_fsync",
+        "x64_sys_call",
+        "do_syscall_64",
+        "entry_SYSCALL_64_after_hwframe"
+      ]
+    }
+  ],
+  "maximum_runnable_ns": 287000,
+  "all_syncs_success": true,
+  "sum_blocked_ns": 222765887000,
+  "sum_io_path_blocked_ns": 222765887000
+}

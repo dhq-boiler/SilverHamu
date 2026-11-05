@@ -1,0 +1,89 @@
+{
+  "parent_commit": "986f0474c3335089015103f8dc859ebf26f4aafb",
+  "runtime_source": "measured-source.zip",
+  "source_sha256": "26cacd293709ff50fd3cabf89534f599bdf747e9d5d2c46075c2216a596f2344",
+  "server_features": {
+    "candidate-profile-off": "service,backlog-batch,benchmark-metrics,sync-stall,lock-timing",
+    "candidate-profile-trace": "service,backlog-batch,benchmark-metrics,sync-stall,lock-timing"
+  },
+  "server_images": {
+    "candidate-profile-off": {
+      "image": "catdb-tail-profile:local",
+      "id": "sha256:5408a4805b5a2a18e6ad61214adc110a30a597b71896ce78ad670c316b1657b8"
+    },
+    "candidate-profile-trace": {
+      "image": "catdb-tail-profile:local",
+      "id": "sha256:5408a4805b5a2a18e6ad61214adc110a30a597b71896ce78ad670c316b1657b8"
+    }
+  },
+  "client_image_id": "sha256:39802503b80b1a6c6f55632fb407b2a47d410316450c48fab246be81adf22f38",
+  "docker": {
+    "Client": {
+      "Version": "29.9.2",
+      "ApiVersion": "1.56",
+      "DefaultAPIVersion": "1.56",
+      "GitCommit": "a82e528",
+      "GoVersion": "go1.26.10",
+      "Os": "windows",
+      "Arch": "amd64",
+      "BuildTime": "Tue Oct 20 19:44:07 2026",
+      "Context": "desktop-linux"
+    },
+    "Server": {
+      "Platform": {
+        "Name": "Docker Desktop 4.98.0 (245422)"
+      },
+      "Version": "29.9.2",
+      "ApiVersion": "1.56",
+      "MinAPIVersion": "1.40",
+      "Os": "linux",
+      "Arch": "amd64",
+      "Components": [
+        {
+          "Name": "Engine",
+          "Version": "29.9.2",
+          "Details": {
+            "ApiVersion": "1.56",
+            "Arch": "amd64",
+            "BuildTime": "Tue Oct 20 18:45:02 2026",
+            "Experimental": "false",
+            "GitCommit": "0367cbe",
+            "GoVersion": "go1.26.10",
+            "KernelVersion": "6.18.54.1-microsoft-standard-WSL2",
+            "MinAPIVersion": "1.40",
+            "Module": "github.com/moby/moby/v2",
+            "ModuleVersion": "v2.0.0+unknown",
+            "Os": "linux"
+          }
+        },
+        {
+          "Name": "containerd",
+          "Version": "v2.4.2",
+          "Details": {
+            "GitCommit": "b7a25261e029d68978bbf290df0a62fc819b3c51"
+          }
+        },
+        {
+          "Name": "runc",
+          "Version": "1.5.2",
+          "Details": {
+            "GitCommit": "v1.5.2-0-g29dd3dc2"
+          }
+        },
+        {
+          "Name": "docker-init",
+          "Version": "0.19.0",
+          "Details": {
+            "GitCommit": "de40ad0"
+          }
+        }
+      ],
+      "GitCommit": "0367cbe",
+      "GoVersion": "go1.26.10",
+      "KernelVersion": "6.18.54.1-microsoft-standard-WSL2",
+      "BuildTime": "2026-10-20T18:45:02.000000000+00:00"
+    }
+  },
+  "interference": "No builds, test suites or chart rendering overlapped timed cohorts. Small source/document edits and occasional reads/attribution of completed cases occurred on the host. Other host/device activity was not fully controlled.",
+  "source_hashes_verified": true
+}

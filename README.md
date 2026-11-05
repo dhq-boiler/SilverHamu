@@ -655,3 +655,13 @@ This repository was extracted from the NewDBMS prototype. Application-specific i
 ## License
 
 [MIT](LICENSE). Original copyright notices are retained.
+
+## Follow-up: separating log-sync I/O-path and runnable waits
+
+The same server binary was measured with kernel tracing off/on, at 100,000 rows and 1/4 connections. This identifies waits inside sync and the observer effect; it does **not** establish a maximum-latency improvement.
+
+![Kernel sync wait attribution](docs/benchmarks/sync-os-2026-11-05/sync-tail.svg)
+
+![Kernel tracing observer effect](docs/benchmarks/sync-os-2026-11-05/observer.svg)
+
+See the [full results, safety checks, raw traces and limitations](docs/benchmarks/sync-os-2026-11-05/README.md). Filesystem/journal blocking is distinguished from runnable-to-scheduled delay; guest observations do not identify physical-device latency. The commit policy and durability guarantees are unchanged.

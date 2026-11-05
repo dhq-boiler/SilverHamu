@@ -177,3 +177,20 @@ No unbounded reserve, hidden mutation retry or weakened durability is introduced
 The optional mode prioritizes request latency at the expense of total collection
 time. See the [measured tradeoffs](benchmarks/reclamation-2026-11-05/README.md).
 The C ABI remains compatible; this new setting is exposed in Rust and the service.
+
+## Optional reclamation diagnostics
+
+Rust `Database::reclamation_profile()` returns a separate `ReclamationProfile`,
+preserving the existing `ReclamationStatus` shape. Build with `lock-timing` to
+record lock misses, persistence deferrals, collection/free/yield wall time,
+requested and actual pause time, and total worker lifetime. Otherwise these
+new fields are zero. Worker lifetime is finalized when the worker exits; stop
+or disable it before comparing summed intervals. Profiles are cumulative across
+enable/disable cycles and do not reset on read.
+
+These are elapsed durations, not CPU usage or a direct measurement of scheduler
+latency. Diagnostic clocks and atomics themselves affect performance. The
+[completion-time investigation](benchmarks/reclamation-cost-2026-11-05/README.md)
+retains both timed and lighter comparisons. Its faster scheduling prototypes
+were not adopted; the existing background policy and disabled-by-default setting
+remain unchanged.

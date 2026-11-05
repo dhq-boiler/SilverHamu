@@ -1,0 +1,19 @@
+{
+  "production_commit": "944bbf2",
+  "diagnostic_baseline": "4d09365",
+  "candidates": {
+    "fast": "bebff39",
+    "small": "e8a1aa3",
+    "tiny": "f8e3116"
+  },
+  "ci_run": 41959378151,
+  "adopted_scheduling_change": false,
+  "raw_summary_sha256": {
+    "diagnosis\\results.json": "9e78834a6c8e7fd02afa5942bf8f5c55961e791954165e629ba26fd4106fc9ec",
+    "fast-full\\results.json": "bea16724519d66f245eb9cfc393ee8bf55ba823e2cdc5e5a889c93bba921c8a2",
+    "fast-pilot\\results.json": "302aa4d3fd927011c98d81614475574197c8b77c1ca474f14fbfc362c3ae46a0",
+    "service\\results.json": "c398bf937d3f325195c2413de4935b871d1d403e33750a5c53963fcc4aeb5081",
+    "small-pilot\\results.json": "b478e7fa664025e76237c4d5e880552ff6a4304bc69fc86d1e839d87b11d9823",
+    "tiny-prototype\\results.json": "2fa6b488f568e6de40fc93e0b50aa30199c0e22169947719b69a54c450cdb75d"
+  }
+}

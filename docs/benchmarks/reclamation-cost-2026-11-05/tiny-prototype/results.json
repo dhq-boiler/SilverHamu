@@ -1,0 +1,4646 @@
+[
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      53184000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      7,
+      100352,
+      0,
+      53184000,
+      296016
+    ],
+    "drain_ns": 0,
+    "drain_steps": 0,
+    "drop_ns": 0,
+    "elapsed_s": 1.044092226,
+    "heap_drained": 80373617,
+    "heap_end": 80768004,
+    "heap_peak": 80783940,
+    "heap_start": 80374940,
+    "lock_timing": true,
+    "main_hold": [
+      2,
+      1686,
+      1274
+    ],
+    "main_wait_ns": 757,
+    "readers": [
+      {
+        "elapsed_s": 1.044022226,
+        "hold": [
+          1475904,
+          342433160,
+          209483
+        ],
+        "latency": {
+          "count": 491968,
+          "max_ms": 0.33071,
+          "p99_ms": 0.010945
+        },
+        "wait_ns": 309729427
+      },
+      {
+        "elapsed_s": 1.044003415,
+        "hold": [
+          1453200,
+          284294483,
+          296715
+        ],
+        "latency": {
+          "count": 484400,
+          "max_ms": 0.310668,
+          "p99_ms": 0.011318
+        },
+        "wait_ns": 347191585
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32009600,
+    "scenario": "mixed",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 31,
+    "worker_max_lock_hold_ns": 939,
+    "worker_profile": {
+      "free_ns": 4422,
+      "io_deferrals": 121,
+      "lock_misses": 584,
+      "pause_elapsed_ns": 1044060748,
+      "pause_requested_ns": 1015000000,
+      "work_ns": 13924,
+      "worker_elapsed_ns": 1044178593,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 0,
+    "writers": [
+      {
+        "elapsed_s": 1.043881648,
+        "hold": [
+          666,
+          955262,
+          12056
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 5.570983,
+          "p99_ms": 4.271367
+        },
+        "wait_ns": 1728931
+      },
+      {
+        "elapsed_s": 1.04399479,
+        "hold": [
+          870,
+          1384991,
+          17845
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 5.560117,
+          "p99_ms": 4.282038
+        },
+        "wait_ns": 1641532
+      },
+      {
+        "elapsed_s": 1.043984173,
+        "hold": [
+          708,
+          1059686,
+          14078
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 5.571142,
+          "p99_ms": 4.294278
+        },
+        "wait_ns": 1734389
+      },
+      {
+        "elapsed_s": 1.04394307,
+        "hold": [
+          756,
+          1166749,
+          20212
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 5.568438,
+          "p99_ms": 4.281793
+        },
+        "wait_ns": 943877
+      }
+    ],
+    "variant": "before",
+    "rep": 1,
+    "raw_file": "before-mixed-r1.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      53184000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      7,
+      100352,
+      0,
+      53184000,
+      296016
+    ],
+    "drain_ns": 0,
+    "drain_steps": 0,
+    "drop_ns": 0,
+    "elapsed_s": 1.113381411,
+    "heap_drained": 80373617,
+    "heap_end": 80768004,
+    "heap_peak": 80785060,
+    "heap_start": 80374940,
+    "lock_timing": true,
+    "main_hold": [
+      2,
+      1697,
+      1429
+    ],
+    "main_wait_ns": 364,
+    "readers": [
+      {
+        "elapsed_s": 1.113317702,
+        "hold": [
+          1635858,
+          308288909,
+          212895
+        ],
+        "latency": {
+          "count": 545286,
+          "max_ms": 0.218961,
+          "p99_ms": 0.011702
+        },
+        "wait_ns": 367645740
+      },
+      {
+        "elapsed_s": 1.113322511,
+        "hold": [
+          1636011,
+          329491901,
+          62495
+        ],
+        "latency": {
+          "count": 545337,
+          "max_ms": 0.485003,
+          "p99_ms": 0.01151
+        },
+        "wait_ns": 349901541
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32009600,
+    "scenario": "mixed",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 58,
+    "worker_max_lock_hold_ns": 805,
+    "worker_profile": {
+      "free_ns": 8655,
+      "io_deferrals": 354,
+      "lock_misses": 1375,
+      "pause_elapsed_ns": 1113164856,
+      "pause_requested_ns": 1002750000,
+      "work_ns": 27702,
+      "worker_elapsed_ns": 1113467327,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 0,
+    "writers": [
+      {
+        "elapsed_s": 1.113301307,
+        "hold": [
+          888,
+          1795854,
+          20848
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 6.188923,
+          "p99_ms": 5.674348
+        },
+        "wait_ns": 939771
+      },
+      {
+        "elapsed_s": 1.11331432,
+        "hold": [
+          660,
+          1185190,
+          18315
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 6.219177,
+          "p99_ms": 5.666345
+        },
+        "wait_ns": 1117651
+      },
+      {
+        "elapsed_s": 1.113260435,
+        "hold": [
+          666,
+          1202670,
+          19541
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 6.182953,
+          "p99_ms": 5.670831
+        },
+        "wait_ns": 1167943
+      },
+      {
+        "elapsed_s": 1.113268173,
+        "hold": [
+          786,
+          1554794,
+          25023
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 6.198177,
+          "p99_ms": 5.680575
+        },
+        "wait_ns": 1065309
+      }
+    ],
+    "variant": "after",
+    "rep": 1,
+    "raw_file": "after-mixed-r1.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      53184000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      7,
+      100352,
+      0,
+      53184000,
+      296016
+    ],
+    "drain_ns": 0,
+    "drain_steps": 0,
+    "drop_ns": 0,
+    "elapsed_s": 1.105334041,
+    "heap_drained": 80373585,
+    "heap_end": 80767972,
+    "heap_peak": 80776920,
+    "heap_start": 80374908,
+    "lock_timing": false,
+    "main_hold": [
+      0,
+      0,
+      0
+    ],
+    "main_wait_ns": 0,
+    "readers": [
+      {
+        "elapsed_s": 1.105335148,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 563555,
+          "max_ms": 0.371699,
+          "p99_ms": 0.009695
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 1.105340676,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 572442,
+          "max_ms": 0.348979,
+          "p99_ms": 0.009484
+        },
+        "wait_ns": 0
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32009600,
+    "scenario": "mixed",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 23,
+    "worker_max_lock_hold_ns": 758,
+    "worker_profile": {
+      "free_ns": 0,
+      "io_deferrals": 0,
+      "lock_misses": 0,
+      "pause_elapsed_ns": 0,
+      "pause_requested_ns": 0,
+      "work_ns": 0,
+      "worker_elapsed_ns": 0,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 0,
+    "writers": [
+      {
+        "elapsed_s": 1.105164059,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 6.381072,
+          "p99_ms": 5.671302
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 1.105209947,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 6.386533,
+          "p99_ms": 5.662317
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 1.105159306,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 6.377801,
+          "p99_ms": 5.668468
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 1.105198089,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 6.385416,
+          "p99_ms": 5.687642
+        },
+        "wait_ns": 0
+      }
+    ],
+    "variant": "before-light",
+    "rep": 1,
+    "raw_file": "before-light-mixed-r1.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      53184000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      7,
+      100352,
+      0,
+      53184000,
+      296016
+    ],
+    "drain_ns": 0,
+    "drain_steps": 0,
+    "drop_ns": 0,
+    "elapsed_s": 1.051762308,
+    "heap_drained": 80373585,
+    "heap_end": 80767972,
+    "heap_peak": 80776920,
+    "heap_start": 80374908,
+    "lock_timing": false,
+    "main_hold": [
+      0,
+      0,
+      0
+    ],
+    "main_wait_ns": 0,
+    "readers": [
+      {
+        "elapsed_s": 1.051697326,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 574136,
+          "max_ms": 0.483477,
+          "p99_ms": 0.009324
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 1.051767913,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 560906,
+          "max_ms": 0.378382,
+          "p99_ms": 0.00943
+        },
+        "wait_ns": 0
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32009600,
+    "scenario": "mixed",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 59,
+    "worker_max_lock_hold_ns": 862,
+    "worker_profile": {
+      "free_ns": 0,
+      "io_deferrals": 0,
+      "lock_misses": 0,
+      "pause_elapsed_ns": 0,
+      "pause_requested_ns": 0,
+      "work_ns": 0,
+      "worker_elapsed_ns": 0,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 0,
+    "writers": [
+      {
+        "elapsed_s": 1.051621101,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 5.652977,
+          "p99_ms": 5.057046
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 1.051688351,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 5.643842,
+          "p99_ms": 5.055797
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 1.051639941,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 5.5268,
+          "p99_ms": 5.06183
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 1.051593955,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 5.623719,
+          "p99_ms": 5.044928
+        },
+        "wait_ns": 0
+      }
+    ],
+    "variant": "after-light",
+    "rep": 1,
+    "raw_file": "after-light-mixed-r1.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      295789568,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      269549568,
+      0
+    ],
+    "budget_peak": [
+      7,
+      16812032,
+      0,
+      295789568,
+      67126352
+    ],
+    "drain_ns": 0,
+    "drain_steps": 0,
+    "drop_ns": 0,
+    "elapsed_s": 0.531283783,
+    "heap_drained": 301372409,
+    "heap_end": 327615732,
+    "heap_peak": 328409984,
+    "heap_start": 301373732,
+    "lock_timing": true,
+    "main_hold": [
+      2,
+      938,
+      632
+    ],
+    "main_wait_ns": 191,
+    "readers": [
+      {
+        "elapsed_s": 0.531236868,
+        "hold": [
+          81660,
+          45327797,
+          210639
+        ],
+        "latency": {
+          "count": 27220,
+          "max_ms": 9.815639,
+          "p99_ms": 0.078678
+        },
+        "wait_ns": 57043368
+      },
+      {
+        "elapsed_s": 0.531225335,
+        "hold": [
+          81660,
+          49752774,
+          4365167
+        ],
+        "latency": {
+          "count": 27220,
+          "max_ms": 9.050268,
+          "p99_ms": 0.060312
+        },
+        "wait_ns": 33154228
+      }
+    ],
+    "rows": 4096,
+    "sample_capacity_bytes": 32003200,
+    "scenario": "large",
+    "value_bytes": 65536,
+    "verified": true,
+    "worker_batches": 18,
+    "worker_max_lock_hold_ns": 911,
+    "worker_profile": {
+      "free_ns": 5260,
+      "io_deferrals": 251,
+      "lock_misses": 85,
+      "pause_elapsed_ns": 531241942,
+      "pause_requested_ns": 516000000,
+      "work_ns": 11328,
+      "worker_elapsed_ns": 531354251,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 0,
+    "writers": [
+      {
+        "elapsed_s": 0.531152672,
+        "hold": [
+          298,
+          11223244,
+          280999
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 9.66281,
+          "p99_ms": 9.519436
+        },
+        "wait_ns": 171856
+      },
+      {
+        "elapsed_s": 0.531155532,
+        "hold": [
+          262,
+          9289515,
+          274156
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 9.652059,
+          "p99_ms": 9.505809
+        },
+        "wait_ns": 368281
+      },
+      {
+        "elapsed_s": 0.53113775,
+        "hold": [
+          178,
+          4582547,
+          366203
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 9.672208,
+          "p99_ms": 9.518436
+        },
+        "wait_ns": 475872
+      },
+      {
+        "elapsed_s": 0.531140331,
+        "hold": [
+          262,
+          9509195,
+          329853
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 9.681608,
+          "p99_ms": 9.518934
+        },
+        "wait_ns": 4561929
+      }
+    ],
+    "variant": "before",
+    "rep": 1,
+    "raw_file": "before-large-r1.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      295789568,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      269549568,
+      0
+    ],
+    "budget_peak": [
+      7,
+      16812032,
+      0,
+      295789568,
+      67126352
+    ],
+    "drain_ns": 0,
+    "drain_steps": 0,
+    "drop_ns": 0,
+    "elapsed_s": 0.524214767,
+    "heap_drained": 301372409,
+    "heap_end": 327614516,
+    "heap_peak": 328276563,
+    "heap_start": 301373732,
+    "lock_timing": true,
+    "main_hold": [
+      2,
+      1093,
+      738
+    ],
+    "main_wait_ns": 240,
+    "readers": [
+      {
+        "elapsed_s": 0.524143697,
+        "hold": [
+          83217,
+          50333318,
+          44504
+        ],
+        "latency": {
+          "count": 27739,
+          "max_ms": 4.6623,
+          "p99_ms": 0.062573
+        },
+        "wait_ns": 44480412
+      },
+      {
+        "elapsed_s": 0.524169213,
+        "hold": [
+          83217,
+          47423779,
+          45310
+        ],
+        "latency": {
+          "count": 27739,
+          "max_ms": 3.611038,
+          "p99_ms": 0.059236
+        },
+        "wait_ns": 48326218
+      }
+    ],
+    "rows": 4096,
+    "sample_capacity_bytes": 32003200,
+    "scenario": "large",
+    "value_bytes": 65536,
+    "verified": true,
+    "worker_batches": 29,
+    "worker_max_lock_hold_ns": 862,
+    "worker_profile": {
+      "free_ns": 5696,
+      "io_deferrals": 213,
+      "lock_misses": 118,
+      "pause_elapsed_ns": 524185595,
+      "pause_requested_ns": 508900000,
+      "work_ns": 17742,
+      "worker_elapsed_ns": 524305249,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 0,
+    "writers": [
+      {
+        "elapsed_s": 0.524123011,
+        "hold": [
+          127,
+          1521345,
+          312911
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 10.805333,
+          "p99_ms": 9.256421
+        },
+        "wait_ns": 227189
+      },
+      {
+        "elapsed_s": 0.519687281,
+        "hold": [
+          306,
+          11270855,
+          340702
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 10.804108,
+          "p99_ms": 9.204284
+        },
+        "wait_ns": 182250
+      },
+      {
+        "elapsed_s": 0.514320505,
+        "hold": [
+          300,
+          11496535,
+          358344
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 10.808696,
+          "p99_ms": 8.426808
+        },
+        "wait_ns": 231551
+      },
+      {
+        "elapsed_s": 0.5196596,
+        "hold": [
+          277,
+          9707243,
+          277760
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 10.805904,
+          "p99_ms": 8.392619
+        },
+        "wait_ns": 812583
+      }
+    ],
+    "variant": "after",
+    "rep": 1,
+    "raw_file": "after-large-r1.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      295789568,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      269549568,
+      0
+    ],
+    "budget_peak": [
+      7,
+      16812032,
+      0,
+      295789568,
+      67126352
+    ],
+    "drain_ns": 0,
+    "drain_steps": 0,
+    "drop_ns": 0,
+    "elapsed_s": 0.556171843,
+    "heap_drained": 301372377,
+    "heap_end": 327615700,
+    "heap_peak": 328409920,
+    "heap_start": 301373700,
+    "lock_timing": false,
+    "main_hold": [
+      0,
+      0,
+      0
+    ],
+    "main_wait_ns": 0,
+    "readers": [
+      {
+        "elapsed_s": 0.556083815,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 29610,
+          "max_ms": 13.133336,
+          "p99_ms": 0.053072
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.556060427,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 29924,
+          "max_ms": 13.149077,
+          "p99_ms": 0.047878
+        },
+        "wait_ns": 0
+      }
+    ],
+    "rows": 4096,
+    "sample_capacity_bytes": 32003200,
+    "scenario": "large",
+    "value_bytes": 65536,
+    "verified": true,
+    "worker_batches": 22,
+    "worker_max_lock_hold_ns": 767,
+    "worker_profile": {
+      "free_ns": 0,
+      "io_deferrals": 0,
+      "lock_misses": 0,
+      "pause_elapsed_ns": 0,
+      "pause_requested_ns": 0,
+      "work_ns": 0,
+      "worker_elapsed_ns": 0,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 0,
+    "writers": [
+      {
+        "elapsed_s": 0.556047377,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 18.450102,
+          "p99_ms": 9.784862
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.555974825,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 18.452407,
+          "p99_ms": 9.795538
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.556041083,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 18.45148,
+          "p99_ms": 9.791637
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.555999953,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 18.447677,
+          "p99_ms": 9.794963
+        },
+        "wait_ns": 0
+      }
+    ],
+    "variant": "before-light",
+    "rep": 1,
+    "raw_file": "before-light-large-r1.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      289885568,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      269549568,
+      0
+    ],
+    "budget_peak": [
+      7,
+      16812032,
+      0,
+      295789568,
+      67126352
+    ],
+    "drain_ns": 0,
+    "drain_steps": 0,
+    "drop_ns": 0,
+    "elapsed_s": 0.484672165,
+    "heap_drained": 301372377,
+    "heap_end": 321710772,
+    "heap_peak": 328409920,
+    "heap_start": 301373700,
+    "lock_timing": false,
+    "main_hold": [
+      0,
+      0,
+      0
+    ],
+    "main_wait_ns": 0,
+    "readers": [
+      {
+        "elapsed_s": 0.484626905,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 25359,
+          "max_ms": 12.17654,
+          "p99_ms": 0.053947
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.484617225,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 25778,
+          "max_ms": 10.289358,
+          "p99_ms": 0.050866
+        },
+        "wait_ns": 0
+      }
+    ],
+    "rows": 4096,
+    "sample_capacity_bytes": 32003200,
+    "scenario": "large",
+    "value_bytes": 65536,
+    "verified": true,
+    "worker_batches": 35,
+    "worker_max_lock_hold_ns": 10000,
+    "worker_profile": {
+      "free_ns": 0,
+      "io_deferrals": 0,
+      "lock_misses": 0,
+      "pause_elapsed_ns": 0,
+      "pause_requested_ns": 0,
+      "work_ns": 0,
+      "worker_elapsed_ns": 0,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 6888000,
+    "writers": [
+      {
+        "elapsed_s": 0.484565308,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 11.601261,
+          "p99_ms": 9.397529
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.4845469,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 11.582065,
+          "p99_ms": 9.393215
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.484549763,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 11.573933,
+          "p99_ms": 9.407141
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.484508213,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 11.594277,
+          "p99_ms": 9.414413
+        },
+        "wait_ns": 0
+      }
+    ],
+    "variant": "after-light",
+    "rep": 1,
+    "raw_file": "after-light-large-r1.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      2,
+      100352,
+      0,
+      84800000,
+      296016
+    ],
+    "drain_ns": 371077085,
+    "drain_steps": 1926,
+    "drop_ns": 795,
+    "elapsed_s": 0.371078033,
+    "heap_drained": 80363758,
+    "heap_end": 80364017,
+    "heap_peak": 113259433,
+    "heap_start": 113259177,
+    "lock_timing": true,
+    "main_hold": [
+      1928,
+      103566,
+      268
+    ],
+    "main_wait_ns": 51690403,
+    "readers": [
+      {
+        "elapsed_s": 0.37107788,
+        "hold": [
+          381705,
+          82864611,
+          203265
+        ],
+        "latency": {
+          "count": 127235,
+          "max_ms": 0.835629,
+          "p99_ms": 0.022117
+        },
+        "wait_ns": 131811640
+      },
+      {
+        "elapsed_s": 0.371098896,
+        "hold": [
+          381732,
+          87982365,
+          65162
+        ],
+        "latency": {
+          "count": 127244,
+          "max_ms": 0.775924,
+          "p99_ms": 0.022155
+        },
+        "wait_ns": 129568147
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32000000,
+    "scenario": "gc",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 1563,
+    "worker_max_lock_hold_ns": 59784,
+    "worker_profile": {
+      "free_ns": 3125523,
+      "io_deferrals": 0,
+      "lock_misses": 288,
+      "pause_elapsed_ns": 314479029,
+      "pause_requested_ns": 307500000,
+      "work_ns": 52001371,
+      "worker_elapsed_ns": 371143042,
+      "yield_ns": 1353944
+    },
+    "worker_reclaimed_bytes": 32000000,
+    "writers": [],
+    "variant": "before",
+    "rep": 1,
+    "raw_file": "before-gc-r1.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      2,
+      100352,
+      0,
+      84800000,
+      296016
+    ],
+    "drain_ns": 652030897,
+    "drain_steps": 3759,
+    "drop_ns": 1064,
+    "elapsed_s": 0.652032105,
+    "heap_drained": 80363758,
+    "heap_end": 80364017,
+    "heap_peak": 113259433,
+    "heap_start": 113259177,
+    "lock_timing": true,
+    "main_hold": [
+      3761,
+      261444,
+      6805
+    ],
+    "main_wait_ns": 24525904,
+    "readers": [
+      {
+        "elapsed_s": 0.652037117,
+        "hold": [
+          694596,
+          155710344,
+          88346
+        ],
+        "latency": {
+          "count": 231532,
+          "max_ms": 0.388803,
+          "p99_ms": 0.030554
+        },
+        "wait_ns": 224414733
+      },
+      {
+        "elapsed_s": 0.652037712,
+        "hold": [
+          694587,
+          157083413,
+          65267
+        ],
+        "latency": {
+          "count": 231529,
+          "max_ms": 0.354907,
+          "p99_ms": 0.030716
+        },
+        "wait_ns": 216005448
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32000000,
+    "scenario": "gc",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 6251,
+    "worker_max_lock_hold_ns": 42352,
+    "worker_profile": {
+      "free_ns": 4571092,
+      "io_deferrals": 0,
+      "lock_misses": 4739,
+      "pause_elapsed_ns": 559934618,
+      "pause_requested_ns": 253150000,
+      "work_ns": 80837898,
+      "worker_elapsed_ns": 652105528,
+      "yield_ns": 5700139
+    },
+    "worker_reclaimed_bytes": 32000000,
+    "writers": [],
+    "variant": "after",
+    "rep": 1,
+    "raw_file": "after-gc-r1.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      2,
+      100352,
+      0,
+      84800000,
+      296016
+    ],
+    "drain_ns": 220729299,
+    "drain_steps": 1031,
+    "drop_ns": 2368,
+    "elapsed_s": 0.220732231,
+    "heap_drained": 80363726,
+    "heap_end": 80363985,
+    "heap_peak": 113259401,
+    "heap_start": 113259145,
+    "lock_timing": false,
+    "main_hold": [
+      0,
+      0,
+      0
+    ],
+    "main_wait_ns": 0,
+    "readers": [
+      {
+        "elapsed_s": 0.220721904,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 62893,
+          "max_ms": 1.328281,
+          "p99_ms": 0.024622
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.220739179,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 62310,
+          "max_ms": 1.263695,
+          "p99_ms": 0.025316
+        },
+        "wait_ns": 0
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32000000,
+    "scenario": "gc",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 1563,
+    "worker_max_lock_hold_ns": 76727,
+    "worker_profile": {
+      "free_ns": 0,
+      "io_deferrals": 0,
+      "lock_misses": 0,
+      "pause_elapsed_ns": 0,
+      "pause_requested_ns": 0,
+      "work_ns": 0,
+      "worker_elapsed_ns": 0,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 32000000,
+    "writers": [],
+    "variant": "before-light",
+    "rep": 1,
+    "raw_file": "before-light-gc-r1.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      2,
+      100352,
+      0,
+      84800000,
+      296016
+    ],
+    "drain_ns": 462686899,
+    "drain_steps": 2677,
+    "drop_ns": 699,
+    "elapsed_s": 0.462687781,
+    "heap_drained": 80363726,
+    "heap_end": 80363985,
+    "heap_peak": 113259401,
+    "heap_start": 113259145,
+    "lock_timing": false,
+    "main_hold": [
+      0,
+      0,
+      0
+    ],
+    "main_wait_ns": 0,
+    "readers": [
+      {
+        "elapsed_s": 0.462686306,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 154850,
+          "max_ms": 0.359289,
+          "p99_ms": 0.031129
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.462683268,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 155037,
+          "max_ms": 0.356903,
+          "p99_ms": 0.030998
+        },
+        "wait_ns": 0
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32000000,
+    "scenario": "gc",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 6251,
+    "worker_max_lock_hold_ns": 210580,
+    "worker_profile": {
+      "free_ns": 0,
+      "io_deferrals": 0,
+      "lock_misses": 0,
+      "pause_elapsed_ns": 0,
+      "pause_requested_ns": 0,
+      "work_ns": 0,
+      "worker_elapsed_ns": 0,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 32000000,
+    "writers": [],
+    "variant": "after-light",
+    "rep": 1,
+    "raw_file": "after-light-gc-r1.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      53184000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      7,
+      100352,
+      0,
+      53184000,
+      296016
+    ],
+    "drain_ns": 0,
+    "drain_steps": 0,
+    "drop_ns": 0,
+    "elapsed_s": 1.095292744,
+    "heap_drained": 80373585,
+    "heap_end": 80767972,
+    "heap_peak": 80776920,
+    "heap_start": 80374908,
+    "lock_timing": false,
+    "main_hold": [
+      0,
+      0,
+      0
+    ],
+    "main_wait_ns": 0,
+    "readers": [
+      {
+        "elapsed_s": 1.095281854,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 548512,
+          "max_ms": 0.287326,
+          "p99_ms": 0.009863
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 1.095289482,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 560287,
+          "max_ms": 0.299757,
+          "p99_ms": 0.009738
+        },
+        "wait_ns": 0
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32009600,
+    "scenario": "mixed",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 50,
+    "worker_max_lock_hold_ns": 556,
+    "worker_profile": {
+      "free_ns": 0,
+      "io_deferrals": 0,
+      "lock_misses": 0,
+      "pause_elapsed_ns": 0,
+      "pause_requested_ns": 0,
+      "work_ns": 0,
+      "worker_elapsed_ns": 0,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 0,
+    "writers": [
+      {
+        "elapsed_s": 1.095196303,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 7.66712,
+          "p99_ms": 5.915741
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 1.095150087,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 7.692956,
+          "p99_ms": 5.912762
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 1.095145769,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 7.693384,
+          "p99_ms": 5.907945
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 1.095143167,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 7.675187,
+          "p99_ms": 5.924675
+        },
+        "wait_ns": 0
+      }
+    ],
+    "variant": "after-light",
+    "rep": 2,
+    "raw_file": "after-light-mixed-r2.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      53184000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      7,
+      100352,
+      0,
+      53184000,
+      296016
+    ],
+    "drain_ns": 0,
+    "drain_steps": 0,
+    "drop_ns": 0,
+    "elapsed_s": 1.113610635,
+    "heap_drained": 80373585,
+    "heap_end": 80767972,
+    "heap_peak": 80776920,
+    "heap_start": 80374908,
+    "lock_timing": false,
+    "main_hold": [
+      0,
+      0,
+      0
+    ],
+    "main_wait_ns": 0,
+    "readers": [
+      {
+        "elapsed_s": 1.113535721,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 533393,
+          "max_ms": 0.201053,
+          "p99_ms": 0.012789
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 1.113528283,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 535738,
+          "max_ms": 0.167433,
+          "p99_ms": 0.012271
+        },
+        "wait_ns": 0
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32009600,
+    "scenario": "mixed",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 22,
+    "worker_max_lock_hold_ns": 680,
+    "worker_profile": {
+      "free_ns": 0,
+      "io_deferrals": 0,
+      "lock_misses": 0,
+      "pause_elapsed_ns": 0,
+      "pause_requested_ns": 0,
+      "work_ns": 0,
+      "worker_elapsed_ns": 0,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 0,
+    "writers": [
+      {
+        "elapsed_s": 1.113512327,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 6.645257,
+          "p99_ms": 5.53199
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 1.113470743,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 6.664043,
+          "p99_ms": 5.525193
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 1.113448844,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 6.58775,
+          "p99_ms": 5.530592
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 1.113430489,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 6.641253,
+          "p99_ms": 5.527386
+        },
+        "wait_ns": 0
+      }
+    ],
+    "variant": "before-light",
+    "rep": 2,
+    "raw_file": "before-light-mixed-r2.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      53184000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      7,
+      100352,
+      0,
+      53184000,
+      296016
+    ],
+    "drain_ns": 0,
+    "drain_steps": 0,
+    "drop_ns": 0,
+    "elapsed_s": 1.077481045,
+    "heap_drained": 80373617,
+    "heap_end": 80768004,
+    "heap_peak": 80785060,
+    "heap_start": 80374940,
+    "lock_timing": true,
+    "main_hold": [
+      2,
+      1456,
+      1159
+    ],
+    "main_wait_ns": 1896,
+    "readers": [
+      {
+        "elapsed_s": 1.077408063,
+        "hold": [
+          1404990,
+          303048450,
+          230414
+        ],
+        "latency": {
+          "count": 468330,
+          "max_ms": 0.344025,
+          "p99_ms": 0.012698
+        },
+        "wait_ns": 349526958
+      },
+      {
+        "elapsed_s": 1.077482731,
+        "hold": [
+          1432296,
+          342943792,
+          221258
+        ],
+        "latency": {
+          "count": 477432,
+          "max_ms": 0.473934,
+          "p99_ms": 0.012405
+        },
+        "wait_ns": 323902895
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32009600,
+    "scenario": "mixed",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 62,
+    "worker_max_lock_hold_ns": 785,
+    "worker_profile": {
+      "free_ns": 9670,
+      "io_deferrals": 287,
+      "lock_misses": 1324,
+      "pause_elapsed_ns": 1077222873,
+      "pause_requested_ns": 973200000,
+      "work_ns": 30111,
+      "worker_elapsed_ns": 1077519880,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 0,
+    "writers": [
+      {
+        "elapsed_s": 1.077385373,
+        "hold": [
+          750,
+          1353203,
+          19611
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 5.896034,
+          "p99_ms": 5.399556
+        },
+        "wait_ns": 1055111
+      },
+      {
+        "elapsed_s": 1.077365251,
+        "hold": [
+          738,
+          1298640,
+          18239
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 5.878663,
+          "p99_ms": 5.391654
+        },
+        "wait_ns": 1924160
+      },
+      {
+        "elapsed_s": 1.077335552,
+        "hold": [
+          834,
+          1627048,
+          47631
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 5.894469,
+          "p99_ms": 5.403729
+        },
+        "wait_ns": 1310091
+      },
+      {
+        "elapsed_s": 1.077344519,
+        "hold": [
+          678,
+          1109058,
+          18824
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 5.880389,
+          "p99_ms": 5.402345
+        },
+        "wait_ns": 1327371
+      }
+    ],
+    "variant": "after",
+    "rep": 2,
+    "raw_file": "after-mixed-r2.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      53184000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      7,
+      100352,
+      0,
+      53184000,
+      296016
+    ],
+    "drain_ns": 0,
+    "drain_steps": 0,
+    "drop_ns": 0,
+    "elapsed_s": 1.059993122,
+    "heap_drained": 80373617,
+    "heap_end": 80768004,
+    "heap_peak": 80785060,
+    "heap_start": 80374940,
+    "lock_timing": true,
+    "main_hold": [
+      2,
+      1160,
+      939
+    ],
+    "main_wait_ns": 220,
+    "readers": [
+      {
+        "elapsed_s": 1.05992872,
+        "hold": [
+          1548963,
+          324262062,
+          50129
+        ],
+        "latency": {
+          "count": 516321,
+          "max_ms": 0.187472,
+          "p99_ms": 0.011931
+        },
+        "wait_ns": 327243083
+      },
+      {
+        "elapsed_s": 1.059939582,
+        "hold": [
+          1549206,
+          287957714,
+          154123
+        ],
+        "latency": {
+          "count": 516402,
+          "max_ms": 0.173457,
+          "p99_ms": 0.012238
+        },
+        "wait_ns": 353058065
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32009600,
+    "scenario": "mixed",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 28,
+    "worker_max_lock_hold_ns": 996,
+    "worker_profile": {
+      "free_ns": 5389,
+      "io_deferrals": 145,
+      "lock_misses": 605,
+      "pause_elapsed_ns": 1059927872,
+      "pause_requested_ns": 1030000000,
+      "work_ns": 14509,
+      "worker_elapsed_ns": 1060072127,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 0,
+    "writers": [
+      {
+        "elapsed_s": 1.059822196,
+        "hold": [
+          756,
+          1364355,
+          17878
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 5.659292,
+          "p99_ms": 5.218473
+        },
+        "wait_ns": 930847
+      },
+      {
+        "elapsed_s": 1.059859543,
+        "hold": [
+          732,
+          1365603,
+          27664
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 5.655945,
+          "p99_ms": 5.228393
+        },
+        "wait_ns": 1026939
+      },
+      {
+        "elapsed_s": 1.059809886,
+        "hold": [
+          768,
+          1370814,
+          27722
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 5.654212,
+          "p99_ms": 5.215916
+        },
+        "wait_ns": 1015609
+      },
+      {
+        "elapsed_s": 1.0598291930000001,
+        "hold": [
+          744,
+          1340360,
+          18883
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 5.649707,
+          "p99_ms": 5.2279
+        },
+        "wait_ns": 964437
+      }
+    ],
+    "variant": "before",
+    "rep": 2,
+    "raw_file": "before-mixed-r2.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      280045568,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      269549568,
+      0
+    ],
+    "budget_peak": [
+      7,
+      16812032,
+      0,
+      295789568,
+      67126352
+    ],
+    "drain_ns": 0,
+    "drain_steps": 0,
+    "drop_ns": 0,
+    "elapsed_s": 0.550190885,
+    "heap_drained": 301372377,
+    "heap_end": 311869628,
+    "heap_peak": 328147680,
+    "heap_start": 301373700,
+    "lock_timing": false,
+    "main_hold": [
+      0,
+      0,
+      0
+    ],
+    "main_wait_ns": 0,
+    "readers": [
+      {
+        "elapsed_s": 0.554604675,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 31262,
+          "max_ms": 10.993077,
+          "p99_ms": 0.048473
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.554593286,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 30540,
+          "max_ms": 12.240801,
+          "p99_ms": 0.053342
+        },
+        "wait_ns": 0
+      }
+    ],
+    "rows": 4096,
+    "sample_capacity_bytes": 32003200,
+    "scenario": "large",
+    "value_bytes": 65536,
+    "verified": true,
+    "worker_batches": 44,
+    "worker_max_lock_hold_ns": 14632,
+    "worker_profile": {
+      "free_ns": 0,
+      "io_deferrals": 0,
+      "lock_misses": 0,
+      "pause_elapsed_ns": 0,
+      "pause_requested_ns": 0,
+      "work_ns": 0,
+      "worker_elapsed_ns": 0,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 15744000,
+    "writers": [
+      {
+        "elapsed_s": 0.549960249,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 15.157072,
+          "p99_ms": 8.776823
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.55003523,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 15.158824,
+          "p99_ms": 8.790476
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.550008321,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 15.156663,
+          "p99_ms": 8.794352
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.550006693,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 15.154755,
+          "p99_ms": 8.796574
+        },
+        "wait_ns": 0
+      }
+    ],
+    "variant": "after-light",
+    "rep": 2,
+    "raw_file": "after-light-large-r2.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      295789568,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      269549568,
+      0
+    ],
+    "budget_peak": [
+      7,
+      16812032,
+      0,
+      295789568,
+      67126352
+    ],
+    "drain_ns": 0,
+    "drain_steps": 0,
+    "drop_ns": 0,
+    "elapsed_s": 0.538738512,
+    "heap_drained": 301372377,
+    "heap_end": 327615700,
+    "heap_peak": 328409920,
+    "heap_start": 301373700,
+    "lock_timing": false,
+    "main_hold": [
+      0,
+      0,
+      0
+    ],
+    "main_wait_ns": 0,
+    "readers": [
+      {
+        "elapsed_s": 0.538668361,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 31820,
+          "max_ms": 11.628052,
+          "p99_ms": 0.044831
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.538665088,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 32783,
+          "max_ms": 11.376128,
+          "p99_ms": 0.041051
+        },
+        "wait_ns": 0
+      }
+    ],
+    "rows": 4096,
+    "sample_capacity_bytes": 32003200,
+    "scenario": "large",
+    "value_bytes": 65536,
+    "verified": true,
+    "worker_batches": 17,
+    "worker_max_lock_hold_ns": 997,
+    "worker_profile": {
+      "free_ns": 0,
+      "io_deferrals": 0,
+      "lock_misses": 0,
+      "pause_elapsed_ns": 0,
+      "pause_requested_ns": 0,
+      "work_ns": 0,
+      "worker_elapsed_ns": 0,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 0,
+    "writers": [
+      {
+        "elapsed_s": 0.53859927,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 9.73515,
+          "p99_ms": 9.611303
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.538617924,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 9.73887,
+          "p99_ms": 9.604379
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.538552033,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 9.738424,
+          "p99_ms": 9.538355
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.53858834,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 9.74054,
+          "p99_ms": 9.601999
+        },
+        "wait_ns": 0
+      }
+    ],
+    "variant": "before-light",
+    "rep": 2,
+    "raw_file": "before-light-large-r2.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      295789568,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      269549568,
+      0
+    ],
+    "budget_peak": [
+      7,
+      16812032,
+      0,
+      295789568,
+      67126352
+    ],
+    "drain_ns": 0,
+    "drain_steps": 0,
+    "drop_ns": 0,
+    "elapsed_s": 0.525237381,
+    "heap_drained": 301372409,
+    "heap_end": 327615732,
+    "heap_peak": 328409984,
+    "heap_start": 301373732,
+    "lock_timing": true,
+    "main_hold": [
+      2,
+      1830,
+      1610
+    ],
+    "main_wait_ns": 115,
+    "readers": [
+      {
+        "elapsed_s": 0.525181187,
+        "hold": [
+          86508,
+          49005996,
+          38084
+        ],
+        "latency": {
+          "count": 28836,
+          "max_ms": 12.469529,
+          "p99_ms": 0.04695
+        },
+        "wait_ns": 67083872
+      },
+      {
+        "elapsed_s": 0.525167177,
+        "hold": [
+          86499,
+          49772259,
+          33963
+        ],
+        "latency": {
+          "count": 28833,
+          "max_ms": 9.245184,
+          "p99_ms": 0.049237
+        },
+        "wait_ns": 43606175
+      }
+    ],
+    "rows": 4096,
+    "sample_capacity_bytes": 32003200,
+    "scenario": "large",
+    "value_bytes": 65536,
+    "verified": true,
+    "worker_batches": 21,
+    "worker_max_lock_hold_ns": 450,
+    "worker_profile": {
+      "free_ns": 3421,
+      "io_deferrals": 282,
+      "lock_misses": 135,
+      "pause_elapsed_ns": 525215453,
+      "pause_requested_ns": 498750000,
+      "work_ns": 9314,
+      "worker_elapsed_ns": 525341466,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 0,
+    "writers": [
+      {
+        "elapsed_s": 0.525112547,
+        "hold": [
+          346,
+          12734343,
+          287407
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 8.602821,
+          "p99_ms": 7.72179
+        },
+        "wait_ns": 254380
+      },
+      {
+        "elapsed_s": 0.525115733,
+        "hold": [
+          358,
+          13600255,
+          362215
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 8.599572,
+          "p99_ms": 7.713663
+        },
+        "wait_ns": 256354
+      },
+      {
+        "elapsed_s": 0.5251172,
+        "hold": [
+          106,
+          506136,
+          335055
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 8.589822,
+          "p99_ms": 7.715167
+        },
+        "wait_ns": 101695
+      },
+      {
+        "elapsed_s": 0.525078986,
+        "hold": [
+          190,
+          4883492,
+          296338
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 8.61642,
+          "p99_ms": 7.702172
+        },
+        "wait_ns": 196400
+      }
+    ],
+    "variant": "after",
+    "rep": 2,
+    "raw_file": "after-large-r2.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      295789568,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      269549568,
+      0
+    ],
+    "budget_peak": [
+      7,
+      16812032,
+      0,
+      295789568,
+      67126352
+    ],
+    "drain_ns": 0,
+    "drain_steps": 0,
+    "drop_ns": 0,
+    "elapsed_s": 0.522812174,
+    "heap_drained": 301372409,
+    "heap_end": 327615732,
+    "heap_peak": 328409992,
+    "heap_start": 301373732,
+    "lock_timing": true,
+    "main_hold": [
+      2,
+      1169,
+      853
+    ],
+    "main_wait_ns": 211,
+    "readers": [
+      {
+        "elapsed_s": 0.522763784,
+        "hold": [
+          92514,
+          46744611,
+          246428
+        ],
+        "latency": {
+          "count": 30838,
+          "max_ms": 8.602442,
+          "p99_ms": 0.075987
+        },
+        "wait_ns": 39942407
+      },
+      {
+        "elapsed_s": 0.52274216,
+        "hold": [
+          92514,
+          50941012,
+          78219
+        ],
+        "latency": {
+          "count": 30838,
+          "max_ms": 12.080716,
+          "p99_ms": 0.047141
+        },
+        "wait_ns": 28599746
+      }
+    ],
+    "rows": 4096,
+    "sample_capacity_bytes": 32003200,
+    "scenario": "large",
+    "value_bytes": 65536,
+    "verified": true,
+    "worker_batches": 20,
+    "worker_max_lock_hold_ns": 987,
+    "worker_profile": {
+      "free_ns": 7361,
+      "io_deferrals": 226,
+      "lock_misses": 83,
+      "pause_elapsed_ns": 522805904,
+      "pause_requested_ns": 509000000,
+      "work_ns": 13569,
+      "worker_elapsed_ns": 522918515,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 0,
+    "writers": [
+      {
+        "elapsed_s": 0.522584851,
+        "hold": [
+          262,
+          8666487,
+          313722
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 7.424281,
+          "p99_ms": 7.25419
+        },
+        "wait_ns": 350476
+      },
+      {
+        "elapsed_s": 0.522675696,
+        "hold": [
+          406,
+          16070470,
+          450459
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 7.438186,
+          "p99_ms": 7.252402
+        },
+        "wait_ns": 273886
+      },
+      {
+        "elapsed_s": 0.522651046,
+        "hold": [
+          184,
+          4564431,
+          275945
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 7.359755,
+          "p99_ms": 7.258828
+        },
+        "wait_ns": 246521
+      },
+      {
+        "elapsed_s": 0.522660254,
+        "hold": [
+          148,
+          2665751,
+          270962
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 7.42819,
+          "p99_ms": 7.253624
+        },
+        "wait_ns": 172304
+      }
+    ],
+    "variant": "before",
+    "rep": 2,
+    "raw_file": "before-large-r2.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      2,
+      100352,
+      0,
+      84800000,
+      296016
+    ],
+    "drain_ns": 466838825,
+    "drain_steps": 2667,
+    "drop_ns": 1265,
+    "elapsed_s": 0.466840302,
+    "heap_drained": 80363726,
+    "heap_end": 80363985,
+    "heap_peak": 113259401,
+    "heap_start": 113259145,
+    "lock_timing": false,
+    "main_hold": [
+      0,
+      0,
+      0
+    ],
+    "main_wait_ns": 0,
+    "readers": [
+      {
+        "elapsed_s": 0.466837572,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 150969,
+          "max_ms": 0.560862,
+          "p99_ms": 0.034735
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.466835375,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 150656,
+          "max_ms": 0.556782,
+          "p99_ms": 0.03507
+        },
+        "wait_ns": 0
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32000000,
+    "scenario": "gc",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 6251,
+    "worker_max_lock_hold_ns": 92977,
+    "worker_profile": {
+      "free_ns": 0,
+      "io_deferrals": 0,
+      "lock_misses": 0,
+      "pause_elapsed_ns": 0,
+      "pause_requested_ns": 0,
+      "work_ns": 0,
+      "worker_elapsed_ns": 0,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 32000000,
+    "writers": [],
+    "variant": "after-light",
+    "rep": 2,
+    "raw_file": "after-light-gc-r2.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      2,
+      100352,
+      0,
+      84800000,
+      296016
+    ],
+    "drain_ns": 205528133,
+    "drain_steps": 956,
+    "drop_ns": 825,
+    "elapsed_s": 0.205529188,
+    "heap_drained": 80363726,
+    "heap_end": 80363985,
+    "heap_peak": 113259401,
+    "heap_start": 113259145,
+    "lock_timing": false,
+    "main_hold": [
+      0,
+      0,
+      0
+    ],
+    "main_wait_ns": 0,
+    "readers": [
+      {
+        "elapsed_s": 0.205545082,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 65419,
+          "max_ms": 0.70561,
+          "p99_ms": 0.024707
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.205541665,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 65555,
+          "max_ms": 0.716429,
+          "p99_ms": 0.023057
+        },
+        "wait_ns": 0
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32000000,
+    "scenario": "gc",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 1563,
+    "worker_max_lock_hold_ns": 90753,
+    "worker_profile": {
+      "free_ns": 0,
+      "io_deferrals": 0,
+      "lock_misses": 0,
+      "pause_elapsed_ns": 0,
+      "pause_requested_ns": 0,
+      "work_ns": 0,
+      "worker_elapsed_ns": 0,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 32000000,
+    "writers": [],
+    "variant": "before-light",
+    "rep": 2,
+    "raw_file": "before-light-gc-r2.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      2,
+      100352,
+      0,
+      84800000,
+      296016
+    ],
+    "drain_ns": 588950983,
+    "drain_steps": 3386,
+    "drop_ns": 909,
+    "elapsed_s": 0.588952035,
+    "heap_drained": 80363758,
+    "heap_end": 80364017,
+    "heap_peak": 113259433,
+    "heap_start": 113259177,
+    "lock_timing": true,
+    "main_hold": [
+      3388,
+      212743,
+      430
+    ],
+    "main_wait_ns": 26753549,
+    "readers": [
+      {
+        "elapsed_s": 0.588942488,
+        "hold": [
+          634719,
+          149320628,
+          279334
+        ],
+        "latency": {
+          "count": 211573,
+          "max_ms": 0.420914,
+          "p99_ms": 0.027545
+        },
+        "wait_ns": 198819958
+      },
+      {
+        "elapsed_s": 0.588956591,
+        "hold": [
+          634836,
+          138890570,
+          204649
+        ],
+        "latency": {
+          "count": 211612,
+          "max_ms": 0.433599,
+          "p99_ms": 0.02723
+        },
+        "wait_ns": 213492272
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32000000,
+    "scenario": "gc",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 6251,
+    "worker_max_lock_hold_ns": 38299,
+    "worker_profile": {
+      "free_ns": 4314127,
+      "io_deferrals": 0,
+      "lock_misses": 4239,
+      "pause_elapsed_ns": 501017648,
+      "pause_requested_ns": 231050000,
+      "work_ns": 77288594,
+      "worker_elapsed_ns": 589023989,
+      "yield_ns": 5464632
+    },
+    "worker_reclaimed_bytes": 32000000,
+    "writers": [],
+    "variant": "after",
+    "rep": 2,
+    "raw_file": "after-gc-r2.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      2,
+      100352,
+      0,
+      84800000,
+      296016
+    ],
+    "drain_ns": 336152380,
+    "drain_steps": 1694,
+    "drop_ns": 967,
+    "elapsed_s": 0.336153605,
+    "heap_drained": 80363758,
+    "heap_end": 80364017,
+    "heap_peak": 113259689,
+    "heap_start": 113259177,
+    "lock_timing": true,
+    "main_hold": [
+      1696,
+      97475,
+      574
+    ],
+    "main_wait_ns": 51729408,
+    "readers": [
+      {
+        "elapsed_s": 0.336166248,
+        "hold": [
+          330132,
+          65807885,
+          141274
+        ],
+        "latency": {
+          "count": 110044,
+          "max_ms": 0.850342,
+          "p99_ms": 0.025019
+        },
+        "wait_ns": 129549068
+      },
+      {
+        "elapsed_s": 0.336163799,
+        "hold": [
+          330192,
+          84707247,
+          36749
+        ],
+        "latency": {
+          "count": 110064,
+          "max_ms": 0.820989,
+          "p99_ms": 0.023995
+        },
+        "wait_ns": 106208800
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32000000,
+    "scenario": "gc",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 1563,
+    "worker_max_lock_hold_ns": 90222,
+    "worker_profile": {
+      "free_ns": 3172288,
+      "io_deferrals": 0,
+      "lock_misses": 253,
+      "pause_elapsed_ns": 278035494,
+      "pause_requested_ns": 272600000,
+      "work_ns": 53474766,
+      "worker_elapsed_ns": 336235803,
+      "yield_ns": 1367266
+    },
+    "worker_reclaimed_bytes": 32000000,
+    "writers": [],
+    "variant": "before",
+    "rep": 2,
+    "raw_file": "before-gc-r2.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      53184000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      7,
+      100352,
+      0,
+      53184000,
+      296016
+    ],
+    "drain_ns": 0,
+    "drain_steps": 0,
+    "drop_ns": 0,
+    "elapsed_s": 1.131437325,
+    "heap_drained": 80373617,
+    "heap_end": 80768004,
+    "heap_peak": 80785060,
+    "heap_start": 80374940,
+    "lock_timing": true,
+    "main_hold": [
+      2,
+      2790,
+      2217
+    ],
+    "main_wait_ns": 1176,
+    "readers": [
+      {
+        "elapsed_s": 1.131445394,
+        "hold": [
+          1520055,
+          311359384,
+          217306
+        ],
+        "latency": {
+          "count": 506685,
+          "max_ms": 0.316641,
+          "p99_ms": 0.015521
+        },
+        "wait_ns": 368826237
+      },
+      {
+        "elapsed_s": 1.1313874130000001,
+        "hold": [
+          1525293,
+          320601650,
+          45560
+        ],
+        "latency": {
+          "count": 508431,
+          "max_ms": 0.410097,
+          "p99_ms": 0.015311
+        },
+        "wait_ns": 359500248
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32009600,
+    "scenario": "mixed",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 18,
+    "worker_max_lock_hold_ns": 765,
+    "worker_profile": {
+      "free_ns": 4341,
+      "io_deferrals": 199,
+      "lock_misses": 724,
+      "pause_elapsed_ns": 1131359472,
+      "pause_requested_ns": 1103000000,
+      "work_ns": 9644,
+      "worker_elapsed_ns": 1131552406,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 0,
+    "writers": [
+      {
+        "elapsed_s": 1.131283851,
+        "hold": [
+          960,
+          2275664,
+          18781
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 9.882296,
+          "p99_ms": 6.420561
+        },
+        "wait_ns": 1271235
+      },
+      {
+        "elapsed_s": 1.131337065,
+        "hold": [
+          714,
+          1551810,
+          17013
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 9.878995,
+          "p99_ms": 6.416214
+        },
+        "wait_ns": 1267315
+      },
+      {
+        "elapsed_s": 1.131347124,
+        "hold": [
+          630,
+          1234433,
+          17490
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 9.875323,
+          "p99_ms": 6.414327
+        },
+        "wait_ns": 1232798
+      },
+      {
+        "elapsed_s": 1.131309539,
+        "hold": [
+          696,
+          1497902,
+          19354
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 9.905067,
+          "p99_ms": 6.437408
+        },
+        "wait_ns": 1198887
+      }
+    ],
+    "variant": "before",
+    "rep": 3,
+    "raw_file": "before-mixed-r3.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      53184000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      7,
+      100352,
+      0,
+      53184000,
+      296016
+    ],
+    "drain_ns": 0,
+    "drain_steps": 0,
+    "drop_ns": 0,
+    "elapsed_s": 1.084334813,
+    "heap_drained": 80373617,
+    "heap_end": 80768004,
+    "heap_peak": 80785060,
+    "heap_start": 80374940,
+    "lock_timing": true,
+    "main_hold": [
+      2,
+      1415,
+      1176
+    ],
+    "main_wait_ns": 516,
+    "readers": [
+      {
+        "elapsed_s": 1.084283988,
+        "hold": [
+          1602693,
+          279624866,
+          339009
+        ],
+        "latency": {
+          "count": 534231,
+          "max_ms": 0.350439,
+          "p99_ms": 0.011718
+        },
+        "wait_ns": 369514247
+      },
+      {
+        "elapsed_s": 1.084337616,
+        "hold": [
+          1604715,
+          335698040,
+          199931
+        ],
+        "latency": {
+          "count": 534905,
+          "max_ms": 0.50849,
+          "p99_ms": 0.011297
+        },
+        "wait_ns": 327919222
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32009600,
+    "scenario": "mixed",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 62,
+    "worker_max_lock_hold_ns": 698,
+    "worker_profile": {
+      "free_ns": 11158,
+      "io_deferrals": 301,
+      "lock_misses": 1320,
+      "pause_elapsed_ns": 1084157325,
+      "pause_requested_ns": 987000000,
+      "work_ns": 50794,
+      "worker_elapsed_ns": 1084457088,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 0,
+    "writers": [
+      {
+        "elapsed_s": 1.084234742,
+        "hold": [
+          804,
+          1489515,
+          20395
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 12.913648,
+          "p99_ms": 5.764087
+        },
+        "wait_ns": 1203965
+      },
+      {
+        "elapsed_s": 1.08425733,
+        "hold": [
+          864,
+          1683672,
+          17270
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 12.928491,
+          "p99_ms": 5.766315
+        },
+        "wait_ns": 1004685
+      },
+      {
+        "elapsed_s": 1.08421868,
+        "hold": [
+          726,
+          1284095,
+          13677
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 12.92977,
+          "p99_ms": 5.758462
+        },
+        "wait_ns": 1052212
+      },
+      {
+        "elapsed_s": 1.084202062,
+        "hold": [
+          606,
+          1024288,
+          45168
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 12.918995,
+          "p99_ms": 5.759791
+        },
+        "wait_ns": 1175439
+      }
+    ],
+    "variant": "after",
+    "rep": 3,
+    "raw_file": "after-mixed-r3.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      53184000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      7,
+      100352,
+      0,
+      53184000,
+      296016
+    ],
+    "drain_ns": 0,
+    "drain_steps": 0,
+    "drop_ns": 0,
+    "elapsed_s": 1.046078095,
+    "heap_drained": 80373585,
+    "heap_end": 80767972,
+    "heap_peak": 80776920,
+    "heap_start": 80374908,
+    "lock_timing": false,
+    "main_hold": [
+      0,
+      0,
+      0
+    ],
+    "main_wait_ns": 0,
+    "readers": [
+      {
+        "elapsed_s": 1.046051493,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 579061,
+          "max_ms": 0.155347,
+          "p99_ms": 0.011679
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 1.046026063,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 572420,
+          "max_ms": 0.115639,
+          "p99_ms": 0.013166
+        },
+        "wait_ns": 0
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32009600,
+    "scenario": "mixed",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 32,
+    "worker_max_lock_hold_ns": 690,
+    "worker_profile": {
+      "free_ns": 0,
+      "io_deferrals": 0,
+      "lock_misses": 0,
+      "pause_elapsed_ns": 0,
+      "pause_requested_ns": 0,
+      "work_ns": 0,
+      "worker_elapsed_ns": 0,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 0,
+    "writers": [
+      {
+        "elapsed_s": 1.045860596,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 5.414934,
+          "p99_ms": 4.671935
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 1.045954661,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 5.407424,
+          "p99_ms": 4.623684
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 1.045944348,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 5.414324,
+          "p99_ms": 4.638657
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 1.045912581,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 5.406849,
+          "p99_ms": 4.651372
+        },
+        "wait_ns": 0
+      }
+    ],
+    "variant": "before-light",
+    "rep": 3,
+    "raw_file": "before-light-mixed-r3.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      53184000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      7,
+      100352,
+      0,
+      53184000,
+      296016
+    ],
+    "drain_ns": 0,
+    "drain_steps": 0,
+    "drop_ns": 0,
+    "elapsed_s": 1.079291643,
+    "heap_drained": 80373585,
+    "heap_end": 80767972,
+    "heap_peak": 80777060,
+    "heap_start": 80374908,
+    "lock_timing": false,
+    "main_hold": [
+      0,
+      0,
+      0
+    ],
+    "main_wait_ns": 0,
+    "readers": [
+      {
+        "elapsed_s": 1.079236597,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 555196,
+          "max_ms": 0.322908,
+          "p99_ms": 0.013242
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 1.079231273,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 574723,
+          "max_ms": 0.273099,
+          "p99_ms": 0.010548
+        },
+        "wait_ns": 0
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32009600,
+    "scenario": "mixed",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 53,
+    "worker_max_lock_hold_ns": 806,
+    "worker_profile": {
+      "free_ns": 0,
+      "io_deferrals": 0,
+      "lock_misses": 0,
+      "pause_elapsed_ns": 0,
+      "pause_requested_ns": 0,
+      "work_ns": 0,
+      "worker_elapsed_ns": 0,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 0,
+    "writers": [
+      {
+        "elapsed_s": 1.079166693,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 5.499366,
+          "p99_ms": 5.362007
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 1.079168111,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 5.524272,
+          "p99_ms": 5.365981
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 1.079163424,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 5.524345,
+          "p99_ms": 5.364132
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 1.0791235829999999,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 300,
+          "max_ms": 5.495585,
+          "p99_ms": 5.366261
+        },
+        "wait_ns": 0
+      }
+    ],
+    "variant": "after-light",
+    "rep": 3,
+    "raw_file": "after-light-mixed-r3.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      295789568,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      269549568,
+      0
+    ],
+    "budget_peak": [
+      7,
+      16812032,
+      0,
+      295789568,
+      67126352
+    ],
+    "drain_ns": 0,
+    "drain_steps": 0,
+    "drop_ns": 0,
+    "elapsed_s": 0.531188461,
+    "heap_drained": 301372409,
+    "heap_end": 327615732,
+    "heap_peak": 328409984,
+    "heap_start": 301373732,
+    "lock_timing": true,
+    "main_hold": [
+      2,
+      1074,
+      805
+    ],
+    "main_wait_ns": 642,
+    "readers": [
+      {
+        "elapsed_s": 0.531168937,
+        "hold": [
+          86295,
+          48092947,
+          34563
+        ],
+        "latency": {
+          "count": 28765,
+          "max_ms": 8.003498,
+          "p99_ms": 0.050532
+        },
+        "wait_ns": 37631515
+      },
+      {
+        "elapsed_s": 0.531155023,
+        "hold": [
+          84798,
+          45672549,
+          78943
+        ],
+        "latency": {
+          "count": 28266,
+          "max_ms": 11.570964,
+          "p99_ms": 0.053264
+        },
+        "wait_ns": 35753933
+      }
+    ],
+    "rows": 4096,
+    "sample_capacity_bytes": 32003200,
+    "scenario": "large",
+    "value_bytes": 65536,
+    "verified": true,
+    "worker_batches": 20,
+    "worker_max_lock_hold_ns": 642,
+    "worker_profile": {
+      "free_ns": 3651,
+      "io_deferrals": 228,
+      "lock_misses": 88,
+      "pause_elapsed_ns": 531145683,
+      "pause_requested_ns": 516000000,
+      "work_ns": 10465,
+      "worker_elapsed_ns": 531278657,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 0,
+    "writers": [
+      {
+        "elapsed_s": 0.531032847,
+        "hold": [
+          364,
+          13682329,
+          280076
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 7.888015,
+          "p99_ms": 7.715178
+        },
+        "wait_ns": 351240
+      },
+      {
+        "elapsed_s": 0.531131517,
+        "hold": [
+          334,
+          12000293,
+          275005
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 7.895031,
+          "p99_ms": 7.711475
+        },
+        "wait_ns": 306320
+      },
+      {
+        "elapsed_s": 0.531119607,
+        "hold": [
+          184,
+          4707958,
+          266801
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 7.896864,
+          "p99_ms": 7.709283
+        },
+        "wait_ns": 445163
+      },
+      {
+        "elapsed_s": 0.53108521,
+        "hold": [
+          118,
+          1091351,
+          334337
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 7.923763,
+          "p99_ms": 7.71211
+        },
+        "wait_ns": 146235
+      }
+    ],
+    "variant": "before",
+    "rep": 3,
+    "raw_file": "before-large-r3.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      295789568,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      269549568,
+      0
+    ],
+    "budget_peak": [
+      7,
+      16812032,
+      0,
+      295789568,
+      67126352
+    ],
+    "drain_ns": 0,
+    "drain_steps": 0,
+    "drop_ns": 0,
+    "elapsed_s": 0.507976849,
+    "heap_drained": 301372409,
+    "heap_end": 327615732,
+    "heap_peak": 328344424,
+    "heap_start": 301373732,
+    "lock_timing": true,
+    "main_hold": [
+      2,
+      1093,
+      738
+    ],
+    "main_wait_ns": 211,
+    "readers": [
+      {
+        "elapsed_s": 0.507913587,
+        "hold": [
+          80229,
+          42690529,
+          208303
+        ],
+        "latency": {
+          "count": 26743,
+          "max_ms": 11.877831,
+          "p99_ms": 0.060635
+        },
+        "wait_ns": 29518035
+      },
+      {
+        "elapsed_s": 0.507982893,
+        "hold": [
+          80229,
+          42144109,
+          36788
+        ],
+        "latency": {
+          "count": 26743,
+          "max_ms": 7.894007,
+          "p99_ms": 0.047911
+        },
+        "wait_ns": 41310133
+      }
+    ],
+    "rows": 4096,
+    "sample_capacity_bytes": 32003200,
+    "scenario": "large",
+    "value_bytes": 65536,
+    "verified": true,
+    "worker_batches": 27,
+    "worker_max_lock_hold_ns": 623,
+    "worker_profile": {
+      "free_ns": 4826,
+      "io_deferrals": 216,
+      "lock_misses": 95,
+      "pause_elapsed_ns": 507923021,
+      "pause_requested_ns": 490750000,
+      "work_ns": 13100,
+      "worker_elapsed_ns": 508030161,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 0,
+    "writers": [
+      {
+        "elapsed_s": 0.504317584,
+        "hold": [
+          187,
+          4196373,
+          303569
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 8.508099,
+          "p99_ms": 7.132889
+        },
+        "wait_ns": 92508
+      },
+      {
+        "elapsed_s": 0.504324774,
+        "hold": [
+          346,
+          12670186,
+          292652
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 7.534292,
+          "p99_ms": 7.146235
+        },
+        "wait_ns": 360467
+      },
+      {
+        "elapsed_s": 0.507825227,
+        "hold": [
+          342,
+          11721870,
+          278226
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 10.150045,
+          "p99_ms": 8.40168
+        },
+        "wait_ns": 191237
+      },
+      {
+        "elapsed_s": 0.504303629,
+        "hold": [
+          129,
+          1602973,
+          312742
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 9.876027,
+          "p99_ms": 7.124033
+        },
+        "wait_ns": 83901
+      }
+    ],
+    "variant": "after",
+    "rep": 3,
+    "raw_file": "after-large-r3.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      280045568,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      269549568,
+      0
+    ],
+    "budget_peak": [
+      7,
+      16812032,
+      0,
+      295789568,
+      67126352
+    ],
+    "drain_ns": 0,
+    "drain_steps": 0,
+    "drop_ns": 0,
+    "elapsed_s": 0.491236622,
+    "heap_drained": 301372377,
+    "heap_end": 311869628,
+    "heap_peak": 328409920,
+    "heap_start": 301373700,
+    "lock_timing": false,
+    "main_hold": [
+      0,
+      0,
+      0
+    ],
+    "main_wait_ns": 0,
+    "readers": [
+      {
+        "elapsed_s": 0.491528437,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 28427,
+          "max_ms": 11.485601,
+          "p99_ms": 0.040027
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.491260175,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 28427,
+          "max_ms": 8.132172,
+          "p99_ms": 0.039442
+        },
+        "wait_ns": 0
+      }
+    ],
+    "rows": 4096,
+    "sample_capacity_bytes": 32003200,
+    "scenario": "large",
+    "value_bytes": 65536,
+    "verified": true,
+    "worker_batches": 36,
+    "worker_max_lock_hold_ns": 14205,
+    "worker_profile": {
+      "free_ns": 0,
+      "io_deferrals": 0,
+      "lock_misses": 0,
+      "pause_elapsed_ns": 0,
+      "pause_requested_ns": 0,
+      "work_ns": 0,
+      "worker_elapsed_ns": 0,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 15744000,
+    "writers": [
+      {
+        "elapsed_s": 0.49112822,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 7.646093,
+          "p99_ms": 7.439809
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.491152829,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 7.654547,
+          "p99_ms": 7.429179
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.491093259,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 7.662398,
+          "p99_ms": 7.429079
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.491110554,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 7.656211,
+          "p99_ms": 7.433373
+        },
+        "wait_ns": 0
+      }
+    ],
+    "variant": "before-light",
+    "rep": 3,
+    "raw_file": "before-light-large-r3.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      269615168,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      269549568,
+      0
+    ],
+    "budget_peak": [
+      7,
+      16812032,
+      0,
+      295789568,
+      67126352
+    ],
+    "drain_ns": 0,
+    "drain_steps": 0,
+    "drop_ns": 0,
+    "elapsed_s": 0.5312635,
+    "heap_drained": 301372377,
+    "heap_end": 301438196,
+    "heap_peak": 328409912,
+    "heap_start": 301373700,
+    "lock_timing": false,
+    "main_hold": [
+      0,
+      0,
+      0
+    ],
+    "main_wait_ns": 0,
+    "readers": [
+      {
+        "elapsed_s": 0.536111063,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 29691,
+          "max_ms": 10.184503,
+          "p99_ms": 0.069204
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.536090229,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 29749,
+          "max_ms": 10.168859,
+          "p99_ms": 0.042222
+        },
+        "wait_ns": 0
+      }
+    ],
+    "rows": 4096,
+    "sample_capacity_bytes": 32003200,
+    "scenario": "large",
+    "value_bytes": 65536,
+    "verified": true,
+    "worker_batches": 55,
+    "worker_max_lock_hold_ns": 13338,
+    "worker_profile": {
+      "free_ns": 0,
+      "io_deferrals": 0,
+      "lock_misses": 0,
+      "pause_elapsed_ns": 0,
+      "pause_requested_ns": 0,
+      "work_ns": 0,
+      "worker_elapsed_ns": 0,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 26174400,
+    "writers": [
+      {
+        "elapsed_s": 0.531170437,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 12.258326,
+          "p99_ms": 9.472902
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.527366672,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 12.267547,
+          "p99_ms": 9.46701
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.527368939,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 12.265706,
+          "p99_ms": 9.474365
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.527320215,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 100,
+          "max_ms": 12.268957,
+          "p99_ms": 9.482148
+        },
+        "wait_ns": 0
+      }
+    ],
+    "variant": "after-light",
+    "rep": 3,
+    "raw_file": "after-light-large-r3.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      2,
+      100352,
+      0,
+      84800000,
+      296016
+    ],
+    "drain_ns": 355768691,
+    "drain_steps": 1805,
+    "drop_ns": 930,
+    "elapsed_s": 0.355769764,
+    "heap_drained": 80363758,
+    "heap_end": 80364017,
+    "heap_peak": 113259433,
+    "heap_start": 113259177,
+    "lock_timing": true,
+    "main_hold": [
+      1807,
+      115387,
+      297
+    ],
+    "main_wait_ns": 51893861,
+    "readers": [
+      {
+        "elapsed_s": 0.355765495,
+        "hold": [
+          342849,
+          87716905,
+          70057
+        ],
+        "latency": {
+          "count": 114283,
+          "max_ms": 0.886509,
+          "p99_ms": 0.02547
+        },
+        "wait_ns": 119632601
+      },
+      {
+        "elapsed_s": 0.355777468,
+        "hold": [
+          342978,
+          72883856,
+          49858
+        ],
+        "latency": {
+          "count": 114326,
+          "max_ms": 0.845356,
+          "p99_ms": 0.026217
+        },
+        "wait_ns": 131156049
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32000000,
+    "scenario": "gc",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 1563,
+    "worker_max_lock_hold_ns": 91598,
+    "worker_profile": {
+      "free_ns": 3224407,
+      "io_deferrals": 0,
+      "lock_misses": 271,
+      "pause_elapsed_ns": 296810362,
+      "pause_requested_ns": 290400000,
+      "work_ns": 54227214,
+      "worker_elapsed_ns": 355833674,
+      "yield_ns": 1377395
+    },
+    "worker_reclaimed_bytes": 32000000,
+    "writers": [],
+    "variant": "before",
+    "rep": 3,
+    "raw_file": "before-gc-r3.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      2,
+      100352,
+      0,
+      84800000,
+      296016
+    ],
+    "drain_ns": 640751355,
+    "drain_steps": 3669,
+    "drop_ns": 1169,
+    "elapsed_s": 0.640752677,
+    "heap_drained": 80363758,
+    "heap_end": 80364017,
+    "heap_peak": 113259433,
+    "heap_start": 113259177,
+    "lock_timing": true,
+    "main_hold": [
+      3671,
+      254716,
+      518
+    ],
+    "main_wait_ns": 26425821,
+    "readers": [
+      {
+        "elapsed_s": 0.640747018,
+        "hold": [
+          684714,
+          169661011,
+          98682
+        ],
+        "latency": {
+          "count": 228238,
+          "max_ms": 0.385159,
+          "p99_ms": 0.030288
+        },
+        "wait_ns": 202721771
+      },
+      {
+        "elapsed_s": 0.640760674,
+        "hold": [
+          684768,
+          133766983,
+          233599
+        ],
+        "latency": {
+          "count": 228256,
+          "max_ms": 0.37106,
+          "p99_ms": 0.032324
+        },
+        "wait_ns": 230199257
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32000000,
+    "scenario": "gc",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 6251,
+    "worker_max_lock_hold_ns": 33867,
+    "worker_profile": {
+      "free_ns": 4400099,
+      "io_deferrals": 0,
+      "lock_misses": 4702,
+      "pause_elapsed_ns": 554288221,
+      "pause_requested_ns": 250100000,
+      "work_ns": 75434292,
+      "worker_elapsed_ns": 640799998,
+      "yield_ns": 5665390
+    },
+    "worker_reclaimed_bytes": 32000000,
+    "writers": [],
+    "variant": "after",
+    "rep": 3,
+    "raw_file": "after-gc-r3.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      2,
+      100352,
+      0,
+      84800000,
+      296016
+    ],
+    "drain_ns": 239545471,
+    "drain_steps": 1139,
+    "drop_ns": 825,
+    "elapsed_s": 0.239546687,
+    "heap_drained": 80363726,
+    "heap_end": 80363985,
+    "heap_peak": 113259401,
+    "heap_start": 113259145,
+    "lock_timing": false,
+    "main_hold": [
+      0,
+      0,
+      0
+    ],
+    "main_wait_ns": 0,
+    "readers": [
+      {
+        "elapsed_s": 0.239552256,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 75543,
+          "max_ms": 0.835161,
+          "p99_ms": 0.025074
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.239547181,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 75637,
+          "max_ms": 0.829987,
+          "p99_ms": 0.024573
+        },
+        "wait_ns": 0
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32000000,
+    "scenario": "gc",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 1563,
+    "worker_max_lock_hold_ns": 71337,
+    "worker_profile": {
+      "free_ns": 0,
+      "io_deferrals": 0,
+      "lock_misses": 0,
+      "pause_elapsed_ns": 0,
+      "pause_requested_ns": 0,
+      "work_ns": 0,
+      "worker_elapsed_ns": 0,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 32000000,
+    "writers": [],
+    "variant": "before-light",
+    "rep": 3,
+    "raw_file": "before-light-gc-r3.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      2,
+      100352,
+      0,
+      84800000,
+      296016
+    ],
+    "drain_ns": 409742920,
+    "drain_steps": 2374,
+    "drop_ns": 748,
+    "elapsed_s": 0.409743889,
+    "heap_drained": 80363726,
+    "heap_end": 80363985,
+    "heap_peak": 113259401,
+    "heap_start": 113259145,
+    "lock_timing": false,
+    "main_hold": [
+      0,
+      0,
+      0
+    ],
+    "main_wait_ns": 0,
+    "readers": [
+      {
+        "elapsed_s": 0.409734791,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 141368,
+          "max_ms": 0.402282,
+          "p99_ms": 0.03033
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.40974351,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 141268,
+          "max_ms": 0.461796,
+          "p99_ms": 0.031208
+        },
+        "wait_ns": 0
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32000000,
+    "scenario": "gc",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 6251,
+    "worker_max_lock_hold_ns": 171120,
+    "worker_profile": {
+      "free_ns": 0,
+      "io_deferrals": 0,
+      "lock_misses": 0,
+      "pause_elapsed_ns": 0,
+      "pause_requested_ns": 0,
+      "work_ns": 0,
+      "worker_elapsed_ns": 0,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 32000000,
+    "writers": [],
+    "variant": "after-light",
+    "rep": 3,
+    "raw_file": "after-light-gc-r3.json.gz"
+  }
+]

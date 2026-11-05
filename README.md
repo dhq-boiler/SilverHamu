@@ -214,6 +214,27 @@ See the [complete report, all three candidates and memory/observer limits](docs/
 [reproduction commands](benchmarks/reclamation/README.md), and
 [opt-in configuration](docs/service.md#opt-in-background-reclamation).
 
+### Follow-up: investigating the 319 ms reclamation cost
+
+**The combined improvement target was not met.** Profiling attributes 82–86% of
+worker wall time to repeated contention pauses. Three prototypes were tested;
+none reduced complete reclamation while preserving read p99. The previous
+production policy is retained, with background reclamation still off by default.
+
+The fastest prototype reduces median completion **299.091 → 117.192 ms**, but
+read p99 rises **0.028 → 0.033 ms** and worst read across three repeats rises
+**1.428 → 1.601 ms**. These are paired native measurements, not an adopted
+performance improvement. Light-instrumentation and ordinary-service results,
+including regressions, are also published.
+
+![Reclamation cost and read-tail tradeoff for the unadopted prototype](docs/benchmarks/reclamation-cost-2026-11-05/native.svg)
+
+All 102 native runs and 288,000 service operations passed their consistency and
+reopen checks; GC drained heap matches at 76.641 MiB. Only optional diagnostics
+are retained. See the [cause, all candidates, safety and memory limits](docs/benchmarks/reclamation-cost-2026-11-05/README.md),
+[service comparison figure](docs/benchmarks/reclamation-cost-2026-11-05/service/reclamation.svg),
+and [reproduction commands](benchmarks/reclamation-cost/README.md).
+
 ## Build
 
 Requires Rust **1.89 or newer**. Python 3 is used by the optional client and integration tests. Docker is needed only for containers.

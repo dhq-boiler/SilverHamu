@@ -1,0 +1,548 @@
+[
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      2,
+      100352,
+      0,
+      84800000,
+      296016
+    ],
+    "drain_ns": 317848793,
+    "drain_steps": 1571,
+    "drop_ns": 834,
+    "elapsed_s": 0.317849789,
+    "heap_drained": 80363758,
+    "heap_end": 80364017,
+    "heap_peak": 113259433,
+    "heap_start": 113259177,
+    "lock_timing": true,
+    "main_hold": [
+      1573,
+      85663,
+      555
+    ],
+    "main_wait_ns": 51242679,
+    "readers": [
+      {
+        "elapsed_s": 0.317859729,
+        "hold": [
+          298563,
+          73189964,
+          58768
+        ],
+        "latency": {
+          "count": 99521,
+          "max_ms": 0.935333,
+          "p99_ms": 0.02878
+        },
+        "wait_ns": 107095875
+      },
+      {
+        "elapsed_s": 0.3178756,
+        "hold": [
+          298644,
+          60704607,
+          208790
+        ],
+        "latency": {
+          "count": 99548,
+          "max_ms": 0.938261,
+          "p99_ms": 0.029097
+        },
+        "wait_ns": 119724349
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32000000,
+    "scenario": "gc",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 1563,
+    "worker_max_lock_hold_ns": 76285,
+    "worker_profile": {
+      "free_ns": 3296906,
+      "io_deferrals": 0,
+      "lock_misses": 235,
+      "pause_elapsed_ns": 259789332,
+      "pause_requested_ns": 254500000,
+      "work_ns": 53265160,
+      "worker_elapsed_ns": 317915819,
+      "yield_ns": 1348552
+    },
+    "worker_reclaimed_bytes": 32000000,
+    "writers": [],
+    "variant": "background",
+    "rep": 1,
+    "raw_file": "background-gc-r1.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      2,
+      100352,
+      0,
+      84800000,
+      296016
+    ],
+    "drain_ns": 203870489,
+    "drain_steps": 969,
+    "drop_ns": 1312,
+    "elapsed_s": 0.203872059,
+    "heap_drained": 80363726,
+    "heap_end": 80363985,
+    "heap_peak": 113259657,
+    "heap_start": 113259145,
+    "lock_timing": false,
+    "main_hold": [
+      0,
+      0,
+      0
+    ],
+    "main_wait_ns": 0,
+    "readers": [
+      {
+        "elapsed_s": 0.203975976,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 58475,
+          "max_ms": 0.927218,
+          "p99_ms": 0.023043
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.203872405,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 60755,
+          "max_ms": 0.941684,
+          "p99_ms": 0.022401
+        },
+        "wait_ns": 0
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32000000,
+    "scenario": "gc",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 1563,
+    "worker_max_lock_hold_ns": 94482,
+    "worker_profile": {
+      "free_ns": 0,
+      "io_deferrals": 0,
+      "lock_misses": 0,
+      "pause_elapsed_ns": 0,
+      "pause_requested_ns": 0,
+      "work_ns": 0,
+      "worker_elapsed_ns": 0,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 32000000,
+    "writers": [],
+    "variant": "background-light",
+    "rep": 1,
+    "raw_file": "background-light-gc-r1.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      2,
+      100352,
+      0,
+      84800000,
+      296016
+    ],
+    "drain_ns": 234668230,
+    "drain_steps": 1117,
+    "drop_ns": 1217,
+    "elapsed_s": 0.234669975,
+    "heap_drained": 80363726,
+    "heap_end": 80363985,
+    "heap_peak": 113259401,
+    "heap_start": 113259145,
+    "lock_timing": false,
+    "main_hold": [
+      0,
+      0,
+      0
+    ],
+    "main_wait_ns": 0,
+    "readers": [
+      {
+        "elapsed_s": 0.234668963,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 70991,
+          "max_ms": 1.234391,
+          "p99_ms": 0.026628
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.234659447,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 70588,
+          "max_ms": 1.253498,
+          "p99_ms": 0.025271
+        },
+        "wait_ns": 0
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32000000,
+    "scenario": "gc",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 1563,
+    "worker_max_lock_hold_ns": 67654,
+    "worker_profile": {
+      "free_ns": 0,
+      "io_deferrals": 0,
+      "lock_misses": 0,
+      "pause_elapsed_ns": 0,
+      "pause_requested_ns": 0,
+      "work_ns": 0,
+      "worker_elapsed_ns": 0,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 32000000,
+    "writers": [],
+    "variant": "background-light",
+    "rep": 2,
+    "raw_file": "background-light-gc-r2.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      2,
+      100352,
+      0,
+      84800000,
+      296016
+    ],
+    "drain_ns": 403879532,
+    "drain_steps": 2121,
+    "drop_ns": 767,
+    "elapsed_s": 0.403880414,
+    "heap_drained": 80363758,
+    "heap_end": 80364017,
+    "heap_peak": 113259689,
+    "heap_start": 113259177,
+    "lock_timing": true,
+    "main_hold": [
+      2123,
+      107264,
+      220
+    ],
+    "main_wait_ns": 52745062,
+    "readers": [
+      {
+        "elapsed_s": 0.403882365,
+        "hold": [
+          444222,
+          99811720,
+          180890
+        ],
+        "latency": {
+          "count": 148074,
+          "max_ms": 1.447972,
+          "p99_ms": 0.019742
+        },
+        "wait_ns": 142906037
+      },
+      {
+        "elapsed_s": 0.403903152,
+        "hold": [
+          444327,
+          101356058,
+          181868
+        ],
+        "latency": {
+          "count": 148109,
+          "max_ms": 1.4905,
+          "p99_ms": 0.019933
+        },
+        "wait_ns": 138157654
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32000000,
+    "scenario": "gc",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 1563,
+    "worker_max_lock_hold_ns": 247134,
+    "worker_profile": {
+      "free_ns": 3252656,
+      "io_deferrals": 0,
+      "lock_misses": 320,
+      "pause_elapsed_ns": 347185909,
+      "pause_requested_ns": 339500000,
+      "work_ns": 52004817,
+      "worker_elapsed_ns": 403962963,
+      "yield_ns": 1332895
+    },
+    "worker_reclaimed_bytes": 32000000,
+    "writers": [],
+    "variant": "background",
+    "rep": 2,
+    "raw_file": "background-gc-r2.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      2,
+      100352,
+      0,
+      84800000,
+      296016
+    ],
+    "drain_ns": 386282190,
+    "drain_steps": 2039,
+    "drop_ns": 778,
+    "elapsed_s": 0.386283209,
+    "heap_drained": 80363758,
+    "heap_end": 80364017,
+    "heap_peak": 113259537,
+    "heap_start": 113259177,
+    "lock_timing": true,
+    "main_hold": [
+      2041,
+      98358,
+      211
+    ],
+    "main_wait_ns": 49978177,
+    "readers": [
+      {
+        "elapsed_s": 0.386272105,
+        "hold": [
+          439230,
+          84176096,
+          184305
+        ],
+        "latency": {
+          "count": 146410,
+          "max_ms": 0.861448,
+          "p99_ms": 0.019133
+        },
+        "wait_ns": 145672518
+      },
+      {
+        "elapsed_s": 0.386284587,
+        "hold": [
+          439242,
+          104834714,
+          197248
+        ],
+        "latency": {
+          "count": 146414,
+          "max_ms": 0.821425,
+          "p99_ms": 0.018999
+        },
+        "wait_ns": 130670487
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32000000,
+    "scenario": "gc",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 1563,
+    "worker_max_lock_hold_ns": 138661,
+    "worker_profile": {
+      "free_ns": 3328791,
+      "io_deferrals": 0,
+      "lock_misses": 304,
+      "pause_elapsed_ns": 330826912,
+      "pause_requested_ns": 323200000,
+      "work_ns": 50662054,
+      "worker_elapsed_ns": 386308159,
+      "yield_ns": 1307171
+    },
+    "worker_reclaimed_bytes": 32000000,
+    "writers": [],
+    "variant": "background",
+    "rep": 3,
+    "raw_file": "background-gc-r3.json.gz"
+  },
+  {
+    "background": true,
+    "budget_current": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_drained": [
+      0,
+      0,
+      0,
+      52800000,
+      0
+    ],
+    "budget_peak": [
+      2,
+      100352,
+      0,
+      84800000,
+      296016
+    ],
+    "drain_ns": 191839404,
+    "drain_steps": 858,
+    "drop_ns": 832,
+    "elapsed_s": 0.191840791,
+    "heap_drained": 80363726,
+    "heap_end": 80363985,
+    "heap_peak": 113259401,
+    "heap_start": 113259145,
+    "lock_timing": false,
+    "main_hold": [
+      0,
+      0,
+      0
+    ],
+    "main_wait_ns": 0,
+    "readers": [
+      {
+        "elapsed_s": 0.19186281,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 54154,
+          "max_ms": 0.771448,
+          "p99_ms": 0.027076
+        },
+        "wait_ns": 0
+      },
+      {
+        "elapsed_s": 0.191874277,
+        "hold": [
+          0,
+          0,
+          0
+        ],
+        "latency": {
+          "count": 55288,
+          "max_ms": 0.757033,
+          "p99_ms": 0.02447
+        },
+        "wait_ns": 0
+      }
+    ],
+    "rows": 100000,
+    "sample_capacity_bytes": 32000000,
+    "scenario": "gc",
+    "value_bytes": 256,
+    "verified": true,
+    "worker_batches": 1563,
+    "worker_max_lock_hold_ns": 107129,
+    "worker_profile": {
+      "free_ns": 0,
+      "io_deferrals": 0,
+      "lock_misses": 0,
+      "pause_elapsed_ns": 0,
+      "pause_requested_ns": 0,
+      "work_ns": 0,
+      "worker_elapsed_ns": 0,
+      "yield_ns": 0
+    },
+    "worker_reclaimed_bytes": 32000000,
+    "writers": [],
+    "variant": "background-light",
+    "rep": 3,
+    "raw_file": "background-light-gc-r3.json.gz"
+  }
+]

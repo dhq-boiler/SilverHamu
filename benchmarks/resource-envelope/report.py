@@ -94,6 +94,8 @@ def main():
             ax.margins(y=.2)
         fig.suptitle('100,000 rows / 512 MiB / 5,000 offered requests/s\nBars: median of 3 trials; dots: individual trials; no engine change',fontsize=11)
         fig.tight_layout();fig.savefig(a.out/'load-observer.svg');fig.savefig(a.out/'load-observer.png',dpi=140);plt.close(fig)
+    for svg in a.out.glob('*.svg'):
+        svg.write_text('\n'.join(line.rstrip() for line in svg.read_text().splitlines())+'\n')
     print(json.dumps(counts,indent=2))
 
 if __name__=='__main__':main()

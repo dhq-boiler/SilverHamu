@@ -2,7 +2,7 @@
   "normalization": "UTF-8 source bytes with CRLF normalized to LF",
   "files": {
     "benchmarks/resource-envelope/client.py": "c778cb47fa033d41c30e48eebd98bdf9786917f3ac50dfc31a5046ac4466ea74",
-    "benchmarks/resource-envelope/report.py": "afa5385f5adc5329abb7c693753a854e029a3268ced808ab7a92f45b452ae08c",
+    "benchmarks/resource-envelope/report.py": "382bf90932c39ac9631b3d2c9160aa257ed5b67a14f029a8825d30e82d9cdf72",
     "benchmarks/resource-envelope/run.py": "4aaf3b3fa1447802e1fab1c8e465a323f52adb728d5afcaf3656bc9ed3d1998e",
     "benchmarks/resource-envelope/supervisor.py": "74ceac1e281a4135975944c0961fccb98df5a1fae11755cdaca987b60fd72533",
     "benchmarks/resource-envelope/supplement.py": "9f63338809980d0ac29e0dc74940b58fab5337431427adc722b67608eeb8c829",

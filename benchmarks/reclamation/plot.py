@@ -56,7 +56,7 @@ for i, (work, title) in enumerate(works.items()):
         for y, c in enumerate(cells):
             label = f"{c[metric]:,.0f}" if metric == "ops_s" else f"{c[metric]:.3f}"
             ax.text(c[metric + "_max"] + maximum * .015, y, label, va="center", fontsize=10)
-fig.supxlabel("Median of 3 runs; whiskers = min/max. Before/after order alternated. Timing instrumentation disabled.\nWarm-cache API microbenchmarks; client overhead included. Experimental, not a general DBMS ranking. 2026-11-05 (JST)", fontsize=10)
+fig.supxlabel("Median of 3 runs; whiskers = min/max; order alternated. State-lock diagnostics disabled.\nStandard worker counters remain enabled. Warm-cache Python API measurements; not a DBMS ranking. 2026-11-05 (JST)", fontsize=10)
 fig.savefig(root / "reclamation.svg", metadata={"Date": env["utc"]})
 fig.savefig(root / "reclamation.png", dpi=140)
 plt.close(fig)

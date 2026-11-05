@@ -705,3 +705,18 @@ A 12-probe observer is compared with the previous 15-probe version. Record size,
 ![Observer comparison](docs/benchmarks/observer-loss-2026-11-06/observer-comparison.svg)
 
 See [the pilot, repeated comparison, loss evidence and limits](docs/benchmarks/observer-loss-2026-11-06/README.md).
+
+## Follow-up: CPU and memory limits reveal a service budget ceiling
+
+With 100k rows, the unchanged service handled 1,000 offered requests/s in every
+1/2-CPU and 512/1024/2048-MiB configuration (three repetitions), with no refusals.
+**All 1M-row attempts were rejected by the service's default 128-MiB retained-data
+budget**, even in 2-GiB containers; this was not an OS out-of-memory failure.
+
+![Container resource envelope](docs/benchmarks/resource-envelope-2026-11-06/comparison.svg)
+
+The higher-arrival diagnostic and observer cost include adverse results. Across
+the workloads, 431,803 requests succeeded, 197 were refused by bounded client
+queues, and 109 full-content checks passed, including crash recovery and an
+isolated OOM/rescue case. No production engine or durability setting changed.
+See [the measured limits, all trials, safety checks and reproduction](docs/benchmarks/resource-envelope-2026-11-06/README.md).

@@ -1,0 +1,31 @@
+{
+  "commit": "b2a92c0e8638449fe24f08e672e5a273c5e98ce2",
+  "image": "sha256:c592b94a23cab48c0951d9b4bc9eb87166b8371fd83037a674cef52ee5fee880",
+  "utc": "2026-11-05T19:43:52.283652+00:00",
+  "arguments": {
+    "out": "C:\\Git\\NewDBMS\\artifacts\\resource-load-r3-cpu2",
+    "rows": [
+      100000
+    ],
+    "cpus": [
+      2
+    ],
+    "memory": [
+      512
+    ],
+    "reps": 1,
+    "ops": 8000,
+    "sample": 1,
+    "rate": 5000.0,
+    "recover_memory": null
+  },
+  "docker": {
+    "ServerVersion": "29.9.2",
+    "NCPU": 32,
+    "MemTotal": 67380625408,
+    "Driver": "overlay2",
+    "OSType": "linux",
+    "Architecture": "x86_64",
+    "KernelVersion": "6.18.54.1-microsoft-standard-WSL2"
+  }
+}

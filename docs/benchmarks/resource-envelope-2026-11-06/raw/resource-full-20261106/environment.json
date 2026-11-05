@@ -1,0 +1,33 @@
+{
+  "commit": "b2a92c0e8638449fe24f08e672e5a273c5e98ce2",
+  "image": "sha256:c592b94a23cab48c0951d9b4bc9eb87166b8371fd83037a674cef52ee5fee880",
+  "utc": "2026-11-05T19:26:03.187200+00:00",
+  "arguments": {
+    "out": "C:\\Git\\NewDBMS\\artifacts\\resource-full-20261106",
+    "rows": [
+      100000,
+      1000000
+    ],
+    "cpus": [
+      1,
+      2
+    ],
+    "memory": [
+      512,
+      1024,
+      2048
+    ],
+    "reps": 3,
+    "ops": 8000,
+    "sample": 1
+  },
+  "docker": {
+    "ServerVersion": "29.9.2",
+    "NCPU": 32,
+    "MemTotal": 67380625408,
+    "Driver": "overlay2",
+    "OSType": "linux",
+    "Architecture": "x86_64",
+    "KernelVersion": "6.18.54.1-microsoft-standard-WSL2"
+  }
+}

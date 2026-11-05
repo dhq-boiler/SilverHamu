@@ -1,0 +1,5389 @@
+{
+  "counts": {
+    "resource-full-20261106": {
+      "failed": 18,
+      "full_checks": 72,
+      "attempted": 288000,
+      "completed": 288000,
+      "queue_rejected": 0,
+      "errors": 0,
+      "passed": 18
+    },
+    "resource-load-r1-cpu2": {
+      "attempted": 16000,
+      "completed": 15997,
+      "queue_rejected": 3,
+      "errors": 0,
+      "passed": 1,
+      "full_checks": 4
+    },
+    "resource-load-r1-sample0": {
+      "attempted": 16000,
+      "completed": 15904,
+      "queue_rejected": 96,
+      "errors": 0,
+      "passed": 1,
+      "full_checks": 4
+    },
+    "resource-load-r1-sample1": {
+      "attempted": 16000,
+      "completed": 15987,
+      "queue_rejected": 13,
+      "errors": 0,
+      "passed": 1,
+      "full_checks": 4
+    },
+    "resource-load-r2-cpu2": {
+      "attempted": 16000,
+      "completed": 16000,
+      "queue_rejected": 0,
+      "errors": 0,
+      "passed": 1,
+      "full_checks": 4
+    },
+    "resource-load-r2-sample0": {
+      "attempted": 16000,
+      "completed": 16000,
+      "queue_rejected": 0,
+      "errors": 0,
+      "passed": 1,
+      "full_checks": 4
+    },
+    "resource-load-r2-sample1": {
+      "attempted": 16000,
+      "completed": 15920,
+      "queue_rejected": 80,
+      "errors": 0,
+      "passed": 1,
+      "full_checks": 4
+    },
+    "resource-load-r3-cpu2": {
+      "attempted": 16000,
+      "completed": 15995,
+      "queue_rejected": 5,
+      "errors": 0,
+      "passed": 1,
+      "full_checks": 4
+    },
+    "resource-load-r3-sample0": {
+      "attempted": 16000,
+      "completed": 16000,
+      "queue_rejected": 0,
+      "errors": 0,
+      "passed": 1,
+      "full_checks": 4
+    },
+    "resource-load-r3-sample1": {
+      "attempted": 16000,
+      "completed": 16000,
+      "queue_rejected": 0,
+      "errors": 0,
+      "passed": 1,
+      "full_checks": 4
+    },
+    "resource-oom": {
+      "failed": 1,
+      "full_checks": 1
+    }
+  },
+  "cases": [
+    {
+      "name": "r1-n1000000-c2-m2048",
+      "rows": 1000000,
+      "cpus": 2,
+      "memory_mib": 2048,
+      "rep": 1,
+      "sample": 1,
+      "status": "failed",
+      "verification": [],
+      "measurements": [],
+      "error": "Traceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 106, in <module>\n    print(json.dumps({'ready_wait_ms':(time.monotonic_ns()-start)/1e6}));break\n ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: not ready: [Errno -3] Temporary failure in name resolution\n",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:26:16.440821903Z",
+        "FinishedAt": "2026-11-05T19:26:17.062118092Z"
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 5,
+          "cgroup_peak_mib": 140.07421875,
+          "sampled_rss_max_mib": 134.0078125,
+          "sampled_file_max_mib": 0.015625,
+          "oom_kills": 0,
+          "cpu_usec": 380547,
+          "throttled_usec": 0
+        }
+      },
+      "failure_kind": "engine_resource_budget",
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r1-n1000000-c1-m1024",
+      "rows": 1000000,
+      "cpus": 1,
+      "memory_mib": 1024,
+      "rep": 1,
+      "sample": 1,
+      "status": "failed",
+      "verification": [],
+      "measurements": [],
+      "error": "Command '['docker', 'exec', 'catdb-resource-3abffddc00-v-1-1-client', 'python', '/bench-src/resource-envelope/client.py', 'ready']' timed out after 75 seconds",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:27:22.303804359Z",
+        "FinishedAt": "2026-11-05T19:27:22.943202852Z"
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 5,
+          "cgroup_peak_mib": 139.8359375,
+          "sampled_rss_max_mib": 133.97265625,
+          "sampled_file_max_mib": 0.015625,
+          "oom_kills": 0,
+          "cpu_usec": 391238,
+          "throttled_usec": 0
+        }
+      },
+      "failure_kind": "engine_resource_budget",
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r1-n1000000-c2-m512",
+      "rows": 1000000,
+      "cpus": 2,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "status": "failed",
+      "verification": [],
+      "measurements": [],
+      "error": "Traceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 105, in <module>\n    with connect() as c:require(c.request(op='ping'))\n         ^^^^^^^^^\n  File \"/bench-src/resource-envelope/client.py\", line 8, in connect\n    def connect(): return Client('database',7400,TOKEN,timeout=30)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/bench/catdb_client.py\", line 12, in __init__\n    self.socket = socket.create_connection((host, port), timeout)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nConnectionRefusedError: [Errno 111] Connection refused\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 113, in <module>\n    if ended.exists():raise RuntimeError('server exited before ready: '+ended.read_text()+' '+(DATA/f'{phase}-server.log').read_text())\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: server exited before ready: {\"returncode\": 1} catdb-server: resource exhausted: database resource budget\n\n",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:28:42.308247788Z",
+        "FinishedAt": "2026-11-05T19:28:42.824167209Z"
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 4,
+          "cgroup_peak_mib": 139.84765625,
+          "sampled_rss_max_mib": 107.00390625,
+          "sampled_file_max_mib": 0.01953125,
+          "oom_kills": 0,
+          "cpu_usec": 362184,
+          "throttled_usec": 0
+        }
+      },
+      "failure_kind": "engine_resource_budget",
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r1-n100000-c1-m512",
+      "rows": 100000,
+      "cpus": 1,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999764247,
+          "start_ns": 97118306632318,
+          "finish_ns": 97126306396565,
+          "completed": 8000,
+          "ops_s": 1000.0294699934549,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.353124,
+          "max_ms": 1.196141,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.353124
+            }
+          },
+          "host_begin_ns": 1130950718000000,
+          "host_end_ns": 1130959093000000,
+          "sampled_cpu_cores": 0.07875953410790185,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.123063,
+          "client_queue_p99_ms": 0.066547,
+          "request_p99_ms": 0.207329
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999655373,
+          "start_ns": 97127635204989,
+          "finish_ns": 97135634860362,
+          "completed": 8000,
+          "ops_s": 1000.0430802308263,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.50606,
+          "max_ms": 14.695941,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 6.243313
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.354991
+            }
+          },
+          "host_begin_ns": 1130960015000000,
+          "host_end_ns": 1130968609000000,
+          "sampled_cpu_cores": 0.09602782513183951,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.110152,
+          "client_queue_p99_ms": 0.078702,
+          "request_p99_ms": 4.373714
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 5.006236,
+          "launch_to_ready_ms": 827.9999999795109
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.46843099792022,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:28:47.529765392Z",
+        "FinishedAt": "2026-11-05T19:29:08.729781149Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 5.038292,
+          "launch_to_ready_ms": 843.0000001098961
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.42626599408686,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 209,
+          "cgroup_peak_mib": 72.85546875,
+          "sampled_rss_max_mib": 55.484375,
+          "sampled_file_max_mib": 0.80078125,
+          "oom_kills": 0,
+          "cpu_usec": 2402864,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 21,
+          "cgroup_peak_mib": 61.0078125,
+          "sampled_rss_max_mib": 54.59765625,
+          "sampled_file_max_mib": 0.046875,
+          "oom_kills": 0,
+          "cpu_usec": 422876,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r1-n1000000-c1-m2048",
+      "rows": 1000000,
+      "cpus": 1,
+      "memory_mib": 2048,
+      "rep": 1,
+      "sample": 1,
+      "status": "failed",
+      "verification": [],
+      "measurements": [],
+      "error": "Traceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 105, in <module>\n    with connect() as c:require(c.request(op='ping'))\n         ^^^^^^^^^\n  File \"/bench-src/resource-envelope/client.py\", line 8, in connect\n    def connect(): return Client('database',7400,TOKEN,timeout=30)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/bench/catdb_client.py\", line 12, in __init__\n    self.socket = socket.create_connection((host, port), timeout)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nConnectionRefusedError: [Errno 111] Connection refused\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 113, in <module>\n    if ended.exists():raise RuntimeError('server exited before ready: '+ended.read_text()+' '+(DATA/f'{phase}-server.log').read_text())\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: server exited before ready: {\"returncode\": 1} catdb-server: resource exhausted: database resource budget\n\n",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:29:16.652016355Z",
+        "FinishedAt": "2026-11-05T19:29:17.266747788Z"
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 5,
+          "cgroup_peak_mib": 140.0703125,
+          "sampled_rss_max_mib": 134.0078125,
+          "sampled_file_max_mib": 0.03125,
+          "oom_kills": 0,
+          "cpu_usec": 379230,
+          "throttled_usec": 3322
+        }
+      },
+      "failure_kind": "engine_resource_budget",
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r1-n100000-c2-m2048",
+      "rows": 100000,
+      "cpus": 2,
+      "memory_mib": 2048,
+      "rep": 1,
+      "sample": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999664021,
+          "start_ns": 97152919168136,
+          "finish_ns": 97160918832157,
+          "completed": 8000,
+          "ops_s": 1000.0419991388536,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.380614,
+          "max_ms": 2.422485,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.380614
+            }
+          },
+          "host_begin_ns": 1130985343000000,
+          "host_end_ns": 1130993750000000,
+          "sampled_cpu_cores": 0.08031011825747995,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.113193,
+          "client_queue_p99_ms": 0.074027,
+          "request_p99_ms": 0.227288
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999780375,
+          "start_ns": 97162287854657,
+          "finish_ns": 97170287635032,
+          "completed": 8000,
+          "ops_s": 1000.0274538786947,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 5.199033,
+          "max_ms": 13.603458,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 6.904207
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.357859
+            }
+          },
+          "host_begin_ns": 1130994687000000,
+          "host_end_ns": 1131003312000000,
+          "sampled_cpu_cores": 0.09724388424473608,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.106541,
+          "client_queue_p99_ms": 0.078921,
+          "request_p99_ms": 5.06904
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 9.370964,
+          "launch_to_ready_ms": 827.9999999795109
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "2147483648",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 101.29244899144396,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:29:22.228782913Z",
+        "FinishedAt": "2026-11-05T19:29:43.387407046Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 4.036531,
+          "launch_to_ready_ms": 797.0000000204891
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "2147483648",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.6089259996079,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 209,
+          "cgroup_peak_mib": 73.43359375,
+          "sampled_rss_max_mib": 55.5703125,
+          "sampled_file_max_mib": 0.79296875,
+          "oom_kills": 0,
+          "cpu_usec": 2424363,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 20,
+          "cgroup_peak_mib": 61.27734375,
+          "sampled_rss_max_mib": 54.74609375,
+          "sampled_file_max_mib": 0.0390625,
+          "oom_kills": 0,
+          "cpu_usec": 416581,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r1-n1000000-c1-m512",
+      "rows": 1000000,
+      "cpus": 1,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "status": "failed",
+      "verification": [],
+      "measurements": [],
+      "error": "Traceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 105, in <module>\n    with connect() as c:require(c.request(op='ping'))\n         ^^^^^^^^^\n  File \"/bench-src/resource-envelope/client.py\", line 8, in connect\n    def connect(): return Client('database',7400,TOKEN,timeout=30)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/bench/catdb_client.py\", line 12, in __init__\n    self.socket = socket.create_connection((host, port), timeout)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nTimeoutError: timed out\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 113, in <module>\n    if ended.exists():raise RuntimeError('server exited before ready: '+ended.read_text()+' '+(DATA/f'{phase}-server.log').read_text())\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: server exited before ready: {\"returncode\": 1} catdb-server: resource exhausted: database resource budget\n\n",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:29:51.342596317Z",
+        "FinishedAt": "2026-11-05T19:29:51.967152555Z"
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 5,
+          "cgroup_peak_mib": 140.4453125,
+          "sampled_rss_max_mib": 133.92578125,
+          "sampled_file_max_mib": 0.015625,
+          "oom_kills": 0,
+          "cpu_usec": 378992,
+          "throttled_usec": 0
+        }
+      },
+      "failure_kind": "engine_resource_budget",
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r1-n100000-c1-m1024",
+      "rows": 100000,
+      "cpus": 1,
+      "memory_mib": 1024,
+      "rep": 1,
+      "sample": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999618091,
+          "start_ns": 97217475263819,
+          "finish_ns": 97225474881910,
+          "completed": 8000,
+          "ops_s": 1000.0477409040851,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.337687,
+          "max_ms": 0.935298,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.337687
+            }
+          },
+          "host_begin_ns": 1131049984000000,
+          "host_end_ns": 1131058406000000,
+          "sampled_cpu_cores": 0.07947964072111,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.107153,
+          "client_queue_p99_ms": 0.06666,
+          "request_p99_ms": 0.200415
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999767504,
+          "start_ns": 97226749093800,
+          "finish_ns": 97234748861304,
+          "completed": 8000,
+          "ops_s": 1000.0290628446244,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.558226,
+          "max_ms": 13.585909,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.339381
+            },
+            "write": {
+              "completed": 1600,
+              "p99_ms": 6.076666
+            }
+          },
+          "host_begin_ns": 1131059296000000,
+          "host_end_ns": 1131067906000000,
+          "sampled_cpu_cores": 0.0956603894755086,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.118928,
+          "client_queue_p99_ms": 0.082385,
+          "request_p99_ms": 4.438285
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 6.245082,
+          "launch_to_ready_ms": 844.0000000409782
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.73636000254191,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:30:26.907188993Z",
+        "FinishedAt": "2026-11-05T19:30:47.867554162Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 7.133559,
+          "launch_to_ready_ms": 844.0000000409782
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.4514530019369,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 207,
+          "cgroup_peak_mib": 72.71484375,
+          "sampled_rss_max_mib": 55.53515625,
+          "sampled_file_max_mib": 0.7890625,
+          "oom_kills": 0,
+          "cpu_usec": 2373185,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 20,
+          "cgroup_peak_mib": 61.33203125,
+          "sampled_rss_max_mib": 54.67578125,
+          "sampled_file_max_mib": 0.046875,
+          "oom_kills": 0,
+          "cpu_usec": 411631,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r1-n100000-c1-m2048",
+      "rows": 100000,
+      "cpus": 1,
+      "memory_mib": 2048,
+      "rep": 1,
+      "sample": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999694481,
+          "start_ns": 97246369440165,
+          "finish_ns": 97254369134646,
+          "completed": 8000,
+          "ops_s": 1000.0381913335223,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.366641,
+          "max_ms": 0.975947,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.366641
+            }
+          },
+          "host_begin_ns": 1131078953000000,
+          "host_end_ns": 1131087343000000,
+          "sampled_cpu_cores": 0.08004200800076221,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.103837,
+          "client_queue_p99_ms": 0.077859,
+          "request_p99_ms": 0.225517
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999786771,
+          "start_ns": 97255693985288,
+          "finish_ns": 97263693772059,
+          "completed": 8000,
+          "ops_s": 1000.0266543354346,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.933583,
+          "max_ms": 8.887255,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.361193
+            },
+            "write": {
+              "completed": 1600,
+              "p99_ms": 6.729388
+            }
+          },
+          "host_begin_ns": 1131088281000000,
+          "host_end_ns": 1131096890000000,
+          "sampled_cpu_cores": 0.09585583404086137,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.10469,
+          "client_queue_p99_ms": 0.070252,
+          "request_p99_ms": 4.809142
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 9.055525,
+          "launch_to_ready_ms": 844.0000000409782
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "2147483648",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.84202599921264,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:30:55.772361029Z",
+        "FinishedAt": "2026-11-05T19:31:17.029910048Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 7.631452,
+          "launch_to_ready_ms": 827.9999999795109
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "2147483648",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.6202869999688,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 210,
+          "cgroup_peak_mib": 72.765625,
+          "sampled_rss_max_mib": 55.60546875,
+          "sampled_file_max_mib": 0.79296875,
+          "oom_kills": 0,
+          "cpu_usec": 2432868,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 21,
+          "cgroup_peak_mib": 61.19921875,
+          "sampled_rss_max_mib": 54.703125,
+          "sampled_file_max_mib": 0.04296875,
+          "oom_kills": 0,
+          "cpu_usec": 412815,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r1-n1000000-c2-m1024",
+      "rows": 1000000,
+      "cpus": 2,
+      "memory_mib": 1024,
+      "rep": 1,
+      "sample": 1,
+      "status": "failed",
+      "verification": [],
+      "measurements": [],
+      "error": "Traceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 105, in <module>\n    with connect() as c:require(c.request(op='ping'))\n         ^^^^^^^^^\n  File \"/bench-src/resource-envelope/client.py\", line 8, in connect\n    def connect(): return Client('database',7400,TOKEN,timeout=30)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/bench/catdb_client.py\", line 12, in __init__\n    self.socket = socket.create_connection((host, port), timeout)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nTimeoutError: timed out\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 113, in <module>\n    if ended.exists():raise RuntimeError('server exited before ready: '+ended.read_text()+' '+(DATA/f'{phase}-server.log').read_text())\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: server exited before ready: {\"returncode\": 1} catdb-server: resource exhausted: database resource budget\n\n",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:31:25.001446986Z",
+        "FinishedAt": "2026-11-05T19:31:25.631722112Z"
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 5,
+          "cgroup_peak_mib": 140.53515625,
+          "sampled_rss_max_mib": 133.96484375,
+          "sampled_file_max_mib": 0.015625,
+          "oom_kills": 0,
+          "cpu_usec": 378125,
+          "throttled_usec": 0
+        }
+      },
+      "failure_kind": "engine_resource_budget",
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r1-n100000-c2-m512",
+      "rows": 100000,
+      "cpus": 2,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999664514,
+          "start_ns": 97311135467120,
+          "finish_ns": 97319135131634,
+          "completed": 8000,
+          "ops_s": 1000.0419375086809,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.364355,
+          "max_ms": 0.96317,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.364355
+            }
+          },
+          "host_begin_ns": 1131143796000000,
+          "host_end_ns": 1131152234000000,
+          "sampled_cpu_cores": 0.08051284237761999,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.102054,
+          "client_queue_p99_ms": 0.071584,
+          "request_p99_ms": 0.22197
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 8.001852663,
+          "start_ns": 97320470602823,
+          "finish_ns": 97328472455485,
+          "completed": 8000,
+          "ops_s": 999.768470743211,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 5.640464,
+          "max_ms": 15.713244,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.356288
+            },
+            "write": {
+              "completed": 1600,
+              "p99_ms": 7.427081
+            }
+          },
+          "host_begin_ns": 1131153171000000,
+          "host_end_ns": 1131161812000000,
+          "sampled_cpu_cores": 0.09958112679467612,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.109949,
+          "client_queue_p99_ms": 0.074765,
+          "request_p99_ms": 5.525889
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 4.949887,
+          "launch_to_ready_ms": 827.9999999795109
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.41828899795655,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:32:00.582873199Z",
+        "FinishedAt": "2026-11-05T19:32:22.114025553Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 4.646764,
+          "launch_to_ready_ms": 827.9999999795109
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.87551400158554,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 212,
+          "cgroup_peak_mib": 72.96875,
+          "sampled_rss_max_mib": 55.45703125,
+          "sampled_file_max_mib": 0.796875,
+          "oom_kills": 0,
+          "cpu_usec": 2495324,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 21,
+          "cgroup_peak_mib": 61.33203125,
+          "sampled_rss_max_mib": 54.68359375,
+          "sampled_file_max_mib": 0.04296875,
+          "oom_kills": 0,
+          "cpu_usec": 413724,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r1-n100000-c2-m1024",
+      "rows": 100000,
+      "cpus": 2,
+      "memory_mib": 1024,
+      "rep": 1,
+      "sample": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999712428,
+          "start_ns": 97340532733525,
+          "finish_ns": 97348532445953,
+          "completed": 8000,
+          "ops_s": 1000.0359477921974,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.34487,
+          "max_ms": 1.29295,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.34487
+            }
+          },
+          "host_begin_ns": 1131173218000000,
+          "host_end_ns": 1131181671000000,
+          "sampled_cpu_cores": 0.07740211117939765,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.105358,
+          "client_queue_p99_ms": 0.060639,
+          "request_p99_ms": 0.21296
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999832935,
+          "start_ns": 97349864647663,
+          "finish_ns": 97357864480598,
+          "completed": 8000,
+          "ops_s": 1000.020883561114,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.348973,
+          "max_ms": 7.720595,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 5.508531
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.341093
+            }
+          },
+          "host_begin_ns": 1131182593000000,
+          "host_end_ns": 1131191218000000,
+          "sampled_cpu_cores": 0.09159164157872517,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.109544,
+          "client_queue_p99_ms": 0.075763,
+          "request_p99_ms": 4.227615
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 6.691111,
+          "launch_to_ready_ms": 875.0
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 100.93184899596963,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:32:30.071633407Z",
+        "FinishedAt": "2026-11-05T19:32:51.28442691Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 9.099832,
+          "launch_to_ready_ms": 797.0000000204891
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 202.4134259991115,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 209,
+          "cgroup_peak_mib": 72.69921875,
+          "sampled_rss_max_mib": 55.6171875,
+          "sampled_file_max_mib": 0.79296875,
+          "oom_kills": 0,
+          "cpu_usec": 2360985,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 21,
+          "cgroup_peak_mib": 61.2890625,
+          "sampled_rss_max_mib": 54.6328125,
+          "sampled_file_max_mib": 0.04296875,
+          "oom_kills": 0,
+          "cpu_usec": 429081,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r2-n100000-c1-m512",
+      "rows": 100000,
+      "cpus": 1,
+      "memory_mib": 512,
+      "rep": 2,
+      "sample": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999748096,
+          "start_ns": 97369455573340,
+          "finish_ns": 97377455321436,
+          "completed": 8000,
+          "ops_s": 1000.0314889915253,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.746452,
+          "max_ms": 14.037879,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.378456
+            },
+            "write": {
+              "completed": 1600,
+              "p99_ms": 6.380219
+            }
+          },
+          "host_begin_ns": 1131202203000000,
+          "host_end_ns": 1131210796000000,
+          "sampled_cpu_cores": 0.09618061196711103,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.114134,
+          "client_queue_p99_ms": 0.082585,
+          "request_p99_ms": 4.604753
+        },
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.99975897,
+          "start_ns": 97378934984019,
+          "finish_ns": 97386934742989,
+          "completed": 8000,
+          "ops_s": 1000.0301296577688,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.347923,
+          "max_ms": 1.289801,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.347923
+            }
+          },
+          "host_begin_ns": 1131211718000000,
+          "host_end_ns": 1131220156000000,
+          "sampled_cpu_cores": 0.08248515732812269,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.102724,
+          "client_queue_p99_ms": 0.066779,
+          "request_p99_ms": 0.211322
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 6.810824,
+          "launch_to_ready_ms": 812.0000001508743
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.5707120008301,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:32:59.121591281Z",
+        "FinishedAt": "2026-11-05T19:33:20.157967865Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 5.607661,
+          "launch_to_ready_ms": 827.9999999795109
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.4361819892656,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 208,
+          "cgroup_peak_mib": 72.703125,
+          "sampled_rss_max_mib": 55.5390625,
+          "sampled_file_max_mib": 0.7890625,
+          "oom_kills": 0,
+          "cpu_usec": 2406494,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 21,
+          "cgroup_peak_mib": 61.0078125,
+          "sampled_rss_max_mib": 54.640625,
+          "sampled_file_max_mib": 0.04296875,
+          "oom_kills": 0,
+          "cpu_usec": 426890,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r2-n1000000-c2-m2048",
+      "rows": 1000000,
+      "cpus": 2,
+      "memory_mib": 2048,
+      "rep": 2,
+      "sample": 1,
+      "status": "failed",
+      "verification": [],
+      "measurements": [],
+      "error": "Traceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 105, in <module>\n    with connect() as c:require(c.request(op='ping'))\n         ^^^^^^^^^\n  File \"/bench-src/resource-envelope/client.py\", line 8, in connect\n    def connect(): return Client('database',7400,TOKEN,timeout=30)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/bench/catdb_client.py\", line 12, in __init__\n    self.socket = socket.create_connection((host, port), timeout)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nConnectionRefusedError: [Errno 111] Connection refused\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 113, in <module>\n    if ended.exists():raise RuntimeError('server exited before ready: '+ended.read_text()+' '+(DATA/f'{phase}-server.log').read_text())\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: server exited before ready: {\"returncode\": 1} catdb-server: resource exhausted: database resource budget\n\n",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:33:28.188885688Z",
+        "FinishedAt": "2026-11-05T19:33:28.717127533Z"
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 4,
+          "cgroup_peak_mib": 139.74609375,
+          "sampled_rss_max_mib": 107.09375,
+          "sampled_file_max_mib": 0.015625,
+          "oom_kills": 0,
+          "cpu_usec": 361497,
+          "throttled_usec": 0
+        }
+      },
+      "failure_kind": "engine_resource_budget",
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r2-n1000000-c1-m1024",
+      "rows": 1000000,
+      "cpus": 1,
+      "memory_mib": 1024,
+      "rep": 2,
+      "sample": 1,
+      "status": "failed",
+      "verification": [],
+      "measurements": [],
+      "error": "Traceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 105, in <module>\n    with connect() as c:require(c.request(op='ping'))\n         ^^^^^^^^^\n  File \"/bench-src/resource-envelope/client.py\", line 8, in connect\n    def connect(): return Client('database',7400,TOKEN,timeout=30)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/bench/catdb_client.py\", line 12, in __init__\n    self.socket = socket.create_connection((host, port), timeout)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nConnectionRefusedError: [Errno 111] Connection refused\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 113, in <module>\n    if ended.exists():raise RuntimeError('server exited before ready: '+ended.read_text()+' '+(DATA/f'{phase}-server.log').read_text())\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: server exited before ready: {\"returncode\": 1} catdb-server: resource exhausted: database resource budget\n\n",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:33:33.544410121Z",
+        "FinishedAt": "2026-11-05T19:33:34.159244518Z"
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 5,
+          "cgroup_peak_mib": 139.78515625,
+          "sampled_rss_max_mib": 105.17578125,
+          "sampled_file_max_mib": 0.015625,
+          "oom_kills": 0,
+          "cpu_usec": 370176,
+          "throttled_usec": 85
+        }
+      },
+      "failure_kind": "engine_resource_budget",
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r2-n100000-c2-m1024",
+      "rows": 100000,
+      "cpus": 2,
+      "memory_mib": 1024,
+      "rep": 2,
+      "sample": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.99977368,
+          "start_ns": 97409455326815,
+          "finish_ns": 97417455100495,
+          "completed": 8000,
+          "ops_s": 1000.0282908003468,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 5.203235,
+          "max_ms": 45.771128,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 23.443469
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.342944
+            }
+          },
+          "host_begin_ns": 1131242296000000,
+          "host_end_ns": 1131250906000000,
+          "sampled_cpu_cores": 0.09425057037669231,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.116028,
+          "client_queue_p99_ms": 0.084428,
+          "request_p99_ms": 5.081015
+        },
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999632827,
+          "start_ns": 97418914901607,
+          "finish_ns": 97426914534434,
+          "completed": 8000,
+          "ops_s": 1000.0458987315968,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.364567,
+          "max_ms": 1.198436,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.364567
+            }
+          },
+          "host_begin_ns": 1131251812000000,
+          "host_end_ns": 1131260171000000,
+          "sampled_cpu_cores": 0.07910475378983699,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.110108,
+          "client_queue_p99_ms": 0.097447,
+          "request_p99_ms": 0.197533
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 6.87304,
+          "launch_to_ready_ms": 827.9999999795109
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 100.82146100467071,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:33:39.1640446Z",
+        "FinishedAt": "2026-11-05T19:34:00.281514375Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 4.000798,
+          "launch_to_ready_ms": 812.9999998491257
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.410166991991,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 208,
+          "cgroup_peak_mib": 72.37890625,
+          "sampled_rss_max_mib": 55.58203125,
+          "sampled_file_max_mib": 0.7890625,
+          "oom_kills": 0,
+          "cpu_usec": 2379364,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 21,
+          "cgroup_peak_mib": 61.18359375,
+          "sampled_rss_max_mib": 54.6640625,
+          "sampled_file_max_mib": 0.04296875,
+          "oom_kills": 0,
+          "cpu_usec": 416962,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r2-n100000-c1-m2048",
+      "rows": 100000,
+      "cpus": 1,
+      "memory_mib": 2048,
+      "rep": 2,
+      "sample": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999788053,
+          "start_ns": 97438581730495,
+          "finish_ns": 97446581518548,
+          "completed": 8000,
+          "ops_s": 1000.0264940769175,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.735656,
+          "max_ms": 8.891056,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.364973
+            },
+            "write": {
+              "completed": 1600,
+              "p99_ms": 6.600369
+            }
+          },
+          "host_begin_ns": 1131271468000000,
+          "host_end_ns": 1131280062000000,
+          "sampled_cpu_cores": 0.09447861338629861,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.10826,
+          "client_queue_p99_ms": 0.075382,
+          "request_p99_ms": 4.61176
+        },
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999673326,
+          "start_ns": 97448037174503,
+          "finish_ns": 97456036847829,
+          "completed": 8000,
+          "ops_s": 1000.0408359175041,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.340828,
+          "max_ms": 1.170068,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.340828
+            }
+          },
+          "host_begin_ns": 1131280968000000,
+          "host_end_ns": 1131289343000000,
+          "sampled_cpu_cores": 0.07848021487189827,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.105777,
+          "client_queue_p99_ms": 0.059332,
+          "request_p99_ms": 0.200168
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 5.949222,
+          "launch_to_ready_ms": 827.9999999795109
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "2147483648",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.5591300005326,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:34:08.389746293Z",
+        "FinishedAt": "2026-11-05T19:34:29.408863652Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 8.49843,
+          "launch_to_ready_ms": 812.9999998491257
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "2147483648",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.5163809992373,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 207,
+          "cgroup_peak_mib": 72.484375,
+          "sampled_rss_max_mib": 55.60546875,
+          "sampled_file_max_mib": 0.7890625,
+          "oom_kills": 0,
+          "cpu_usec": 2368708,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 20,
+          "cgroup_peak_mib": 61.11328125,
+          "sampled_rss_max_mib": 54.6484375,
+          "sampled_file_max_mib": 0.0390625,
+          "oom_kills": 0,
+          "cpu_usec": 412963,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r2-n1000000-c1-m512",
+      "rows": 1000000,
+      "cpus": 1,
+      "memory_mib": 512,
+      "rep": 2,
+      "sample": 1,
+      "status": "failed",
+      "verification": [],
+      "measurements": [],
+      "error": "Traceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 105, in <module>\n    with connect() as c:require(c.request(op='ping'))\n         ^^^^^^^^^\n  File \"/bench-src/resource-envelope/client.py\", line 8, in connect\n    def connect(): return Client('database',7400,TOKEN,timeout=30)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/bench/catdb_client.py\", line 12, in __init__\n    self.socket = socket.create_connection((host, port), timeout)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nConnectionRefusedError: [Errno 111] Connection refused\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 113, in <module>\n    if ended.exists():raise RuntimeError('server exited before ready: '+ended.read_text()+' '+(DATA/f'{phase}-server.log').read_text())\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: server exited before ready: {\"returncode\": 1} catdb-server: resource exhausted: database resource budget\n\n",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:34:37.514185601Z",
+        "FinishedAt": "2026-11-05T19:34:38.150199742Z"
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 5,
+          "cgroup_peak_mib": 140.046875,
+          "sampled_rss_max_mib": 133.98828125,
+          "sampled_file_max_mib": 0.015625,
+          "oom_kills": 0,
+          "cpu_usec": 392805,
+          "throttled_usec": 0
+        }
+      },
+      "failure_kind": "engine_resource_budget",
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r2-n1000000-c1-m2048",
+      "rows": 1000000,
+      "cpus": 1,
+      "memory_mib": 2048,
+      "rep": 2,
+      "sample": 1,
+      "status": "failed",
+      "verification": [],
+      "measurements": [],
+      "error": "Traceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 105, in <module>\n    with connect() as c:require(c.request(op='ping'))\n         ^^^^^^^^^\n  File \"/bench-src/resource-envelope/client.py\", line 8, in connect\n    def connect(): return Client('database',7400,TOKEN,timeout=30)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/bench/catdb_client.py\", line 12, in __init__\n    self.socket = socket.create_connection((host, port), timeout)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nConnectionRefusedError: [Errno 111] Connection refused\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 113, in <module>\n    if ended.exists():raise RuntimeError('server exited before ready: '+ended.read_text()+' '+(DATA/f'{phase}-server.log').read_text())\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: server exited before ready: {\"returncode\": 1} catdb-server: resource exhausted: database resource budget\n\n",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:34:43.178129581Z",
+        "FinishedAt": "2026-11-05T19:34:43.838210441Z"
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 5,
+          "cgroup_peak_mib": 139.98828125,
+          "sampled_rss_max_mib": 133.95703125,
+          "sampled_file_max_mib": 0.015625,
+          "oom_kills": 0,
+          "cpu_usec": 381400,
+          "throttled_usec": 1828
+        }
+      },
+      "failure_kind": "engine_resource_budget",
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r2-n100000-c1-m1024",
+      "rows": 100000,
+      "cpus": 1,
+      "memory_mib": 1024,
+      "rep": 2,
+      "sample": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 8.001364712,
+          "start_ns": 97478860705661,
+          "finish_ns": 97486862070373,
+          "completed": 8000,
+          "ops_s": 999.8294400956435,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.714973,
+          "max_ms": 6.52364,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 5.890736
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.390682
+            }
+          },
+          "host_begin_ns": 1131311828000000,
+          "host_end_ns": 1131320390000000,
+          "sampled_cpu_cores": 0.09512733493468001,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.119714,
+          "client_queue_p99_ms": 0.077675,
+          "request_p99_ms": 4.582079
+        },
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999641623,
+          "start_ns": 97488401181643,
+          "finish_ns": 97496400823266,
+          "completed": 8000,
+          "ops_s": 1000.0447991318723,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.336181,
+          "max_ms": 0.976697,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.336181
+            }
+          },
+          "host_begin_ns": 1131321343000000,
+          "host_end_ns": 1131329765000000,
+          "sampled_cpu_cores": 0.0776981628639401,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.107821,
+          "client_queue_p99_ms": 0.06241,
+          "request_p99_ms": 0.197193
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 5.744937,
+          "launch_to_ready_ms": 859.0000001713634
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 100.7674399879761,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:34:48.638126328Z",
+        "FinishedAt": "2026-11-05T19:35:09.857241922Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 4.207341,
+          "launch_to_ready_ms": 827.9999999795109
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.5302779909689,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 209,
+          "cgroup_peak_mib": 72.60546875,
+          "sampled_rss_max_mib": 55.51953125,
+          "sampled_file_max_mib": 0.79296875,
+          "oom_kills": 0,
+          "cpu_usec": 2403952,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 20,
+          "cgroup_peak_mib": 61.16015625,
+          "sampled_rss_max_mib": 54.6328125,
+          "sampled_file_max_mib": 0.0390625,
+          "oom_kills": 0,
+          "cpu_usec": 413179,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r2-n100000-c2-m2048",
+      "rows": 100000,
+      "cpus": 2,
+      "memory_mib": 2048,
+      "rep": 2,
+      "sample": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999899552,
+          "start_ns": 97507704283543,
+          "finish_ns": 97515704183095,
+          "completed": 8000,
+          "ops_s": 1000.0125561576551,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.614053,
+          "max_ms": 13.793728,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 6.19809
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.337554
+            }
+          },
+          "host_begin_ns": 1131340718000000,
+          "host_end_ns": 1131349281000000,
+          "sampled_cpu_cores": 0.09300802515269802,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.11307,
+          "client_queue_p99_ms": 0.068958,
+          "request_p99_ms": 4.491484
+        },
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999563982,
+          "start_ns": 97517344976503,
+          "finish_ns": 97525344540485,
+          "completed": 8000,
+          "ops_s": 1000.0545052206572,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.343438,
+          "max_ms": 1.619165,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.343438
+            }
+          },
+          "host_begin_ns": 1131350296000000,
+          "host_end_ns": 1131358750000000,
+          "sampled_cpu_cores": 0.07888871843063504,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.104727,
+          "client_queue_p99_ms": 0.060521,
+          "request_p99_ms": 0.202126
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 6.918473,
+          "launch_to_ready_ms": 844.0000000409782
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "2147483648",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.46665300126188,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:35:17.568820616Z",
+        "FinishedAt": "2026-11-05T19:35:38.778473638Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 6.518048,
+          "launch_to_ready_ms": 828.999999910593
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "2147483648",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.61285699578002,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 209,
+          "cgroup_peak_mib": 73.68359375,
+          "sampled_rss_max_mib": 55.4921875,
+          "sampled_file_max_mib": 0.79296875,
+          "oom_kills": 0,
+          "cpu_usec": 2404889,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 21,
+          "cgroup_peak_mib": 61.3046875,
+          "sampled_rss_max_mib": 54.5703125,
+          "sampled_file_max_mib": 0.04296875,
+          "oom_kills": 0,
+          "cpu_usec": 449691,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r2-n100000-c2-m512",
+      "rows": 100000,
+      "cpus": 2,
+      "memory_mib": 512,
+      "rep": 2,
+      "sample": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999776622,
+          "start_ns": 97536775706016,
+          "finish_ns": 97544775482638,
+          "completed": 8000,
+          "ops_s": 1000.0279230296738,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.668817,
+          "max_ms": 13.725842,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 6.35936
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.37367
+            }
+          },
+          "host_begin_ns": 1131369828000000,
+          "host_end_ns": 1131378375000000,
+          "sampled_cpu_cores": 0.09615767216753504,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.123885,
+          "client_queue_p99_ms": 0.077158,
+          "request_p99_ms": 4.537218
+        },
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999658778,
+          "start_ns": 97546254103294,
+          "finish_ns": 97554253762072,
+          "completed": 8000,
+          "ops_s": 1000.0426545693347,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.346073,
+          "max_ms": 1.033535,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.346073
+            }
+          },
+          "host_begin_ns": 1131379281000000,
+          "host_end_ns": 1131387703000000,
+          "sampled_cpu_cores": 0.0802902051257617,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.106142,
+          "client_queue_p99_ms": 0.068089,
+          "request_p99_ms": 0.212141
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 7.530549,
+          "launch_to_ready_ms": 828.0000002123415
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.40224799979478,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:35:46.602473874Z",
+        "FinishedAt": "2026-11-05T19:36:07.720183373Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 8.517215,
+          "launch_to_ready_ms": 936.9999999180436
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 100.71704399888404,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 208,
+          "cgroup_peak_mib": 73.51171875,
+          "sampled_rss_max_mib": 55.3359375,
+          "sampled_file_max_mib": 0.7890625,
+          "oom_kills": 0,
+          "cpu_usec": 2393271,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 22,
+          "cgroup_peak_mib": 61.71484375,
+          "sampled_rss_max_mib": 54.71875,
+          "sampled_file_max_mib": 0.04296875,
+          "oom_kills": 0,
+          "cpu_usec": 409712,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r2-n1000000-c2-m1024",
+      "rows": 1000000,
+      "cpus": 2,
+      "memory_mib": 1024,
+      "rep": 2,
+      "sample": 1,
+      "status": "failed",
+      "verification": [],
+      "measurements": [],
+      "error": "Traceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 105, in <module>\n    with connect() as c:require(c.request(op='ping'))\n         ^^^^^^^^^\n  File \"/bench-src/resource-envelope/client.py\", line 8, in connect\n    def connect(): return Client('database',7400,TOKEN,timeout=30)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/bench/catdb_client.py\", line 12, in __init__\n    self.socket = socket.create_connection((host, port), timeout)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nConnectionRefusedError: [Errno 111] Connection refused\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 113, in <module>\n    if ended.exists():raise RuntimeError('server exited before ready: '+ended.read_text()+' '+(DATA/f'{phase}-server.log').read_text())\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: server exited before ready: {\"returncode\": 1} catdb-server: resource exhausted: database resource budget\n\n",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:36:15.777894411Z",
+        "FinishedAt": "2026-11-05T19:36:16.416769085Z"
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 5,
+          "cgroup_peak_mib": 140.234375,
+          "sampled_rss_max_mib": 133.8125,
+          "sampled_file_max_mib": 0.015625,
+          "oom_kills": 0,
+          "cpu_usec": 395499,
+          "throttled_usec": 0
+        }
+      },
+      "failure_kind": "engine_resource_budget",
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r2-n1000000-c2-m512",
+      "rows": 1000000,
+      "cpus": 2,
+      "memory_mib": 512,
+      "rep": 2,
+      "sample": 1,
+      "status": "failed",
+      "verification": [],
+      "measurements": [],
+      "error": "Traceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 105, in <module>\n    with connect() as c:require(c.request(op='ping'))\n         ^^^^^^^^^\n  File \"/bench-src/resource-envelope/client.py\", line 8, in connect\n    def connect(): return Client('database',7400,TOKEN,timeout=30)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/bench/catdb_client.py\", line 12, in __init__\n    self.socket = socket.create_connection((host, port), timeout)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nConnectionRefusedError: [Errno 111] Connection refused\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 113, in <module>\n    if ended.exists():raise RuntimeError('server exited before ready: '+ended.read_text()+' '+(DATA/f'{phase}-server.log').read_text())\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: server exited before ready: {\"returncode\": 1} catdb-server: resource exhausted: database resource budget\n\n",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:36:21.270237844Z",
+        "FinishedAt": "2026-11-05T19:36:21.887138561Z"
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 5,
+          "cgroup_peak_mib": 140.19921875,
+          "sampled_rss_max_mib": 134.05078125,
+          "sampled_file_max_mib": 0.015625,
+          "oom_kills": 0,
+          "cpu_usec": 400699,
+          "throttled_usec": 0
+        }
+      },
+      "failure_kind": "engine_resource_budget",
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r3-n100000-c2-m512",
+      "rows": 100000,
+      "cpus": 2,
+      "memory_mib": 512,
+      "rep": 3,
+      "sample": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.99986398,
+          "start_ns": 97576724919649,
+          "finish_ns": 97584724783629,
+          "completed": 8000,
+          "ops_s": 1000.0170027890899,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.384931,
+          "max_ms": 0.958584,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.384931
+            }
+          },
+          "host_begin_ns": 1131409796000000,
+          "host_end_ns": 1131418218000000,
+          "sampled_cpu_cores": 0.08086018143252034,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.129687,
+          "client_queue_p99_ms": 0.079012,
+          "request_p99_ms": 0.233675
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.99968246,
+          "start_ns": 97586011004256,
+          "finish_ns": 97594010686716,
+          "completed": 8000,
+          "ops_s": 1000.0396940755571,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.480015,
+          "max_ms": 9.95324,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 6.13263
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.336031
+            }
+          },
+          "host_begin_ns": 1131419109000000,
+          "host_end_ns": 1131427718000000,
+          "sampled_cpu_cores": 0.09480897246458919,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.103632,
+          "client_queue_p99_ms": 0.073558,
+          "request_p99_ms": 4.365018
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 7.365709,
+          "launch_to_ready_ms": 843.9999998081475
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.56412399956025,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:36:26.675389703Z",
+        "FinishedAt": "2026-11-05T19:36:47.735066454Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 6.203976,
+          "launch_to_ready_ms": 812.9999998491257
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.51221299602184,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 208,
+          "cgroup_peak_mib": 72.69921875,
+          "sampled_rss_max_mib": 55.4453125,
+          "sampled_file_max_mib": 0.7890625,
+          "oom_kills": 0,
+          "cpu_usec": 2406148,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 20,
+          "cgroup_peak_mib": 60.546875,
+          "sampled_rss_max_mib": 54.61328125,
+          "sampled_file_max_mib": 0.0390625,
+          "oom_kills": 0,
+          "cpu_usec": 410997,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r3-n100000-c2-m2048",
+      "rows": 100000,
+      "cpus": 2,
+      "memory_mib": 2048,
+      "rep": 3,
+      "sample": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.99963581,
+          "start_ns": 97605532040528,
+          "finish_ns": 97613531676338,
+          "completed": 8000,
+          "ops_s": 1000.0455258225062,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.323211,
+          "max_ms": 1.188943,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.323211
+            }
+          },
+          "host_begin_ns": 1131438656000000,
+          "host_end_ns": 1131447062000000,
+          "sampled_cpu_cores": 0.07602229943306656,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.100103,
+          "client_queue_p99_ms": 0.056947,
+          "request_p99_ms": 0.190333
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999736209,
+          "start_ns": 97614902344186,
+          "finish_ns": 97622902080395,
+          "completed": 8000,
+          "ops_s": 1000.0329749623123,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.629611,
+          "max_ms": 8.528242,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 5.999996
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.33553
+            }
+          },
+          "host_begin_ns": 1131448015000000,
+          "host_end_ns": 1131456640000000,
+          "sampled_cpu_cores": 0.09255267617236365,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.106184,
+          "client_queue_p99_ms": 0.074531,
+          "request_p99_ms": 4.49448
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 6.392984,
+          "launch_to_ready_ms": 843.0000001098961
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "2147483648",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.9002930028364,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:36:55.504305483Z",
+        "FinishedAt": "2026-11-05T19:37:16.651707692Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 8.088328,
+          "launch_to_ready_ms": 827.9999999795109
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "2147483648",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.48788701044396,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 209,
+          "cgroup_peak_mib": 72.83203125,
+          "sampled_rss_max_mib": 55.53125,
+          "sampled_file_max_mib": 0.79296875,
+          "oom_kills": 0,
+          "cpu_usec": 2361425,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 21,
+          "cgroup_peak_mib": 60.53515625,
+          "sampled_rss_max_mib": 54.69140625,
+          "sampled_file_max_mib": 0.04296875,
+          "oom_kills": 0,
+          "cpu_usec": 433231,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r3-n1000000-c2-m512",
+      "rows": 1000000,
+      "cpus": 2,
+      "memory_mib": 512,
+      "rep": 3,
+      "sample": 1,
+      "status": "failed",
+      "verification": [],
+      "measurements": [],
+      "error": "Traceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 105, in <module>\n    with connect() as c:require(c.request(op='ping'))\n         ^^^^^^^^^\n  File \"/bench-src/resource-envelope/client.py\", line 8, in connect\n    def connect(): return Client('database',7400,TOKEN,timeout=30)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/bench/catdb_client.py\", line 12, in __init__\n    self.socket = socket.create_connection((host, port), timeout)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nConnectionRefusedError: [Errno 111] Connection refused\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 113, in <module>\n    if ended.exists():raise RuntimeError('server exited before ready: '+ended.read_text()+' '+(DATA/f'{phase}-server.log').read_text())\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: server exited before ready: {\"returncode\": 1} catdb-server: resource exhausted: database resource budget\n\n",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:37:24.664670231Z",
+        "FinishedAt": "2026-11-05T19:37:25.29831133Z"
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 5,
+          "cgroup_peak_mib": 139.88671875,
+          "sampled_rss_max_mib": 134.03515625,
+          "sampled_file_max_mib": 0.015625,
+          "oom_kills": 0,
+          "cpu_usec": 390256,
+          "throttled_usec": 0
+        }
+      },
+      "failure_kind": "engine_resource_budget",
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r3-n100000-c1-m2048",
+      "rows": 100000,
+      "cpus": 1,
+      "memory_mib": 2048,
+      "rep": 3,
+      "sample": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999716454,
+          "start_ns": 97640222377538,
+          "finish_ns": 97648222093992,
+          "completed": 8000,
+          "ops_s": 1000.0354445062685,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.347486,
+          "max_ms": 0.964492,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.347486
+            }
+          },
+          "host_begin_ns": 1131473406000000,
+          "host_end_ns": 1131481812000000,
+          "sampled_cpu_cores": 0.08020055460212398,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.106231,
+          "client_queue_p99_ms": 0.063196,
+          "request_p99_ms": 0.207009
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.99987724,
+          "start_ns": 97649580013587,
+          "finish_ns": 97657579890827,
+          "completed": 8000,
+          "ops_s": 1000.0153452354726,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.798658,
+          "max_ms": 13.474374,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 5.87058
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.336411
+            }
+          },
+          "host_begin_ns": 1131482765000000,
+          "host_end_ns": 1131491390000000,
+          "sampled_cpu_cores": 0.0941289617172267,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.104974,
+          "client_queue_p99_ms": 0.082655,
+          "request_p99_ms": 4.670881
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 5.343243,
+          "launch_to_ready_ms": 827.9999999795109
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "2147483648",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.40259500476532,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:37:30.343399641Z",
+        "FinishedAt": "2026-11-05T19:37:51.437404284Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 5.438437,
+          "launch_to_ready_ms": 797.0000000204891
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "2147483648",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 101.06953899958171,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 208,
+          "cgroup_peak_mib": 73.09765625,
+          "sampled_rss_max_mib": 55.5703125,
+          "sampled_file_max_mib": 0.7890625,
+          "oom_kills": 0,
+          "cpu_usec": 2400482,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 21,
+          "cgroup_peak_mib": 60.56640625,
+          "sampled_rss_max_mib": 54.52734375,
+          "sampled_file_max_mib": 0.04296875,
+          "oom_kills": 0,
+          "cpu_usec": 404059,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r3-n100000-c2-m1024",
+      "rows": 100000,
+      "cpus": 2,
+      "memory_mib": 1024,
+      "rep": 3,
+      "sample": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999648913,
+          "start_ns": 97669349260764,
+          "finish_ns": 97677348909677,
+          "completed": 8000,
+          "ops_s": 1000.0438878010546,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.331769,
+          "max_ms": 1.022664,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.331769
+            }
+          },
+          "host_begin_ns": 1131502546000000,
+          "host_end_ns": 1131510984000000,
+          "sampled_cpu_cores": 0.07757760185170207,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.108435,
+          "client_queue_p99_ms": 0.068747,
+          "request_p99_ms": 0.195233
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.99974608,
+          "start_ns": 97678666464362,
+          "finish_ns": 97686666210442,
+          "completed": 8000,
+          "ops_s": 1000.0317410074596,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.682328,
+          "max_ms": 13.650836,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.345739
+            },
+            "write": {
+              "completed": 1600,
+              "p99_ms": 6.487802
+            }
+          },
+          "host_begin_ns": 1131511906000000,
+          "host_end_ns": 1131520500000000,
+          "sampled_cpu_cores": 0.09401213928807962,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.107693,
+          "client_queue_p99_ms": 0.077156,
+          "request_p99_ms": 4.560972
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 8.80135,
+          "launch_to_ready_ms": 984.9999998696148
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 100.93435700400732,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:37:59.316013526Z",
+        "FinishedAt": "2026-11-05T19:38:20.563349804Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 8.128332,
+          "launch_to_ready_ms": 843.9999998081475
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.56568901438732,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 210,
+          "cgroup_peak_mib": 73.6015625,
+          "sampled_rss_max_mib": 55.4375,
+          "sampled_file_max_mib": 0.79296875,
+          "oom_kills": 0,
+          "cpu_usec": 2363733,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 21,
+          "cgroup_peak_mib": 61.71875,
+          "sampled_rss_max_mib": 54.7265625,
+          "sampled_file_max_mib": 0.04296875,
+          "oom_kills": 0,
+          "cpu_usec": 430748,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r3-n1000000-c2-m2048",
+      "rows": 1000000,
+      "cpus": 2,
+      "memory_mib": 2048,
+      "rep": 3,
+      "sample": 1,
+      "status": "failed",
+      "verification": [],
+      "measurements": [],
+      "error": "Traceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 105, in <module>\n    with connect() as c:require(c.request(op='ping'))\n         ^^^^^^^^^\n  File \"/bench-src/resource-envelope/client.py\", line 8, in connect\n    def connect(): return Client('database',7400,TOKEN,timeout=30)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/bench/catdb_client.py\", line 12, in __init__\n    self.socket = socket.create_connection((host, port), timeout)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nTimeoutError: timed out\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 113, in <module>\n    if ended.exists():raise RuntimeError('server exited before ready: '+ended.read_text()+' '+(DATA/f'{phase}-server.log').read_text())\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: server exited before ready: {\"returncode\": 1} catdb-server: resource exhausted: database resource budget\n\n",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:38:28.646862473Z",
+        "FinishedAt": "2026-11-05T19:38:29.261688273Z"
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 5,
+          "cgroup_peak_mib": 139.80078125,
+          "sampled_rss_max_mib": 134.1328125,
+          "sampled_file_max_mib": 0.015625,
+          "oom_kills": 0,
+          "cpu_usec": 386746,
+          "throttled_usec": 0
+        }
+      },
+      "failure_kind": "engine_resource_budget",
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r3-n1000000-c1-m1024",
+      "rows": 1000000,
+      "cpus": 1,
+      "memory_mib": 1024,
+      "rep": 3,
+      "sample": 1,
+      "status": "failed",
+      "verification": [],
+      "measurements": [],
+      "error": "Traceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 105, in <module>\n    with connect() as c:require(c.request(op='ping'))\n         ^^^^^^^^^\n  File \"/bench-src/resource-envelope/client.py\", line 8, in connect\n    def connect(): return Client('database',7400,TOKEN,timeout=30)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/bench/catdb_client.py\", line 12, in __init__\n    self.socket = socket.create_connection((host, port), timeout)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nConnectionRefusedError: [Errno 111] Connection refused\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 113, in <module>\n    if ended.exists():raise RuntimeError('server exited before ready: '+ended.read_text()+' '+(DATA/f'{phase}-server.log').read_text())\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: server exited before ready: {\"returncode\": 1} catdb-server: resource exhausted: database resource budget\n\n",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:39:04.653110256Z",
+        "FinishedAt": "2026-11-05T19:39:05.285689794Z"
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 5,
+          "cgroup_peak_mib": 140.015625,
+          "sampled_rss_max_mib": 133.9453125,
+          "sampled_file_max_mib": 0.015625,
+          "oom_kills": 0,
+          "cpu_usec": 396438,
+          "throttled_usec": 0
+        }
+      },
+      "failure_kind": "engine_resource_budget",
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r3-n1000000-c2-m1024",
+      "rows": 1000000,
+      "cpus": 2,
+      "memory_mib": 1024,
+      "rep": 3,
+      "sample": 1,
+      "status": "failed",
+      "verification": [],
+      "measurements": [],
+      "error": "Traceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 105, in <module>\n    with connect() as c:require(c.request(op='ping'))\n         ^^^^^^^^^\n  File \"/bench-src/resource-envelope/client.py\", line 8, in connect\n    def connect(): return Client('database',7400,TOKEN,timeout=30)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/bench/catdb_client.py\", line 12, in __init__\n    self.socket = socket.create_connection((host, port), timeout)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nConnectionRefusedError: [Errno 111] Connection refused\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 113, in <module>\n    if ended.exists():raise RuntimeError('server exited before ready: '+ended.read_text()+' '+(DATA/f'{phase}-server.log').read_text())\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: server exited before ready: {\"returncode\": 1} catdb-server: resource exhausted: database resource budget\n\n",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:39:10.184664604Z",
+        "FinishedAt": "2026-11-05T19:39:10.829692726Z"
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 5,
+          "cgroup_peak_mib": 139.7578125,
+          "sampled_rss_max_mib": 105.43359375,
+          "sampled_file_max_mib": 0.015625,
+          "oom_kills": 0,
+          "cpu_usec": 370371,
+          "throttled_usec": 0
+        }
+      },
+      "failure_kind": "engine_resource_budget",
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r3-n100000-c1-m1024",
+      "rows": 100000,
+      "cpus": 1,
+      "memory_mib": 1024,
+      "rep": 3,
+      "sample": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999702721,
+          "start_ns": 97745513144401,
+          "finish_ns": 97753512847122,
+          "completed": 8000,
+          "ops_s": 1000.0371612559076,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.366787,
+          "max_ms": 0.975252,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.366787
+            }
+          },
+          "host_begin_ns": 1131578875000000,
+          "host_end_ns": 1131587265000000,
+          "sampled_cpu_cores": 0.07877764837616674,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.110131,
+          "client_queue_p99_ms": 0.068215,
+          "request_p99_ms": 0.212108
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 8.000802611,
+          "start_ns": 97754839603431,
+          "finish_ns": 97762840406041,
+          "completed": 8000,
+          "ops_s": 999.8996836893718,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.663195,
+          "max_ms": 16.429342,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.349931
+            },
+            "write": {
+              "completed": 1600,
+              "p99_ms": 6.695843
+            }
+          },
+          "host_begin_ns": 1131588187000000,
+          "host_end_ns": 1131596765000000,
+          "sampled_cpu_cores": 0.0953848373281147,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.122089,
+          "client_queue_p99_ms": 0.080248,
+          "request_p99_ms": 4.549809
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 4.931665,
+          "launch_to_ready_ms": 827.9999999795109
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.43629099766258,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:39:15.747143273Z",
+        "FinishedAt": "2026-11-05T19:39:36.860463981Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 4.356298,
+          "launch_to_ready_ms": 797.0000000204891
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.5056570089655,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 208,
+          "cgroup_peak_mib": 72.83984375,
+          "sampled_rss_max_mib": 55.55859375,
+          "sampled_file_max_mib": 0.7890625,
+          "oom_kills": 0,
+          "cpu_usec": 2394967,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 21,
+          "cgroup_peak_mib": 60.39453125,
+          "sampled_rss_max_mib": 54.6875,
+          "sampled_file_max_mib": 0.0390625,
+          "oom_kills": 0,
+          "cpu_usec": 411119,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r3-n1000000-c1-m2048",
+      "rows": 1000000,
+      "cpus": 1,
+      "memory_mib": 2048,
+      "rep": 3,
+      "sample": 1,
+      "status": "failed",
+      "verification": [],
+      "measurements": [],
+      "error": "Traceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 105, in <module>\n    with connect() as c:require(c.request(op='ping'))\n         ^^^^^^^^^\n  File \"/bench-src/resource-envelope/client.py\", line 8, in connect\n    def connect(): return Client('database',7400,TOKEN,timeout=30)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/bench/catdb_client.py\", line 12, in __init__\n    self.socket = socket.create_connection((host, port), timeout)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nConnectionRefusedError: [Errno 111] Connection refused\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 113, in <module>\n    if ended.exists():raise RuntimeError('server exited before ready: '+ended.read_text()+' '+(DATA/f'{phase}-server.log').read_text())\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: server exited before ready: {\"returncode\": 1} catdb-server: resource exhausted: database resource budget\n\n",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:39:44.854515545Z",
+        "FinishedAt": "2026-11-05T19:39:45.491095869Z"
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 5,
+          "cgroup_peak_mib": 139.81640625,
+          "sampled_rss_max_mib": 133.87890625,
+          "sampled_file_max_mib": 0.015625,
+          "oom_kills": 0,
+          "cpu_usec": 388392,
+          "throttled_usec": 1153
+        }
+      },
+      "failure_kind": "engine_resource_budget",
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r3-n100000-c1-m512",
+      "rows": 100000,
+      "cpus": 1,
+      "memory_mib": 512,
+      "rep": 3,
+      "sample": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999681567,
+          "start_ns": 97780117333260,
+          "finish_ns": 97788117014827,
+          "completed": 8000,
+          "ops_s": 1000.0398057094314,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.344128,
+          "max_ms": 1.297242,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.344128
+            }
+          },
+          "host_begin_ns": 1131613531000000,
+          "host_end_ns": 1131621906000000,
+          "sampled_cpu_cores": 0.07811962490266125,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.11226,
+          "client_queue_p99_ms": 0.062077,
+          "request_p99_ms": 0.196934
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999654318,
+          "start_ns": 97789414131413,
+          "finish_ns": 97797413785731,
+          "completed": 8000,
+          "ops_s": 1000.0432121172064,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.606844,
+          "max_ms": 8.319421,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 5.94274
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.336058
+            }
+          },
+          "host_begin_ns": 1131622796000000,
+          "host_end_ns": 1131631375000000,
+          "sampled_cpu_cores": 0.09433406194116407,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.109341,
+          "client_queue_p99_ms": 0.076266,
+          "request_p99_ms": 4.500667
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 8.068154,
+          "launch_to_ready_ms": 844.0000000409782
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 100.79509200295433,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:39:50.374394348Z",
+        "FinishedAt": "2026-11-05T19:40:11.399265368Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 6.785619,
+          "launch_to_ready_ms": 828.999999910593
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.72337999974843,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 207,
+          "cgroup_peak_mib": 72.04296875,
+          "sampled_rss_max_mib": 55.48046875,
+          "sampled_file_max_mib": 0.7890625,
+          "oom_kills": 0,
+          "cpu_usec": 2346983,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 21,
+          "cgroup_peak_mib": 61.05078125,
+          "sampled_rss_max_mib": 54.6171875,
+          "sampled_file_max_mib": 0.04296875,
+          "oom_kills": 0,
+          "cpu_usec": 427230,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r3-n1000000-c1-m512",
+      "rows": 1000000,
+      "cpus": 1,
+      "memory_mib": 512,
+      "rep": 3,
+      "sample": 1,
+      "status": "failed",
+      "verification": [],
+      "measurements": [],
+      "error": "Traceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 105, in <module>\n    with connect() as c:require(c.request(op='ping'))\n         ^^^^^^^^^\n  File \"/bench-src/resource-envelope/client.py\", line 8, in connect\n    def connect(): return Client('database',7400,TOKEN,timeout=30)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/bench/catdb_client.py\", line 12, in __init__\n    self.socket = socket.create_connection((host, port), timeout)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nConnectionRefusedError: [Errno 111] Connection refused\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 113, in <module>\n    if ended.exists():raise RuntimeError('server exited before ready: '+ended.read_text()+' '+(DATA/f'{phase}-server.log').read_text())\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: server exited before ready: {\"returncode\": 1} catdb-server: resource exhausted: database resource budget\n\n",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:40:19.403363893Z",
+        "FinishedAt": "2026-11-05T19:40:20.034551357Z"
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 5,
+          "cgroup_peak_mib": 140.26171875,
+          "sampled_rss_max_mib": 133.9765625,
+          "sampled_file_max_mib": 0.015625,
+          "oom_kills": 0,
+          "cpu_usec": 381631,
+          "throttled_usec": 0
+        }
+      },
+      "failure_kind": "engine_resource_budget",
+      "cohort": "resource-full-20261106",
+      "cohort_kind": "main"
+    },
+    {
+      "name": "r1-n100000-c2-m512",
+      "rows": 100000,
+      "cpus": 2,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "54a74898de210e0b3ac8a50c3270a1f21768bd5fbab78627d5af456e3ea0f89d",
+          "updated": 1597,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "54a74898de210e0b3ac8a50c3270a1f21768bd5fbab78627d5af456e3ea0f89d",
+          "updated": 1597,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 5000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 1.600455345,
+          "start_ns": 97902844813498,
+          "finish_ns": 97904445268843,
+          "completed": 8000,
+          "ops_s": 4998.577451718904,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.399688,
+          "max_ms": 2.047544,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.399688
+            }
+          },
+          "host_begin_ns": 1131736406000000,
+          "host_end_ns": 1131738406000000,
+          "sampled_cpu_cores": 0.33127414152304796,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.133068,
+          "client_queue_p99_ms": 0.077039,
+          "request_p99_ms": 0.261586
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 5000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 1.661045582,
+          "start_ns": 97905727948103,
+          "finish_ns": 97907388993685,
+          "completed": 7997,
+          "ops_s": 4814.437416203308,
+          "old_snapshot_checked_keys": 1597,
+          "p99_ms": 65.628169,
+          "max_ms": 70.914522,
+          "queue_rejected": 3,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1597,
+              "p99_ms": 69.444138
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 1.002819
+            }
+          },
+          "host_begin_ns": 1131739296000000,
+          "host_end_ns": 1131741515000000,
+          "sampled_cpu_cores": 0.35911892231036663,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.410735,
+          "client_queue_p99_ms": 61.042352,
+          "request_p99_ms": 5.109232
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 7.458621,
+          "launch_to_ready_ms": 844.0000000409782
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 202.02302798861638,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:41:53.252258677Z",
+        "FinishedAt": "2026-11-05T19:42:01.651546018Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 7.256027,
+          "launch_to_ready_ms": 844.0000000409782
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.626058013062,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 82,
+          "cgroup_peak_mib": 72.62109375,
+          "sampled_rss_max_mib": 55.67578125,
+          "sampled_file_max_mib": 0.609375,
+          "oom_kills": 0,
+          "cpu_usec": 2122710,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 21,
+          "cgroup_peak_mib": 61.3125,
+          "sampled_rss_max_mib": 54.5234375,
+          "sampled_file_max_mib": 0.04296875,
+          "oom_kills": 0,
+          "cpu_usec": 428000,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-load-r1-cpu2",
+      "cohort_kind": "load"
+    },
+    {
+      "name": "r1-n100000-c1-m512",
+      "rows": 100000,
+      "cpus": 1,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 0,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "06a30856a98af3facdac1ffc4ca4501cfdf1c8820f4e41ecbaffcbbe028ecf2f",
+          "updated": 1504,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "06a30856a98af3facdac1ffc4ca4501cfdf1c8820f4e41ecbaffcbbe028ecf2f",
+          "updated": 1504,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 5000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 1.600486574,
+          "start_ns": 97861000251906,
+          "finish_ns": 97862600738480,
+          "completed": 8000,
+          "ops_s": 4998.479918520078,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.390829,
+          "max_ms": 1.862986,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.390829
+            }
+          },
+          "host_begin_ns": 1131694531000000,
+          "host_end_ns": 1131696531000000,
+          "producer_lag_p99_ms": 0.130541,
+          "client_queue_p99_ms": 0.078146,
+          "request_p99_ms": 0.264428
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 5000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 1.671946332,
+          "start_ns": 97863900877921,
+          "finish_ns": 97865572824253,
+          "completed": 7904,
+          "ops_s": 4727.4244685504655,
+          "old_snapshot_checked_keys": 1504,
+          "p99_ms": 78.931878,
+          "max_ms": 84.909493,
+          "queue_rejected": 96,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1504,
+              "p99_ms": 81.453007
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 1.162929
+            }
+          },
+          "host_begin_ns": 1131697421000000,
+          "host_end_ns": 1131699687000000,
+          "producer_lag_p99_ms": 0.477813,
+          "client_queue_p99_ms": 74.192617,
+          "request_p99_ms": 5.650808
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 5.376907,
+          "launch_to_ready_ms": 844.0000000409782
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 500.75456099875737,
+          "poll_resolution_ms": 500
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:41:11.417590624Z",
+        "FinishedAt": "2026-11-05T19:41:20.167389006Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 5.687647,
+          "launch_to_ready_ms": 796.000000089407
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 500.82959300198127,
+          "poll_resolution_ms": 500
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 2,
+          "cgroup_peak_mib": 72.96875,
+          "sampled_rss_max_mib": 0.328125,
+          "sampled_file_max_mib": 0.46875,
+          "oom_kills": 0,
+          "cpu_usec": 2126377,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 2,
+          "cgroup_peak_mib": 61.421875,
+          "sampled_rss_max_mib": 0.32421875,
+          "sampled_file_max_mib": 0.015625,
+          "oom_kills": 0,
+          "cpu_usec": 424474,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-load-r1-sample0",
+      "cohort_kind": "load"
+    },
+    {
+      "name": "r1-n100000-c1-m512",
+      "rows": 100000,
+      "cpus": 1,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "dcfa0c75f8851f82c78b8f02653d440279cdf3e252625ea3eff1062490dc69f6",
+          "updated": 1587,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "dcfa0c75f8851f82c78b8f02653d440279cdf3e252625ea3eff1062490dc69f6",
+          "updated": 1587,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 5000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 1.600505802,
+          "start_ns": 97882342683236,
+          "finish_ns": 97883943189038,
+          "completed": 8000,
+          "ops_s": 4998.419868271118,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.714706,
+          "max_ms": 2.20541,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.714706
+            }
+          },
+          "host_begin_ns": 1131715875000000,
+          "host_end_ns": 1131717875000000,
+          "sampled_cpu_cores": 0.3275692538575011,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.152777,
+          "client_queue_p99_ms": 0.094387,
+          "request_p99_ms": 0.446381
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 5000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 1.667836686,
+          "start_ns": 97885255623237,
+          "finish_ns": 97886923459923,
+          "completed": 7987,
+          "ops_s": 4788.838180047084,
+          "old_snapshot_checked_keys": 1587,
+          "p99_ms": 69.927571,
+          "max_ms": 74.796275,
+          "queue_rejected": 13,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1587,
+              "p99_ms": 73.025849
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.980883
+            }
+          },
+          "host_begin_ns": 1131718796000000,
+          "host_end_ns": 1131721031000000,
+          "sampled_cpu_cores": 0.3657558238076953,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.400746,
+          "client_queue_p99_ms": 65.501987,
+          "request_p99_ms": 5.417991
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 7.512487,
+          "launch_to_ready_ms": 844.0000000409782
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.420817989856,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:41:32.800432912Z",
+        "FinishedAt": "2026-11-05T19:41:41.173495368Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 6.080704,
+          "launch_to_ready_ms": 812.0000001508743
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.50920499872882,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 82,
+          "cgroup_peak_mib": 73.1484375,
+          "sampled_rss_max_mib": 55.41796875,
+          "sampled_file_max_mib": 0.609375,
+          "oom_kills": 0,
+          "cpu_usec": 2140186,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 21,
+          "cgroup_peak_mib": 60.91796875,
+          "sampled_rss_max_mib": 54.48046875,
+          "sampled_file_max_mib": 0.04296875,
+          "oom_kills": 0,
+          "cpu_usec": 428054,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-load-r1-sample1",
+      "cohort_kind": "load"
+    },
+    {
+      "name": "r1-n100000-c2-m512",
+      "rows": 100000,
+      "cpus": 2,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 5000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 1.600409062,
+          "start_ns": 97964710216763,
+          "finish_ns": 97966310625825,
+          "completed": 8000,
+          "ops_s": 4998.722007986231,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.482609,
+          "max_ms": 2.232009,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.482609
+            }
+          },
+          "host_begin_ns": 1131798359000000,
+          "host_end_ns": 1131800375000000,
+          "sampled_cpu_cores": 0.34395859262190953,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.148584,
+          "client_queue_p99_ms": 0.098198,
+          "request_p99_ms": 0.319733
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 5000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 1.64930515,
+          "start_ns": 97967607220689,
+          "finish_ns": 97969256525839,
+          "completed": 8000,
+          "ops_s": 4850.527508508659,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 51.787133,
+          "max_ms": 54.738756,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 53.574775
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 1.071174
+            }
+          },
+          "host_begin_ns": 1131801250000000,
+          "host_end_ns": 1131803484000000,
+          "sampled_cpu_cores": 0.36973893179853273,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.416348,
+          "client_queue_p99_ms": 47.629974,
+          "request_p99_ms": 5.03796
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 5.346544,
+          "launch_to_ready_ms": 859.9999998696148
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.68392101186328,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:42:55.17787053Z",
+        "FinishedAt": "2026-11-05T19:43:03.577505382Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 4.967103,
+          "launch_to_ready_ms": 827.9999999795109
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.50435600953642,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 82,
+          "cgroup_peak_mib": 73.609375,
+          "sampled_rss_max_mib": 55.62890625,
+          "sampled_file_max_mib": 0.61328125,
+          "oom_kills": 0,
+          "cpu_usec": 2138429,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 21,
+          "cgroup_peak_mib": 61.4765625,
+          "sampled_rss_max_mib": 54.69140625,
+          "sampled_file_max_mib": 0.04296875,
+          "oom_kills": 0,
+          "cpu_usec": 429832,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-load-r2-cpu2",
+      "cohort_kind": "load"
+    },
+    {
+      "name": "r1-n100000-c1-m512",
+      "rows": 100000,
+      "cpus": 1,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 0,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 5000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 1.600387547,
+          "start_ns": 97944125200552,
+          "finish_ns": 97945725588099,
+          "completed": 8000,
+          "ops_s": 4998.789208899037,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 3.244208,
+          "max_ms": 4.468344,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 3.244208
+            }
+          },
+          "host_begin_ns": 1131777734000000,
+          "host_end_ns": 1131779750000000,
+          "producer_lag_p99_ms": 0.384138,
+          "client_queue_p99_ms": 2.171371,
+          "request_p99_ms": 1.033013
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 5000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 1.636714464,
+          "start_ns": 97946999202820,
+          "finish_ns": 97948635917284,
+          "completed": 8000,
+          "ops_s": 4887.840961855152,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 39.79653,
+          "max_ms": 42.116271,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.951139
+            },
+            "write": {
+              "completed": 1600,
+              "p99_ms": 41.204806
+            }
+          },
+          "host_begin_ns": 1131780640000000,
+          "host_end_ns": 1131782843000000,
+          "producer_lag_p99_ms": 0.414147,
+          "client_queue_p99_ms": 35.646528,
+          "request_p99_ms": 4.960543
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 8.012648,
+          "launch_to_ready_ms": 875.0
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 500.85377400682773,
+          "poll_resolution_ms": 500
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:42:34.548117536Z",
+        "FinishedAt": "2026-11-05T19:42:43.26957902Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 6.812169,
+          "launch_to_ready_ms": 827.9999999795109
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 500.8121930004563,
+          "poll_resolution_ms": 500
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 2,
+          "cgroup_peak_mib": 73.00390625,
+          "sampled_rss_max_mib": 0.50390625,
+          "sampled_file_max_mib": 0.5,
+          "oom_kills": 0,
+          "cpu_usec": 2072641,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 2,
+          "cgroup_peak_mib": 60.96875,
+          "sampled_rss_max_mib": 0.34765625,
+          "sampled_file_max_mib": 0.015625,
+          "oom_kills": 0,
+          "cpu_usec": 416437,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-load-r2-sample0",
+      "cohort_kind": "load"
+    },
+    {
+      "name": "r1-n100000-c1-m512",
+      "rows": 100000,
+      "cpus": 1,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "c0c4d3e8c30f48cf111f2c577db0b59d0ab67e45beb8d626e14724d7d19ad8e0",
+          "updated": 1520,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "c0c4d3e8c30f48cf111f2c577db0b59d0ab67e45beb8d626e14724d7d19ad8e0",
+          "updated": 1520,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 5000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 1.60213117,
+          "start_ns": 97923273067487,
+          "finish_ns": 97924875198657,
+          "completed": 8000,
+          "ops_s": 4993.348952820136,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 3.48843,
+          "max_ms": 5.058022,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 3.48843
+            }
+          },
+          "host_begin_ns": 1131756890000000,
+          "host_end_ns": 1131758906000000,
+          "sampled_cpu_cores": 0.3464966925549068,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.439957,
+          "client_queue_p99_ms": 2.462872,
+          "request_p99_ms": 1.226773
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 5000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 1.664737357,
+          "start_ns": 97926345169633,
+          "finish_ns": 97928009906990,
+          "completed": 7920,
+          "ops_s": 4757.5072228045165,
+          "old_snapshot_checked_keys": 1520,
+          "p99_ms": 74.823678,
+          "max_ms": 77.569592,
+          "queue_rejected": 80,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1520,
+              "p99_ms": 76.510442
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 1.394562
+            }
+          },
+          "host_begin_ns": 1131759953000000,
+          "host_end_ns": 1131762218000000,
+          "sampled_cpu_cores": 0.39129401339155845,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.493323,
+          "client_queue_p99_ms": 70.240653,
+          "request_p99_ms": 5.512884
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 7.230458,
+          "launch_to_ready_ms": 859.0000001713634
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.42181499977596,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:42:13.701173045Z",
+        "FinishedAt": "2026-11-05T19:42:22.448715569Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 4.622699,
+          "launch_to_ready_ms": 843.0000001098961
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 202.62549599283375,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 85,
+          "cgroup_peak_mib": 72.390625,
+          "sampled_rss_max_mib": 55.6171875,
+          "sampled_file_max_mib": 0.58984375,
+          "oom_kills": 0,
+          "cpu_usec": 2263685,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 22,
+          "cgroup_peak_mib": 61.25390625,
+          "sampled_rss_max_mib": 54.58203125,
+          "sampled_file_max_mib": 0.04296875,
+          "oom_kills": 0,
+          "cpu_usec": 438776,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-load-r2-sample1",
+      "cohort_kind": "load"
+    },
+    {
+      "name": "r1-n100000-c2-m512",
+      "rows": 100000,
+      "cpus": 2,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "300a407e0bf6c506f3e938b75756875e5696a63cb1e185d11b772e48b8002903",
+          "updated": 1595,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "300a407e0bf6c506f3e938b75756875e5696a63cb1e185d11b772e48b8002903",
+          "updated": 1595,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 5000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 1.600459673,
+          "start_ns": 98025918166925,
+          "finish_ns": 98027518626598,
+          "completed": 8000,
+          "ops_s": 4998.56393445035,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.670013,
+          "max_ms": 2.273126,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.670013
+            }
+          },
+          "host_begin_ns": 1131859671000000,
+          "host_end_ns": 1131861656000000,
+          "sampled_cpu_cores": 0.3497978401334393,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.160245,
+          "client_queue_p99_ms": 0.102018,
+          "request_p99_ms": 0.39142
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 5000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 1.662740851,
+          "start_ns": 98028836205817,
+          "finish_ns": 98030498946668,
+          "completed": 7995,
+          "ops_s": 4808.325960832486,
+          "old_snapshot_checked_keys": 1595,
+          "p99_ms": 66.902724,
+          "max_ms": 72.814953,
+          "queue_rejected": 5,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.986814
+            },
+            "write": {
+              "completed": 1595,
+              "p99_ms": 71.192254
+            }
+          },
+          "host_begin_ns": 1131862578000000,
+          "host_end_ns": 1131864812000000,
+          "sampled_cpu_cores": 0.37233766502709725,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.425525,
+          "client_queue_p99_ms": 62.586744,
+          "request_p99_ms": 5.132982
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 5.98278,
+          "launch_to_ready_ms": 844.0000000409782
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.8927250028355,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:43:56.541012976Z",
+        "FinishedAt": "2026-11-05T19:44:04.928086928Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 7.930504,
+          "launch_to_ready_ms": 812.0000001508743
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.60893000138458,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 82,
+          "cgroup_peak_mib": 73.26953125,
+          "sampled_rss_max_mib": 55.66796875,
+          "sampled_file_max_mib": 0.609375,
+          "oom_kills": 0,
+          "cpu_usec": 2165269,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 21,
+          "cgroup_peak_mib": 61.140625,
+          "sampled_rss_max_mib": 54.62109375,
+          "sampled_file_max_mib": 0.04296875,
+          "oom_kills": 0,
+          "cpu_usec": 417245,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-load-r3-cpu2",
+      "cohort_kind": "load"
+    },
+    {
+      "name": "r1-n100000-c1-m512",
+      "rows": 100000,
+      "cpus": 1,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 0,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 5000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 1.600420998,
+          "start_ns": 97984894734184,
+          "finish_ns": 97986495155182,
+          "completed": 8000,
+          "ops_s": 4998.684727329478,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 5.306174,
+          "max_ms": 6.563779,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 5.306174
+            }
+          },
+          "host_begin_ns": 1131818609000000,
+          "host_end_ns": 1131820625000000,
+          "producer_lag_p99_ms": 0.308298,
+          "client_queue_p99_ms": 4.28455,
+          "request_p99_ms": 1.008931
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 5000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 1.633884862,
+          "start_ns": 97987850525801,
+          "finish_ns": 97989484410663,
+          "completed": 8000,
+          "ops_s": 4896.305845081023,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 35.918911,
+          "max_ms": 39.198433,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 37.857282
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.971709
+            }
+          },
+          "host_begin_ns": 1131821578000000,
+          "host_end_ns": 1131823796000000,
+          "producer_lag_p99_ms": 0.3955,
+          "client_queue_p99_ms": 31.880893,
+          "request_p99_ms": 4.975589
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 8.621949,
+          "launch_to_ready_ms": 937.0000001508743
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 500.9839069971349,
+          "poll_resolution_ms": 500
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:43:15.455692637Z",
+        "FinishedAt": "2026-11-05T19:43:24.225229416Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 7.401866,
+          "launch_to_ready_ms": 812.9999998491257
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 500.87966200953815,
+          "poll_resolution_ms": 500
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 2,
+          "cgroup_peak_mib": 71.6796875,
+          "sampled_rss_max_mib": 0.6328125,
+          "sampled_file_max_mib": 0.5,
+          "oom_kills": 0,
+          "cpu_usec": 2086297,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 2,
+          "cgroup_peak_mib": 61.28125,
+          "sampled_rss_max_mib": 0.33203125,
+          "sampled_file_max_mib": 0.015625,
+          "oom_kills": 0,
+          "cpu_usec": 416705,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-load-r3-sample0",
+      "cohort_kind": "load"
+    },
+    {
+      "name": "r1-n100000-c1-m512",
+      "rows": 100000,
+      "cpus": 1,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 5000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 1.600440851,
+          "start_ns": 98005611954708,
+          "finish_ns": 98007212395559,
+          "completed": 8000,
+          "ops_s": 4998.622720109511,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 1.058116,
+          "max_ms": 2.518881,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 1.058116
+            }
+          },
+          "host_begin_ns": 1131839328000000,
+          "host_end_ns": 1131841343000000,
+          "sampled_cpu_cores": 0.345133014856893,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.193392,
+          "client_queue_p99_ms": 0.165176,
+          "request_p99_ms": 0.657739
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 5000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 1.65978368,
+          "start_ns": 98008540814634,
+          "finish_ns": 98010200598314,
+          "completed": 8000,
+          "ops_s": 4819.905205960333,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 63.892749,
+          "max_ms": 66.682656,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 6400,
+              "p99_ms": 1.066178
+            },
+            "write": {
+              "completed": 1600,
+              "p99_ms": 65.408592
+            }
+          },
+          "host_begin_ns": 1131842265000000,
+          "host_end_ns": 1131844500000000,
+          "sampled_cpu_cores": 0.37484447903408735,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.441832,
+          "client_queue_p99_ms": 59.726128,
+          "request_p99_ms": 5.113672
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 7.39408,
+          "launch_to_ready_ms": 858.9999999385327
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.7542320099892,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:43:36.164836735Z",
+        "FinishedAt": "2026-11-05T19:43:44.563271959Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 7.285365,
+          "launch_to_ready_ms": 797.0000000204891
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.53373799985275,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 82,
+          "cgroup_peak_mib": 72.8203125,
+          "sampled_rss_max_mib": 55.52734375,
+          "sampled_file_max_mib": 0.61328125,
+          "oom_kills": 0,
+          "cpu_usec": 2153774,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 21,
+          "cgroup_peak_mib": 61.36328125,
+          "sampled_rss_max_mib": 54.72265625,
+          "sampled_file_max_mib": 0.04296875,
+          "oom_kills": 0,
+          "cpu_usec": 426913,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "resource-load-r3-sample1",
+      "cohort_kind": "load"
+    },
+    {
+      "name": "r1-n100000-c1-m32",
+      "rows": 100000,
+      "cpus": 1,
+      "memory_mib": 32,
+      "rep": 1,
+      "sample": 1,
+      "status": "failed",
+      "verification": [
+        {
+          "phase": "rescue",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        }
+      ],
+      "measurements": [],
+      "error": "Traceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 105, in <module>\n    with connect() as c:require(c.request(op='ping'))\n         ^^^^^^^^^\n  File \"/bench-src/resource-envelope/client.py\", line 8, in connect\n    def connect(): return Client('database',7400,TOKEN,timeout=30)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/bench/catdb_client.py\", line 12, in __init__\n    self.socket = socket.create_connection((host, port), timeout)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 841, in create_connection\n    for res in getaddrinfo(host, port, 0, SOCK_STREAM):\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 978, in getaddrinfo\n    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsocket.gaierror: [Errno -3] Temporary failure in name resolution\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 113, in <module>\n    if ended.exists():raise RuntimeError('server exited before ready: '+ended.read_text()+' '+(DATA/f'{phase}-server.log').read_text())\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: server exited before ready: {\"returncode\": -9} \n",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": true,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T19:44:16.837366025Z",
+        "FinishedAt": "2026-11-05T19:44:17.153516669Z"
+      },
+      "rescue": {
+        "timing": {
+          "ready_wait_ms": 6.960583,
+          "launch_to_ready_ms": 843.0000001098961
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.4132799959043,
+          "poll_resolution_ms": 100
+        }
+      },
+      "rescue_verified": true,
+      "resource_summary": {
+        "boot": {
+          "samples": 2,
+          "cgroup_peak_mib": 32.0,
+          "sampled_rss_max_mib": 0.37109375,
+          "sampled_file_max_mib": 0.0078125,
+          "oom_kills": 1,
+          "cpu_usec": 111644,
+          "throttled_usec": 0
+        },
+        "rescue": {
+          "samples": 22,
+          "cgroup_peak_mib": 60.6171875,
+          "sampled_rss_max_mib": 54.609375,
+          "sampled_file_max_mib": 0.04296875,
+          "oom_kills": 0,
+          "cpu_usec": 422140,
+          "throttled_usec": 0
+        }
+      },
+      "failure_kind": "oom",
+      "cohort": "resource-oom",
+      "cohort_kind": "oom"
+    }
+  ]
+}

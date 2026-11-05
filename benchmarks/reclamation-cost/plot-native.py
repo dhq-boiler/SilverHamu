@@ -23,3 +23,7 @@ for ax,metric,title in zip(axes,['readers_p99_ms','readers_max_ms','total_gc_ms'
  ax.set_xticks(range(4),['Previous','Prototype','Previous\nlight','Prototype\nlight'],fontsize=9);ax.set_ylabel('ms; lower is better');ax.set_title(title);ax.set_ylim(0,ax.get_ylim()[1]*1.18)
 fig.suptitle('Faster collection did not preserve the read tail — prototype NOT adopted\n100,000 overwritten records | two readers | three paired repeats',fontsize=14)
 fig.savefig(root/'native.svg');fig.savefig(root/'native.png',dpi=140);plt.close(fig)
+
+for name in ("diagnosis.svg", "native.svg"):
+ p=root/name
+ p.write_text("\n".join(line.rstrip() for line in p.read_text(encoding="utf-8").splitlines())+"\n",encoding="utf-8")

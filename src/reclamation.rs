@@ -173,7 +173,7 @@ fn run(state: Arc<Mutex<State>>, stop: Arc<(Mutex<bool>, Condvar)>, counters: Ar
                     counters.io_deferrals.fetch_add(1, Ordering::Relaxed);
                     None
                 } else {
-                    let retired = guard.collect_with_keys(32);
+                    let retired = guard.collect_with_keys(16);
                     let pending = guard.gc_pending();
                     let charge = retired.charge;
                     counters
@@ -220,7 +220,7 @@ fn run(state: Arc<Mutex<State>>, stop: Arc<(Mutex<bool>, Condvar)>, counters: Ar
         // Contending for the lock must not put maintenance ahead of queued requests.
         let pause = match pending {
             Some(false) => Duration::from_millis(10),
-            None if contended => Duration::from_micros(100),
+            None if contended => Duration::from_micros(50),
             None => Duration::from_millis(1),
             Some(true) => Duration::from_micros(100),
         };

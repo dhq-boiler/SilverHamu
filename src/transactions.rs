@@ -3009,41 +3009,43 @@ fn legacy_wal_file(file: File) -> WalFile {
 mod read_copy_tests {
     use super::*;
     #[test]
-    fn bv_background_key_budget_handles_below_at_and_above_32_keys() {
-        for count in [31u32, 32, 33] {
-            let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-                .join("artifacts")
-                .join(format!("gc-small-{}-{count}", std::process::id()));
-            let _ = std::fs::remove_file(&path);
-            let db = Database::create(&path, [32; 16]).unwrap();
-            let mut w = db.begin().unwrap();
-            for i in 0..count {
-                w.put(&i.to_be_bytes(), b"a").unwrap();
-            }
-            w.commit().unwrap();
-            let old = db.begin_read().unwrap();
-            let mut w = db.begin().unwrap();
-            for i in 0..count {
-                w.put(&i.to_be_bytes(), b"b").unwrap();
-            }
-            w.commit().unwrap();
-            let mut state = db.state().unwrap();
-            // Dropping the handle would run cooperative collection before the bounded step.
-            state.active.remove(&old.snapshot);
-            let retained = state.collect_with_keys(32);
-            assert_eq!(retained.values.len(), count.min(32) as usize);
-            assert_eq!(
-                state.rows.values().map(VecDeque::len).sum::<usize>(),
-                (count * 2 - count.min(32)) as usize
-            );
-            drop(state);
-            drop(retained);
-            drop(old);
-            while db.collect_garbage().unwrap() {}
-            assert_eq!(db.stats().unwrap().retained_versions, count as usize);
-            let mut r = db.begin_read().unwrap();
-            for i in 0..count {
-                assert_eq!(r.get(&i.to_be_bytes()).unwrap(), Some(b"b".to_vec()));
+    fn bv_background_key_budgets_handle_below_at_and_above_boundaries() {
+        for budget in [16u32, 32] {
+            for count in [budget - 1, budget, budget + 1] {
+                let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                    .join("artifacts")
+                    .join(format!("gc-small-{}-{count}", std::process::id()));
+                let _ = std::fs::remove_file(&path);
+                let db = Database::create(&path, [32; 16]).unwrap();
+                let mut w = db.begin().unwrap();
+                for i in 0..count {
+                    w.put(&i.to_be_bytes(), b"a").unwrap();
+                }
+                w.commit().unwrap();
+                let old = db.begin_read().unwrap();
+                let mut w = db.begin().unwrap();
+                for i in 0..count {
+                    w.put(&i.to_be_bytes(), b"b").unwrap();
+                }
+                w.commit().unwrap();
+                let mut state = db.state().unwrap();
+                // Dropping the handle would run cooperative collection before the bounded step.
+                state.active.remove(&old.snapshot);
+                let retained = state.collect_with_keys(budget as usize);
+                assert_eq!(retained.values.len(), count.min(budget) as usize);
+                assert_eq!(
+                    state.rows.values().map(VecDeque::len).sum::<usize>(),
+                    (count * 2 - count.min(budget)) as usize
+                );
+                drop(state);
+                drop(retained);
+                drop(old);
+                while db.collect_garbage().unwrap() {}
+                assert_eq!(db.stats().unwrap().retained_versions, count as usize);
+                let mut r = db.begin_read().unwrap();
+                for i in 0..count {
+                    assert_eq!(r.get(&i.to_be_bytes()).unwrap(), Some(b"b".to_vec()));
+                }
             }
         }
     }

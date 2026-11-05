@@ -381,6 +381,11 @@ fn connection(
                 Error::Poisoned | Error::CommitUncertain(_) | Error::CheckpointUncertain(_)
             )
         });
+        #[cfg(feature = "backlog-batch")]
+        let fatal = fatal
+            || result
+                .as_ref()
+                .is_ok_and(|v| v.get("reopen_required").and_then(Value::as_bool) == Some(true));
         let response = match result {
             Ok(value) => value,
             Err(e) => error(match e {
@@ -501,9 +506,103 @@ fn dispatch_operation(
         #[cfg(all(feature = "fixed-log", feature = "lock-timing"))]
         "fixed_log_metrics" => Ok(json!({"ok":true,"metrics":db.fixed_log_metrics()?})),
         #[cfg(feature = "benchmark-metrics")]
-        "benchmark_counters" => Ok(json!({"ok":true,
-            "version":db.current_version()?.to_string(),
-            "sync_attempts":db.commit_sync_attempts()})),
+        "benchmark_counters" => {
+            #[allow(unused_mut)]
+            let mut response = json!({"ok":true,"version":db.current_version()?.to_string(),"sync_attempts":db.commit_sync_attempts()});
+            #[cfg(feature = "sync-stall")]
+            {
+                response["injected_stalls"] = json!(db.diagnostic_stall_count());
+                response["injected_stall_ns"] = json!(db.diagnostic_stall_timing());
+            }
+            Ok(response)
+        }
+        #[cfg(all(feature = "benchmark-metrics", feature = "sync-stall"))]
+        "benchmark_stall" => {
+            if tx.is_some() || std::env::var("CATDB_BENCH_STALL").as_deref() != Ok("1") {
+                return Err(Error::Invalid(
+                    "diagnostic stall disabled or transaction active",
+                ));
+            }
+            let field = |name: &str, max: u64| -> Result<u64, Error> {
+                v.get(name)
+                    .and_then(Value::as_u64)
+                    .filter(|n| *n <= max)
+                    .ok_or(Error::Invalid("stall limit"))
+            };
+            let start = field("start_ms", 30000)?;
+            let duration = field("duration_ms", 10000)?;
+            let delay = field("delay_ms", 1000)?;
+            let count = field("count", 10000)?;
+            db.set_diagnostic_sync_stall_limit(
+                Duration::from_millis(start),
+                Duration::from_millis(duration),
+                Duration::from_millis(delay),
+                Some(count),
+            );
+            Ok(json!({"ok":true}))
+        }
+        #[cfg(feature = "backlog-batch")]
+        "put_batch_commit" => {
+            if tx.is_some() {
+                return Err(Error::Invalid("batch requires no transaction"));
+            }
+            let entries = v
+                .get("entries")
+                .and_then(Value::as_array)
+                .filter(|x| !x.is_empty() && x.len() <= 8)
+                .ok_or(Error::Limit("batch count"))?;
+            let mut decoded = Vec::with_capacity(entries.len());
+            let mut size = 0_usize;
+            for entry in entries {
+                let key = bytes(entry, "key", 1024)?;
+                let value = bytes(entry, "value", MAX_VALUE)?;
+                size += key.len() + value.len();
+                if size > MAX_VALUE {
+                    return Err(Error::Limit("batch bytes"));
+                }
+                if decoded.iter().any(|(k, _)| k == &key) {
+                    return Err(Error::Invalid("duplicate batch key"));
+                }
+                decoded.push((key, value));
+            }
+            let mut transactions = Vec::with_capacity(decoded.len());
+            for (key, value) in decoded {
+                let mut transaction = db.begin()?;
+                transaction.put(&key, &value)?;
+                transactions.push(transaction);
+            }
+            let mut reopen = false;
+            let results: Vec<Value> = db
+                .commit_batch(transactions)?
+                .into_iter()
+                .map(|outcome| match outcome.result {
+                    Ok(version) => json!({"ok":true,"version":version.to_string()}),
+                    Err(e) => {
+                        let code = match e {
+                            Error::Conflict(_) => "conflict",
+                            Error::Invalid(_) => "invalid_request",
+                            Error::Limit(_) => "limit",
+                            Error::ResourceExhausted(_) => "resource_exhausted",
+                            Error::CommitUncertain(_) => {
+                                reopen = true;
+                                "commit_uncertain"
+                            }
+                            Error::CheckpointUncertain(_) => {
+                                reopen = true;
+                                "checkpoint_uncertain"
+                            }
+                            Error::Poisoned => {
+                                reopen = true;
+                                "reopen_required"
+                            }
+                            Error::Io(_) | Error::Locked(_) => "storage_error",
+                        };
+                        error(code)
+                    }
+                })
+                .collect();
+            Ok(json!({"ok":true,"results":results,"reopen_required":reopen}))
+        }
         "ping" => Ok(json!({"ok":true,"version":db.current_version()?.to_string()})),
         "get_latest" | "scan_latest" | "put_commit" | "delete_commit" => {
             if tx.is_some() {

@@ -1,0 +1,278 @@
+{
+  "utc": "2026-11-05T11:32:58.219520+00:00",
+  "rows": 100000,
+  "value_bytes": 256,
+  "ops": 8000,
+  "reps": 3,
+  "cases": [
+    "1:250",
+    "4:800"
+  ],
+  "scenarios": [
+    "normal"
+  ],
+  "clients": [
+    1,
+    4
+  ],
+  "workloads": [
+    "update"
+  ],
+  "server_cpus": 2,
+  "client_cpus": 2,
+  "memory_gib_each": 4,
+  "variants": {
+    "before-clean": {
+      "image": "catdb-backlog-clean:local",
+      "id": "sha256:c851d238148e1abe8243a082563b98039bc9ad0b721476cfc0058cf446d0d23b"
+    },
+    "candidate-clean": {
+      "image": "catdb-backlog-clean:local",
+      "id": "sha256:c851d238148e1abe8243a082563b98039bc9ad0b721476cfc0058cf446d0d23b"
+    }
+  },
+  "source_sha256": {
+    "benchmarks\\backlog\\run.py": "5fd4dc1ca27c780dc7e5087cf0d4745228dd36eb4214b3eb0e0b41b9af713235",
+    "benchmarks\\runner.py": "aa313e3ba0969e60f1c6917acfff090c572e4a25f5bbe60b04d319a410e754e0",
+    "benchmarks\\backlog\\client.py": "b8ddbcc3c08226086c3171bafa5d43c7f60936063815ea3c1002198a5a8e74d2",
+    "benchmarks\\backlog\\schedule.py": "e12d149be5a250bf55280df816720be760d4bb9db18125cebc6670717282f2f1",
+    "src\\group_commit.rs": "758f5701f9585d55ead23f024ce7ff410db10d160b30b6c08b20027b420f0620",
+    "src\\service.rs": "fded20d1b53d55bd84c606c73fddd618ace6c4569ea6628a7e7dfed6cfa1e61e"
+  },
+  "runs": [
+    {
+      "variant": "before-clean",
+      "rep": 1,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4-800-normal",
+          "rows": 100000,
+          "sha256": "331a84833ada3b4e3dd964e363f1b3e7b217a1f99b9608ad0320529f4adcd803",
+          "expected_sha256": "331a84833ada3b4e3dd964e363f1b3e7b217a1f99b9608ad0320529f4adcd803",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-1-250-normal",
+          "rows": 100000,
+          "sha256": "e87ed10242087dc8fafaef5c0c4b1e5d5df512e854798ccb973a4278195f7672",
+          "expected_sha256": "e87ed10242087dc8fafaef5c0c4b1e5d5df512e854798ccb973a4278195f7672",
+          "updated_keys": 14319,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "e87ed10242087dc8fafaef5c0c4b1e5d5df512e854798ccb973a4278195f7672",
+          "expected_sha256": "e87ed10242087dc8fafaef5c0c4b1e5d5df512e854798ccb973a4278195f7672",
+          "updated_keys": 14319,
+          "empty_and_last": true
+        }
+      ]
+    },
+    {
+      "variant": "candidate-clean",
+      "rep": 1,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4-800-normal",
+          "rows": 100000,
+          "sha256": "331a84833ada3b4e3dd964e363f1b3e7b217a1f99b9608ad0320529f4adcd803",
+          "expected_sha256": "331a84833ada3b4e3dd964e363f1b3e7b217a1f99b9608ad0320529f4adcd803",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-1-250-normal",
+          "rows": 100000,
+          "sha256": "e87ed10242087dc8fafaef5c0c4b1e5d5df512e854798ccb973a4278195f7672",
+          "expected_sha256": "e87ed10242087dc8fafaef5c0c4b1e5d5df512e854798ccb973a4278195f7672",
+          "updated_keys": 14319,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "e87ed10242087dc8fafaef5c0c4b1e5d5df512e854798ccb973a4278195f7672",
+          "expected_sha256": "e87ed10242087dc8fafaef5c0c4b1e5d5df512e854798ccb973a4278195f7672",
+          "updated_keys": 14319,
+          "empty_and_last": true
+        }
+      ]
+    },
+    {
+      "variant": "candidate-clean",
+      "rep": 2,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4-800-normal",
+          "rows": 100000,
+          "sha256": "b1000389a96f83966ef88dd2bb5631a25182688cb84fe40ae516af0ec490b026",
+          "expected_sha256": "b1000389a96f83966ef88dd2bb5631a25182688cb84fe40ae516af0ec490b026",
+          "updated_keys": 7660,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-1-250-normal",
+          "rows": 100000,
+          "sha256": "1842d187148da05d42aeb4ab2079602746bdb24fdce96788e20f61621e417139",
+          "expected_sha256": "1842d187148da05d42aeb4ab2079602746bdb24fdce96788e20f61621e417139",
+          "updated_keys": 14325,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "1842d187148da05d42aeb4ab2079602746bdb24fdce96788e20f61621e417139",
+          "expected_sha256": "1842d187148da05d42aeb4ab2079602746bdb24fdce96788e20f61621e417139",
+          "updated_keys": 14325,
+          "empty_and_last": true
+        }
+      ]
+    },
+    {
+      "variant": "before-clean",
+      "rep": 2,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4-800-normal",
+          "rows": 100000,
+          "sha256": "b1000389a96f83966ef88dd2bb5631a25182688cb84fe40ae516af0ec490b026",
+          "expected_sha256": "b1000389a96f83966ef88dd2bb5631a25182688cb84fe40ae516af0ec490b026",
+          "updated_keys": 7660,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-1-250-normal",
+          "rows": 100000,
+          "sha256": "1842d187148da05d42aeb4ab2079602746bdb24fdce96788e20f61621e417139",
+          "expected_sha256": "1842d187148da05d42aeb4ab2079602746bdb24fdce96788e20f61621e417139",
+          "updated_keys": 14325,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "1842d187148da05d42aeb4ab2079602746bdb24fdce96788e20f61621e417139",
+          "expected_sha256": "1842d187148da05d42aeb4ab2079602746bdb24fdce96788e20f61621e417139",
+          "updated_keys": 14325,
+          "empty_and_last": true
+        }
+      ]
+    },
+    {
+      "variant": "before-clean",
+      "rep": 3,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4-800-normal",
+          "rows": 100000,
+          "sha256": "939801e2e318d0ad14bb0a7741cc2e0dced63e0611651dc113c0b8d155115593",
+          "expected_sha256": "939801e2e318d0ad14bb0a7741cc2e0dced63e0611651dc113c0b8d155115593",
+          "updated_keys": 7705,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-1-250-normal",
+          "rows": 100000,
+          "sha256": "2f0456fc44a266235d78ede07f058a9a42005afd0e42e43ff28a47df1b34ecd6",
+          "expected_sha256": "2f0456fc44a266235d78ede07f058a9a42005afd0e42e43ff28a47df1b34ecd6",
+          "updated_keys": 14349,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "2f0456fc44a266235d78ede07f058a9a42005afd0e42e43ff28a47df1b34ecd6",
+          "expected_sha256": "2f0456fc44a266235d78ede07f058a9a42005afd0e42e43ff28a47df1b34ecd6",
+          "updated_keys": 14349,
+          "empty_and_last": true
+        }
+      ]
+    },
+    {
+      "variant": "candidate-clean",
+      "rep": 3,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4-800-normal",
+          "rows": 100000,
+          "sha256": "939801e2e318d0ad14bb0a7741cc2e0dced63e0611651dc113c0b8d155115593",
+          "expected_sha256": "939801e2e318d0ad14bb0a7741cc2e0dced63e0611651dc113c0b8d155115593",
+          "updated_keys": 7705,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-1-250-normal",
+          "rows": 100000,
+          "sha256": "2f0456fc44a266235d78ede07f058a9a42005afd0e42e43ff28a47df1b34ecd6",
+          "expected_sha256": "2f0456fc44a266235d78ede07f058a9a42005afd0e42e43ff28a47df1b34ecd6",
+          "updated_keys": 14349,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "2f0456fc44a266235d78ede07f058a9a42005afd0e42e43ff28a47df1b34ecd6",
+          "expected_sha256": "2f0456fc44a266235d78ede07f058a9a42005afd0e42e43ff28a47df1b34ecd6",
+          "updated_keys": 14349,
+          "empty_and_last": true
+        }
+      ]
+    }
+  ]
+}

@@ -414,6 +414,35 @@ so it is not directly comparable to the older closed-loop charts. See the
 [throughput and numerical table](docs/benchmarks/arrival-rate-2026-11-05/table.md),
 and [reproduction commands](benchmarks/arrival-rate/README.md).
 
+### Follow-up: draining backlog after slow synchronization
+
+An opt-in `backlog-batch` API submits already-ready independent updates together,
+without skipping real sync or waiting for new client arrivals. In the same 100k
+rows / 256B workload with bounded outstanding requests and three repeats, injecting
+20 ms before each sync for one second gives these results:
+
+- **1 connection, 250 offered/s:** p99 **411.283 → 40.319 ms**, worst response
+  **1,195.832 → 50.111 ms**, rejections **2,193 → 0 / 24,000**.
+- **4 connections, 800 offered/s:** p99 **444.791 → 90.520 ms**, worst response
+  **674.552 → 137.514 ms**, rejections **5,156 → 483 / 24,000**.
+
+![Controlled stalls: queue-inclusive p99, maximum and rejected updates](docs/benchmarks/backlog-2026-11-05/backlog-comparison.svg)
+
+**Not a universal latency improvement:** a single-injection candidate trial still
+reaches **1,473.682 ms** and rejects 1,041 requests; normal 1/200 p99 also worsens.
+The default remains unchanged. A separate 4/800 experiment with the existing
+commit window reduces repeated-delay p99 further to 49.919 ms and rejection to
+zero, but worsens the strict recovery-time metric. Both findings are retained.
+
+Across the primary and two supplemental cohorts, **744,656 updates succeed,
+23,344 are rejected at finite client admission, zero operation errors occur, and
+132 full-content checks including 18 reopens pass**. Batches retain independent
+outcomes and require explicit client adoption; C#/PALV is unchanged.
+See the [full report and unfavorable cases](docs/benchmarks/backlog-2026-11-05/README.md),
+[all numerical results](docs/benchmarks/backlog-2026-11-05/table.md),
+[recovery observations](docs/benchmarks/backlog-2026-11-05/recovery.svg), and
+[API/reproduction instructions](benchmarks/backlog/README.md).
+
 ## Build
 
 Requires Rust **1.89 or newer**. Python 3 is used by the optional client and integration tests. Docker is needed only for containers.

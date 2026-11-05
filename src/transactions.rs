@@ -27,7 +27,7 @@ type WalFile = File;
 mod reclamation;
 #[path = "retirement.rs"]
 mod retirement;
-#[cfg(feature = "commit-window")]
+#[cfg(any(feature = "commit-window", feature = "backlog-batch"))]
 pub use group_commit::CommitOutcome;
 pub use reclamation::{ReclamationProfile, ReclamationStatus};
 pub use retirement::RetirementStatus;

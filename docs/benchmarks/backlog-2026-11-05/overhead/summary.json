@@ -1,0 +1,1186 @@
+{
+  "summary": [
+    {
+      "scenario": "normal",
+      "clients": 1,
+      "rate": 250,
+      "variant": "before-clean",
+      "attempted": 24000,
+      "rejected": 0,
+      "ops_s": {
+        "median": 250.00074715067043,
+        "min": 250.00028305500797,
+        "max": 250.00401034558044
+      },
+      "syncs_s": {
+        "median": 250.00074715067043,
+        "min": 250.00028305500797,
+        "max": 250.00401034558044
+      },
+      "updates_per_sync": {
+        "median": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "mean_batch_size": {
+        "median": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "mean_send_rate": {
+        "median": 249.99951279942428,
+        "min": 249.9946310379208,
+        "max": 250.00057551076353
+      },
+      "response": {
+        "p99_ms": {
+          "median": 119.069158,
+          "min": 34.698317,
+          "max": 126.529339
+        },
+        "max_ms": {
+          "median": 139.443482,
+          "min": 45.288702,
+          "max": 140.564449
+        }
+      },
+      "operation": {
+        "p99_ms": {
+          "median": 5.577828,
+          "min": 5.549738,
+          "max": 5.619632
+        },
+        "max_ms": {
+          "median": 13.313616,
+          "min": 12.726382,
+          "max": 14.134476
+        }
+      },
+      "queue": {
+        "p99_ms": {
+          "median": 115.08739,
+          "min": 30.714285,
+          "max": 122.544467
+        },
+        "max_ms": {
+          "median": 135.46215,
+          "min": 41.308001,
+          "max": 136.582897
+        }
+      },
+      "recovery_ms": null
+    },
+    {
+      "scenario": "normal",
+      "clients": 1,
+      "rate": 250,
+      "variant": "candidate-clean",
+      "attempted": 24000,
+      "rejected": 0,
+      "ops_s": {
+        "median": 250.0007337052783,
+        "min": 249.99752766507498,
+        "max": 250.00666590429486
+      },
+      "syncs_s": {
+        "median": 248.87573040360454,
+        "min": 217.94331100206907,
+        "max": 249.2787847730379
+      },
+      "updates_per_sync": {
+        "median": 1.0045203415369162,
+        "min": 1.0028832894571895,
+        "max": 1.1471178663607686
+      },
+      "mean_batch_size": {
+        "median": 1.0045203415369162,
+        "min": 1.0028832894571895,
+        "max": 1.1471178663607686
+      },
+      "mean_send_rate": {
+        "median": 250.00041559170225,
+        "min": 249.99990287070906,
+        "max": 250.00075207283376
+      },
+      "response": {
+        "p99_ms": {
+          "median": 7.182411,
+          "min": 7.134352,
+          "max": 115.823158
+        },
+        "max_ms": {
+          "median": 64.235786,
+          "min": 20.125184,
+          "max": 229.368723
+        }
+      },
+      "operation": {
+        "p99_ms": {
+          "median": 5.436584,
+          "min": 5.372273,
+          "max": 44.492197
+        },
+        "max_ms": {
+          "median": 50.306699,
+          "min": 20.02305,
+          "max": 132.542067
+        }
+      },
+      "queue": {
+        "p99_ms": {
+          "median": 2.976454,
+          "min": 2.867971,
+          "max": 83.902864
+        },
+        "max_ms": {
+          "median": 48.275875,
+          "min": 16.158848,
+          "max": 197.446586
+        }
+      },
+      "recovery_ms": null
+    },
+    {
+      "scenario": "normal",
+      "clients": 4,
+      "rate": 800,
+      "variant": "before-clean",
+      "attempted": 24000,
+      "rejected": 0,
+      "ops_s": {
+        "median": 799.76959853516,
+        "min": 799.7323614079847,
+        "max": 799.8219888187915
+      },
+      "syncs_s": {
+        "median": 228.42355572715562,
+        "min": 226.83465238453473,
+        "max": 235.64755345573644
+      },
+      "updates_per_sync": {
+        "median": 3.50109409190372,
+        "min": 3.3941450997030125,
+        "max": 3.525782282944028
+      },
+      "mean_batch_size": {
+        "median": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "mean_send_rate": {
+        "median": 799.976689925375,
+        "min": 799.965413091832,
+        "max": 800.0129889544806
+      },
+      "response": {
+        "p99_ms": {
+          "median": 10.4566,
+          "min": 9.377198,
+          "max": 10.570095
+        },
+        "max_ms": {
+          "median": 17.322999,
+          "min": 16.724523,
+          "max": 17.7054
+        }
+      },
+      "operation": {
+        "p99_ms": {
+          "median": 8.174763,
+          "min": 7.971533,
+          "max": 8.255873
+        },
+        "max_ms": {
+          "median": 17.191687,
+          "min": 16.583555,
+          "max": 17.511525
+        }
+      },
+      "queue": {
+        "p99_ms": {
+          "median": 5.469083,
+          "min": 4.387266,
+          "max": 5.580928
+        },
+        "max_ms": {
+          "median": 12.334762,
+          "min": 11.73531,
+          "max": 12.715627
+        }
+      },
+      "recovery_ms": null
+    },
+    {
+      "scenario": "normal",
+      "clients": 4,
+      "rate": 800,
+      "variant": "candidate-clean",
+      "attempted": 24000,
+      "rejected": 0,
+      "ops_s": {
+        "median": 799.7339393147981,
+        "min": 799.5342243816388,
+        "max": 799.7526117248625
+      },
+      "syncs_s": {
+        "median": 232.0228091437058,
+        "min": 230.56568195605507,
+        "max": 232.6280409354694
+      },
+      "updates_per_sync": {
+        "median": 3.4467901766479967,
+        "min": 3.4379028792436612,
+        "max": 3.4677069787602948
+      },
+      "mean_batch_size": {
+        "median": 1.0060362173038229,
+        "min": 1.0026319087604962,
+        "max": 1.0065425264217414
+      },
+      "mean_send_rate": {
+        "median": 800.0085013930039,
+        "min": 799.9284400958093,
+        "max": 800.0230845915944
+      },
+      "response": {
+        "p99_ms": {
+          "median": 9.796695,
+          "min": 8.988412,
+          "max": 9.902878
+        },
+        "max_ms": {
+          "median": 21.507742,
+          "min": 15.895809,
+          "max": 44.535321
+        }
+      },
+      "operation": {
+        "p99_ms": {
+          "median": 8.120478,
+          "min": 8.051882,
+          "max": 8.162798
+        },
+        "max_ms": {
+          "median": 18.516699,
+          "min": 15.298989,
+          "max": 38.002749
+        }
+      },
+      "queue": {
+        "p99_ms": {
+          "median": 4.379183,
+          "min": 3.747465,
+          "max": 4.534015
+        },
+        "max_ms": {
+          "median": 13.681959,
+          "min": 10.911314,
+          "max": 37.474669
+        }
+      },
+      "recovery_ms": null
+    }
+  ],
+  "trials": [
+    {
+      "variant": "before-clean",
+      "scenario": "normal",
+      "clients": 4,
+      "rate": 800,
+      "rep": 1,
+      "attempted": 8000,
+      "completed": 8000,
+      "rejected": 0,
+      "ops_s": 799.76959853516,
+      "syncs_s": 226.83465238453473,
+      "sync_attempts": 2269,
+      "updates_per_sync": 3.525782282944028,
+      "injected_stalls": 0,
+      "response": {
+        "p50_ms": 5.811565,
+        "p99_ms": 10.570095,
+        "max_ms": 16.724523,
+        "above_ms": {
+          "10": 102,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p50_ms": 4.540909,
+        "p99_ms": 8.174763,
+        "max_ms": 16.583555,
+        "above_ms": {
+          "10": 11,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.823773,
+        "p99_ms": 5.580928,
+        "max_ms": 11.73531,
+        "above_ms": {
+          "10": 7,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "recovery": null,
+      "mean_batch_size": 1.0,
+      "batch_size_counts": {
+        "1": 8000,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0
+      },
+      "mean_send_rate": 799.965413091832,
+      "producer_p99_ms": 0.251157,
+      "maximum_event": {
+        "id": 4181,
+        "worker": 1,
+        "sequence": 1045,
+        "planned_ns": 70516451029721,
+        "admitted_ns": 70516451126853,
+        "status": "completed",
+        "sent_ns": 70516451170689,
+        "key_index": 86109,
+        "stamp": 10080004009046,
+        "finished_ns": 70516467754244,
+        "batch_id": 1045,
+        "producer_ms": 0.097132,
+        "client_queue_ms": 0.043836,
+        "operation_ms": 16.583555
+      }
+    },
+    {
+      "variant": "before-clean",
+      "scenario": "normal",
+      "clients": 1,
+      "rate": 250,
+      "rep": 1,
+      "attempted": 8000,
+      "completed": 8000,
+      "rejected": 0,
+      "ops_s": 250.00028305500797,
+      "syncs_s": 250.00028305500797,
+      "sync_attempts": 8000,
+      "updates_per_sync": 1.0,
+      "injected_stalls": 0,
+      "response": {
+        "p50_ms": 3.958835,
+        "p99_ms": 119.069158,
+        "max_ms": 140.564449,
+        "above_ms": {
+          "10": 469,
+          "20": 374,
+          "50": 287
+        }
+      },
+      "operation": {
+        "p50_ms": 3.748298,
+        "p99_ms": 5.549738,
+        "max_ms": 14.134476,
+        "above_ms": {
+          "10": 20,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.123238,
+        "p99_ms": 115.08739,
+        "max_ms": 136.582897,
+        "above_ms": {
+          "10": 408,
+          "20": 361,
+          "50": 276
+        }
+      },
+      "recovery": null,
+      "mean_batch_size": 1.0,
+      "batch_size_counts": {
+        "1": 8000,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0
+      },
+      "mean_send_rate": 250.00057551076353,
+      "producer_p99_ms": 0.134424,
+      "maximum_event": {
+        "id": 5049,
+        "worker": 0,
+        "sequence": 5049,
+        "planned_ns": 70543246421446,
+        "admitted_ns": 70543246517297,
+        "status": "completed",
+        "sent_ns": 70543382736890,
+        "key_index": 79111,
+        "stamp": 10025001005050,
+        "finished_ns": 70543386985895,
+        "batch_id": 5049,
+        "producer_ms": 0.095851,
+        "client_queue_ms": 136.219593,
+        "operation_ms": 4.249005
+      }
+    },
+    {
+      "variant": "candidate-clean",
+      "scenario": "normal",
+      "clients": 4,
+      "rate": 800,
+      "rep": 1,
+      "attempted": 8000,
+      "completed": 8000,
+      "rejected": 0,
+      "ops_s": 799.7526117248625,
+      "syncs_s": 232.6280409354694,
+      "sync_attempts": 2327,
+      "updates_per_sync": 3.4379028792436612,
+      "injected_stalls": 0,
+      "response": {
+        "p50_ms": 5.684713,
+        "p99_ms": 8.988412,
+        "max_ms": 15.895809,
+        "above_ms": {
+          "10": 35,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p50_ms": 4.491484,
+        "p99_ms": 8.051882,
+        "max_ms": 15.298989,
+        "above_ms": {
+          "10": 8,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.699045,
+        "p99_ms": 3.747465,
+        "max_ms": 10.911314,
+        "above_ms": {
+          "10": 2,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "recovery": null,
+      "mean_batch_size": 1.0026319087604962,
+      "batch_size_counts": {
+        "1": 7960,
+        "2": 17,
+        "3": 2,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0
+      },
+      "mean_send_rate": 799.9284400958093,
+      "producer_p99_ms": 0.223664,
+      "maximum_event": {
+        "id": 5498,
+        "worker": 2,
+        "sequence": 1374,
+        "planned_ns": 70569965304509,
+        "admitted_ns": 70569965374632,
+        "status": "completed",
+        "sent_ns": 70569967395233,
+        "key_index": 82398,
+        "stamp": 10080004017375,
+        "finished_ns": 70569981200318,
+        "batch_id": 1373,
+        "producer_ms": 0.070123,
+        "client_queue_ms": 2.020601,
+        "operation_ms": 13.805085
+      }
+    },
+    {
+      "variant": "candidate-clean",
+      "scenario": "normal",
+      "clients": 1,
+      "rate": 250,
+      "rep": 1,
+      "attempted": 8000,
+      "completed": 8000,
+      "rejected": 0,
+      "ops_s": 250.0007337052783,
+      "syncs_s": 248.87573040360454,
+      "sync_attempts": 7964,
+      "updates_per_sync": 1.0045203415369162,
+      "injected_stalls": 0,
+      "response": {
+        "p50_ms": 3.888717,
+        "p99_ms": 7.182411,
+        "max_ms": 64.235786,
+        "above_ms": {
+          "10": 27,
+          "20": 15,
+          "50": 5
+        }
+      },
+      "operation": {
+        "p50_ms": 3.717551,
+        "p99_ms": 5.436584,
+        "max_ms": 50.306699,
+        "above_ms": {
+          "10": 8,
+          "20": 5,
+          "50": 4
+        }
+      },
+      "queue": {
+        "p50_ms": 0.121205,
+        "p99_ms": 2.867971,
+        "max_ms": 48.275875,
+        "above_ms": {
+          "10": 15,
+          "20": 8,
+          "50": 0
+        }
+      },
+      "recovery": null,
+      "mean_batch_size": 1.0045203415369162,
+      "batch_size_counts": {
+        "1": 7944,
+        "2": 14,
+        "3": 2,
+        "4": 1,
+        "5": 2,
+        "6": 0,
+        "7": 0,
+        "8": 1
+      },
+      "mean_send_rate": 250.00075207283376,
+      "producer_p99_ms": 0.165015,
+      "maximum_event": {
+        "id": 2026,
+        "worker": 0,
+        "sequence": 2026,
+        "planned_ns": 70583056972247,
+        "admitted_ns": 70583057059455,
+        "status": "completed",
+        "sent_ns": 70583070901334,
+        "key_index": 79451,
+        "stamp": 10025001002027,
+        "finished_ns": 70583121208033,
+        "batch_id": 2025,
+        "producer_ms": 0.087208,
+        "client_queue_ms": 13.841879,
+        "operation_ms": 50.306699
+      }
+    },
+    {
+      "variant": "candidate-clean",
+      "scenario": "normal",
+      "clients": 4,
+      "rate": 800,
+      "rep": 2,
+      "attempted": 8000,
+      "completed": 8000,
+      "rejected": 0,
+      "ops_s": 799.7339393147981,
+      "syncs_s": 232.0228091437058,
+      "sync_attempts": 2321,
+      "updates_per_sync": 3.4467901766479967,
+      "injected_stalls": 0,
+      "response": {
+        "p50_ms": 5.69209,
+        "p99_ms": 9.796695,
+        "max_ms": 44.535321,
+        "above_ms": {
+          "10": 76,
+          "20": 23,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p50_ms": 4.478842,
+        "p99_ms": 8.120478,
+        "max_ms": 38.002749,
+        "above_ms": {
+          "10": 14,
+          "20": 4,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.704941,
+        "p99_ms": 4.534015,
+        "max_ms": 37.474669,
+        "above_ms": {
+          "10": 25,
+          "20": 14,
+          "50": 0
+        }
+      },
+      "recovery": null,
+      "mean_batch_size": 1.0065425264217414,
+      "batch_size_counts": {
+        "1": 7921,
+        "2": 20,
+        "3": 3,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 2,
+        "8": 2
+      },
+      "mean_send_rate": 800.0085013930039,
+      "producer_p99_ms": 0.244847,
+      "maximum_event": {
+        "id": 6825,
+        "worker": 1,
+        "sequence": 1706,
+        "planned_ns": 70623654396947,
+        "admitted_ns": 70623654422569,
+        "status": "completed",
+        "sent_ns": 70623691871616,
+        "key_index": 70761,
+        "stamp": 20080004009707,
+        "finished_ns": 70623698932268,
+        "batch_id": 1702,
+        "producer_ms": 0.025622,
+        "client_queue_ms": 37.449047,
+        "operation_ms": 7.060652
+      }
+    },
+    {
+      "variant": "candidate-clean",
+      "scenario": "normal",
+      "clients": 1,
+      "rate": 250,
+      "rep": 2,
+      "attempted": 8000,
+      "completed": 8000,
+      "rejected": 0,
+      "ops_s": 250.00666590429486,
+      "syncs_s": 217.94331100206907,
+      "sync_attempts": 6974,
+      "updates_per_sync": 1.1471178663607686,
+      "injected_stalls": 0,
+      "response": {
+        "p50_ms": 4.1198,
+        "p99_ms": 115.823158,
+        "max_ms": 229.368723,
+        "above_ms": {
+          "10": 1153,
+          "20": 939,
+          "50": 472
+        }
+      },
+      "operation": {
+        "p50_ms": 3.88358,
+        "p99_ms": 44.492197,
+        "max_ms": 132.542067,
+        "above_ms": {
+          "10": 787,
+          "20": 578,
+          "50": 64
+        }
+      },
+      "queue": {
+        "p50_ms": 0.160947,
+        "p99_ms": 83.902864,
+        "max_ms": 197.446586,
+        "above_ms": {
+          "10": 822,
+          "20": 577,
+          "50": 197
+        }
+      },
+      "recovery": null,
+      "mean_batch_size": 1.1471178663607686,
+      "batch_size_counts": {
+        "1": 6700,
+        "2": 100,
+        "3": 36,
+        "4": 11,
+        "5": 10,
+        "6": 14,
+        "7": 10,
+        "8": 93
+      },
+      "mean_send_rate": 250.00041559170225,
+      "producer_p99_ms": 0.157337,
+      "maximum_event": {
+        "id": 2126,
+        "worker": 0,
+        "sequence": 2126,
+        "planned_ns": 70635452358163,
+        "admitted_ns": 70635452435446,
+        "status": "completed",
+        "sent_ns": 70635611595750,
+        "key_index": 63875,
+        "stamp": 20025001002127,
+        "finished_ns": 70635681726886,
+        "batch_id": 1991,
+        "producer_ms": 0.077283,
+        "client_queue_ms": 159.160304,
+        "operation_ms": 70.131136
+      }
+    },
+    {
+      "variant": "before-clean",
+      "scenario": "normal",
+      "clients": 4,
+      "rate": 800,
+      "rep": 2,
+      "attempted": 8000,
+      "completed": 8000,
+      "rejected": 0,
+      "ops_s": 799.7323614079847,
+      "syncs_s": 228.42355572715562,
+      "sync_attempts": 2285,
+      "updates_per_sync": 3.50109409190372,
+      "injected_stalls": 0,
+      "response": {
+        "p50_ms": 5.831992,
+        "p99_ms": 10.4566,
+        "max_ms": 17.322999,
+        "above_ms": {
+          "10": 110,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p50_ms": 4.499393,
+        "p99_ms": 8.255873,
+        "max_ms": 17.191687,
+        "above_ms": {
+          "10": 21,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.843791,
+        "p99_ms": 5.469083,
+        "max_ms": 12.334762,
+        "above_ms": {
+          "10": 8,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "recovery": null,
+      "mean_batch_size": 1.0,
+      "batch_size_counts": {
+        "1": 8000,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0
+      },
+      "mean_send_rate": 799.976689925375,
+      "producer_p99_ms": 0.265302,
+      "maximum_event": {
+        "id": 2140,
+        "worker": 0,
+        "sequence": 535,
+        "planned_ns": 70670212063961,
+        "admitted_ns": 70670212150428,
+        "status": "completed",
+        "sent_ns": 70670212195273,
+        "key_index": 25752,
+        "stamp": 20080004000536,
+        "finished_ns": 70670229386960,
+        "batch_id": 535,
+        "producer_ms": 0.086467,
+        "client_queue_ms": 0.044845,
+        "operation_ms": 17.191687
+      }
+    },
+    {
+      "variant": "before-clean",
+      "scenario": "normal",
+      "clients": 1,
+      "rate": 250,
+      "rep": 2,
+      "attempted": 8000,
+      "completed": 8000,
+      "rejected": 0,
+      "ops_s": 250.00074715067043,
+      "syncs_s": 250.00074715067043,
+      "sync_attempts": 8000,
+      "updates_per_sync": 1.0,
+      "injected_stalls": 0,
+      "response": {
+        "p50_ms": 3.985208,
+        "p99_ms": 34.698317,
+        "max_ms": 45.288702,
+        "above_ms": {
+          "10": 373,
+          "20": 175,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p50_ms": 3.773932,
+        "p99_ms": 5.577828,
+        "max_ms": 12.726382,
+        "above_ms": {
+          "10": 4,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.126646,
+        "p99_ms": 30.714285,
+        "max_ms": 41.308001,
+        "above_ms": {
+          "10": 242,
+          "20": 145,
+          "50": 0
+        }
+      },
+      "recovery": null,
+      "mean_batch_size": 1.0,
+      "batch_size_counts": {
+        "1": 8000,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0
+      },
+      "mean_send_rate": 249.9946310379208,
+      "producer_p99_ms": 0.164391,
+      "maximum_event": {
+        "id": 7240,
+        "worker": 0,
+        "sequence": 7240,
+        "planned_ns": 70708261012387,
+        "admitted_ns": 70708261098826,
+        "status": "completed",
+        "sent_ns": 70708301712375,
+        "key_index": 78562,
+        "stamp": 20025001007241,
+        "finished_ns": 70708306301089,
+        "batch_id": 7240,
+        "producer_ms": 0.086439,
+        "client_queue_ms": 40.613549,
+        "operation_ms": 4.588714
+      }
+    },
+    {
+      "variant": "before-clean",
+      "scenario": "normal",
+      "clients": 4,
+      "rate": 800,
+      "rep": 3,
+      "attempted": 8000,
+      "completed": 8000,
+      "rejected": 0,
+      "ops_s": 799.8219888187915,
+      "syncs_s": 235.64755345573644,
+      "sync_attempts": 2357,
+      "updates_per_sync": 3.3941450997030125,
+      "injected_stalls": 0,
+      "response": {
+        "p50_ms": 5.612296,
+        "p99_ms": 9.377198,
+        "max_ms": 17.7054,
+        "above_ms": {
+          "10": 59,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p50_ms": 4.44854,
+        "p99_ms": 7.971533,
+        "max_ms": 17.511525,
+        "above_ms": {
+          "10": 13,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.623736,
+        "p99_ms": 4.387266,
+        "max_ms": 12.715627,
+        "above_ms": {
+          "10": 13,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "recovery": null,
+      "mean_batch_size": 1.0,
+      "batch_size_counts": {
+        "1": 8000,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0
+      },
+      "mean_send_rate": 800.0129889544806,
+      "producer_p99_ms": 0.231391,
+      "maximum_event": {
+        "id": 1924,
+        "worker": 0,
+        "sequence": 481,
+        "planned_ns": 70722097966469,
+        "admitted_ns": 70722098056791,
+        "status": "completed",
+        "sent_ns": 70722099939990,
+        "key_index": 97720,
+        "stamp": 30080004000482,
+        "finished_ns": 70722115671869,
+        "batch_id": 481,
+        "producer_ms": 0.090322,
+        "client_queue_ms": 1.883199,
+        "operation_ms": 15.731879
+      }
+    },
+    {
+      "variant": "before-clean",
+      "scenario": "normal",
+      "clients": 1,
+      "rate": 250,
+      "rep": 3,
+      "attempted": 8000,
+      "completed": 8000,
+      "rejected": 0,
+      "ops_s": 250.00401034558044,
+      "syncs_s": 250.00401034558044,
+      "sync_attempts": 8000,
+      "updates_per_sync": 1.0,
+      "injected_stalls": 0,
+      "response": {
+        "p50_ms": 4.01782,
+        "p99_ms": 126.529339,
+        "max_ms": 139.443482,
+        "above_ms": {
+          "10": 601,
+          "20": 473,
+          "50": 340
+        }
+      },
+      "operation": {
+        "p50_ms": 3.764205,
+        "p99_ms": 5.619632,
+        "max_ms": 13.313616,
+        "above_ms": {
+          "10": 19,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.137334,
+        "p99_ms": 122.544467,
+        "max_ms": 135.46215,
+        "above_ms": {
+          "10": 507,
+          "20": 456,
+          "50": 332
+        }
+      },
+      "recovery": null,
+      "mean_batch_size": 1.0,
+      "batch_size_counts": {
+        "1": 8000,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0
+      },
+      "mean_send_rate": 249.99951279942428,
+      "producer_p99_ms": 0.16999,
+      "maximum_event": {
+        "id": 3439,
+        "worker": 0,
+        "sequence": 3439,
+        "planned_ns": 70745217636040,
+        "admitted_ns": 70745217712177,
+        "status": "completed",
+        "sent_ns": 70745350772151,
+        "key_index": 11344,
+        "stamp": 30025001003440,
+        "finished_ns": 70745357079522,
+        "batch_id": 3439,
+        "producer_ms": 0.076137,
+        "client_queue_ms": 133.059974,
+        "operation_ms": 6.307371
+      }
+    },
+    {
+      "variant": "candidate-clean",
+      "scenario": "normal",
+      "clients": 4,
+      "rate": 800,
+      "rep": 3,
+      "attempted": 8000,
+      "completed": 8000,
+      "rejected": 0,
+      "ops_s": 799.5342243816388,
+      "syncs_s": 230.56568195605507,
+      "sync_attempts": 2307,
+      "updates_per_sync": 3.4677069787602948,
+      "injected_stalls": 0,
+      "response": {
+        "p50_ms": 5.718728,
+        "p99_ms": 9.902878,
+        "max_ms": 21.507742,
+        "above_ms": {
+          "10": 77,
+          "20": 2,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p50_ms": 4.497361,
+        "p99_ms": 8.162798,
+        "max_ms": 18.516699,
+        "above_ms": {
+          "10": 22,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.72745,
+        "p99_ms": 4.379183,
+        "max_ms": 13.681959,
+        "above_ms": {
+          "10": 6,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "recovery": null,
+      "mean_batch_size": 1.0060362173038229,
+      "batch_size_counts": {
+        "1": 7910,
+        "2": 36,
+        "3": 6,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0
+      },
+      "mean_send_rate": 800.0230845915944,
+      "producer_p99_ms": 0.265523,
+      "maximum_event": {
+        "id": 4600,
+        "worker": 0,
+        "sequence": 1150,
+        "planned_ns": 70777472439283,
+        "admitted_ns": 70777472490722,
+        "status": "completed",
+        "sent_ns": 70777486121242,
+        "key_index": 24328,
+        "stamp": 30080004001151,
+        "finished_ns": 70777493947025,
+        "batch_id": 1147,
+        "producer_ms": 0.051439,
+        "client_queue_ms": 13.63052,
+        "operation_ms": 7.825783
+      }
+    },
+    {
+      "variant": "candidate-clean",
+      "scenario": "normal",
+      "clients": 1,
+      "rate": 250,
+      "rep": 3,
+      "attempted": 8000,
+      "completed": 8000,
+      "rejected": 0,
+      "ops_s": 249.99752766507498,
+      "syncs_s": 249.2787847730379,
+      "sync_attempts": 7977,
+      "updates_per_sync": 1.0028832894571895,
+      "injected_stalls": 0,
+      "response": {
+        "p50_ms": 3.886459,
+        "p99_ms": 7.134352,
+        "max_ms": 20.125184,
+        "above_ms": {
+          "10": 14,
+          "20": 1,
+          "50": 0
+        }
+      },
+      "operation": {
+        "p50_ms": 3.698937,
+        "p99_ms": 5.372273,
+        "max_ms": 20.02305,
+        "above_ms": {
+          "10": 4,
+          "20": 1,
+          "50": 0
+        }
+      },
+      "queue": {
+        "p50_ms": 0.124457,
+        "p99_ms": 2.976454,
+        "max_ms": 16.158848,
+        "above_ms": {
+          "10": 3,
+          "20": 0,
+          "50": 0
+        }
+      },
+      "recovery": null,
+      "mean_batch_size": 1.0028832894571895,
+      "batch_size_counts": {
+        "1": 7960,
+        "2": 13,
+        "3": 2,
+        "4": 2,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0
+      },
+      "mean_send_rate": 249.99990287070906,
+      "producer_p99_ms": 0.171845,
+      "maximum_event": {
+        "id": 5319,
+        "worker": 0,
+        "sequence": 5319,
+        "planned_ns": 70804735607700,
+        "admitted_ns": 70804735673710,
+        "status": "completed",
+        "sent_ns": 70804735709834,
+        "key_index": 63259,
+        "stamp": 30025001005320,
+        "finished_ns": 70804755732884,
+        "batch_id": 5304,
+        "producer_ms": 0.06601,
+        "client_queue_ms": 0.036124,
+        "operation_ms": 20.02305
+      }
+    }
+  ]
+}

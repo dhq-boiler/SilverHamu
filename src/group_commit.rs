@@ -60,9 +60,26 @@ pub(super) struct GroupCommit {
     #[cfg(feature = "lock-timing")]
     collections: Mutex<Vec<[u64; 5]>>,
     #[cfg(any(test, feature = "sync-stall"))]
-    stall: Mutex<Option<(Instant, Duration, Duration, Duration)>>,
+    stall: Mutex<Option<SyncStall>>,
+    #[cfg(any(test, feature = "sync-stall"))]
+    stall_count: AtomicU64,
+    #[cfg(any(test, feature = "sync-stall"))]
+    stall_elapsed: AtomicU64,
+    #[cfg(any(test, feature = "sync-stall"))]
+    stall_first: AtomicU64,
+    #[cfg(any(test, feature = "sync-stall"))]
+    stall_last: AtomicU64,
     #[cfg(test)]
     sync_gate: Mutex<Option<Arc<[std::sync::Barrier; 2]>>>,
+}
+
+#[cfg(any(test, feature = "sync-stall"))]
+struct SyncStall {
+    origin: Instant,
+    start: Duration,
+    duration: Duration,
+    delay: Duration,
+    remaining: Option<u64>,
 }
 
 struct Request {
@@ -86,7 +103,7 @@ struct Reply {
     costs: [u64; 2],
 }
 
-#[cfg(feature = "commit-window")]
+#[cfg(any(feature = "commit-window", feature = "backlog-batch"))]
 pub struct CommitOutcome {
     pub result: Result<u64>,
     #[cfg(feature = "lock-timing")]
@@ -119,7 +136,7 @@ impl Database {
         std::mem::take(&mut *self.inner.group.collections.lock().unwrap())
     }
 
-    #[cfg(feature = "commit-window")]
+    #[cfg(any(feature = "commit-window", feature = "backlog-batch"))]
     #[doc(hidden)]
     pub fn commit_batch(&self, transactions: Vec<Transaction>) -> Result<Vec<CommitOutcome>> {
         if transactions
@@ -143,7 +160,44 @@ impl Database {
     #[cfg(any(test, feature = "sync-stall"))]
     #[doc(hidden)]
     pub fn set_diagnostic_sync_stall(&self, start: Duration, duration: Duration, delay: Duration) {
-        *self.inner.group.stall.lock().unwrap() = Some((Instant::now(), start, duration, delay));
+        self.set_diagnostic_sync_stall_limit(start, duration, delay, None);
+    }
+
+    #[cfg(any(test, feature = "sync-stall"))]
+    #[doc(hidden)]
+    pub fn set_diagnostic_sync_stall_limit(
+        &self,
+        start: Duration,
+        duration: Duration,
+        delay: Duration,
+        remaining: Option<u64>,
+    ) {
+        *self.inner.group.stall.lock().unwrap() = Some(SyncStall {
+            origin: Instant::now(),
+            start,
+            duration,
+            delay,
+            remaining,
+        });
+        self.inner.group.stall_count.store(0, Ordering::Relaxed);
+        self.inner.group.stall_elapsed.store(0, Ordering::Relaxed);
+        self.inner.group.stall_first.store(0, Ordering::Relaxed);
+        self.inner.group.stall_last.store(0, Ordering::Relaxed);
+    }
+
+    #[cfg(any(test, feature = "sync-stall"))]
+    #[doc(hidden)]
+    pub fn diagnostic_stall_count(&self) -> u64 {
+        self.inner.group.stall_count.load(Ordering::Relaxed)
+    }
+    #[cfg(any(test, feature = "sync-stall"))]
+    #[doc(hidden)]
+    pub fn diagnostic_stall_timing(&self) -> [u64; 3] {
+        [
+            self.inner.group.stall_first.load(Ordering::Relaxed),
+            self.inner.group.stall_last.load(Ordering::Relaxed),
+            self.inner.group.stall_elapsed.load(Ordering::Relaxed),
+        ]
     }
     /// Ends the batching wait early once four write requests are queued.
     pub fn set_group_commit_wake_on_four(&self, enabled: bool) {
@@ -182,21 +236,33 @@ impl GroupCommit {
             gate[0].wait();
             gate[1].wait();
         }
-        let delay =
-            self.stall
-                .lock()
-                .unwrap()
-                .as_ref()
-                .and_then(|(origin, start, duration, delay)| {
-                    let elapsed = origin.elapsed();
-                    (elapsed >= *start && elapsed < *start + *duration).then_some(*delay)
-                });
-        if let Some(delay) = delay {
+        let delay = self.stall.lock().unwrap().as_mut().and_then(|stall| {
+            let elapsed = stall.origin.elapsed();
+            if elapsed < stall.start
+                || elapsed >= stall.start + stall.duration
+                || stall.remaining == Some(0)
+            {
+                return None;
+            }
+            if let Some(remaining) = &mut stall.remaining {
+                *remaining -= 1;
+            }
+            Some((stall.delay, stall.origin))
+        });
+        if let Some((delay, origin)) = delay {
+            let started = origin.elapsed().as_nanos() as u64;
+            if self.stall_count.fetch_add(1, Ordering::Relaxed) == 0 {
+                self.stall_first.store(started, Ordering::Relaxed);
+            }
             std::thread::sleep(delay);
+            let ended = origin.elapsed().as_nanos() as u64;
+            self.stall_elapsed
+                .fetch_add(ended - started, Ordering::Relaxed);
+            self.stall_last.store(ended, Ordering::Relaxed);
         }
     }
 
-    #[cfg(feature = "commit-window")]
+    #[cfg(any(feature = "commit-window", feature = "backlog-batch"))]
     fn submit_many(&self, transactions: Vec<Transaction>) -> Result<Vec<Reply>> {
         #[cfg(feature = "lock-timing")]
         {
@@ -824,7 +890,7 @@ mod tests {
         }
     }
 
-    #[cfg(feature = "commit-window")]
+    #[cfg(any(feature = "commit-window", feature = "backlog-batch"))]
     #[test]
     fn eq_window_preserves_independent_conflicts_and_old_reads() {
         let f = Fixture::new();
@@ -927,7 +993,7 @@ mod tests {
         );
     }
 
-    #[cfg(feature = "commit-window")]
+    #[cfg(any(feature = "commit-window", feature = "backlog-batch"))]
     #[test]
     fn bv_window_rejects_excess_count_and_bytes_without_partial_submission() {
         for count in [0, 1, 31, 32, 33] {
@@ -961,7 +1027,7 @@ mod tests {
         }
     }
 
-    #[cfg(feature = "commit-window")]
+    #[cfg(any(feature = "commit-window", feature = "backlog-batch"))]
     #[test]
     fn er_window_rejects_mixed_databases_and_read_only_entries_before_any_write() {
         let a = Fixture::new();
@@ -980,7 +1046,7 @@ mod tests {
         assert_eq!(other.stats().unwrap().version, 0);
     }
 
-    #[cfg(feature = "commit-window")]
+    #[cfg(any(feature = "commit-window", feature = "backlog-batch"))]
     #[test]
     fn st_window_keeps_all_successes_hidden_until_delayed_sync_finishes() {
         let f = Fixture::new();
@@ -1040,7 +1106,7 @@ mod tests {
         );
     }
 
-    #[cfg(feature = "commit-window")]
+    #[cfg(any(feature = "commit-window", feature = "backlog-batch"))]
     #[test]
     fn st_four_windows_share_sync_without_stranding_requests() {
         let f = Fixture::new();
@@ -1096,7 +1162,7 @@ mod tests {
         assert!(rows.iter().all(|(_, v)| *v == vec![7]));
     }
 
-    #[cfg(feature = "commit-window")]
+    #[cfg(any(feature = "commit-window", feature = "backlog-batch"))]
     #[test]
     fn er_window_write_failure_replies_to_all_and_preserves_acknowledged_data() {
         let f = Fixture::new();
@@ -1125,7 +1191,7 @@ mod tests {
         );
     }
 
-    #[cfg(feature = "commit-window")]
+    #[cfg(any(feature = "commit-window", feature = "backlog-batch"))]
     #[test]
     #[ignore = "subprocess helper"]
     fn window_crash_worker() {
@@ -1136,7 +1202,7 @@ mod tests {
         panic!("window crash point not reached");
     }
 
-    #[cfg(feature = "commit-window")]
+    #[cfg(any(feature = "commit-window", feature = "backlog-batch"))]
     #[test]
     fn er_window_process_exit_around_sync_preserves_atomic_transactions_and_acknowledged_data() {
         for phase in ["before-sync", "after-sync"] {

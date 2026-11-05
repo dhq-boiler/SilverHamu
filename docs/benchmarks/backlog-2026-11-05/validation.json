@@ -1,0 +1,81 @@
+{
+  "status": "passed",
+  "checks": {
+    "build": {
+      "status": "passed"
+    },
+    "clippy": {
+      "status": "passed"
+    },
+    "default-build": {
+      "status": "passed"
+    },
+    "default-protocol": {
+      "passed": 19,
+      "failed": 0
+    },
+    "diagnostic-build": {
+      "status": "passed"
+    },
+    "diagnostics": {
+      "passed": 21,
+      "failed": 0
+    },
+    "ffi": {
+      "passed": 35,
+      "failed": 0
+    },
+    "metrics": {
+      "passed": 19,
+      "failed": 0
+    },
+    "previous-report": {
+      "passed": 5,
+      "failed": 0
+    },
+    "previous-schedule": {
+      "passed": 6,
+      "failed": 0
+    },
+    "protocol": {
+      "passed": 28,
+      "failed": 0
+    },
+    "pull": {
+      "passed": 23,
+      "failed": 0
+    },
+    "release": {
+      "status": "passed"
+    },
+    "report": {
+      "passed": 5,
+      "failed": 0
+    },
+    "rust-window": {
+      "passed": 145,
+      "failed": 0,
+      "ignored": 12
+    },
+    "rust": {
+      "passed": 145,
+      "failed": 0,
+      "ignored": 12
+    },
+    "schedule": {
+      "passed": 6,
+      "failed": 0
+    }
+  },
+  "benchmark": {
+    "offered": 768000,
+    "completed": 744656,
+    "rejected": 23344,
+    "errors": 0,
+    "retries": 0,
+    "full_content_checks": 132,
+    "reopens": 18
+  },
+  "limitations": "Process exit tests are not physical power-loss proof. Primary and supplemental trials use independent successful-update oracles. Defaults unchanged.",
+  "archive_hashes_verified": true
+}

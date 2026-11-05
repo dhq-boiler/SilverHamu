@@ -18,7 +18,7 @@ class CounterTests(protocol.ServiceTests):
             self.assertEqual(self.ok(a, op='ping')['version'], '0')
             return
         self.assertTrue(first['ok'])
-        self.assertEqual(first, {'ok': True, 'version': '0', 'sync_attempts': 0})
+        self.assertEqual({k:first[k] for k in ['ok','version','sync_attempts']}, {'ok': True, 'version': '0', 'sync_attempts': 0})
         self.ok(a, op='begin')
         self.ok(a, op='put', key='01', value='aa')
         self.assertEqual(self.ok(a, op='benchmark_counters'), first)

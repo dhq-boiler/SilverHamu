@@ -25,8 +25,6 @@ use fixed_log::LogFile as WalFile;
 type WalFile = File;
 #[path = "reclamation.rs"]
 mod reclamation;
-#[path = "reclamation_plan.rs"]
-mod reclamation_plan;
 #[path = "retirement.rs"]
 mod retirement;
 #[cfg(feature = "commit-window")]
@@ -981,9 +979,7 @@ impl Database {
     }
 
     pub fn set_background_reclamation(&self, enabled: bool) -> Result<()> {
-        self.inner
-            .reclaimer
-            .set(enabled, &self.inner.state, &self.inner.budget)?;
+        self.inner.reclaimer.set(enabled, &self.inner.state)?;
         Ok(())
     }
 

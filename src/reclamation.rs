@@ -1,5 +1,4 @@
-use super::{State, reclamation_plan::Plan, wrap_state};
-use crate::resources::Budget;
+use super::{State, wrap_state};
 use std::io;
 use std::sync::{
     Arc, Condvar, Mutex,
@@ -91,12 +90,7 @@ impl Reclaimer {
     pub fn enabled(&self) -> bool {
         self.enabled.load(Ordering::Acquire)
     }
-    pub fn set(
-        &self,
-        enabled: bool,
-        state: &Arc<Mutex<State>>,
-        budget: &Arc<Budget>,
-    ) -> io::Result<()> {
+    pub fn set(&self, enabled: bool, state: &Arc<Mutex<State>>) -> io::Result<()> {
         let mut worker = self
             .worker
             .lock()
@@ -114,10 +108,9 @@ impl Reclaimer {
             // Owning Inner would retain the owner file indefinitely or join this very thread.
             let shared = state.clone();
             let counters = self.counters.clone();
-            let budget = budget.clone();
             let handle = thread::Builder::new()
                 .name("catdb-reclaim".into())
-                .spawn(move || run(shared, signal, counters, budget))?;
+                .spawn(move || run(shared, signal, counters))?;
             *worker = Some(Worker { stop, handle });
             self.enabled.store(true, Ordering::Release);
         } else {
@@ -154,26 +147,16 @@ impl Drop for WorkerClock<'_> {
             .fetch_add(self.started.elapsed().as_nanos() as u64, Ordering::Relaxed);
     }
 }
-fn run(
-    state: Arc<Mutex<State>>,
-    stop: Arc<(Mutex<bool>, Condvar)>,
-    counters: Arc<Counters>,
-    budget: Arc<Budget>,
-) {
+fn run(state: Arc<Mutex<State>>, stop: Arc<(Mutex<bool>, Condvar)>, counters: Arc<Counters>) {
     #[cfg(feature = "lock-timing")]
     let _clock = WorkerClock {
         counters: &counters,
         started: std::time::Instant::now(),
     };
     let mut burst = 0;
-    let mut plan: Option<Plan> = None;
-    let mut needs_plan = false;
     loop {
         if *stop.0.lock().unwrap_or_else(|e| e.into_inner()) {
             return;
-        }
-        if needs_plan && plan.is_none() {
-            plan = Plan::allocate(&budget).ok();
         }
         counters.busy.store(true, Ordering::Release);
         let busy = Busy(&counters.busy);
@@ -189,44 +172,9 @@ fn run(
                     counters.io_deferrals.fetch_add(1, Ordering::Relaxed);
                     None
                 } else {
-                    if plan.is_none() && !needs_plan && guard.gc_pending() {
-                        needs_plan = true;
-                        counters
-                            .hold_max_ns
-                            .fetch_max(started.elapsed().as_nanos() as u64, Ordering::Relaxed);
-                        drop(guard);
-                        #[cfg(feature = "lock-timing")]
-                        counters
-                            .work_ns
-                            .fetch_add(started.elapsed().as_nanos() as u64, Ordering::Relaxed);
-                        continue;
-                    }
-                    let mut retired = None;
-                    if let Some(prepared) = plan.as_mut() {
-                        if prepared.ready() {
-                            prepared.apply(&mut guard);
-                        } else if prepared.capture(&mut guard) {
-                            counters
-                                .hold_max_ns
-                                .fetch_max(started.elapsed().as_nanos() as u64, Ordering::Relaxed);
-                            drop(guard);
-                            #[cfg(feature = "lock-timing")]
-                            counters
-                                .work_ns
-                                .fetch_add(started.elapsed().as_nanos() as u64, Ordering::Relaxed);
-                            prepared.prepare();
-                            continue;
-                        }
-                    } else {
-                        // Buffer pressure must not prevent the collector from releasing retained data.
-                        retired = Some(guard.collect());
-                    }
+                    let retired = guard.collect();
                     let pending = guard.gc_pending();
-                    needs_plan = pending;
-                    let charge = plan.as_ref().map_or_else(
-                        || retired.as_ref().map_or(0, |r| r.charge),
-                        Plan::reclaimed_bytes,
-                    );
+                    let charge = retired.charge;
                     counters
                         .hold_max_ns
                         .fetch_max(started.elapsed().as_nanos() as u64, Ordering::Relaxed);
@@ -239,7 +187,6 @@ fn run(
                     #[cfg(feature = "lock-timing")]
                     let freeing = std::time::Instant::now();
                     drop(retired);
-                    drop(plan.take());
                     #[cfg(feature = "lock-timing")]
                     counters
                         .free_ns

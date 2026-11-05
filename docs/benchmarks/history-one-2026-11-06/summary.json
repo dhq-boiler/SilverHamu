@@ -1,0 +1,4567 @@
+{
+  "counts": {
+    "attempted": 384000,
+    "completed": 384000,
+    "queue_rejected": 0,
+    "errors": 0,
+    "passed": 24,
+    "full_checks": 102,
+    "failed": 6
+  },
+  "cases": [
+    {
+      "name": "r1-n1000000-c1-m1024",
+      "rows": 1000000,
+      "cpus": 1,
+      "memory_mib": 1024,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": 671088640,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999806444,
+          "start_ns": 111230360741273,
+          "finish_ns": 111238360547717,
+          "completed": 8000,
+          "ops_s": 1000.024195085388,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.433181,
+          "max_ms": 1.034031,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.433181
+            }
+          },
+          "host_begin_ns": 1145141656000000,
+          "host_end_ns": 1145150281000000,
+          "sampled_cpu_cores": 0.09762851595150969,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.118998,
+          "client_queue_p99_ms": 0.091288,
+          "request_p99_ms": 0.290309
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999852676,
+          "start_ns": 111245141913548,
+          "finish_ns": 111253141766224,
+          "completed": 8000,
+          "ops_s": 1000.0184158391369,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 6.431177,
+          "max_ms": 25.860604,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 20.013391
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.402546
+            }
+          },
+          "host_begin_ns": 1145156796000000,
+          "host_end_ns": 1145165609000000,
+          "sampled_cpu_cores": 0.11438378748288971,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.106883,
+          "client_queue_p99_ms": 0.096651,
+          "request_p99_ms": 6.22051
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 800.676547,
+          "launch_to_ready_ms": 1718.000000109896
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1208.2216650014743,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:25:12.597828337Z",
+        "FinishedAt": "2026-11-05T23:25:51.888154772Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 858.316375,
+          "launch_to_ready_ms": 1797.000000020489
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1208.8722979970044,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 382,
+          "cgroup_peak_mib": 541.53515625,
+          "sampled_rss_max_mib": 521.671875,
+          "sampled_file_max_mib": 2.0859375,
+          "oom_kills": 0,
+          "cpu_usec": 10467104,
+          "throttled_usec": 26650
+        },
+        "reopen": {
+          "samples": 85,
+          "cgroup_peak_mib": 528.53125,
+          "sampled_rss_max_mib": 520.84375,
+          "sampled_file_max_mib": 0.13671875,
+          "oom_kills": 0,
+          "cpu_usec": 3883823,
+          "throttled_usec": 33390
+        }
+      },
+      "cohort": "before",
+      "scale": "million",
+      "round": 1,
+      "raw_directory": "million-before-r1"
+    },
+    {
+      "name": "r1-n1000000-c2-m1024",
+      "rows": 1000000,
+      "cpus": 2,
+      "memory_mib": 1024,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": 671088640,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999692322,
+          "start_ns": 111285564073663,
+          "finish_ns": 111293563765985,
+          "completed": 8000,
+          "ops_s": 1000.0384612292094,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.426491,
+          "max_ms": 1.657748,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.426491
+            }
+          },
+          "host_begin_ns": 1145198203000000,
+          "host_end_ns": 1145206859000000,
+          "sampled_cpu_cores": 0.09465996044704399,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.115854,
+          "client_queue_p99_ms": 0.086341,
+          "request_p99_ms": 0.274876
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999795216,
+          "start_ns": 111300305324541,
+          "finish_ns": 111308305119757,
+          "completed": 8000,
+          "ops_s": 1000.0255986552744,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 5.574189,
+          "max_ms": 12.982072,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.426808
+            },
+            "write": {
+              "completed": 1600,
+              "p99_ms": 7.88942
+            }
+          },
+          "host_begin_ns": 1145213328000000,
+          "host_end_ns": 1145222125000000,
+          "sampled_cpu_cores": 0.11644639922356236,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.118043,
+          "client_queue_p99_ms": 0.089155,
+          "request_p99_ms": 5.435499
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 785.572203,
+          "launch_to_ready_ms": 1734.0000001713634
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1208.2226339989575,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:26:08.181361688Z",
+        "FinishedAt": "2026-11-05T23:26:48.255526968Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 803.34794,
+          "launch_to_ready_ms": 1688.0000000819564
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1208.2732859998941,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 382,
+          "cgroup_peak_mib": 540.08203125,
+          "sampled_rss_max_mib": 521.6796875,
+          "sampled_file_max_mib": 1.04296875,
+          "oom_kills": 0,
+          "cpu_usec": 10471853,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 85,
+          "cgroup_peak_mib": 529.1640625,
+          "sampled_rss_max_mib": 520.75390625,
+          "sampled_file_max_mib": 0.13671875,
+          "oom_kills": 0,
+          "cpu_usec": 3863227,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "before",
+      "scale": "million",
+      "round": 1,
+      "raw_directory": "million-before-r1"
+    },
+    {
+      "name": "r1-n1000000-c1-m512",
+      "rows": 1000000,
+      "cpus": 1,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": 671088640,
+      "status": "failed",
+      "verification": [
+        {
+          "phase": "rescue",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        }
+      ],
+      "measurements": [],
+      "error": "Traceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 105, in <module>\n    with connect() as c:require(c.request(op='ping'))\n         ^^^^^^^^^\n  File \"/bench-src/resource-envelope/client.py\", line 8, in connect\n    def connect(): return Client('database',7400,TOKEN,timeout=30)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/bench/catdb_client.py\", line 12, in __init__\n    self.socket = socket.create_connection((host, port), timeout)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nConnectionRefusedError: [Errno 111] Connection refused\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 113, in <module>\n    if ended.exists():raise RuntimeError('server exited before ready: '+ended.read_text()+' '+(DATA/f'{phase}-server.log').read_text())\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: server exited before ready: {\"returncode\": -9} \n",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": true,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:27:04.30925054Z",
+        "FinishedAt": "2026-11-05T23:27:05.863709703Z"
+      },
+      "rescue": {
+        "timing": {
+          "ready_wait_ms": 868.419948,
+          "launch_to_ready_ms": 1765.0000001303852
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1208.4096160106128,
+          "poll_resolution_ms": 100
+        }
+      },
+      "rescue_verified": true,
+      "resource_summary": {
+        "boot": {
+          "samples": 14,
+          "cgroup_peak_mib": 512.0,
+          "sampled_rss_max_mib": 504.9609375,
+          "sampled_file_max_mib": 0.02734375,
+          "oom_kills": 1,
+          "cpu_usec": 1326369,
+          "throttled_usec": 28849
+        },
+        "rescue": {
+          "samples": 88,
+          "cgroup_peak_mib": 528.53515625,
+          "sampled_rss_max_mib": 520.8125,
+          "sampled_file_max_mib": 0.140625,
+          "oom_kills": 0,
+          "cpu_usec": 3962773,
+          "throttled_usec": 31862
+        }
+      },
+      "failure_kind": "oom",
+      "cohort": "before",
+      "scale": "million",
+      "round": 1,
+      "raw_directory": "million-before-r1"
+    },
+    {
+      "name": "r1-n1000000-c2-m512",
+      "rows": 1000000,
+      "cpus": 2,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": 671088640,
+      "status": "failed",
+      "verification": [
+        {
+          "phase": "rescue",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        }
+      ],
+      "measurements": [],
+      "error": "Traceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 105, in <module>\n    with connect() as c:require(c.request(op='ping'))\n         ^^^^^^^^^\n  File \"/bench-src/resource-envelope/client.py\", line 8, in connect\n    def connect(): return Client('database',7400,TOKEN,timeout=30)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/bench/catdb_client.py\", line 12, in __init__\n    self.socket = socket.create_connection((host, port), timeout)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nTimeoutError: timed out\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 113, in <module>\n    if ended.exists():raise RuntimeError('server exited before ready: '+ended.read_text()+' '+(DATA/f'{phase}-server.log').read_text())\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: server exited before ready: {\"returncode\": -9} \n",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": true,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:27:22.68221627Z",
+        "FinishedAt": "2026-11-05T23:27:24.125183656Z"
+      },
+      "rescue": {
+        "timing": {
+          "ready_wait_ms": 846.266002,
+          "launch_to_ready_ms": 1750.0
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1208.512048004195,
+          "poll_resolution_ms": 100
+        }
+      },
+      "rescue_verified": true,
+      "resource_summary": {
+        "boot": {
+          "samples": 13,
+          "cgroup_peak_mib": 512.0,
+          "sampled_rss_max_mib": 503.1484375,
+          "sampled_file_max_mib": 0.02734375,
+          "oom_kills": 1,
+          "cpu_usec": 1269293,
+          "throttled_usec": 0
+        },
+        "rescue": {
+          "samples": 84,
+          "cgroup_peak_mib": 528.84375,
+          "sampled_rss_max_mib": 520.73046875,
+          "sampled_file_max_mib": 0.14453125,
+          "oom_kills": 0,
+          "cpu_usec": 3859961,
+          "throttled_usec": 0
+        }
+      },
+      "failure_kind": "oom",
+      "cohort": "before",
+      "scale": "million",
+      "round": 1,
+      "raw_directory": "million-before-r1"
+    },
+    {
+      "name": "r1-n100000-c1-m512",
+      "rows": 100000,
+      "cpus": 1,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": null,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999695212,
+          "start_ns": 111402252959508,
+          "finish_ns": 111410252654720,
+          "completed": 8000,
+          "ops_s": 1000.038099951551,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.431081,
+          "max_ms": 1.155699,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.431081
+            }
+          },
+          "host_begin_ns": 1145317781000000,
+          "host_end_ns": 1145326437000000,
+          "sampled_cpu_cores": 0.09287237542828539,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.166206,
+          "client_queue_p99_ms": 0.086394,
+          "request_p99_ms": 0.253253
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999754991,
+          "start_ns": 111411673512443,
+          "finish_ns": 111419673267434,
+          "completed": 8000,
+          "ops_s": 1000.0306270629883,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 6.213205,
+          "max_ms": 31.155231,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.432941
+            },
+            "write": {
+              "completed": 1600,
+              "p99_ms": 20.311874
+            }
+          },
+          "host_begin_ns": 1145327453000000,
+          "host_end_ns": 1145336265000000,
+          "sampled_cpu_cores": 0.1140910427677099,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.103087,
+          "client_queue_p99_ms": 0.090053,
+          "request_p99_ms": 6.081518
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 6.104334,
+          "launch_to_ready_ms": 905.9999999590218
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.7841810011305,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:28:14.04705464Z",
+        "FinishedAt": "2026-11-05T23:28:36.386747218Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 9.230371,
+          "launch_to_ready_ms": 890.9999998286366
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.7593820055481,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 213,
+          "cgroup_peak_mib": 74.08203125,
+          "sampled_rss_max_mib": 55.59375,
+          "sampled_file_max_mib": 0.80078125,
+          "oom_kills": 0,
+          "cpu_usec": 2804767,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 22,
+          "cgroup_peak_mib": 61.515625,
+          "sampled_rss_max_mib": 54.67578125,
+          "sampled_file_max_mib": 0.046875,
+          "oom_kills": 0,
+          "cpu_usec": 502648,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "before",
+      "scale": "control",
+      "round": 1,
+      "raw_directory": "control-before-r1"
+    },
+    {
+      "name": "r1-n1000000-c1-m1024",
+      "rows": 1000000,
+      "cpus": 1,
+      "memory_mib": 1024,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": 671088640,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.99959979,
+          "start_ns": 111450971819320,
+          "finish_ns": 111458971419110,
+          "completed": 8000,
+          "ops_s": 1000.0500287527508,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.423083,
+          "max_ms": 0.913783,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.423083
+            }
+          },
+          "host_begin_ns": 1145367687000000,
+          "host_end_ns": 1145376328000000,
+          "sampled_cpu_cores": 0.09850776866985317,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.111368,
+          "client_queue_p99_ms": 0.084581,
+          "request_p99_ms": 0.281761
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999841648,
+          "start_ns": 111465588542948,
+          "finish_ns": 111473588384596,
+          "completed": 8000,
+          "ops_s": 1000.0197943918101,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 5.380497,
+          "max_ms": 13.888555,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.386288
+            },
+            "write": {
+              "completed": 1600,
+              "p99_ms": 8.358092
+            }
+          },
+          "host_begin_ns": 1145382671000000,
+          "host_end_ns": 1145391484000000,
+          "sampled_cpu_cores": 0.11339752768376529,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.099548,
+          "client_queue_p99_ms": 0.078662,
+          "request_p99_ms": 5.26583
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 683.229434,
+          "launch_to_ready_ms": 1594.0000000409782
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1107.6097530021798,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:28:58.363441916Z",
+        "FinishedAt": "2026-11-05T23:29:37.168759213Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 820.870549,
+          "launch_to_ready_ms": 1781.0000001918525
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1209.5673879957758,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 377,
+          "cgroup_peak_mib": 465.38671875,
+          "sampled_rss_max_mib": 446.54296875,
+          "sampled_file_max_mib": 1.0390625,
+          "oom_kills": 0,
+          "cpu_usec": 10179125,
+          "throttled_usec": 27681
+        },
+        "reopen": {
+          "samples": 86,
+          "cgroup_peak_mib": 453.10546875,
+          "sampled_rss_max_mib": 445.6328125,
+          "sampled_file_max_mib": 0.13671875,
+          "oom_kills": 0,
+          "cpu_usec": 3898316,
+          "throttled_usec": 31495
+        }
+      },
+      "cohort": "after",
+      "scale": "million",
+      "round": 1,
+      "raw_directory": "million-after-r1"
+    },
+    {
+      "name": "r1-n1000000-c2-m1024",
+      "rows": 1000000,
+      "cpus": 2,
+      "memory_mib": 1024,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": 671088640,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.99971264,
+          "start_ns": 111505599329764,
+          "finish_ns": 111513599042404,
+          "completed": 8000,
+          "ops_s": 1000.0359212902927,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.386842,
+          "max_ms": 1.002816,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.386842
+            }
+          },
+          "host_begin_ns": 1145423656000000,
+          "host_end_ns": 1145432328000000,
+          "sampled_cpu_cores": 0.09284906675690544,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.100223,
+          "client_queue_p99_ms": 0.076313,
+          "request_p99_ms": 0.251594
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.99981108,
+          "start_ns": 111520352318149,
+          "finish_ns": 111528352129229,
+          "completed": 8000,
+          "ops_s": 1000.0236155576814,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 5.180177,
+          "max_ms": 8.878228,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.399289
+            },
+            "write": {
+              "completed": 1600,
+              "p99_ms": 6.83456
+            }
+          },
+          "host_begin_ns": 1145438828000000,
+          "host_end_ns": 1145447640000000,
+          "sampled_cpu_cores": 0.1116980111697899,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.114019,
+          "client_queue_p99_ms": 0.085386,
+          "request_p99_ms": 5.067203
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 712.768928,
+          "launch_to_ready_ms": 1640.0000001303852
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1107.7930859901244,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:29:54.19915006Z",
+        "FinishedAt": "2026-11-05T23:30:33.354590081Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 772.112545,
+          "launch_to_ready_ms": 1702.999999979511
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1108.2515360030811,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 380,
+          "cgroup_peak_mib": 464.8984375,
+          "sampled_rss_max_mib": 446.50390625,
+          "sampled_file_max_mib": 1.0390625,
+          "oom_kills": 0,
+          "cpu_usec": 10268118,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 87,
+          "cgroup_peak_mib": 453.75,
+          "sampled_rss_max_mib": 445.66796875,
+          "sampled_file_max_mib": 0.14453125,
+          "oom_kills": 0,
+          "cpu_usec": 3801393,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "after",
+      "scale": "million",
+      "round": 1,
+      "raw_directory": "million-after-r1"
+    },
+    {
+      "name": "r1-n1000000-c1-m512",
+      "rows": 1000000,
+      "cpus": 1,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": 671088640,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999642886,
+          "start_ns": 111560447253475,
+          "finish_ns": 111568446896361,
+          "completed": 8000,
+          "ops_s": 1000.0446412427516,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.412283,
+          "max_ms": 1.590233,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.412283
+            }
+          },
+          "host_begin_ns": 1145479890000000,
+          "host_end_ns": 1145488531000000,
+          "sampled_cpu_cores": 0.09445648626408434,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.105047,
+          "client_queue_p99_ms": 0.077016,
+          "request_p99_ms": 0.275906
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999762442,
+          "start_ns": 111574961792280,
+          "finish_ns": 111582961554722,
+          "completed": 8000,
+          "ops_s": 1000.0296956318044,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 5.033554,
+          "max_ms": 9.964799,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.414786
+            },
+            "write": {
+              "completed": 1600,
+              "p99_ms": 6.810841
+            }
+          },
+          "host_begin_ns": 1145494781000000,
+          "host_end_ns": 1145503578000000,
+          "sampled_cpu_cores": 0.11728842506925821,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.123003,
+          "client_queue_p99_ms": 0.084675,
+          "request_p99_ms": 4.938617
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 859.092718,
+          "launch_to_ready_ms": 1827.999999979511
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1309.9621629953617,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:30:50.375615809Z",
+        "FinishedAt": "2026-11-05T23:31:29.404846353Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 787.577926,
+          "launch_to_ready_ms": 1703.0000002123415
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1107.9049830004806,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 379,
+          "cgroup_peak_mib": 465.72265625,
+          "sampled_rss_max_mib": 446.53125,
+          "sampled_file_max_mib": 1.046875,
+          "oom_kills": 0,
+          "cpu_usec": 10443246,
+          "throttled_usec": 30781
+        },
+        "reopen": {
+          "samples": 83,
+          "cgroup_peak_mib": 453.3046875,
+          "sampled_rss_max_mib": 445.62890625,
+          "sampled_file_max_mib": 0.1328125,
+          "oom_kills": 0,
+          "cpu_usec": 3746964,
+          "throttled_usec": 29273
+        }
+      },
+      "cohort": "after",
+      "scale": "million",
+      "round": 1,
+      "raw_directory": "million-after-r1"
+    },
+    {
+      "name": "r1-n1000000-c2-m512",
+      "rows": 1000000,
+      "cpus": 2,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": 671088640,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999652188,
+          "start_ns": 111614187667854,
+          "finish_ns": 111622187320042,
+          "completed": 8000,
+          "ops_s": 1000.0434783902882,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.410707,
+          "max_ms": 1.381948,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.410707
+            }
+          },
+          "host_begin_ns": 1145535015000000,
+          "host_end_ns": 1145543671000000,
+          "sampled_cpu_cores": 0.09623497220975225,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.09167,
+          "client_queue_p99_ms": 0.078941,
+          "request_p99_ms": 0.281675
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999954243,
+          "start_ns": 111628732607828,
+          "finish_ns": 111636732562071,
+          "completed": 8000,
+          "ops_s": 1000.0057196577143,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 5.214865,
+          "max_ms": 13.609259,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.433997
+            },
+            "write": {
+              "completed": 1600,
+              "p99_ms": 6.469051
+            }
+          },
+          "host_begin_ns": 1145549984000000,
+          "host_end_ns": 1145558843000000,
+          "sampled_cpu_cores": 0.11368740595099504,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.133549,
+          "client_queue_p99_ms": 0.087529,
+          "request_p99_ms": 5.100274
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 692.434157,
+          "launch_to_ready_ms": 1625.0
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1108.5440179886064,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:31:45.201081658Z",
+        "FinishedAt": "2026-11-05T23:32:25.208439142Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 709.712539,
+          "launch_to_ready_ms": 1640.0000001303852
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1108.0179339915048,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 380,
+          "cgroup_peak_mib": 466.0703125,
+          "sampled_rss_max_mib": 446.53125,
+          "sampled_file_max_mib": 1.0390625,
+          "oom_kills": 0,
+          "cpu_usec": 10372622,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 83,
+          "cgroup_peak_mib": 453.33203125,
+          "sampled_rss_max_mib": 445.63671875,
+          "sampled_file_max_mib": 0.1328125,
+          "oom_kills": 0,
+          "cpu_usec": 3715433,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "after",
+      "scale": "million",
+      "round": 1,
+      "raw_directory": "million-after-r1"
+    },
+    {
+      "name": "r1-n100000-c1-m512",
+      "rows": 100000,
+      "cpus": 1,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": null,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999780512,
+          "start_ns": 111665863649434,
+          "finish_ns": 111673863429946,
+          "completed": 8000,
+          "ops_s": 1000.0274367527547,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.401038,
+          "max_ms": 1.166586,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.401038
+            }
+          },
+          "host_begin_ns": 1145588046000000,
+          "host_end_ns": 1145596671000000,
+          "sampled_cpu_cores": 0.09146064765081584,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.119116,
+          "client_queue_p99_ms": 0.075667,
+          "request_p99_ms": 0.262193
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999827085,
+          "start_ns": 111675313443440,
+          "finish_ns": 111683313270525,
+          "completed": 8000,
+          "ops_s": 1000.0216148421913,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.579044,
+          "max_ms": 13.483067,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 5.773221
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.407763
+            }
+          },
+          "host_begin_ns": 1145597734000000,
+          "host_end_ns": 1145606546000000,
+          "sampled_cpu_cores": 0.10871971490895622,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.124864,
+          "client_queue_p99_ms": 0.088281,
+          "request_p99_ms": 4.45342
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 8.319621,
+          "launch_to_ready_ms": 938.0000000819564
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 100.80365199246444,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:32:44.577563855Z",
+        "FinishedAt": "2026-11-05T23:33:06.794956085Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 7.464144,
+          "launch_to_ready_ms": 906.0000001918525
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.571336001507,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 212,
+          "cgroup_peak_mib": 66.47265625,
+          "sampled_rss_max_mib": 48.171875,
+          "sampled_file_max_mib": 0.80078125,
+          "oom_kills": 0,
+          "cpu_usec": 2711111,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 22,
+          "cgroup_peak_mib": 53.62109375,
+          "sampled_rss_max_mib": 47.328125,
+          "sampled_file_max_mib": 0.046875,
+          "oom_kills": 0,
+          "cpu_usec": 459598,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "after",
+      "scale": "control",
+      "round": 1,
+      "raw_directory": "control-after-r1"
+    },
+    {
+      "name": "r1-n1000000-c1-m1024",
+      "rows": 1000000,
+      "cpus": 1,
+      "memory_mib": 1024,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": 671088640,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999672286,
+          "start_ns": 111713978504451,
+          "finish_ns": 111721978176737,
+          "completed": 8000,
+          "ops_s": 1000.0409659281386,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.425103,
+          "max_ms": 0.920196,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.425103
+            }
+          },
+          "host_begin_ns": 1145637390000000,
+          "host_end_ns": 1145646031000000,
+          "sampled_cpu_cores": 0.0923977242761553,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.143769,
+          "client_queue_p99_ms": 0.087422,
+          "request_p99_ms": 0.266971
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 8.000008542,
+          "start_ns": 111728536100648,
+          "finish_ns": 111736536109190,
+          "completed": 8000,
+          "ops_s": 999.9989322511401,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.905753,
+          "max_ms": 13.731734,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 7.184865
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.403302
+            }
+          },
+          "host_begin_ns": 1145652312000000,
+          "host_end_ns": 1145661140000000,
+          "sampled_cpu_cores": 0.11045254089539937,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.103717,
+          "client_queue_p99_ms": 0.077725,
+          "request_p99_ms": 4.796992
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 788.747569,
+          "launch_to_ready_ms": 1719.0000000409782
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1208.7699240073562,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:33:28.214605829Z",
+        "FinishedAt": "2026-11-05T23:34:06.988275344Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 752.410881,
+          "launch_to_ready_ms": 1625.0
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1108.28723499435,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 376,
+          "cgroup_peak_mib": 465.42578125,
+          "sampled_rss_max_mib": 446.46875,
+          "sampled_file_max_mib": 1.03515625,
+          "oom_kills": 0,
+          "cpu_usec": 10176420,
+          "throttled_usec": 31151
+        },
+        "reopen": {
+          "samples": 85,
+          "cgroup_peak_mib": 453.5703125,
+          "sampled_rss_max_mib": 445.65625,
+          "sampled_file_max_mib": 0.13671875,
+          "oom_kills": 0,
+          "cpu_usec": 3728919,
+          "throttled_usec": 33183
+        }
+      },
+      "cohort": "after",
+      "scale": "million",
+      "round": 2,
+      "raw_directory": "million-after-r2"
+    },
+    {
+      "name": "r1-n1000000-c2-m1024",
+      "rows": 1000000,
+      "cpus": 2,
+      "memory_mib": 1024,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": 671088640,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999613486,
+          "start_ns": 111767805618791,
+          "finish_ns": 111775805232277,
+          "completed": 8000,
+          "ops_s": 1000.0483165843794,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.412471,
+          "max_ms": 2.666575,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.412471
+            }
+          },
+          "host_begin_ns": 1145692625000000,
+          "host_end_ns": 1145701250000000,
+          "sampled_cpu_cores": 0.0930186603466052,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.104167,
+          "client_queue_p99_ms": 0.076874,
+          "request_p99_ms": 0.265727
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999810298,
+          "start_ns": 111782662456173,
+          "finish_ns": 111790662266471,
+          "completed": 8000,
+          "ops_s": 1000.0237133123079,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.678275,
+          "max_ms": 13.749302,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.414626
+            },
+            "write": {
+              "completed": 1600,
+              "p99_ms": 5.749978
+            }
+          },
+          "host_begin_ns": 1145707843000000,
+          "host_end_ns": 1145716671000000,
+          "sampled_cpu_cores": 0.11062506206001092,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.133234,
+          "client_queue_p99_ms": 0.092151,
+          "request_p99_ms": 4.559034
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 682.668725,
+          "launch_to_ready_ms": 1593.000000109896
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1107.9996280022897,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:34:22.923646875Z",
+        "FinishedAt": "2026-11-05T23:35:02.730261947Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 700.580243,
+          "launch_to_ready_ms": 1594.0000000409782
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1107.626651006285,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 379,
+          "cgroup_peak_mib": 464.38671875,
+          "sampled_rss_max_mib": 446.4609375,
+          "sampled_file_max_mib": 1.0390625,
+          "oom_kills": 0,
+          "cpu_usec": 10232418,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 83,
+          "cgroup_peak_mib": 453.25390625,
+          "sampled_rss_max_mib": 445.59765625,
+          "sampled_file_max_mib": 0.1328125,
+          "oom_kills": 0,
+          "cpu_usec": 3704888,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "after",
+      "scale": "million",
+      "round": 2,
+      "raw_directory": "million-after-r2"
+    },
+    {
+      "name": "r1-n1000000-c1-m512",
+      "rows": 1000000,
+      "cpus": 1,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": 671088640,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999678622,
+          "start_ns": 111822026334015,
+          "finish_ns": 111830026012637,
+          "completed": 8000,
+          "ops_s": 1000.0401738638744,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.414517,
+          "max_ms": 0.974249,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.414517
+            }
+          },
+          "host_begin_ns": 1145748218000000,
+          "host_end_ns": 1145756843000000,
+          "sampled_cpu_cores": 0.09392754851072546,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.128285,
+          "client_queue_p99_ms": 0.083005,
+          "request_p99_ms": 0.267208
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999791446,
+          "start_ns": 111836608510653,
+          "finish_ns": 111844608302099,
+          "completed": 8000,
+          "ops_s": 1000.0260699296235,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.921296,
+          "max_ms": 13.747677,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 7.00629
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.43463
+            }
+          },
+          "host_begin_ns": 1145763156000000,
+          "host_end_ns": 1145772000000000,
+          "sampled_cpu_cores": 0.11233208113232211,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.153965,
+          "client_queue_p99_ms": 0.089541,
+          "request_p99_ms": 4.813468
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 767.819521,
+          "launch_to_ready_ms": 1797.000000020489
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1107.4063359992579,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:35:18.5550606Z",
+        "FinishedAt": "2026-11-05T23:35:58.059029883Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 707.678178,
+          "launch_to_ready_ms": 1625.0
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1108.3634909882676,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 376,
+          "cgroup_peak_mib": 464.66015625,
+          "sampled_rss_max_mib": 446.4921875,
+          "sampled_file_max_mib": 1.03515625,
+          "oom_kills": 0,
+          "cpu_usec": 10253777,
+          "throttled_usec": 28757
+        },
+        "reopen": {
+          "samples": 83,
+          "cgroup_peak_mib": 453.0859375,
+          "sampled_rss_max_mib": 445.48828125,
+          "sampled_file_max_mib": 0.1328125,
+          "oom_kills": 0,
+          "cpu_usec": 3688733,
+          "throttled_usec": 23485
+        }
+      },
+      "cohort": "after",
+      "scale": "million",
+      "round": 2,
+      "raw_directory": "million-after-r2"
+    },
+    {
+      "name": "r1-n1000000-c2-m512",
+      "rows": 1000000,
+      "cpus": 2,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": 671088640,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999638083,
+          "start_ns": 111875837068561,
+          "finish_ns": 111883836706644,
+          "completed": 8000,
+          "ops_s": 1000.0452416717163,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.423441,
+          "max_ms": 0.965039,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.423441
+            }
+          },
+          "host_begin_ns": 1145803421000000,
+          "host_end_ns": 1145812062000000,
+          "sampled_cpu_cores": 0.09284463132032779,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.145313,
+          "client_queue_p99_ms": 0.08519,
+          "request_p99_ms": 0.260767
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999961773,
+          "start_ns": 111890593027448,
+          "finish_ns": 111898592989221,
+          "completed": 8000,
+          "ops_s": 1000.004778397833,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.89156,
+          "max_ms": 13.482234,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 7.305535
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.400759
+            }
+          },
+          "host_begin_ns": 1145818531000000,
+          "host_end_ns": 1145827390000000,
+          "sampled_cpu_cores": 0.11209802795073924,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.100145,
+          "client_queue_p99_ms": 0.086234,
+          "request_p99_ms": 4.80701
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 824.314879,
+          "launch_to_ready_ms": 1750.0
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1208.0707139975857,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:36:13.907729903Z",
+        "FinishedAt": "2026-11-05T23:36:52.87942063Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 809.762498,
+          "launch_to_ready_ms": 1687.9999998491257
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1208.0888519994915,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 378,
+          "cgroup_peak_mib": 465.44921875,
+          "sampled_rss_max_mib": 446.49609375,
+          "sampled_file_max_mib": 1.0390625,
+          "oom_kills": 0,
+          "cpu_usec": 10478737,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 84,
+          "cgroup_peak_mib": 453.71484375,
+          "sampled_rss_max_mib": 445.62890625,
+          "sampled_file_max_mib": 0.13671875,
+          "oom_kills": 0,
+          "cpu_usec": 3769271,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "after",
+      "scale": "million",
+      "round": 2,
+      "raw_directory": "million-after-r2"
+    },
+    {
+      "name": "r1-n100000-c1-m512",
+      "rows": 100000,
+      "cpus": 1,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": null,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999668207,
+          "start_ns": 111927484269423,
+          "finish_ns": 111935483937630,
+          "completed": 8000,
+          "ops_s": 1000.0414758451744,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.390093,
+          "max_ms": 1.239185,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.390093
+            }
+          },
+          "host_begin_ns": 1145856406000000,
+          "host_end_ns": 1145865062000000,
+          "sampled_cpu_cores": 0.08962876945386102,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.097074,
+          "client_queue_p99_ms": 0.083031,
+          "request_p99_ms": 0.262566
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999692711,
+          "start_ns": 111936972661213,
+          "finish_ns": 111944972353924,
+          "completed": 8000,
+          "ops_s": 1000.0384126004712,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.626275,
+          "max_ms": 8.630418,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.38215
+            },
+            "write": {
+              "completed": 1600,
+              "p99_ms": 6.052022
+            }
+          },
+          "host_begin_ns": 1145866125000000,
+          "host_end_ns": 1145874984000000,
+          "sampled_cpu_cores": 0.1082474667123747,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.098038,
+          "client_queue_p99_ms": 0.082688,
+          "request_p99_ms": 4.508325
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 8.567851,
+          "launch_to_ready_ms": 937.9999998491257
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 100.77456699218601,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:37:13.125316695Z",
+        "FinishedAt": "2026-11-05T23:37:35.487634599Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 10.497766,
+          "launch_to_ready_ms": 889.9999998975545
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.5457969973795,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 213,
+          "cgroup_peak_mib": 65.203125,
+          "sampled_rss_max_mib": 48.0703125,
+          "sampled_file_max_mib": 0.80078125,
+          "oom_kills": 0,
+          "cpu_usec": 2697185,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 22,
+          "cgroup_peak_mib": 53.8828125,
+          "sampled_rss_max_mib": 47.15625,
+          "sampled_file_max_mib": 0.046875,
+          "oom_kills": 0,
+          "cpu_usec": 474445,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "after",
+      "scale": "control",
+      "round": 2,
+      "raw_directory": "control-after-r2"
+    },
+    {
+      "name": "r1-n1000000-c1-m1024",
+      "rows": 1000000,
+      "cpus": 1,
+      "memory_mib": 1024,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": 671088640,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.99956259,
+          "start_ns": 111975614213005,
+          "finish_ns": 111983613775595,
+          "completed": 8000,
+          "ops_s": 1000.0546792396558,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.391559,
+          "max_ms": 1.164842,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.391559
+            }
+          },
+          "host_begin_ns": 1145905796000000,
+          "host_end_ns": 1145914437000000,
+          "sampled_cpu_cores": 0.09692904849705909,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.099536,
+          "client_queue_p99_ms": 0.074842,
+          "request_p99_ms": 0.260221
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999686495,
+          "start_ns": 111990245267646,
+          "finish_ns": 111998244954141,
+          "completed": 8000,
+          "ops_s": 1000.0391896607694,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.611491,
+          "max_ms": 13.558541,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 6.250802
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.422197
+            }
+          },
+          "host_begin_ns": 1145920812000000,
+          "host_end_ns": 1145929656000000,
+          "sampled_cpu_cores": 0.10862464382525787,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.133736,
+          "client_queue_p99_ms": 0.095017,
+          "request_p99_ms": 4.495841
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 835.199643,
+          "launch_to_ready_ms": 1764.9999998975545
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1208.4796800045297,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:37:56.115629383Z",
+        "FinishedAt": "2026-11-05T23:38:35.676830745Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 811.991342,
+          "launch_to_ready_ms": 1703.999999910593
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1208.2327829994028,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 376,
+          "cgroup_peak_mib": 540.2734375,
+          "sampled_rss_max_mib": 521.6640625,
+          "sampled_file_max_mib": 1.03515625,
+          "oom_kills": 0,
+          "cpu_usec": 10234725,
+          "throttled_usec": 35547
+        },
+        "reopen": {
+          "samples": 85,
+          "cgroup_peak_mib": 528.75390625,
+          "sampled_rss_max_mib": 520.80859375,
+          "sampled_file_max_mib": 0.13671875,
+          "oom_kills": 0,
+          "cpu_usec": 3833839,
+          "throttled_usec": 30522
+        }
+      },
+      "cohort": "before",
+      "scale": "million",
+      "round": 2,
+      "raw_directory": "million-before-r2"
+    },
+    {
+      "name": "r1-n1000000-c2-m1024",
+      "rows": 1000000,
+      "cpus": 2,
+      "memory_mib": 1024,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": 671088640,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999709789,
+          "start_ns": 112029812925926,
+          "finish_ns": 112037812635715,
+          "completed": 8000,
+          "ops_s": 1000.0362776910232,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.412851,
+          "max_ms": 1.183612,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.412851
+            }
+          },
+          "host_begin_ns": 1145961421000000,
+          "host_end_ns": 1145970046000000,
+          "sampled_cpu_cores": 0.09328475601914364,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.126543,
+          "client_queue_p99_ms": 0.101647,
+          "request_p99_ms": 0.249477
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999826544,
+          "start_ns": 112044429363795,
+          "finish_ns": 112052429190339,
+          "completed": 8000,
+          "ops_s": 1000.0216824701192,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 5.171079,
+          "max_ms": 28.637855,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.401038
+            },
+            "write": {
+              "completed": 1600,
+              "p99_ms": 7.049603
+            }
+          },
+          "host_begin_ns": 1145976390000000,
+          "host_end_ns": 1145985234000000,
+          "sampled_cpu_cores": 0.11009225093646785,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.140754,
+          "client_queue_p99_ms": 0.08821,
+          "request_p99_ms": 4.946376
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 858.760172,
+          "launch_to_ready_ms": 1781.999999890104
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1208.2805120007833,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:38:51.827213012Z",
+        "FinishedAt": "2026-11-05T23:39:30.669030949Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 807.735408,
+          "launch_to_ready_ms": 1702.999999979511
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1209.0100589994108,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 377,
+          "cgroup_peak_mib": 540.44140625,
+          "sampled_rss_max_mib": 521.61328125,
+          "sampled_file_max_mib": 1.03515625,
+          "oom_kills": 0,
+          "cpu_usec": 10291999,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 86,
+          "cgroup_peak_mib": 529.57421875,
+          "sampled_rss_max_mib": 520.6875,
+          "sampled_file_max_mib": 0.13671875,
+          "oom_kills": 0,
+          "cpu_usec": 3900358,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "before",
+      "scale": "million",
+      "round": 2,
+      "raw_directory": "million-before-r2"
+    },
+    {
+      "name": "r1-n1000000-c1-m512",
+      "rows": 1000000,
+      "cpus": 1,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": 671088640,
+      "status": "failed",
+      "verification": [
+        {
+          "phase": "rescue",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        }
+      ],
+      "measurements": [],
+      "error": "Traceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 105, in <module>\n    with connect() as c:require(c.request(op='ping'))\n         ^^^^^^^^^\n  File \"/bench-src/resource-envelope/client.py\", line 8, in connect\n    def connect(): return Client('database',7400,TOKEN,timeout=30)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/bench/catdb_client.py\", line 12, in __init__\n    self.socket = socket.create_connection((host, port), timeout)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nTimeoutError: timed out\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 113, in <module>\n    if ended.exists():raise RuntimeError('server exited before ready: '+ended.read_text()+' '+(DATA/f'{phase}-server.log').read_text())\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: server exited before ready: {\"returncode\": -9} \n",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": true,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:39:47.436230054Z",
+        "FinishedAt": "2026-11-05T23:39:48.899282996Z"
+      },
+      "rescue": {
+        "timing": {
+          "ready_wait_ms": 914.499183,
+          "launch_to_ready_ms": 1875.0
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1309.5908840041375,
+          "poll_resolution_ms": 100
+        }
+      },
+      "rescue_verified": true,
+      "resource_summary": {
+        "boot": {
+          "samples": 13,
+          "cgroup_peak_mib": 512.0,
+          "sampled_rss_max_mib": 490.84375,
+          "sampled_file_max_mib": 0.02734375,
+          "oom_kills": 1,
+          "cpu_usec": 1270494,
+          "throttled_usec": 29496
+        },
+        "rescue": {
+          "samples": 84,
+          "cgroup_peak_mib": 528.26171875,
+          "sampled_rss_max_mib": 520.734375,
+          "sampled_file_max_mib": 0.13671875,
+          "oom_kills": 0,
+          "cpu_usec": 3887074,
+          "throttled_usec": 35790
+        }
+      },
+      "failure_kind": "oom",
+      "cohort": "before",
+      "scale": "million",
+      "round": 2,
+      "raw_directory": "million-before-r2"
+    },
+    {
+      "name": "r1-n1000000-c2-m512",
+      "rows": 1000000,
+      "cpus": 2,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": 671088640,
+      "status": "failed",
+      "verification": [
+        {
+          "phase": "rescue",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        }
+      ],
+      "measurements": [],
+      "error": "Traceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 105, in <module>\n    with connect() as c:require(c.request(op='ping'))\n         ^^^^^^^^^\n  File \"/bench-src/resource-envelope/client.py\", line 8, in connect\n    def connect(): return Client('database',7400,TOKEN,timeout=30)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/bench/catdb_client.py\", line 12, in __init__\n    self.socket = socket.create_connection((host, port), timeout)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nTimeoutError: timed out\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 113, in <module>\n    if ended.exists():raise RuntimeError('server exited before ready: '+ended.read_text()+' '+(DATA/f'{phase}-server.log').read_text())\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: server exited before ready: {\"returncode\": -9} \n",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": true,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:40:36.220949598Z",
+        "FinishedAt": "2026-11-05T23:40:37.55218078Z"
+      },
+      "rescue": {
+        "timing": {
+          "ready_wait_ms": 909.38728,
+          "launch_to_ready_ms": 1796.9999997876585
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1309.5943369989982,
+          "poll_resolution_ms": 100
+        }
+      },
+      "rescue_verified": true,
+      "resource_summary": {
+        "boot": {
+          "samples": 12,
+          "cgroup_peak_mib": 512.0,
+          "sampled_rss_max_mib": 493.890625,
+          "sampled_file_max_mib": 0.0234375,
+          "oom_kills": 1,
+          "cpu_usec": 1175010,
+          "throttled_usec": 0
+        },
+        "rescue": {
+          "samples": 84,
+          "cgroup_peak_mib": 528.46875,
+          "sampled_rss_max_mib": 520.72265625,
+          "sampled_file_max_mib": 0.14453125,
+          "oom_kills": 0,
+          "cpu_usec": 3916939,
+          "throttled_usec": 0
+        }
+      },
+      "failure_kind": "oom",
+      "cohort": "before",
+      "scale": "million",
+      "round": 2,
+      "raw_directory": "million-before-r2"
+    },
+    {
+      "name": "r1-n100000-c1-m512",
+      "rows": 100000,
+      "cpus": 1,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": null,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999702898,
+          "start_ns": 112175513603526,
+          "finish_ns": 112183513306424,
+          "completed": 8000,
+          "ops_s": 1000.0371391292638,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.416209,
+          "max_ms": 1.565571,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.416209
+            }
+          },
+          "host_begin_ns": 1146110906000000,
+          "host_end_ns": 1146119562000000,
+          "sampled_cpu_cores": 0.0935603692170248,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.098009,
+          "client_queue_p99_ms": 0.080133,
+          "request_p99_ms": 0.282145
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 8.001288454,
+          "start_ns": 112184926545026,
+          "finish_ns": 112192927833480,
+          "completed": 8000,
+          "ops_s": 999.8389691850996,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.81254,
+          "max_ms": 13.644738,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 6.859383
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.385828
+            }
+          },
+          "host_begin_ns": 1146120578000000,
+          "host_end_ns": 1146129437000000,
+          "sampled_cpu_cores": 0.10963629642944941,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.095716,
+          "client_queue_p99_ms": 0.083564,
+          "request_p99_ms": 4.6967
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 8.784278,
+          "launch_to_ready_ms": 891.0000000614673
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.67364500230178,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:41:27.48626986Z",
+        "FinishedAt": "2026-11-05T23:41:49.72373072Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 6.99678,
+          "launch_to_ready_ms": 875.0
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.53990600374527,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 212,
+          "cgroup_peak_mib": 73.05859375,
+          "sampled_rss_max_mib": 55.55078125,
+          "sampled_file_max_mib": 0.80078125,
+          "oom_kills": 0,
+          "cpu_usec": 2728445,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 22,
+          "cgroup_peak_mib": 61.109375,
+          "sampled_rss_max_mib": 54.71484375,
+          "sampled_file_max_mib": 0.046875,
+          "oom_kills": 0,
+          "cpu_usec": 485597,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "before",
+      "scale": "control",
+      "round": 2,
+      "raw_directory": "control-before-r2"
+    },
+    {
+      "name": "r1-n1000000-c1-m1024",
+      "rows": 1000000,
+      "cpus": 1,
+      "memory_mib": 1024,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": 671088640,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999603885,
+          "start_ns": 112224309806988,
+          "finish_ns": 112232309410873,
+          "completed": 8000,
+          "ops_s": 1000.0495168267947,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.435599,
+          "max_ms": 1.498497,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.435599
+            }
+          },
+          "host_begin_ns": 1146160937000000,
+          "host_end_ns": 1146169656000000,
+          "sampled_cpu_cores": 0.10344799817503282,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.1346,
+          "client_queue_p99_ms": 0.087356,
+          "request_p99_ms": 0.281208
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 8.000023779,
+          "start_ns": 112238844359252,
+          "finish_ns": 112246844383030,
+          "completed": 8000,
+          "ops_s": 999.997027633835,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.763729,
+          "max_ms": 13.538575,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.389436
+            },
+            "write": {
+              "completed": 1600,
+              "p99_ms": 6.623111
+            }
+          },
+          "host_begin_ns": 1146175921000000,
+          "host_end_ns": 1146184765000000,
+          "sampled_cpu_cores": 0.11025648278338399,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.108047,
+          "client_queue_p99_ms": 0.083195,
+          "request_p99_ms": 4.653376
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 864.262579,
+          "launch_to_ready_ms": 1811.9999999180436
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1209.221825003624,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:42:11.320004278Z",
+        "FinishedAt": "2026-11-05T23:42:50.513921889Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 845.099334,
+          "launch_to_ready_ms": 1750.0
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1208.87427800335,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 380,
+          "cgroup_peak_mib": 540.3203125,
+          "sampled_rss_max_mib": 521.63671875,
+          "sampled_file_max_mib": 1.04296875,
+          "oom_kills": 0,
+          "cpu_usec": 10474608,
+          "throttled_usec": 31220
+        },
+        "reopen": {
+          "samples": 85,
+          "cgroup_peak_mib": 528.4765625,
+          "sampled_rss_max_mib": 520.7109375,
+          "sampled_file_max_mib": 0.13671875,
+          "oom_kills": 0,
+          "cpu_usec": 3896923,
+          "throttled_usec": 35434
+        }
+      },
+      "cohort": "before",
+      "scale": "million",
+      "round": 3,
+      "raw_directory": "million-before-r3"
+    },
+    {
+      "name": "r1-n1000000-c2-m1024",
+      "rows": 1000000,
+      "cpus": 2,
+      "memory_mib": 1024,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": 671088640,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.99975907,
+          "start_ns": 112278128238711,
+          "finish_ns": 112286127997781,
+          "completed": 8000,
+          "ops_s": 1000.0301171570159,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.408561,
+          "max_ms": 1.150681,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.408561
+            }
+          },
+          "host_begin_ns": 1146216250000000,
+          "host_end_ns": 1146224890000000,
+          "sampled_cpu_cores": 0.09321316493844711,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.103303,
+          "client_queue_p99_ms": 0.077807,
+          "request_p99_ms": 0.265405
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999872003,
+          "start_ns": 112292653257063,
+          "finish_ns": 112300653129066,
+          "completed": 8000,
+          "ops_s": 1000.0159998809921,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.656893,
+          "max_ms": 13.472476,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 6.399417
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.41276
+            }
+          },
+          "host_begin_ns": 1146231156000000,
+          "host_end_ns": 1146239984000000,
+          "sampled_cpu_cores": 0.10946365687986638,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.122364,
+          "client_queue_p99_ms": 0.093036,
+          "request_p99_ms": 4.531326
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 740.608291,
+          "launch_to_ready_ms": 1687.0000001508743
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1107.7250029920833,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:43:06.409614952Z",
+        "FinishedAt": "2026-11-05T23:43:46.066002157Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 816.331968,
+          "launch_to_ready_ms": 1702.999999979511
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1208.9284579997184,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 377,
+          "cgroup_peak_mib": 540.453125,
+          "sampled_rss_max_mib": 521.6484375,
+          "sampled_file_max_mib": 1.046875,
+          "oom_kills": 0,
+          "cpu_usec": 10232668,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 85,
+          "cgroup_peak_mib": 529.62109375,
+          "sampled_rss_max_mib": 520.78125,
+          "sampled_file_max_mib": 0.140625,
+          "oom_kills": 0,
+          "cpu_usec": 3883583,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "before",
+      "scale": "million",
+      "round": 3,
+      "raw_directory": "million-before-r3"
+    },
+    {
+      "name": "r1-n1000000-c1-m512",
+      "rows": 1000000,
+      "cpus": 1,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": 671088640,
+      "status": "failed",
+      "verification": [
+        {
+          "phase": "rescue",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        }
+      ],
+      "measurements": [],
+      "error": "Traceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 105, in <module>\n    with connect() as c:require(c.request(op='ping'))\n         ^^^^^^^^^\n  File \"/bench-src/resource-envelope/client.py\", line 8, in connect\n    def connect(): return Client('database',7400,TOKEN,timeout=30)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/bench/catdb_client.py\", line 12, in __init__\n    self.socket = socket.create_connection((host, port), timeout)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nConnectionRefusedError: [Errno 111] Connection refused\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 113, in <module>\n    if ended.exists():raise RuntimeError('server exited before ready: '+ended.read_text()+' '+(DATA/f'{phase}-server.log').read_text())\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: server exited before ready: {\"returncode\": -9} \n",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": true,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:44:02.114421766Z",
+        "FinishedAt": "2026-11-05T23:44:03.649507005Z"
+      },
+      "rescue": {
+        "timing": {
+          "ready_wait_ms": 918.439931,
+          "launch_to_ready_ms": 1828.999999910593
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1309.1184710065136,
+          "poll_resolution_ms": 100
+        }
+      },
+      "rescue_verified": true,
+      "resource_summary": {
+        "boot": {
+          "samples": 14,
+          "cgroup_peak_mib": 512.0,
+          "sampled_rss_max_mib": 475.37109375,
+          "sampled_file_max_mib": 0.03125,
+          "oom_kills": 1,
+          "cpu_usec": 1306523,
+          "throttled_usec": 36297
+        },
+        "rescue": {
+          "samples": 85,
+          "cgroup_peak_mib": 528.26953125,
+          "sampled_rss_max_mib": 520.71875,
+          "sampled_file_max_mib": 0.14453125,
+          "oom_kills": 0,
+          "cpu_usec": 3909147,
+          "throttled_usec": 36856
+        }
+      },
+      "failure_kind": "oom",
+      "cohort": "before",
+      "scale": "million",
+      "round": 3,
+      "raw_directory": "million-before-r3"
+    },
+    {
+      "name": "r1-n1000000-c2-m512",
+      "rows": 1000000,
+      "cpus": 2,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": 671088640,
+      "status": "failed",
+      "verification": [
+        {
+          "phase": "rescue",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        }
+      ],
+      "measurements": [],
+      "error": "Traceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 105, in <module>\n    with connect() as c:require(c.request(op='ping'))\n         ^^^^^^^^^\n  File \"/bench-src/resource-envelope/client.py\", line 8, in connect\n    def connect(): return Client('database',7400,TOKEN,timeout=30)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/bench/catdb_client.py\", line 12, in __init__\n    self.socket = socket.create_connection((host, port), timeout)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/socket.py\", line 865, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.12/socket.py\", line 850, in create_connection\n    sock.connect(sa)\nConnectionRefusedError: [Errno 111] Connection refused\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/bench-src/resource-envelope/client.py\", line 113, in <module>\n    if ended.exists():raise RuntimeError('server exited before ready: '+ended.read_text()+' '+(DATA/f'{phase}-server.log').read_text())\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: server exited before ready: {\"returncode\": -9} \n",
+      "failure_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": true,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:44:20.092777865Z",
+        "FinishedAt": "2026-11-05T23:44:21.434367978Z"
+      },
+      "rescue": {
+        "timing": {
+          "ready_wait_ms": 773.549522,
+          "launch_to_ready_ms": 1671.9999997876585
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1107.9690199985635,
+          "poll_resolution_ms": 100
+        }
+      },
+      "rescue_verified": true,
+      "resource_summary": {
+        "boot": {
+          "samples": 12,
+          "cgroup_peak_mib": 512.0,
+          "sampled_rss_max_mib": 501.89453125,
+          "sampled_file_max_mib": 0.02734375,
+          "oom_kills": 1,
+          "cpu_usec": 1153402,
+          "throttled_usec": 0
+        },
+        "rescue": {
+          "samples": 84,
+          "cgroup_peak_mib": 529.43359375,
+          "sampled_rss_max_mib": 520.83203125,
+          "sampled_file_max_mib": 0.140625,
+          "oom_kills": 0,
+          "cpu_usec": 3833275,
+          "throttled_usec": 0
+        }
+      },
+      "failure_kind": "oom",
+      "cohort": "before",
+      "scale": "million",
+      "round": 3,
+      "raw_directory": "million-before-r3"
+    },
+    {
+      "name": "r1-n100000-c1-m512",
+      "rows": 100000,
+      "cpus": 1,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": null,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999610614,
+          "start_ns": 112363886437772,
+          "finish_ns": 112371886048386,
+          "completed": 8000,
+          "ops_s": 1000.0486756192006,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.410532,
+          "max_ms": 1.899795,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.410532
+            }
+          },
+          "host_begin_ns": 1146304296000000,
+          "host_end_ns": 1146312921000000,
+          "sampled_cpu_cores": 0.09228876776497714,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.139539,
+          "client_queue_p99_ms": 0.08511,
+          "request_p99_ms": 0.257227
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999906939,
+          "start_ns": 112373249353725,
+          "finish_ns": 112381249260664,
+          "completed": 8000,
+          "ops_s": 1000.0116327603196,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 5.070988,
+          "max_ms": 13.88723,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 6.609731
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.421398
+            }
+          },
+          "host_begin_ns": 1146313906000000,
+          "host_end_ns": 1146322734000000,
+          "sampled_cpu_cores": 0.11059829822398433,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.154937,
+          "client_queue_p99_ms": 0.092453,
+          "request_p99_ms": 4.980645
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 4.766208,
+          "launch_to_ready_ms": 922.0000000204891
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.43569599895272,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:44:41.417326634Z",
+        "FinishedAt": "2026-11-05T23:45:02.792625074Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 7.335887,
+          "launch_to_ready_ms": 875.0
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 201.59128800150938,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 211,
+          "cgroup_peak_mib": 73.0859375,
+          "sampled_rss_max_mib": 55.5703125,
+          "sampled_file_max_mib": 0.796875,
+          "oom_kills": 0,
+          "cpu_usec": 2727287,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 22,
+          "cgroup_peak_mib": 60.6875,
+          "sampled_rss_max_mib": 54.73046875,
+          "sampled_file_max_mib": 0.046875,
+          "oom_kills": 0,
+          "cpu_usec": 461609,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "before",
+      "scale": "control",
+      "round": 3,
+      "raw_directory": "control-before-r3"
+    },
+    {
+      "name": "r1-n1000000-c1-m1024",
+      "rows": 1000000,
+      "cpus": 1,
+      "memory_mib": 1024,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": 671088640,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999606433,
+          "start_ns": 112412344448165,
+          "finish_ns": 112420344054598,
+          "completed": 8000,
+          "ops_s": 1000.0491982953531,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.392877,
+          "max_ms": 0.971792,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.392877
+            }
+          },
+          "host_begin_ns": 1146354031000000,
+          "host_end_ns": 1146362656000000,
+          "sampled_cpu_cores": 0.09112101883862285,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.101653,
+          "client_queue_p99_ms": 0.079152,
+          "request_p99_ms": 0.261475
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999716244,
+          "start_ns": 112427081678615,
+          "finish_ns": 112435081394859,
+          "completed": 8000,
+          "ops_s": 1000.03547075813,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.56717,
+          "max_ms": 13.447848,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 5.891112
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.387689
+            }
+          },
+          "host_begin_ns": 1146369140000000,
+          "host_end_ns": 1146377984000000,
+          "sampled_cpu_cores": 0.11034121272366106,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.098503,
+          "client_queue_p99_ms": 0.088435,
+          "request_p99_ms": 4.456522
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 786.75925,
+          "launch_to_ready_ms": 1750.0
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1208.923865997349,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:45:24.37326801Z",
+        "FinishedAt": "2026-11-05T23:46:03.371779967Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 833.192995,
+          "launch_to_ready_ms": 1719.0000000409782
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1208.9676369942026,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 378,
+          "cgroup_peak_mib": 464.703125,
+          "sampled_rss_max_mib": 446.5,
+          "sampled_file_max_mib": 1.0390625,
+          "oom_kills": 0,
+          "cpu_usec": 10311625,
+          "throttled_usec": 37072
+        },
+        "reopen": {
+          "samples": 85,
+          "cgroup_peak_mib": 453.82421875,
+          "sampled_rss_max_mib": 445.6328125,
+          "sampled_file_max_mib": 0.13671875,
+          "oom_kills": 0,
+          "cpu_usec": 3801915,
+          "throttled_usec": 30386
+        }
+      },
+      "cohort": "after",
+      "scale": "million",
+      "round": 3,
+      "raw_directory": "million-after-r3"
+    },
+    {
+      "name": "r1-n1000000-c2-m1024",
+      "rows": 1000000,
+      "cpus": 2,
+      "memory_mib": 1024,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": 671088640,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999616431,
+          "start_ns": 112466237345438,
+          "finish_ns": 112474236961869,
+          "completed": 8000,
+          "ops_s": 1000.0479484239412,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.389812,
+          "max_ms": 1.170135,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.389812
+            }
+          },
+          "host_begin_ns": 1146409328000000,
+          "host_end_ns": 1146418000000000,
+          "sampled_cpu_cores": 0.0920394817347025,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.093453,
+          "client_queue_p99_ms": 0.082463,
+          "request_p99_ms": 0.263157
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999833482,
+          "start_ns": 112481056893588,
+          "finish_ns": 112489056727070,
+          "completed": 8000,
+          "ops_s": 1000.0208151832629,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 5.203815,
+          "max_ms": 36.642067,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.399555
+            },
+            "write": {
+              "completed": 1600,
+              "p99_ms": 21.250012
+            }
+          },
+          "host_begin_ns": 1146424562000000,
+          "host_end_ns": 1146433421000000,
+          "sampled_cpu_cores": 0.10919902483017221,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.114966,
+          "client_queue_p99_ms": 0.108476,
+          "request_p99_ms": 5.097674
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 778.999159,
+          "launch_to_ready_ms": 1686.9999999180436
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1209.2648630059557,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:46:20.271427812Z",
+        "FinishedAt": "2026-11-05T23:46:59.041047865Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 850.144073,
+          "launch_to_ready_ms": 1765.0000001303852
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "1073741824",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1208.4585499978857,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 376,
+          "cgroup_peak_mib": 466.05078125,
+          "sampled_rss_max_mib": 446.515625,
+          "sampled_file_max_mib": 1.0390625,
+          "oom_kills": 0,
+          "cpu_usec": 10224545,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 84,
+          "cgroup_peak_mib": 453.1015625,
+          "sampled_rss_max_mib": 445.54296875,
+          "sampled_file_max_mib": 0.140625,
+          "oom_kills": 0,
+          "cpu_usec": 3819259,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "after",
+      "scale": "million",
+      "round": 3,
+      "raw_directory": "million-after-r3"
+    },
+    {
+      "name": "r1-n1000000-c1-m512",
+      "rows": 1000000,
+      "cpus": 1,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": 671088640,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999715301,
+          "start_ns": 112520114672810,
+          "finish_ns": 112528114388111,
+          "completed": 8000,
+          "ops_s": 1000.0355886415064,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.41266,
+          "max_ms": 1.169406,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.41266
+            }
+          },
+          "host_begin_ns": 1146464656000000,
+          "host_end_ns": 1146473312000000,
+          "sampled_cpu_cores": 0.09230430076853596,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.087916,
+          "client_queue_p99_ms": 0.079776,
+          "request_p99_ms": 0.287304
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999882612,
+          "start_ns": 112534807115054,
+          "finish_ns": 112542806997666,
+          "completed": 8000,
+          "ops_s": 1000.0146737153148,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 5.201458,
+          "max_ms": 14.202187,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 7.37473
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.387254
+            }
+          },
+          "host_begin_ns": 1146479734000000,
+          "host_end_ns": 1146488593000000,
+          "sampled_cpu_cores": 0.11070156703096233,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.107786,
+          "client_queue_p99_ms": 0.08471,
+          "request_p99_ms": 5.091924
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 640.456923,
+          "launch_to_ready_ms": 1688.0000000819564
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1107.6913490105653,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:47:15.690720734Z",
+        "FinishedAt": "2026-11-05T23:47:54.456796775Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 866.532936,
+          "launch_to_ready_ms": 1781.0000001918525
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1209.2478300037328,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 376,
+          "cgroup_peak_mib": 464.7578125,
+          "sampled_rss_max_mib": 446.46875,
+          "sampled_file_max_mib": 1.03515625,
+          "oom_kills": 0,
+          "cpu_usec": 10152047,
+          "throttled_usec": 29703
+        },
+        "reopen": {
+          "samples": 85,
+          "cgroup_peak_mib": 453.09765625,
+          "sampled_rss_max_mib": 445.59375,
+          "sampled_file_max_mib": 0.140625,
+          "oom_kills": 0,
+          "cpu_usec": 3821414,
+          "throttled_usec": 31353
+        }
+      },
+      "cohort": "after",
+      "scale": "million",
+      "round": 3,
+      "raw_directory": "million-after-r3"
+    },
+    {
+      "name": "r1-n1000000-c2-m512",
+      "rows": 1000000,
+      "cpus": 2,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": 671088640,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 1000000,
+          "sha256": "c945f8b9672c1f8827e6181ceaeaec54c777c8b6e9c35c19bb9c6a621c54c947",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 1000000,
+          "sha256": "4fb183a98348beeaf59662599a558c604f2262d4fc22706c9720b64918e3e9f6",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999663137,
+          "start_ns": 112574210032928,
+          "finish_ns": 112582209696065,
+          "completed": 8000,
+          "ops_s": 1000.0421096481479,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.375948,
+          "max_ms": 1.174182,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.375948
+            }
+          },
+          "host_begin_ns": 1146520203000000,
+          "host_end_ns": 1146528843000000,
+          "sampled_cpu_cores": 0.09124155251452071,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.096925,
+          "client_queue_p99_ms": 0.07054,
+          "request_p99_ms": 0.256937
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999741904,
+          "start_ns": 112588871931483,
+          "finish_ns": 112596871673387,
+          "completed": 8000,
+          "ops_s": 1000.0322630408701,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.590039,
+          "max_ms": 9.923068,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "write": {
+              "completed": 1600,
+              "p99_ms": 6.19438
+            },
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.40164
+            }
+          },
+          "host_begin_ns": 1146535250000000,
+          "host_end_ns": 1146544109000000,
+          "sampled_cpu_cores": 0.11083566886973113,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.110948,
+          "client_queue_p99_ms": 0.099579,
+          "request_p99_ms": 4.46748
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 794.146859,
+          "launch_to_ready_ms": 1750.0
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1208.4098579944111,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:48:10.455266274Z",
+        "FinishedAt": "2026-11-05T23:48:50.051985246Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 786.074371,
+          "launch_to_ready_ms": 1641.0000000614673
+        },
+        "limits": {
+          "cpu.max": "200000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 1107.3614460037788,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 376,
+          "cgroup_peak_mib": 465.22265625,
+          "sampled_rss_max_mib": 446.5390625,
+          "sampled_file_max_mib": 1.0390625,
+          "oom_kills": 0,
+          "cpu_usec": 10274068,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 85,
+          "cgroup_peak_mib": 453.8984375,
+          "sampled_rss_max_mib": 445.5390625,
+          "sampled_file_max_mib": 0.13671875,
+          "oom_kills": 0,
+          "cpu_usec": 3753482,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "after",
+      "scale": "million",
+      "round": 3,
+      "raw_directory": "million-after-r3"
+    },
+    {
+      "name": "r1-n100000-c1-m512",
+      "rows": 100000,
+      "cpus": 1,
+      "memory_mib": 512,
+      "rep": 1,
+      "sample": 1,
+      "retained_bytes": null,
+      "status": "passed",
+      "verification": [
+        {
+          "phase": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "read",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated": 0,
+          "passed": true
+        },
+        {
+          "phase": "mixed",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        },
+        {
+          "phase": "reopen",
+          "rows": 100000,
+          "sha256": "0f1cc782ba88c2dc71646686962ca60a3b33e6a7753014ac2b8fb0f60f0b5df3",
+          "updated": 1600,
+          "passed": true
+        }
+      ],
+      "measurements": [
+        {
+          "work": "read",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999676163,
+          "start_ns": 112625546049230,
+          "finish_ns": 112633545725393,
+          "completed": 8000,
+          "ops_s": 1000.0404812636664,
+          "old_snapshot_checked_keys": 0,
+          "p99_ms": 0.393615,
+          "max_ms": 1.064964,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 8000,
+              "p99_ms": 0.393615
+            }
+          },
+          "host_begin_ns": 1146572921000000,
+          "host_end_ns": 1146581562000000,
+          "sampled_cpu_cores": 0.09281445738919519,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.099564,
+          "client_queue_p99_ms": 0.072738,
+          "request_p99_ms": 0.265052
+        },
+        {
+          "work": "mixed",
+          "ops": 8000,
+          "rate": 1000.0,
+          "capacity_per_kind": 64,
+          "elapsed_s": 7.999958844,
+          "start_ns": 112634922522853,
+          "finish_ns": 112642922481697,
+          "completed": 8000,
+          "ops_s": 1000.005144526466,
+          "old_snapshot_checked_keys": 1600,
+          "p99_ms": 4.475389,
+          "max_ms": 7.871679,
+          "queue_rejected": 0,
+          "errors": [],
+          "by_kind": {
+            "read": {
+              "completed": 6400,
+              "p99_ms": 0.379047
+            },
+            "write": {
+              "completed": 1600,
+              "p99_ms": 5.383172
+            }
+          },
+          "host_begin_ns": 1146582546000000,
+          "host_end_ns": 1146591390000000,
+          "sampled_cpu_cores": 0.10880772965153267,
+          "sampled_throttled_ms": 0.0,
+          "producer_lag_p99_ms": 0.124486,
+          "client_queue_p99_ms": 0.088523,
+          "request_p99_ms": 4.354824
+        }
+      ],
+      "boot": {
+        "timing": {
+          "ready_wait_ms": 6.251161,
+          "launch_to_ready_ms": 890.0000001303852
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 100.86678799416404,
+          "poll_resolution_ms": 100
+        }
+      },
+      "stop_state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-05T23:49:09.493250678Z",
+        "FinishedAt": "2026-11-05T23:49:31.664341356Z"
+      },
+      "reopen": {
+        "timing": {
+          "ready_wait_ms": 8.486546,
+          "launch_to_ready_ms": 905.9999999590218
+        },
+        "limits": {
+          "cpu.max": "100000 100000",
+          "memory.max": "536870912",
+          "memory.swap.max": "0"
+        },
+        "process_ready": {
+          "process_ready_ms": 100.79942899756134,
+          "poll_resolution_ms": 100
+        }
+      },
+      "resource_summary": {
+        "boot": {
+          "samples": 211,
+          "cgroup_peak_mib": 65.6953125,
+          "sampled_rss_max_mib": 48.078125,
+          "sampled_file_max_mib": 0.796875,
+          "oom_kills": 0,
+          "cpu_usec": 2699559,
+          "throttled_usec": 0
+        },
+        "reopen": {
+          "samples": 22,
+          "cgroup_peak_mib": 53.6484375,
+          "sampled_rss_max_mib": 47.30078125,
+          "sampled_file_max_mib": 0.046875,
+          "oom_kills": 0,
+          "cpu_usec": 441418,
+          "throttled_usec": 0
+        }
+      },
+      "cohort": "after",
+      "scale": "control",
+      "round": 3,
+      "raw_directory": "control-after-r3"
+    }
+  ]
+}

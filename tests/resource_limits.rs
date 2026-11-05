@@ -340,3 +340,87 @@ fn bv_zero_limits_are_invalid_and_do_not_create_files() {
     ));
     assert!(!f.0.exists());
 }
+
+#[test]
+fn eq_st_history_growth_preserves_each_snapshot_across_delete_reinsert_and_reopen() {
+    let f = Fixture::new();
+    let db = f.create(ResourceLimits::default());
+    let mut snapshots = Vec::new();
+    for generation in 0_u8..9 {
+        let mut tx = db.begin().unwrap();
+        tx.put(b"k", &[generation]).unwrap();
+        tx.commit().unwrap();
+        snapshots.push(db.begin_read().unwrap());
+        for (expected, snapshot) in snapshots.iter_mut().enumerate() {
+            assert_eq!(snapshot.get(b"k").unwrap(), Some(vec![expected as u8]));
+        }
+    }
+    let mut remove = db.begin().unwrap();
+    remove.delete(b"k").unwrap();
+    remove.commit().unwrap();
+    let mut deleted = db.begin_read().unwrap();
+    let mut reinsert = db.begin().unwrap();
+    reinsert.put(b"k", b"new").unwrap();
+    reinsert.commit().unwrap();
+    assert_eq!(deleted.get(b"k").unwrap(), None);
+    for (expected, snapshot) in snapshots.iter_mut().enumerate() {
+        assert_eq!(snapshot.get(b"k").unwrap(), Some(vec![expected as u8]));
+    }
+    drop(deleted);
+    drop(snapshots);
+    db.checkpoint().unwrap();
+    drop(db);
+    let reopened = Database::open(&f.0).unwrap();
+    assert_eq!(
+        reopened.begin_read().unwrap().get(b"k").unwrap(),
+        Some(b"new".to_vec())
+    );
+}
+
+#[test]
+fn bv_er_history_growth_refusal_preserves_versions_and_capacity_recovers() {
+    for generations in [1_usize, 2, 4, 8] {
+        let f = Fixture::new();
+        let db = f.create(ResourceLimits {
+            max_retained_bytes: 194 + 65 * generations,
+            ..ResourceLimits::default()
+        });
+        let mut initial = db.begin().unwrap();
+        initial.put(b"k", &[0]).unwrap();
+        initial.commit().unwrap();
+        let mut old = db.begin_read().unwrap();
+        for generation in 1..generations {
+            let mut tx = db.begin().unwrap();
+            tx.put(b"k", &[generation as u8]).unwrap();
+            tx.commit().unwrap();
+        }
+        let wal_bytes = db.stats().unwrap().wal_bytes;
+        let mut rejected = db.begin().unwrap();
+        rejected.put(b"k", &[255]).unwrap();
+        assert!(matches!(
+            rejected.commit(),
+            Err(Error::ResourceExhausted(_))
+        ));
+        assert_eq!(db.stats().unwrap().wal_bytes, wal_bytes);
+        assert_eq!(old.get(b"k").unwrap(), Some(vec![0]));
+        assert_eq!(
+            db.begin_read().unwrap().get(b"k").unwrap(),
+            Some(vec![(generations - 1) as u8])
+        );
+        drop(old);
+        db.checkpoint().unwrap();
+        assert_eq!(db.resource_usage().unwrap().current[3], 259);
+        // A one-version budget cannot admit an update before its old value is retired.
+        if generations > 1 {
+            let mut next = db.begin().unwrap();
+            next.put(b"k", &[99]).unwrap();
+            next.commit().unwrap();
+        }
+        drop(db);
+        let reopened = Database::open(&f.0).unwrap();
+        assert_eq!(
+            reopened.begin_read().unwrap().get(b"k").unwrap(),
+            Some(vec![if generations > 1 { 99 } else { 0 }])
+        );
+    }
+}

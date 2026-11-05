@@ -1,0 +1,13 @@
+{
+  "normalization": "CRLF to LF",
+  "files": {
+    "src/transactions.rs": "7207bea9c12a54420eb92f95783d533d8717421487e726170272bdde114c8124",
+    "tests/resource_limits.rs": "9c34342bbb226c908255bbd75304802ed0748a9f161d2c1a5672598cc0dc4b24",
+    "benchmarks/resource-envelope/history_compare.py": "18de2efd946b3d87f666d5e9b109d200cf9229892473a8f933dbd28b3ae1f2cd",
+    "benchmarks/resource-envelope/history_report.py": "b853b7195cfdc6888ac07f68f197ab97ad2eb0194ab25e3b63bb172b8cf8f511",
+    "benchmarks/resource-envelope/run.py": "54d6adb9f29202d218c9b70bc554a012eae334e97f90b0fc665fb1eee581cc44",
+    "benchmarks/resource-envelope/client.py": "c778cb47fa033d41c30e48eebd98bdf9786917f3ac50dfc31a5046ac4466ea74",
+    "benchmarks/resource-envelope/supervisor.py": "52df3532172eb4b27156d269f4137a3d7fe68675f63029ac232fd0126ecc7364",
+    "benchmarks/resource-envelope/report.py": "382bf90932c39ac9631b3d2c9160aa257ed5b67a14f029a8825d30e82d9cdf72"
+  }
+}

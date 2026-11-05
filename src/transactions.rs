@@ -1791,7 +1791,10 @@ impl State {
         self.budget
             .replace(RETAINED, 0, self.retained_growth(&writes))?;
         for (key, value) in writes {
-            let versions = self.rows.entry(key.clone()).or_default();
+            let versions = self
+                .rows
+                .entry(key.clone())
+                .or_insert_with(|| VecDeque::with_capacity(1));
             if !versions.is_empty() || value.is_none() {
                 self.history_keys.insert(key);
             }

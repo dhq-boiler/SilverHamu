@@ -101,3 +101,33 @@ python benchmarks/resource-envelope/run.py --out artifacts/resource-config-milli
 The container memory limit remains independent. A failure rescued at 1 GiB is
 still reported as a failure under the original limit. No automatic increase is
 performed in production.
+
+
+## Initial history capacity comparison
+
+`history_compare.py` runs the same workload against two separately built images.
+Build the baseline from revision `79b18f0` in a separate checkout as
+`catdb-resource-config:local`, and build the candidate checkout with:
+
+```sh
+docker build -f benchmarks/Dockerfile -t catdb-history-one:local .
+python benchmarks/resource-envelope/history_compare.py --out artifacts/history-one-comparison --before catdb-resource-config:local --after catdb-history-one:local
+python benchmarks/resource-envelope/history_report.py --input artifacts/history-one-comparison --out docs/benchmarks/history-one-2026-11-06
+```
+
+Three rounds use before/after, after/before, before/after order. Each image gets
+the same four million-row CPU/memory cells (1/2 CPUs, 512/1024 MiB), plus a
+100k-row default-budget control at 1 CPU / 512 MiB. The million-row retained
+budget is 640 MiB. Each invocation uses the same shuffled condition order and
+read-then-mixed workload order. Runs are sequential; the report preserves every
+OOM and its separately labelled 1-GiB rescue. It reports update-only p99 from
+the mixed workload separately from read-only p99. The generator validates run
+completion, full-content checks, request records and failure classification.
+
+This is an initial-allocation study. The mixed workload updates 1,600 distinct
+keys while holding an old snapshot; it does not establish steady-state memory
+after rewriting the entire database. History-capacity expansion, pinned
+snapshots through deletion/reinsertion and budget refusal are also covered by
+`tests/resource_limits.rs`. Existing persistence and conflict tests remain in
+the regression suite. No service budget, file format or durability setting is
+relaxed by the candidate.

@@ -1,0 +1,35 @@
+{
+  "commit": "79b18f0581d55ae06d6b89c80416ba699548fa1e",
+  "image": "sha256:10562126d4e0c99d2e14b52803a938af0093d517d5190d53e9a7741e0d9b0d30",
+  "utc": "2026-11-05T23:24:58.845212+00:00",
+  "arguments": {
+    "out": "C:\\Git\\NewDBMS\\artifacts\\history-one-comparison\\million-before-r1",
+    "rows": [
+      1000000
+    ],
+    "cpus": [
+      1,
+      2
+    ],
+    "memory": [
+      512,
+      1024
+    ],
+    "reps": 1,
+    "ops": 8000,
+    "sample": 1,
+    "rate": 1000,
+    "recover_memory": 1024,
+    "retained_bytes": 671088640,
+    "image": "catdb-resource-config:local"
+  },
+  "docker": {
+    "ServerVersion": "29.9.2",
+    "NCPU": 32,
+    "MemTotal": 67380625408,
+    "Driver": "overlay2",
+    "OSType": "linux",
+    "Architecture": "x86_64",
+    "KernelVersion": "6.18.54.1-microsoft-standard-WSL2"
+  }
+}

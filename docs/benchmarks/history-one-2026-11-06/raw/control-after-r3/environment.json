@@ -1,0 +1,33 @@
+{
+  "commit": "79b18f0581d55ae06d6b89c80416ba699548fa1e",
+  "image": "sha256:a2ea0ca52cc587a2f5f572ecd71ae8be6a8bd4b74ae57fb803f309d4008255bc",
+  "utc": "2026-11-05T23:49:05.116909+00:00",
+  "arguments": {
+    "out": "C:\\Git\\NewDBMS\\artifacts\\history-one-comparison\\control-after-r3",
+    "rows": [
+      100000
+    ],
+    "cpus": [
+      1
+    ],
+    "memory": [
+      512
+    ],
+    "reps": 1,
+    "ops": 8000,
+    "sample": 1,
+    "rate": 1000,
+    "recover_memory": null,
+    "retained_bytes": null,
+    "image": "catdb-history-one:local"
+  },
+  "docker": {
+    "ServerVersion": "29.9.2",
+    "NCPU": 32,
+    "MemTotal": 67380625408,
+    "Driver": "overlay2",
+    "OSType": "linux",
+    "Architecture": "x86_64",
+    "KernelVersion": "6.18.54.1-microsoft-standard-WSL2"
+  }
+}

@@ -736,3 +736,20 @@ completed without refusals or errors, and 66 full-content checks passed includin
 crash recovery and OOM rescue. Million-row mixed p99 trial medians were
 4.453–4.633 ms at 1,000 offered requests/s; this is not a saturation benchmark.
 See [all results, safety checks, raw failures and reproduction](docs/benchmarks/resource-config-2026-11-06/README.md).
+
+## Follow-up: smaller initial histories enable the 512-MiB case
+
+Allocating one initial history slot per record reduced the million-row median
+container peak from 540.3 to 465.4 MiB at 1 CPU / 1 GiB. All twelve
+candidate million-row trials passed, including all six at 512 MiB; all six
+baseline 512-MiB trials hit OOM and were separately verified after rescue at 1 GiB.
+
+![Initial history allocation](docs/benchmarks/history-one-2026-11-06/comparison.svg)
+
+This is an initial-memory improvement, not a guarantee for prolonged updates:
+grown histories still retain capacity. Across the passing fixtures,
+384,000 requests completed with 0 refusals and
+0 errors, and 102 full-content checks passed including
+process-crash recovery and OOM rescue. Update-p99 medians at 1 GiB changed from
+6.623 to 7.185 ms at 1 CPU (worse), and 7.050 to 6.835 ms at 2 CPUs; no uniform
+latency improvement is claimed. See [per-trial latency, controls, limits and reproduction](docs/benchmarks/history-one-2026-11-06/README.md).

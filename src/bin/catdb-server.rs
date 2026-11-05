@@ -1,4 +1,5 @@
 use newdbms::service::{Config, Server, healthcheck};
+use newdbms::transactions::ResourceLimits;
 use std::io::Read;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 use std::sync::Arc;
@@ -21,6 +22,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     let mut request_timeout = 30;
     let mut transaction_timeout = 60;
     let mut check = false;
+    let mut limits = ResourceLimits::default();
     let mut args = std::env::args().skip(1);
     while let Some(arg) = args.next() {
         match arg.as_str() {
@@ -34,12 +36,28 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             "--transaction-timeout-secs" => {
                 transaction_timeout = args.next().ok_or("missing timeout")?.parse()?
             }
+            "--max-retained-bytes" => {
+                limits.max_retained_bytes =
+                    budget_bytes(&args.next().ok_or("missing resource budget")?)?;
+            }
+            "--max-staged-bytes" => {
+                limits.max_staged_bytes =
+                    budget_bytes(&args.next().ok_or("missing resource budget")?)?;
+            }
+            "--max-dependency-bytes" => {
+                limits.max_dependency_bytes =
+                    budget_bytes(&args.next().ok_or("missing resource budget")?)?;
+            }
+            "--max-buffer-bytes" => {
+                limits.max_buffer_bytes =
+                    budget_bytes(&args.next().ok_or("missing resource budget")?)?;
+            }
             "--init" => init = true,
             "--allow-remote" => remote = true,
             "--healthcheck" => check = true,
             "--help" => {
                 println!(
-                    "catdb-server --db PATH --token-file PATH [--init] [--bind 127.0.0.1:7400] [--allow-remote] [--max-connections 32] [--request-timeout-secs 30] [--transaction-timeout-secs 60]\ncatdb-server --healthcheck --token-file PATH [--bind 127.0.0.1:7400]\nExperimental framed JSON v1, not SQL or HTTP. Remote transport requires an encrypted tunnel."
+                    "catdb-server --db PATH --token-file PATH [--init] [--bind 127.0.0.1:7400] [--allow-remote] [--max-connections 32] [--request-timeout-secs 30] [--transaction-timeout-secs 60] [--max-retained-bytes 134217728] [--max-staged-bytes 33554432] [--max-dependency-bytes 16777216] [--max-buffer-bytes 16777216]\ncatdb-server --healthcheck --token-file PATH [--bind 127.0.0.1:7400]\nExperimental framed JSON v1, not SQL or HTTP. Remote transport requires an encrypted tunnel."
                 );
                 return Ok(());
             }
@@ -79,17 +97,44 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     let stop = Arc::new(AtomicBool::new(false));
     let signal = Arc::clone(&stop);
     ctrlc::set_handler(move || signal.store(true, Ordering::Release))?;
-    let server = Server::bind(Config {
-        bind: address,
-        database: database.ok_or("--db is required")?.into(),
-        token,
-        initialize: init,
-        allow_remote: remote,
-        max_connections,
-        request_timeout: Duration::from_secs(request_timeout),
-        transaction_timeout: Duration::from_secs(transaction_timeout),
-    })?;
+    limits.max_transactions = max_connections;
+    let server = Server::bind_with_limits(
+        Config {
+            bind: address,
+            database: database.ok_or("--db is required")?.into(),
+            token,
+            initialize: init,
+            allow_remote: remote,
+            max_connections,
+            request_timeout: Duration::from_secs(request_timeout),
+            transaction_timeout: Duration::from_secs(transaction_timeout),
+        },
+        limits,
+    )?;
     println!("catdb-server ready {} protocol=1", server.address()?);
     server.run(stop)?;
     Ok(())
+}
+
+fn budget_bytes(value: &str) -> Result<usize, Box<dyn std::error::Error>> {
+    let bytes: usize = value.parse()?;
+    if bytes == 0 {
+        return Err("resource budget must be positive bytes".into());
+    }
+    Ok(bytes)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn bv_resource_budgets_reject_zero_invalid_and_overflow() {
+        for value in ["0", "-1", "", "1MiB", "18446744073709551616"] {
+            assert!(budget_bytes(value).is_err(), "{value}");
+        }
+        for value in [1, 134217727, 134217728, 134217729, usize::MAX] {
+            assert_eq!(budget_bytes(&value.to_string()).unwrap(), value);
+        }
+    }
 }

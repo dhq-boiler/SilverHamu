@@ -84,3 +84,20 @@ publication of negative outcomes before implementation.
   successes/rejections/errors accounting, and absence of swap use.
 
 Docker semantics: https://docs.docker.com/engine/containers/resource_constraints/
+
+## Explicit service budgets
+
+`--image IMAGE` selects a separately built server image. `--retained-bytes N`
+passes the positive byte budget to the server, recording it in the run arguments
+and each case. Omitting it retains the service default. The observer records the
+requested override in each lifecycle command file. To repeat the million-row
+configuration experiment (logical retained budget 640 MiB):
+
+```sh
+docker build -f benchmarks/Dockerfile -t catdb-resource-config:local .
+python benchmarks/resource-envelope/run.py --out artifacts/resource-config-million --rows 1000000 --retained-bytes 671088640 --image catdb-resource-config:local --recover-memory 1024
+```
+
+The container memory limit remains independent. A failure rescued at 1 GiB is
+still reported as a failure under the original limit. No automatic increase is
+performed in production.

@@ -10,6 +10,10 @@ catdb-server --db PATH --token-file PATH [--init]
   [--max-connections 32]
   [--request-timeout-secs 30]
   [--transaction-timeout-secs 60]
+  [--max-retained-bytes 134217728]
+  [--max-staged-bytes 33554432]
+  [--max-dependency-bytes 16777216]
+  [--max-buffer-bytes 16777216]
 ```
 
 Parent directories must already exist. Without `--init`, a missing database is an error. Existing corrupt files are rejected, not replaced. Non-loopback binding requires explicit `--allow-remote`. Docker uses it inside the container; Compose limits host publication to loopback.
@@ -82,6 +86,12 @@ It still observes the engine's poisoned/reopen-required state.
 | Transaction lifetime | 60 seconds; configurable 1–3600 |
 
 Frame deadlines cover the entire frame and are not extended by partial sends. Transaction expiry is fixed at begin, not extended by requests. Deadlines apply at request boundaries and while waiting for network data; they do not cancel an in-progress storage synchronization.
+
+Engine byte budgets may be explicitly configured using the options above. Values are positive decimal byte counts fitting the platform `usize`; zero, negative, suffixes and overflow are rejected. Omitted options retain their defaults. These options do not preallocate their stated capacity or automatically resize to container memory. Recovery also needs enough buffer and retained budget; an insufficient budget fails open without replacing the database.
+
+Rust callers can use `Server::bind_with_limits(config, limits)`; `Config` and `Server::bind(config)` remain source-compatible with the same defaults. Explicit `max_transactions` is respected separately from the connection limit. The CLI continues to use its connection count as the transaction limit.
+
+For example, `--max-retained-bytes 671088640` sets a 640-MiB **logical retained-data budget**, not a 640-MiB process limit. Choose it alongside an independently enforced container/OS memory cap and headroom for other allocations. It does not guarantee that a given database fits the container.
 
 Engine defaults bound staged changes to 32 MiB, dependencies to 16 MiB, retained data to 128 MiB, and processing buffers to 16 MiB. These are not a strict RSS budget: network buffers, JSON allocations, OS resources, and recovery allocations also consume memory. The engine currently loads database contents into memory.
 

@@ -269,5 +269,65 @@ class ServiceTests(unittest.TestCase):
         self.assertNotEqual(run.returncode,0);self.assertEqual(self.db.read_bytes(),b"corrupt")
 
 
+    def test_bv_resource_arguments_reject_invalid_values_without_touching_database(self):
+        self.seed(); self.stop(); original=self.db.read_bytes()
+        args=[str(BINARY),"--db",str(self.db),"--init","--bind","127.0.0.1:0","--token-file",str(self.secret)]
+        for name in ["retained","staged","dependency","buffer"]:
+            for value in ["0","-1","18446744073709551616","nonsense"]:
+                with self.subTest(name=name,value=value):
+                    result=subprocess.run([*args,"--max-"+name+"-bytes",value],capture_output=True,text=True,timeout=10)
+                    self.assertNotEqual(result.returncode,0)
+                    self.assertEqual(self.db.read_bytes(),original)
+            result=subprocess.run([*args,"--max-"+name+"-bytes"],capture_output=True,text=True,timeout=10)
+            self.assertNotEqual(result.returncode,0);self.assertEqual(self.db.read_bytes(),original)
+
+    def test_bv_retained_admission_boundary_and_reopen_refusal_preserve_values(self):
+        self.stop()
+        for budget in [258,259,260]:
+            with self.subTest(budget=budget):
+                self.db=self.folder / f"limit-{budget}.ndb"
+                self.start("--max-retained-bytes",str(budget));c=self.client()
+                result=c.request(op="put_commit",key="01",value="ff")
+                if budget==258:
+                    self.assertEqual(result["error"],"resource_exhausted")
+                    self.assertIsNone(self.ok(c,op="get_latest",key="01")["value"])
+                else:
+                    self.assertTrue(result["ok"],result)
+                    self.assertEqual(self.ok(c,op="get_latest",key="01")["value"],"ff")
+                self.stop()
+        original=self.db.read_bytes()
+        args=[str(BINARY),"--db",str(self.db),"--bind","127.0.0.1:0","--token-file",str(self.secret),"--max-retained-bytes","258"]
+        result=subprocess.run(args,capture_output=True,text=True,timeout=10)
+        self.assertNotEqual(result.returncode,0);self.assertIn("resource exhausted",result.stderr)
+        self.assertEqual(self.db.read_bytes(),original)
+        self.start("--max-retained-bytes","1048576");c=self.client()
+        old=self.client();self.ok(old,op="begin_read")
+        self.ok(c,op="put_commit",key="01",value="aa")
+        self.assertEqual(self.ok(old,op="get",key="01")["value"],"ff")
+        self.stop();self.start("--max-retained-bytes","1048576");c=self.client()
+        self.assertEqual(self.ok(c,op="get_latest",key="01")["value"],"aa")
+
+    def test_st_staged_limit_refusal_preserves_prior_changes_and_releases_budget(self):
+        self.stop();self.start("--max-staged-bytes","256");c=self.client()
+        self.ok(c,op="begin");self.ok(c,op="put",key="01",value="ff")
+        self.assertEqual(c.request(op="put",key="01",value="aa"*1024)["error"],"resource_exhausted")
+        self.assertEqual(self.ok(c,op="get",key="01")["value"],"ff")
+        self.ok(c,op="commit");self.ok(c,op="put_commit",key="02",value="bb")
+
+    def test_st_dependency_limit_refusal_releases_on_rollback(self):
+        self.stop();self.start("--max-dependency-bytes","97");c=self.client()
+        self.ok(c,op="begin");self.ok(c,op="get",key="01")
+        self.assertEqual(c.request(op="get",key="02")["error"],"resource_exhausted")
+        self.ok(c,op="get",key="01");self.ok(c,op="rollback")
+        self.ok(c,op="begin");self.ok(c,op="get",key="02");self.ok(c,op="rollback")
+
+    def test_er_buffer_refusal_does_not_break_following_reads(self):
+        self.seed();self.stop();self.start("--max-buffer-bytes","1024");c=self.client()
+        self.assertEqual(c.request(op="put_commit",key="01",value="aa"*8192)["error"],"resource_exhausted")
+        self.assertIsNone(self.ok(c,op="get_latest",key="02")["value"])
+        self.stop();self.start();c=self.client()
+        self.assertEqual(self.ok(c,op="get_latest",key="01")["value"],"ff")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -24,8 +24,12 @@ def main():
     limits = {x: read(x) for x in ['cpu.max', 'memory.max', 'memory.swap.max']}
     (OUT / f'{tag}-limits.json').write_text(json.dumps(limits))
     with (OUT / f'{tag}-server.log').open('w') as log:
-        p = subprocess.Popen(['catdb-server','--db','/data/catdb.wal','--bind','0.0.0.0:7400',
-            '--allow-remote','--token-file','/data/token','--transaction-timeout-secs','3600'], stdout=log, stderr=log)
+        command = ['catdb-server','--db','/data/catdb.wal','--bind','0.0.0.0:7400',
+            '--allow-remote','--token-file','/data/token','--transaction-timeout-secs','3600']
+        retained=os.environ.get('RETAINED_BYTES')
+        if retained: command += ['--max-retained-bytes',retained]
+        (OUT/f'{tag}-command.json').write_text(json.dumps({'retained_bytes':retained}))
+        p = subprocess.Popen(command, stdout=log, stderr=log)
         signal.signal(signal.SIGTERM, lambda *_: p.send_signal(signal.SIGTERM) if p.poll() is None else None)
         signal.signal(signal.SIGINT, lambda *_: p.send_signal(signal.SIGINT) if p.poll() is None else None)
         with (OUT / f'{tag}-resources.jsonl').open('w', buffering=1) as f:

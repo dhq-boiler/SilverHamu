@@ -53,13 +53,22 @@ pub struct Server {
 
 impl Server {
     pub fn bind(config: Config) -> Result<Self, Box<dyn std::error::Error>> {
-        config.validate()?;
-        let listener = TcpListener::bind(config.bind)?;
-        listener.set_nonblocking(true)?;
         let limits = ResourceLimits {
             max_transactions: config.max_connections,
             ..ResourceLimits::default()
         };
+        Self::bind_with_limits(config, limits)
+    }
+
+    /// Binds using explicit engine budgets. These budgets are not a process RSS cap.
+    pub fn bind_with_limits(
+        config: Config,
+        limits: ResourceLimits,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
+        config.validate()?;
+        let limits = limits.validate()?;
+        let listener = TcpListener::bind(config.bind)?;
+        listener.set_nonblocking(true)?;
         let db = if config.database.try_exists()? {
             Database::open_with_limits(&config.database, limits)?
         } else if config.initialize {
@@ -1055,6 +1064,55 @@ mod tests {
         dispatch(&db, &mut tx, &json!({"op":"rollback"})).unwrap();
         assert_eq!(db.begin().unwrap().get(&[1]).unwrap(), None);
     }
+    #[test]
+    fn eq_explicit_service_budgets_preserve_legacy_config_and_reject_zero_before_creation() {
+        let fixture = Fixture::new();
+        let config = || Config {
+            bind: "127.0.0.1:0".parse().unwrap(),
+            database: fixture.0.join("limits.ndb"),
+            token: vec![b'x'; 32],
+            initialize: true,
+            allow_remote: false,
+            max_connections: 12,
+            request_timeout: Duration::from_secs(1),
+            transaction_timeout: Duration::from_secs(1),
+        };
+        let bad = ResourceLimits {
+            max_retained_bytes: 0,
+            ..ResourceLimits::default()
+        };
+        assert!(Server::bind_with_limits(config(), bad).is_err());
+        assert!(!config().database.exists());
+        let server = Server::bind(config()).unwrap();
+        let expected = ResourceLimits {
+            max_transactions: 12,
+            ..ResourceLimits::default()
+        };
+        assert_eq!(
+            server.db.resource_usage().unwrap().limits.values(),
+            expected.values()
+        );
+        drop(server);
+        let limits = ResourceLimits {
+            max_transactions: 2,
+            max_staged_bytes: 1024,
+            max_dependency_bytes: 512,
+            max_retained_bytes: 2048,
+            max_buffer_bytes: 4096,
+        };
+        let server = Server::bind_with_limits(config(), limits).unwrap();
+        assert_eq!(
+            server.db.resource_usage().unwrap().limits.values(),
+            limits.values()
+        );
+        let _first = server.db.begin().unwrap();
+        let _second = server.db.begin().unwrap();
+        assert!(matches!(
+            server.db.begin(),
+            Err(Error::ResourceExhausted(_))
+        ));
+    }
+
     #[test]
     fn bv_auth_and_connection_configuration_bounds() {
         for size in [31, 32, 256, 257] {

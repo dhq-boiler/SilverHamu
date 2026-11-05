@@ -25,6 +25,12 @@ jobs:
         run: python benchmarks/commit-breakdown/test_diagnostics.py
         env:
           CATDB_DIAGNOSTICS: '1'
+      - if: contains(matrix.features, 'lock-timing')
+        run: python benchmarks/commit-tail/test_protocol.py
+        env:
+          CATDB_DIAGNOSTICS: 'pull'
+      - run: python benchmarks/commit-tail/test_collector.py
+      - run: python benchmarks/commit-tail/test_attribution.py
       - run: python tests/service_protocol.py
       - run: python tests/service_protocol.py
         env:

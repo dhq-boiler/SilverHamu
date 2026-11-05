@@ -368,6 +368,26 @@ Sync-before-success and recovery ordering are unchanged. See the
 [full results and limitations](docs/benchmarks/commit-breakdown-2026-11-05/README.md),
 and [reproduction commands](benchmarks/commit-breakdown/README.md).
 
+### Follow-up: maximum-latency attribution (default unchanged)
+
+Five further trials per mode found **sync-call outliers under both policies**.
+The bounded pull diagnostic matched 628 records to their exact requests: sync
+was the largest phase in all 20 observer-case maxima and all 285 responses over
+10 ms. It does not distinguish device I/O from scheduling inside the sync call.
+
+The unfavorable primary result remains: with one connection, the candidate's
+worst response was **78.956 ms versus 39.287 ms**, with eight >50 ms requests
+clustered in one run. Typical throughput improved **269.8 → 290.1 updates/s**,
+but the maximum is **not fixed**, and that uninstrumented event is not directly
+attributed. **The collection bypass remains opt-in.**
+
+![Five-trial throughput and tail-latency comparison](docs/benchmarks/commit-tail-2026-11-05/service.svg)
+
+All 320,000 updates and 80 full-content/restart checks passed. See the
+[same-request breakdown](docs/benchmarks/commit-tail-2026-11-05/tail-breakdown.svg),
+[results, observer effect and unresolved causes](docs/benchmarks/commit-tail-2026-11-05/README.md),
+and [reproduction commands](benchmarks/commit-tail/README.md).
+
 ## Build
 
 Requires Rust **1.89 or newer**. Python 3 is used by the optional client and integration tests. Docker is needed only for containers.

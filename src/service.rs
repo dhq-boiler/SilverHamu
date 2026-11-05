@@ -275,6 +275,34 @@ fn same_token(a: &[u8], b: &[u8]) -> bool {
     difference == 0
 }
 
+#[cfg(feature = "lock-timing")]
+struct CommitDiagnostic {
+    request_index: u64,
+    dispatch_ns: u64,
+    finished_ns: u64,
+    trace: [u64; 8],
+    detail: [u64; 8],
+    costs: [u64; 2],
+    sync_attempts: u64,
+    commit_ok: bool,
+}
+
+#[cfg(feature = "lock-timing")]
+impl CommitDiagnostic {
+    fn json(&self) -> Value {
+        json!({
+            "request_index": self.request_index,
+            "dispatch_ns": self.dispatch_ns,
+            "finished_ns": self.finished_ns,
+            "trace": self.trace,
+            "detail": self.detail,
+            "costs": self.costs,
+            "sync_attempts": self.sync_attempts,
+            "commit_ok": self.commit_ok,
+        })
+    }
+}
+
 fn connection(
     mut stream: TcpStream,
     db: Database,
@@ -302,6 +330,12 @@ fn connection(
     )?;
     #[cfg(feature = "lock-timing")]
     let diagnostic = std::env::var_os("CATDB_DIAGNOSTICS").is_some();
+    #[cfg(feature = "lock-timing")]
+    let pull_diagnostic = std::env::var("CATDB_DIAGNOSTICS").as_deref() == Ok("pull");
+    #[cfg(feature = "lock-timing")]
+    let mut last_diagnostic: Option<CommitDiagnostic> = None;
+    #[cfg(feature = "lock-timing")]
+    let mut request_index = 0_u64;
     let mut transaction: Option<Transaction> = None;
     let mut expires = None;
     while !stop.load(Ordering::Acquire) {
@@ -312,6 +346,18 @@ fn connection(
         let request = receive(&mut stream, deadline, stop)?;
         if Instant::now() >= deadline || stop.load(Ordering::Acquire) {
             break;
+        }
+        #[cfg(feature = "lock-timing")]
+        {
+            if pull_diagnostic
+                && request.get("op").and_then(Value::as_str) == Some("diagnostic_last")
+            {
+                let response = json!({"ok": true, "diagnostic": last_diagnostic.as_ref().map(CommitDiagnostic::json)});
+                send(&mut stream, &response, deadline, stop)?;
+                continue;
+            }
+            request_index = request_index.wrapping_add(1);
+            last_diagnostic = None;
         }
         #[cfg(feature = "lock-timing")]
         let dispatch_started = {
@@ -354,15 +400,22 @@ fn connection(
                 request.get("op").and_then(Value::as_str),
                 Some("commit" | "put_commit" | "delete_commit")
             ) {
+            let record = CommitDiagnostic {
+                request_index,
+                dispatch_ns: dispatch_finished.saturating_sub(dispatch_started),
+                finished_ns: dispatch_finished,
+                trace: crate::transactions::take_commit_trace(),
+                detail: crate::transactions::take_commit_detail(),
+                costs: crate::transactions::take_commit_costs(),
+                sync_attempts: db.commit_sync_attempts(),
+                commit_ok: response.get("ok").and_then(Value::as_bool) == Some(true),
+            };
             let mut response = response;
-            response["diagnostic"] = json!({
-                "dispatch_ns": dispatch_finished.saturating_sub(dispatch_started),
-                "finished_ns": dispatch_finished,
-                "trace": crate::transactions::take_commit_trace(),
-                "detail": crate::transactions::take_commit_detail(),
-                "costs": crate::transactions::take_commit_costs(),
-                "sync_attempts": db.commit_sync_attempts(),
-            });
+            if pull_diagnostic {
+                last_diagnostic = Some(record);
+            } else {
+                response["diagnostic"] = record.json();
+            }
             response
         } else {
             response

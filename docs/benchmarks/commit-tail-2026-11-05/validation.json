@@ -1,0 +1,47 @@
+{
+  "rust": {
+    "features": "service,lock-timing,single-client-commit",
+    "passed": 142,
+    "failed": 0,
+    "ignored": 12
+  },
+  "pull_protocol": {
+    "passed": 23,
+    "failed": 0
+  },
+  "full_protocol_diagnostics": {
+    "passed": 21,
+    "failed": 0
+  },
+  "c_abi": {
+    "passed": 35,
+    "failed": 0
+  },
+  "collector": {
+    "passed": 4,
+    "failed": 0
+  },
+  "attribution": {
+    "passed": 3,
+    "failed": 0
+  },
+  "clippy": {
+    "features": "service,lock-timing,single-client-commit,commit-window,wal-prepare",
+    "targets": "all",
+    "warnings_denied": true,
+    "passed": true
+  },
+  "benchmark": {
+    "timed_updates": 320000,
+    "primary_updates": 160000,
+    "observer_updates": 160000,
+    "full_content_checks": 80,
+    "failed": 0,
+    "retries": 0,
+    "probes": 628,
+    "probe_errors": 0,
+    "dropped_records": 0,
+    "over_10ms_attributed": 285
+  },
+  "physical_power_loss_tested": false
+}

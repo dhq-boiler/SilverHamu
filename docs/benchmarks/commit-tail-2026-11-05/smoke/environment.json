@@ -1,0 +1,77 @@
+{
+  "utc": "2026-11-05T08:35:46.750402+00:00",
+  "rows": 100000,
+  "value_bytes": 256,
+  "ops": 100,
+  "reps": 1,
+  "single_variants": [
+    "smoke"
+  ],
+  "profile": false,
+  "profile_variants": [
+    "smoke"
+  ],
+  "clients": [
+    1,
+    4
+  ],
+  "workloads": [
+    "update"
+  ],
+  "server_cpus": 2,
+  "client_cpus": 2,
+  "memory_gib_each": 4,
+  "variants": {
+    "smoke": {
+      "image": "catdb-tail-candidate-light:local",
+      "id": "sha256:dfcbef409c79176d11bec8560e1556da4f17b6506a40b557671c435b057c5496"
+    }
+  },
+  "source_sha256": {
+    "benchmarks\\runner.py": "aa313e3ba0969e60f1c6917acfff090c572e4a25f5bbe60b04d319a410e754e0",
+    "benchmarks\\commit-tail\\client.py": "3dbe872611a4a59b53d3cf804404ed779156766a27c2f1062f5b50977e4ae7e8",
+    "src\\group_commit.rs": "af9405abf7101ba37f2ee823f3da409f9448b2d32f4d4c8391ee6fced0bc3c92",
+    "src\\service.rs": "81ca3bffda65dfd03e5ecba2b1be7e69bdb32ae3c9ddfb79982a5f2c9d2b9d95"
+  },
+  "runs": [
+    {
+      "variant": "smoke",
+      "rep": 1,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "8552481827bf1abace5a962f3463ecefc5e0d6ce46afb65dddea6725ede3e382",
+          "expected_sha256": "8552481827bf1abace5a962f3463ecefc5e0d6ce46afb65dddea6725ede3e382",
+          "updated_keys": 100,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-1",
+          "rows": 100000,
+          "sha256": "c8e207dbf7e440077532279a8388f9792fd910730ecac91b1203564e99bd7035",
+          "expected_sha256": "c8e207dbf7e440077532279a8388f9792fd910730ecac91b1203564e99bd7035",
+          "updated_keys": 195,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "c8e207dbf7e440077532279a8388f9792fd910730ecac91b1203564e99bd7035",
+          "expected_sha256": "c8e207dbf7e440077532279a8388f9792fd910730ecac91b1203564e99bd7035",
+          "updated_keys": 195,
+          "empty_and_last": true
+        }
+      ]
+    }
+  ]
+}

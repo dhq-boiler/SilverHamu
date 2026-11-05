@@ -1,0 +1,2352 @@
+{
+  "summary": [
+    {
+      "variant": "before",
+      "clients": 1,
+      "operations": 40000,
+      "runs": 5,
+      "above_ms": {
+        "10": 63,
+        "20": 4,
+        "50": 0
+      },
+      "ops_s": {
+        "median": 269.79301517646684,
+        "min": 264.78669355211633,
+        "max": 276.0122930246043
+      },
+      "p50_ms": {
+        "median": 3.769744,
+        "min": 3.721602,
+        "max": 3.878841
+      },
+      "p99_ms": {
+        "median": 5.833509,
+        "min": 5.687707,
+        "max": 6.039637
+      },
+      "p999_ms": {
+        "median": 10.253911,
+        "min": 7.77099,
+        "max": 12.786151
+      },
+      "max_ms": {
+        "median": 15.117605,
+        "min": 13.377809,
+        "max": 39.286569
+      }
+    },
+    {
+      "variant": "candidate",
+      "clients": 1,
+      "operations": 40000,
+      "runs": 5,
+      "above_ms": {
+        "10": 79,
+        "20": 14,
+        "50": 8
+      },
+      "ops_s": {
+        "median": 290.1238799962449,
+        "min": 280.45142462519254,
+        "max": 306.9151493686602
+      },
+      "p50_ms": {
+        "median": 3.553787,
+        "min": 3.414892,
+        "max": 3.572307
+      },
+      "p99_ms": {
+        "median": 5.518705,
+        "min": 4.96209,
+        "max": 5.679791
+      },
+      "p999_ms": {
+        "median": 12.169508,
+        "min": 7.881853,
+        "max": 45.980717
+      },
+      "max_ms": {
+        "median": 20.892783,
+        "min": 12.892404,
+        "max": 78.955964
+      }
+    },
+    {
+      "variant": "before-light",
+      "clients": 1,
+      "operations": 40000,
+      "runs": 5,
+      "above_ms": {
+        "10": 49,
+        "20": 7,
+        "50": 2
+      },
+      "ops_s": {
+        "median": 269.95412370365506,
+        "min": 262.4685714038409,
+        "max": 284.09577286905466
+      },
+      "p50_ms": {
+        "median": 3.764838,
+        "min": 3.694288,
+        "max": 3.873921
+      },
+      "p99_ms": {
+        "median": 5.704981,
+        "min": 5.176347,
+        "max": 6.051537
+      },
+      "p999_ms": {
+        "median": 7.524316,
+        "min": 6.351385,
+        "max": 13.030636
+      },
+      "max_ms": {
+        "median": 24.311792,
+        "min": 13.511759,
+        "max": 53.22562
+      }
+    },
+    {
+      "variant": "candidate-light",
+      "clients": 1,
+      "operations": 40000,
+      "runs": 5,
+      "above_ms": {
+        "10": 49,
+        "20": 2,
+        "50": 0
+      },
+      "ops_s": {
+        "median": 293.0123663536475,
+        "min": 284.356889931822,
+        "max": 305.98939043376686
+      },
+      "p50_ms": {
+        "median": 3.522777,
+        "min": 3.437608,
+        "max": 3.580889
+      },
+      "p99_ms": {
+        "median": 5.482165,
+        "min": 5.162239,
+        "max": 5.835685
+      },
+      "p999_ms": {
+        "median": 7.328046,
+        "min": 7.142605,
+        "max": 12.50742
+      },
+      "max_ms": {
+        "median": 16.792851,
+        "min": 13.268331,
+        "max": 23.768337
+      }
+    },
+    {
+      "variant": "before",
+      "clients": 4,
+      "operations": 40000,
+      "runs": 5,
+      "above_ms": {
+        "10": 36,
+        "20": 4,
+        "50": 0
+      },
+      "ops_s": {
+        "median": 1022.6235981155567,
+        "min": 985.5088871205639,
+        "max": 1043.866875306131
+      },
+      "p50_ms": {
+        "median": 3.931554,
+        "min": 3.915851,
+        "max": 4.067134
+      },
+      "p99_ms": {
+        "median": 5.78611,
+        "min": 5.729744,
+        "max": 6.246993
+      },
+      "p999_ms": {
+        "median": 8.71034,
+        "min": 7.559027,
+        "max": 11.646096
+      },
+      "max_ms": {
+        "median": 15.701462,
+        "min": 11.038634,
+        "max": 22.696322
+      }
+    },
+    {
+      "variant": "candidate",
+      "clients": 4,
+      "operations": 40000,
+      "runs": 5,
+      "above_ms": {
+        "10": 28,
+        "20": 0,
+        "50": 0
+      },
+      "ops_s": {
+        "median": 1000.3222671976881,
+        "min": 979.3014120301377,
+        "max": 1070.0806644314043
+      },
+      "p50_ms": {
+        "median": 4.015211,
+        "min": 3.805417,
+        "max": 4.095725
+      },
+      "p99_ms": {
+        "median": 5.902032,
+        "min": 5.33967,
+        "max": 6.386822
+      },
+      "p999_ms": {
+        "median": 7.977735,
+        "min": 6.3483,
+        "max": 10.818906
+      },
+      "max_ms": {
+        "median": 13.545127,
+        "min": 10.560223,
+        "max": 14.336122
+      }
+    },
+    {
+      "variant": "before-light",
+      "clients": 4,
+      "operations": 40000,
+      "runs": 5,
+      "above_ms": {
+        "10": 95,
+        "20": 12,
+        "50": 0
+      },
+      "ops_s": {
+        "median": 1023.4650124036635,
+        "min": 922.6320132417899,
+        "max": 1063.188858675647
+      },
+      "p50_ms": {
+        "median": 3.919597,
+        "min": 3.787905,
+        "max": 4.281447
+      },
+      "p99_ms": {
+        "median": 6.175915,
+        "min": 5.555711,
+        "max": 7.638516
+      },
+      "p999_ms": {
+        "median": 9.019618,
+        "min": 6.71748,
+        "max": 16.663374
+      },
+      "max_ms": {
+        "median": 21.509401,
+        "min": 14.589345,
+        "max": 24.645043
+      }
+    },
+    {
+      "variant": "candidate-light",
+      "clients": 4,
+      "operations": 40000,
+      "runs": 5,
+      "above_ms": {
+        "10": 92,
+        "20": 14,
+        "50": 4
+      },
+      "ops_s": {
+        "median": 1004.8787286838866,
+        "min": 936.3735467199301,
+        "max": 1026.3397723636551
+      },
+      "p50_ms": {
+        "median": 3.957665,
+        "min": 3.928724,
+        "max": 4.199106
+      },
+      "p99_ms": {
+        "median": 6.014496,
+        "min": 5.813848,
+        "max": 6.460138
+      },
+      "p999_ms": {
+        "median": 8.630445,
+        "min": 7.504344,
+        "max": 29.758474
+      },
+      "max_ms": {
+        "median": 14.561068,
+        "min": 9.875649,
+        "max": 53.714618
+      }
+    }
+  ],
+  "trials": [
+    {
+      "variant": "before",
+      "clients": 4,
+      "rep": 1,
+      "ops_s": 1022.6235981155567,
+      "p50_ms": 3.931554,
+      "p95_ms": 4.699808,
+      "p99_ms": 5.757936,
+      "max_ms": 14.685871,
+      "elapsed_s": 7.823015247,
+      "p999_ms": 11.646096,
+      "above_ms": {
+        "10": 12,
+        "20": 0,
+        "50": 0
+      }
+    },
+    {
+      "variant": "before",
+      "clients": 1,
+      "rep": 1,
+      "ops_s": 264.78669355211633,
+      "p50_ms": 3.878841,
+      "p95_ms": 4.581865,
+      "p99_ms": 5.900148,
+      "max_ms": 13.377809,
+      "elapsed_s": 30.212998594,
+      "p999_ms": 8.398881,
+      "above_ms": {
+        "10": 4,
+        "20": 0,
+        "50": 0
+      }
+    },
+    {
+      "variant": "before-light",
+      "clients": 4,
+      "rep": 1,
+      "ops_s": 922.6320132417899,
+      "p50_ms": 4.281447,
+      "p95_ms": 5.755138,
+      "p99_ms": 7.00537,
+      "max_ms": 22.184782,
+      "elapsed_s": 8.67084589,
+      "p999_ms": 9.742777,
+      "above_ms": {
+        "10": 8,
+        "20": 4,
+        "50": 0
+      },
+      "probe_count": 25,
+      "probe_elapsed_sum_ms": 13.640512,
+      "max_record": {
+        "operation_ns": 22184782,
+        "request_ns": 22176237,
+        "worker": 2,
+        "sequence": 91,
+        "request_index": 142,
+        "reason": "threshold",
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            538,
+            4621
+          ],
+          "detail": [
+            1327936752,
+            1327572668,
+            1327961369,
+            1327977525,
+            1349206410,
+            1349264669,
+            1349298509,
+            1327936545
+          ],
+          "dispatch_ns": 21367350,
+          "finished_ns": 1349301301,
+          "request_index": 142,
+          "sync_attempts": 92,
+          "trace": [
+            1327936875,
+            1327960803,
+            1327960973,
+            1327961039,
+            1327977572,
+            1327994973,
+            1349205165,
+            1349228744
+          ]
+        },
+        "probe_ns": 327310,
+        "phases": {
+          "dispatch preparation": 2594,
+          "queue submission": 330,
+          "leader queue": 0,
+          "batch collection": 23928,
+          "selection overhead": 170,
+          "writer lock": 66,
+          "state lock": 330,
+          "validation / encoding / bookkeeping": 16156,
+          "log reservation": 47,
+          "log write": 17401,
+          "log sync": 21210192,
+          "publication lock": 1245,
+          "publication": 22334,
+          "cleanup / replies ahead": 35925,
+          "reply wake / leader exit": 33840,
+          "dispatch finish": 2792,
+          "transport / client residual": 808887,
+          "outside protocol request": 8545
+        },
+        "largest_phase": "log sync",
+        "sync_fraction": 0.9560694353453643
+      },
+      "tail_classification": {
+        "log sync": 8
+      },
+      "sync_majority_count": 8
+    },
+    {
+      "variant": "before-light",
+      "clients": 1,
+      "rep": 1,
+      "ops_s": 262.4685714038409,
+      "p50_ms": 3.873921,
+      "p95_ms": 4.6126,
+      "p99_ms": 6.051537,
+      "max_ms": 27.815874,
+      "elapsed_s": 30.479839766,
+      "p999_ms": 12.979797,
+      "above_ms": {
+        "10": 17,
+        "20": 2,
+        "50": 0
+      },
+      "probe_count": 26,
+      "probe_elapsed_sum_ms": 4.991677,
+      "max_record": {
+        "operation_ns": 27815874,
+        "request_ns": 27801452,
+        "worker": 0,
+        "sequence": 1388,
+        "request_index": 1439,
+        "reason": "threshold",
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            221,
+            2702
+          ],
+          "detail": [
+            16232944920,
+            16232945289,
+            16233205341,
+            16233214119,
+            16260439613,
+            16260456746,
+            16260462934,
+            16232944533
+          ],
+          "dispatch_ns": 27529393,
+          "finished_ns": 16260466604,
+          "request_index": 1439,
+          "sync_attempts": 3389,
+          "trace": [
+            16232944985,
+            16233204751,
+            16233204889,
+            16233205018,
+            16233214166,
+            16233233816,
+            16260437612,
+            16260451472
+          ]
+        },
+        "probe_ns": 273338,
+        "phases": {
+          "dispatch preparation": 7322,
+          "queue submission": 452,
+          "leader queue": 304,
+          "batch collection": 259462,
+          "selection overhead": 138,
+          "writer lock": 129,
+          "state lock": 323,
+          "validation / encoding / bookkeeping": 8778,
+          "log reservation": 47,
+          "log write": 19650,
+          "log sync": 27203796,
+          "publication lock": 2001,
+          "publication": 11859,
+          "cleanup / replies ahead": 5274,
+          "reply wake / leader exit": 6188,
+          "dispatch finish": 3670,
+          "transport / client residual": 272059,
+          "outside protocol request": 14422
+        },
+        "largest_phase": "log sync",
+        "sync_fraction": 0.9779953705571143
+      },
+      "tail_classification": {
+        "log sync": 17
+      },
+      "sync_majority_count": 17
+    },
+    {
+      "variant": "candidate",
+      "clients": 4,
+      "rep": 1,
+      "ops_s": 996.8039460126937,
+      "p50_ms": 4.015211,
+      "p95_ms": 5.043155,
+      "p99_ms": 6.351891,
+      "max_ms": 14.336122,
+      "elapsed_s": 8.025650412,
+      "p999_ms": 8.063273,
+      "above_ms": {
+        "10": 4,
+        "20": 0,
+        "50": 0
+      }
+    },
+    {
+      "variant": "candidate",
+      "clients": 1,
+      "rep": 1,
+      "ops_s": 280.45142462519254,
+      "p50_ms": 3.572307,
+      "p95_ms": 4.242455,
+      "p99_ms": 5.679791,
+      "max_ms": 78.955964,
+      "elapsed_s": 28.52543898,
+      "p999_ms": 45.980717,
+      "above_ms": {
+        "10": 18,
+        "20": 12,
+        "50": 8
+      }
+    },
+    {
+      "variant": "candidate-light",
+      "clients": 4,
+      "rep": 1,
+      "ops_s": 991.871057885273,
+      "p50_ms": 4.048559,
+      "p95_ms": 4.940862,
+      "p99_ms": 5.813848,
+      "max_ms": 14.561068,
+      "elapsed_s": 8.065564507,
+      "p999_ms": 8.630445,
+      "above_ms": {
+        "10": 8,
+        "20": 0,
+        "50": 0
+      },
+      "probe_count": 40,
+      "probe_elapsed_sum_ms": 15.619673,
+      "max_record": {
+        "operation_ns": 14561068,
+        "request_ns": 14553243,
+        "worker": 3,
+        "sequence": 1539,
+        "request_index": 1590,
+        "reason": "threshold",
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            725,
+            4962
+          ],
+          "detail": [
+            7262300083,
+            7262190217,
+            7262472657,
+            7262489957,
+            7275915139,
+            7275949832,
+            7275985850,
+            7262299679
+          ],
+          "dispatch_ns": 13694536,
+          "finished_ns": 7275990372,
+          "request_index": 1590,
+          "sync_attempts": 1540,
+          "trace": [
+            7262300285,
+            7262472106,
+            7262472280,
+            7262472317,
+            7262490058,
+            7262511101,
+            7275913167,
+            7275943200
+          ]
+        },
+        "probe_ns": 406824,
+        "phases": {
+          "dispatch preparation": 3843,
+          "queue submission": 606,
+          "leader queue": 0,
+          "batch collection": 171821,
+          "selection overhead": 174,
+          "writer lock": 37,
+          "state lock": 340,
+          "validation / encoding / bookkeeping": 17300,
+          "log reservation": 101,
+          "log write": 21043,
+          "log sync": 13402066,
+          "publication lock": 1972,
+          "publication": 28061,
+          "cleanup / replies ahead": 6632,
+          "reply wake / leader exit": 36018,
+          "dispatch finish": 4522,
+          "transport / client residual": 858707,
+          "outside protocol request": 7825
+        },
+        "largest_phase": "log sync",
+        "sync_fraction": 0.920404052779645
+      },
+      "tail_classification": {
+        "log sync": 8
+      },
+      "sync_majority_count": 8
+    },
+    {
+      "variant": "candidate-light",
+      "clients": 1,
+      "rep": 1,
+      "ops_s": 285.0723453701032,
+      "p50_ms": 3.540422,
+      "p95_ms": 4.255445,
+      "p99_ms": 5.835685,
+      "max_ms": 16.792851,
+      "elapsed_s": 28.063051818,
+      "p999_ms": 12.11089,
+      "above_ms": {
+        "10": 21,
+        "20": 0,
+        "50": 0
+      },
+      "probe_count": 28,
+      "probe_elapsed_sum_ms": 4.668357,
+      "max_record": {
+        "operation_ns": 16792851,
+        "request_ns": 16778220,
+        "worker": 0,
+        "sequence": 129,
+        "request_index": 180,
+        "reason": "threshold",
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            257,
+            2312
+          ],
+          "detail": [
+            10833379348,
+            10833379650,
+            10833380577,
+            10833387411,
+            10849828824,
+            10849842950,
+            10849846794,
+            10833378944
+          ],
+          "dispatch_ns": 16474556,
+          "finished_ns": 10849849372,
+          "request_index": 180,
+          "sync_attempts": 2130,
+          "trace": [
+            10833379430,
+            10833380256,
+            10833380311,
+            10833380357,
+            10833387521,
+            10833404216,
+            10849827246,
+            10849838621
+          ]
+        },
+        "probe_ns": 214061,
+        "phases": {
+          "dispatch preparation": 4128,
+          "queue submission": 486,
+          "leader queue": 220,
+          "batch collection": 606,
+          "selection overhead": 55,
+          "writer lock": 46,
+          "state lock": 220,
+          "validation / encoding / bookkeeping": 6834,
+          "log reservation": 110,
+          "log write": 16695,
+          "log sync": 16423030,
+          "publication lock": 1578,
+          "publication": 9797,
+          "cleanup / replies ahead": 4329,
+          "reply wake / leader exit": 3844,
+          "dispatch finish": 2578,
+          "transport / client residual": 303664,
+          "outside protocol request": 14631
+        },
+        "largest_phase": "log sync",
+        "sync_fraction": 0.9779774738667067
+      },
+      "tail_classification": {
+        "log sync": 21
+      },
+      "sync_majority_count": 21
+    },
+    {
+      "variant": "before",
+      "clients": 4,
+      "rep": 2,
+      "ops_s": 1027.3586577561807,
+      "p50_ms": 3.919963,
+      "p95_ms": 4.689847,
+      "p99_ms": 5.78611,
+      "max_ms": 15.701462,
+      "elapsed_s": 7.786959247,
+      "p999_ms": 7.559027,
+      "above_ms": {
+        "10": 8,
+        "20": 0,
+        "50": 0
+      }
+    },
+    {
+      "variant": "before",
+      "clients": 1,
+      "rep": 2,
+      "ops_s": 268.5857061474705,
+      "p50_ms": 3.823316,
+      "p95_ms": 4.547742,
+      "p99_ms": 5.791375,
+      "max_ms": 14.093201,
+      "elapsed_s": 29.785650602,
+      "p999_ms": 7.77099,
+      "above_ms": {
+        "10": 4,
+        "20": 0,
+        "50": 0
+      }
+    },
+    {
+      "variant": "candidate-light",
+      "clients": 4,
+      "rep": 2,
+      "ops_s": 1004.8787286838866,
+      "p50_ms": 3.939032,
+      "p95_ms": 4.827175,
+      "p99_ms": 6.416279,
+      "max_ms": 19.067954,
+      "elapsed_s": 7.961159662,
+      "p999_ms": 14.067336,
+      "above_ms": {
+        "10": 60,
+        "20": 0,
+        "50": 0
+      },
+      "probe_count": 72,
+      "probe_elapsed_sum_ms": 36.455991,
+      "max_record": {
+        "operation_ns": 19067954,
+        "request_ns": 19055847,
+        "worker": 2,
+        "sequence": 963,
+        "request_index": 1014,
+        "reason": "threshold",
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            746,
+            5485
+          ],
+          "detail": [
+            4792845703,
+            4792846029,
+            4793196807,
+            4793216376,
+            4811194972,
+            4811229427,
+            4811270067,
+            4792845190
+          ],
+          "dispatch_ns": 18431211,
+          "finished_ns": 4811271345,
+          "request_index": 1014,
+          "sync_attempts": 964,
+          "trace": [
+            4792845768,
+            4793196201,
+            4793196416,
+            4793196462,
+            4793216479,
+            4793240311,
+            4811193722,
+            4811226909
+          ]
+        },
+        "probe_ns": 228317,
+        "phases": {
+          "dispatch preparation": 5056,
+          "queue submission": 578,
+          "leader queue": 261,
+          "batch collection": 350172,
+          "selection overhead": 215,
+          "writer lock": 46,
+          "state lock": 345,
+          "validation / encoding / bookkeeping": 19569,
+          "log reservation": 103,
+          "log write": 23832,
+          "log sync": 17953411,
+          "publication lock": 1250,
+          "publication": 31937,
+          "cleanup / replies ahead": 2518,
+          "reply wake / leader exit": 40640,
+          "dispatch finish": 1278,
+          "transport / client residual": 624636,
+          "outside protocol request": 12107
+        },
+        "largest_phase": "log sync",
+        "sync_fraction": 0.9415488940239735
+      },
+      "tail_classification": {
+        "log sync": 60
+      },
+      "sync_majority_count": 60
+    },
+    {
+      "variant": "candidate-light",
+      "clients": 1,
+      "rep": 2,
+      "ops_s": 284.356889931822,
+      "p50_ms": 3.580889,
+      "p95_ms": 4.298197,
+      "p99_ms": 5.659695,
+      "max_ms": 13.268331,
+      "elapsed_s": 28.133659789,
+      "p999_ms": 7.310862,
+      "above_ms": {
+        "10": 2,
+        "20": 0,
+        "50": 0
+      },
+      "probe_count": 7,
+      "probe_elapsed_sum_ms": 1.324523,
+      "max_record": {
+        "operation_ns": 13268331,
+        "request_ns": 13254253,
+        "worker": 0,
+        "sequence": 2665,
+        "request_index": 2716,
+        "reason": "threshold",
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            169,
+            3423
+          ],
+          "detail": [
+            19747251511,
+            19747251906,
+            19747252498,
+            19747262410,
+            19760192585,
+            19760208958,
+            19760211911,
+            19747251191
+          ],
+          "dispatch_ns": 12969898,
+          "finished_ns": 19760214995,
+          "request_index": 2716,
+          "sync_attempts": 4666,
+          "trace": [
+            19747251605,
+            19747252178,
+            19747252225,
+            19747252272,
+            19747262467,
+            19747277335,
+            19760190845,
+            19760203240
+          ]
+        },
+        "probe_ns": 177356,
+        "phases": {
+          "dispatch preparation": 6094,
+          "queue submission": 414,
+          "leader queue": 301,
+          "batch collection": 272,
+          "selection overhead": 47,
+          "writer lock": 47,
+          "state lock": 226,
+          "validation / encoding / bookkeeping": 9912,
+          "log reservation": 57,
+          "log write": 14868,
+          "log sync": 12913510,
+          "publication lock": 1740,
+          "publication": 10655,
+          "cleanup / replies ahead": 5718,
+          "reply wake / leader exit": 2953,
+          "dispatch finish": 3084,
+          "transport / client residual": 284355,
+          "outside protocol request": 14078
+        },
+        "largest_phase": "log sync",
+        "sync_fraction": 0.9732580533301438
+      },
+      "tail_classification": {
+        "log sync": 2
+      },
+      "sync_majority_count": 2
+    },
+    {
+      "variant": "candidate",
+      "clients": 4,
+      "rep": 2,
+      "ops_s": 1000.3222671976881,
+      "p50_ms": 4.023616,
+      "p95_ms": 4.878947,
+      "p99_ms": 5.902032,
+      "max_ms": 10.560223,
+      "elapsed_s": 7.997422693,
+      "p999_ms": 7.977735,
+      "above_ms": {
+        "10": 4,
+        "20": 0,
+        "50": 0
+      }
+    },
+    {
+      "variant": "candidate",
+      "clients": 1,
+      "rep": 2,
+      "ops_s": 286.3225433740109,
+      "p50_ms": 3.570672,
+      "p95_ms": 4.381693,
+      "p99_ms": 5.655812,
+      "max_ms": 13.028153,
+      "elapsed_s": 27.940517382,
+      "p999_ms": 7.881853,
+      "above_ms": {
+        "10": 4,
+        "20": 0,
+        "50": 0
+      }
+    },
+    {
+      "variant": "before-light",
+      "clients": 4,
+      "rep": 2,
+      "ops_s": 950.8542605538133,
+      "p50_ms": 4.11216,
+      "p95_ms": 5.441034,
+      "p99_ms": 7.638516,
+      "max_ms": 24.645043,
+      "elapsed_s": 8.413487042,
+      "p999_ms": 16.663374,
+      "above_ms": {
+        "10": 67,
+        "20": 4,
+        "50": 0
+      },
+      "probe_count": 96,
+      "probe_elapsed_sum_ms": 44.722248,
+      "max_record": {
+        "operation_ns": 24645043,
+        "request_ns": 24620300,
+        "worker": 3,
+        "sequence": 583,
+        "request_index": 634,
+        "reason": "threshold",
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            1042,
+            4906
+          ],
+          "detail": [
+            3483955727,
+            3483534153,
+            3483990117,
+            3484008958,
+            3507319175,
+            3507380146,
+            3507414745,
+            3483955305
+          ],
+          "dispatch_ns": 23467266,
+          "finished_ns": 3507417232,
+          "request_index": 634,
+          "sync_attempts": 584,
+          "trace": [
+            3483955878,
+            3483989235,
+            3483989498,
+            3483989629,
+            3484009071,
+            3484036825,
+            3507317636,
+            3507341741
+          ]
+        },
+        "probe_ns": 255732,
+        "phases": {
+          "dispatch preparation": 5339,
+          "queue submission": 573,
+          "leader queue": 0,
+          "batch collection": 33357,
+          "selection overhead": 263,
+          "writer lock": 131,
+          "state lock": 488,
+          "validation / encoding / bookkeeping": 18841,
+          "log reservation": 113,
+          "log write": 27754,
+          "log sync": 23280811,
+          "publication lock": 1539,
+          "publication": 22566,
+          "cleanup / replies ahead": 38405,
+          "reply wake / leader exit": 34599,
+          "dispatch finish": 2487,
+          "transport / client residual": 1153034,
+          "outside protocol request": 24743
+        },
+        "largest_phase": "log sync",
+        "sync_fraction": 0.9446447709586061
+      },
+      "tail_classification": {
+        "log sync": 67
+      },
+      "sync_majority_count": 67
+    },
+    {
+      "variant": "before-light",
+      "clients": 1,
+      "rep": 2,
+      "ops_s": 267.60607306829195,
+      "p50_ms": 3.790291,
+      "p95_ms": 4.484622,
+      "p99_ms": 5.704981,
+      "max_ms": 17.843644,
+      "elapsed_s": 29.894687771,
+      "p999_ms": 7.200743,
+      "above_ms": {
+        "10": 4,
+        "20": 0,
+        "50": 0
+      },
+      "probe_count": 12,
+      "probe_elapsed_sum_ms": 2.309508,
+      "max_record": {
+        "operation_ns": 17843644,
+        "request_ns": 17827421,
+        "worker": 0,
+        "sequence": 4805,
+        "request_index": 4856,
+        "reason": "threshold",
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            236,
+            2756
+          ],
+          "detail": [
+            29214203765,
+            29214204066,
+            29214471377,
+            29214479983,
+            29231697415,
+            29231712097,
+            29231715201,
+            29214203389
+          ],
+          "dispatch_ns": 17519647,
+          "finished_ns": 29231718013,
+          "request_index": 4856,
+          "sync_attempts": 6807,
+          "trace": [
+            29214203812,
+            29214470804,
+            29214470945,
+            29214471058,
+            29214480059,
+            29214499603,
+            29231695910,
+            29231707498
+          ]
+        },
+        "probe_ns": 148867,
+        "phases": {
+          "dispatch preparation": 5023,
+          "queue submission": 423,
+          "leader queue": 254,
+          "batch collection": 266738,
+          "selection overhead": 141,
+          "writer lock": 113,
+          "state lock": 319,
+          "validation / encoding / bookkeeping": 8606,
+          "log reservation": 76,
+          "log write": 19544,
+          "log sync": 17196307,
+          "publication lock": 1505,
+          "publication": 10083,
+          "cleanup / replies ahead": 4599,
+          "reply wake / leader exit": 3104,
+          "dispatch finish": 2812,
+          "transport / client residual": 307774,
+          "outside protocol request": 16223
+        },
+        "largest_phase": "log sync",
+        "sync_fraction": 0.963721703929982
+      },
+      "tail_classification": {
+        "log sync": 4
+      },
+      "sync_majority_count": 4
+    },
+    {
+      "variant": "candidate",
+      "clients": 4,
+      "rep": 3,
+      "ops_s": 979.3014120301377,
+      "p50_ms": 4.095725,
+      "p95_ms": 5.191833,
+      "p99_ms": 6.386822,
+      "max_ms": 13.545127,
+      "elapsed_s": 8.169088599,
+      "p999_ms": 7.851179,
+      "above_ms": {
+        "10": 4,
+        "20": 0,
+        "50": 0
+      }
+    },
+    {
+      "variant": "candidate",
+      "clients": 1,
+      "rep": 3,
+      "ops_s": 290.1238799962449,
+      "p50_ms": 3.553787,
+      "p95_ms": 4.179656,
+      "p99_ms": 5.518705,
+      "max_ms": 20.892783,
+      "elapsed_s": 27.574427862,
+      "p999_ms": 12.680119,
+      "above_ms": {
+        "10": 21,
+        "20": 1,
+        "50": 0
+      }
+    },
+    {
+      "variant": "candidate-light",
+      "clients": 4,
+      "rep": 3,
+      "ops_s": 936.3735467199301,
+      "p50_ms": 4.199106,
+      "p95_ms": 5.179797,
+      "p99_ms": 6.460138,
+      "max_ms": 53.714618,
+      "elapsed_s": 8.543598896,
+      "p999_ms": 29.758474,
+      "above_ms": {
+        "10": 20,
+        "20": 14,
+        "50": 4
+      },
+      "probe_count": 50,
+      "probe_elapsed_sum_ms": 21.471276,
+      "max_record": {
+        "operation_ns": 53714618,
+        "request_ns": 53706652,
+        "worker": 0,
+        "sequence": 189,
+        "request_index": 240,
+        "reason": "threshold",
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            719,
+            4404
+          ],
+          "detail": [
+            1881436325,
+            1881251210,
+            1881714326,
+            1881732769,
+            1933860347,
+            1933888326,
+            1933928249,
+            1881435799
+          ],
+          "dispatch_ns": 52501441,
+          "finished_ns": 1933932791,
+          "request_index": 240,
+          "sync_attempts": 190,
+          "trace": [
+            1881436445,
+            1881713735,
+            1881713957,
+            1881714003,
+            1881732880,
+            1881764265,
+            1933858529,
+            1933883886
+          ]
+        },
+        "probe_ns": 205857,
+        "phases": {
+          "dispatch preparation": 4449,
+          "queue submission": 646,
+          "leader queue": 0,
+          "batch collection": 277290,
+          "selection overhead": 222,
+          "writer lock": 46,
+          "state lock": 323,
+          "validation / encoding / bookkeeping": 18443,
+          "log reservation": 111,
+          "log write": 31385,
+          "log sync": 52094264,
+          "publication lock": 1818,
+          "publication": 23539,
+          "cleanup / replies ahead": 4440,
+          "reply wake / leader exit": 39923,
+          "dispatch finish": 4542,
+          "transport / client residual": 1205211,
+          "outside protocol request": 7966
+        },
+        "largest_phase": "log sync",
+        "sync_fraction": 0.9698340217182593
+      },
+      "tail_classification": {
+        "log sync": 20
+      },
+      "sync_majority_count": 20
+    },
+    {
+      "variant": "candidate-light",
+      "clients": 1,
+      "rep": 3,
+      "ops_s": 293.0123663536475,
+      "p50_ms": 3.522777,
+      "p95_ms": 4.165988,
+      "p99_ms": 5.458532,
+      "max_ms": 23.768337,
+      "elapsed_s": 27.302601933,
+      "p999_ms": 7.328046,
+      "above_ms": {
+        "10": 5,
+        "20": 1,
+        "50": 0
+      },
+      "probe_count": 9,
+      "probe_elapsed_sum_ms": 1.811336,
+      "max_record": {
+        "operation_ns": 23768337,
+        "request_ns": 23755816,
+        "worker": 0,
+        "sequence": 3392,
+        "request_index": 3443,
+        "reason": "threshold",
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            245,
+            2302
+          ],
+          "detail": [
+            22804335816,
+            22804336061,
+            22804336476,
+            22804343458,
+            22827821665,
+            22827830213,
+            22827831742,
+            22804335580
+          ],
+          "dispatch_ns": 23501823,
+          "finished_ns": 22827833346,
+          "request_index": 3443,
+          "sync_attempts": 5393,
+          "trace": [
+            22804335873,
+            22804336212,
+            22804336250,
+            22804336288,
+            22804343506,
+            22804353431,
+            22827820995,
+            22827828128
+          ]
+        },
+        "probe_ns": 174222,
+        "phases": {
+          "dispatch preparation": 4057,
+          "queue submission": 293,
+          "leader queue": 188,
+          "batch collection": 151,
+          "selection overhead": 38,
+          "writer lock": 38,
+          "state lock": 188,
+          "validation / encoding / bookkeeping": 6982,
+          "log reservation": 48,
+          "log write": 9925,
+          "log sync": 23467564,
+          "publication lock": 670,
+          "publication": 6463,
+          "cleanup / replies ahead": 2085,
+          "reply wake / leader exit": 1529,
+          "dispatch finish": 1604,
+          "transport / client residual": 253993,
+          "outside protocol request": 12521
+        },
+        "largest_phase": "log sync",
+        "sync_fraction": 0.9873456439127398
+      },
+      "tail_classification": {
+        "log sync": 5
+      },
+      "sync_majority_count": 5
+    },
+    {
+      "variant": "before",
+      "clients": 4,
+      "rep": 3,
+      "ops_s": 985.5088871205639,
+      "p50_ms": 4.067134,
+      "p95_ms": 5.119143,
+      "p99_ms": 6.233458,
+      "max_ms": 22.696322,
+      "elapsed_s": 8.117633544,
+      "p999_ms": 8.71034,
+      "above_ms": {
+        "10": 4,
+        "20": 4,
+        "50": 0
+      }
+    },
+    {
+      "variant": "before",
+      "clients": 1,
+      "rep": 3,
+      "ops_s": 271.90657562077007,
+      "p50_ms": 3.767422,
+      "p95_ms": 4.543005,
+      "p99_ms": 5.833509,
+      "max_ms": 15.117605,
+      "elapsed_s": 29.421870294,
+      "p999_ms": 12.786151,
+      "above_ms": {
+        "10": 23,
+        "20": 0,
+        "50": 0
+      }
+    },
+    {
+      "variant": "before-light",
+      "clients": 4,
+      "rep": 3,
+      "ops_s": 1023.4650124036635,
+      "p50_ms": 3.919597,
+      "p95_ms": 4.874945,
+      "p99_ms": 6.175915,
+      "max_ms": 14.589345,
+      "elapsed_s": 7.816583765,
+      "p999_ms": 9.019618,
+      "above_ms": {
+        "10": 8,
+        "20": 0,
+        "50": 0
+      },
+      "probe_count": 37,
+      "probe_elapsed_sum_ms": 17.556358,
+      "max_record": {
+        "operation_ns": 14589345,
+        "request_ns": 14581286,
+        "worker": 3,
+        "sequence": 226,
+        "request_index": 277,
+        "reason": "threshold",
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            769,
+            5136
+          ],
+          "detail": [
+            1812455510,
+            1812276863,
+            1812573079,
+            1812592027,
+            1825853096,
+            1825899968,
+            1825934491,
+            1812455205
+          ],
+          "dispatch_ns": 13486336,
+          "finished_ns": 1825937211,
+          "request_index": 277,
+          "sync_attempts": 227,
+          "trace": [
+            1812455612,
+            1812572227,
+            1812572468,
+            1812572625,
+            1812592092,
+            1812611781,
+            1825851514,
+            1825877050
+          ]
+        },
+        "probe_ns": 307142,
+        "phases": {
+          "dispatch preparation": 4330,
+          "queue submission": 407,
+          "leader queue": 0,
+          "batch collection": 116615,
+          "selection overhead": 241,
+          "writer lock": 157,
+          "state lock": 454,
+          "validation / encoding / bookkeeping": 18948,
+          "log reservation": 65,
+          "log write": 19689,
+          "log sync": 13239733,
+          "publication lock": 1582,
+          "publication": 23954,
+          "cleanup / replies ahead": 22918,
+          "reply wake / leader exit": 34523,
+          "dispatch finish": 2720,
+          "transport / client residual": 1094950,
+          "outside protocol request": 8059
+        },
+        "largest_phase": "log sync",
+        "sync_fraction": 0.9074933110430934
+      },
+      "tail_classification": {
+        "log sync": 8
+      },
+      "sync_majority_count": 8
+    },
+    {
+      "variant": "before-light",
+      "clients": 1,
+      "rep": 3,
+      "ops_s": 277.68869983244866,
+      "p50_ms": 3.740528,
+      "p95_ms": 4.29385,
+      "p99_ms": 5.49036,
+      "max_ms": 24.311792,
+      "elapsed_s": 28.809238564,
+      "p999_ms": 7.524316,
+      "above_ms": {
+        "10": 4,
+        "20": 1,
+        "50": 0
+      },
+      "probe_count": 11,
+      "probe_elapsed_sum_ms": 1.665441,
+      "max_record": {
+        "operation_ns": 24311792,
+        "request_ns": 24299528,
+        "worker": 0,
+        "sequence": 4030,
+        "request_index": 4081,
+        "reason": "threshold",
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            188,
+            2165
+          ],
+          "detail": [
+            24768460168,
+            24768460375,
+            24768721551,
+            24768729118,
+            24792495728,
+            24792511051,
+            24792513809,
+            24768459914
+          ],
+          "dispatch_ns": 24059900,
+          "finished_ns": 24792516303,
+          "request_index": 4081,
+          "sync_attempts": 6031,
+          "trace": [
+            24768460225,
+            24768720976,
+            24768721127,
+            24768721183,
+            24768729156,
+            24768739904,
+            24792494109,
+            24792507070
+          ]
+        },
+        "probe_ns": 222914,
+        "phases": {
+          "dispatch preparation": 3511,
+          "queue submission": 311,
+          "leader queue": 150,
+          "batch collection": 260601,
+          "selection overhead": 151,
+          "writer lock": 56,
+          "state lock": 368,
+          "validation / encoding / bookkeeping": 7567,
+          "log reservation": 38,
+          "log write": 10748,
+          "log sync": 23754205,
+          "publication lock": 1619,
+          "publication": 11342,
+          "cleanup / replies ahead": 3981,
+          "reply wake / leader exit": 2758,
+          "dispatch finish": 2494,
+          "transport / client residual": 239628,
+          "outside protocol request": 12264
+        },
+        "largest_phase": "log sync",
+        "sync_fraction": 0.9770651624528541
+      },
+      "tail_classification": {
+        "log sync": 4
+      },
+      "sync_majority_count": 4
+    },
+    {
+      "variant": "candidate",
+      "clients": 4,
+      "rep": 4,
+      "ops_s": 1070.0806644314043,
+      "p50_ms": 3.805417,
+      "p95_ms": 4.467524,
+      "p99_ms": 5.33967,
+      "max_ms": 13.4933,
+      "elapsed_s": 7.476071913,
+      "p999_ms": 6.3483,
+      "above_ms": {
+        "10": 4,
+        "20": 0,
+        "50": 0
+      }
+    },
+    {
+      "variant": "candidate",
+      "clients": 1,
+      "rep": 4,
+      "ops_s": 301.2018672720005,
+      "p50_ms": 3.477432,
+      "p95_ms": 3.950769,
+      "p99_ms": 5.335386,
+      "max_ms": 22.331789,
+      "elapsed_s": 26.560260308,
+      "p999_ms": 12.169508,
+      "above_ms": {
+        "10": 18,
+        "20": 1,
+        "50": 0
+      }
+    },
+    {
+      "variant": "before-light",
+      "clients": 4,
+      "rep": 4,
+      "ops_s": 1050.5105660463037,
+      "p50_ms": 3.85727,
+      "p95_ms": 4.551329,
+      "p99_ms": 5.614195,
+      "max_ms": 15.092953,
+      "elapsed_s": 7.615344632,
+      "p999_ms": 6.71748,
+      "above_ms": {
+        "10": 4,
+        "20": 0,
+        "50": 0
+      },
+      "probe_count": 33,
+      "probe_elapsed_sum_ms": 9.960443,
+      "max_record": {
+        "operation_ns": 15092953,
+        "request_ns": 15084957,
+        "worker": 3,
+        "sequence": 1722,
+        "request_index": 1773,
+        "reason": "threshold",
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            643,
+            3183
+          ],
+          "detail": [
+            7478274110,
+            7478179107,
+            7478637741,
+            7478653445,
+            7492733010,
+            7492759465,
+            7492791859,
+            7478273766
+          ],
+          "dispatch_ns": 14524973,
+          "finished_ns": 7492795732,
+          "request_index": 1773,
+          "sync_attempts": 1724,
+          "trace": [
+            7478274213,
+            7478637182,
+            7478637341,
+            7478637415,
+            7478653500,
+            7478669437,
+            7492731819,
+            7492754448
+          ]
+        },
+        "probe_ns": 464352,
+        "phases": {
+          "dispatch preparation": 3007,
+          "queue submission": 447,
+          "leader queue": 0,
+          "batch collection": 362969,
+          "selection overhead": 159,
+          "writer lock": 74,
+          "state lock": 326,
+          "validation / encoding / bookkeeping": 15704,
+          "log reservation": 55,
+          "log write": 15937,
+          "log sync": 14062382,
+          "publication lock": 1191,
+          "publication": 21438,
+          "cleanup / replies ahead": 5017,
+          "reply wake / leader exit": 32394,
+          "dispatch finish": 3873,
+          "transport / client residual": 559984,
+          "outside protocol request": 7996
+        },
+        "largest_phase": "log sync",
+        "sync_fraction": 0.9317183986460437
+      },
+      "tail_classification": {
+        "log sync": 4
+      },
+      "sync_majority_count": 4
+    },
+    {
+      "variant": "before-light",
+      "clients": 1,
+      "rep": 4,
+      "ops_s": 269.95412370365506,
+      "p50_ms": 3.764838,
+      "p95_ms": 4.810265,
+      "p99_ms": 5.868799,
+      "max_ms": 53.22562,
+      "elapsed_s": 29.634664921,
+      "p999_ms": 13.030636,
+      "above_ms": {
+        "10": 20,
+        "20": 4,
+        "50": 2
+      },
+      "probe_count": 27,
+      "probe_elapsed_sum_ms": 4.785591,
+      "max_record": {
+        "operation_ns": 53225620,
+        "request_ns": 53214464,
+        "worker": 0,
+        "sequence": 1003,
+        "request_index": 1054,
+        "reason": "threshold",
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            132,
+            1515
+          ],
+          "detail": [
+            13240440638,
+            13240440835,
+            13240701527,
+            13240707914,
+            13293373494,
+            13293388865,
+            13293392336,
+            13240440393
+          ],
+          "dispatch_ns": 52958151,
+          "finished_ns": 13293395572,
+          "request_index": 1054,
+          "sync_attempts": 3005,
+          "trace": [
+            13240440694,
+            13240701075,
+            13240701188,
+            13240701244,
+            13240707952,
+            13240716136,
+            13293371838,
+            13293383776
+          ]
+        },
+        "probe_ns": 214640,
+        "phases": {
+          "dispatch preparation": 2972,
+          "queue submission": 301,
+          "leader queue": 141,
+          "batch collection": 260240,
+          "selection overhead": 113,
+          "writer lock": 56,
+          "state lock": 283,
+          "validation / encoding / bookkeeping": 6387,
+          "log reservation": 38,
+          "log write": 8184,
+          "log sync": 52655702,
+          "publication lock": 1656,
+          "publication": 10282,
+          "cleanup / replies ahead": 5089,
+          "reply wake / leader exit": 3471,
+          "dispatch finish": 3236,
+          "transport / client residual": 256313,
+          "outside protocol request": 11156
+        },
+        "largest_phase": "log sync",
+        "sync_fraction": 0.9892924121879652
+      },
+      "tail_classification": {
+        "log sync": 20
+      },
+      "sync_majority_count": 20
+    },
+    {
+      "variant": "before",
+      "clients": 4,
+      "rep": 4,
+      "ops_s": 1043.866875306131,
+      "p50_ms": 3.915851,
+      "p95_ms": 4.622675,
+      "p99_ms": 5.729744,
+      "max_ms": 11.038634,
+      "elapsed_s": 7.663812493,
+      "p999_ms": 7.814568,
+      "above_ms": {
+        "10": 4,
+        "20": 0,
+        "50": 0
+      }
+    },
+    {
+      "variant": "before",
+      "clients": 1,
+      "rep": 4,
+      "ops_s": 276.0122930246043,
+      "p50_ms": 3.721602,
+      "p95_ms": 4.443271,
+      "p99_ms": 5.687707,
+      "max_ms": 26.978367,
+      "elapsed_s": 28.984216291,
+      "p999_ms": 10.253911,
+      "above_ms": {
+        "10": 9,
+        "20": 2,
+        "50": 0
+      }
+    },
+    {
+      "variant": "candidate-light",
+      "clients": 4,
+      "rep": 4,
+      "ops_s": 1026.3397723636551,
+      "p50_ms": 3.928724,
+      "p95_ms": 4.848238,
+      "p99_ms": 5.969744,
+      "max_ms": 13.717571,
+      "elapsed_s": 7.794689649,
+      "p999_ms": 7.822745,
+      "above_ms": {
+        "10": 4,
+        "20": 0,
+        "50": 0
+      },
+      "probe_count": 22,
+      "probe_elapsed_sum_ms": 9.433253,
+      "max_record": {
+        "operation_ns": 13717571,
+        "request_ns": 13710207,
+        "worker": 1,
+        "sequence": 31,
+        "request_index": 82,
+        "reason": "threshold",
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            847,
+            4414
+          ],
+          "detail": [
+            1083819359,
+            1083523780,
+            1083917658,
+            1083936454,
+            1096452327,
+            1096500391,
+            1096534045,
+            1083818949
+          ],
+          "dispatch_ns": 12722068,
+          "finished_ns": 1096536754,
+          "request_index": 82,
+          "sync_attempts": 32,
+          "trace": [
+            1083819508,
+            1083917025,
+            1083917277,
+            1083917323,
+            1083936566,
+            1083964503,
+            1096450455,
+            1096474381
+          ]
+        },
+        "probe_ns": 507331,
+        "phases": {
+          "dispatch preparation": 4263,
+          "queue submission": 559,
+          "leader queue": 0,
+          "batch collection": 97517,
+          "selection overhead": 252,
+          "writer lock": 46,
+          "state lock": 335,
+          "validation / encoding / bookkeeping": 18796,
+          "log reservation": 112,
+          "log write": 27937,
+          "log sync": 12485952,
+          "publication lock": 1872,
+          "publication": 22054,
+          "cleanup / replies ahead": 26010,
+          "reply wake / leader exit": 33654,
+          "dispatch finish": 2709,
+          "transport / client residual": 988139,
+          "outside protocol request": 7364
+        },
+        "largest_phase": "log sync",
+        "sync_fraction": 0.9102159558714877
+      },
+      "tail_classification": {
+        "log sync": 4
+      },
+      "sync_majority_count": 4
+    },
+    {
+      "variant": "candidate-light",
+      "clients": 1,
+      "rep": 4,
+      "ops_s": 300.79942455385606,
+      "p50_ms": 3.464376,
+      "p95_ms": 3.9736,
+      "p99_ms": 5.482165,
+      "max_ms": 23.652995,
+      "elapsed_s": 26.59579556,
+      "p999_ms": 12.50742,
+      "above_ms": {
+        "10": 18,
+        "20": 1,
+        "50": 0
+      },
+      "probe_count": 28,
+      "probe_elapsed_sum_ms": 4.697107,
+      "max_record": {
+        "operation_ns": 23652995,
+        "request_ns": 23642071,
+        "worker": 0,
+        "sequence": 4767,
+        "request_index": 4818,
+        "reason": "threshold",
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            224,
+            2084
+          ],
+          "detail": [
+            25779492007,
+            25779492267,
+            25779492695,
+            25779499367,
+            25802858340,
+            25802874521,
+            25802877601,
+            25779491672
+          ],
+          "dispatch_ns": 23392024,
+          "finished_ns": 25802880197,
+          "request_index": 4818,
+          "sync_attempts": 6768,
+          "trace": [
+            25779492053,
+            25779492435,
+            25779492472,
+            25779492509,
+            25779499460,
+            25779509406,
+            25802856777,
+            25802869227
+          ]
+        },
+        "probe_ns": 168628,
+        "phases": {
+          "dispatch preparation": 3499,
+          "queue submission": 381,
+          "leader queue": 214,
+          "batch collection": 168,
+          "selection overhead": 37,
+          "writer lock": 37,
+          "state lock": 186,
+          "validation / encoding / bookkeeping": 6672,
+          "log reservation": 93,
+          "log write": 9946,
+          "log sync": 23347371,
+          "publication lock": 1563,
+          "publication": 10887,
+          "cleanup / replies ahead": 5294,
+          "reply wake / leader exit": 3080,
+          "dispatch finish": 2596,
+          "transport / client residual": 250047,
+          "outside protocol request": 10924
+        },
+        "largest_phase": "log sync",
+        "sync_fraction": 0.987078845617648
+      },
+      "tail_classification": {
+        "log sync": 18
+      },
+      "sync_majority_count": 18
+    },
+    {
+      "variant": "before",
+      "clients": 4,
+      "rep": 5,
+      "ops_s": 1001.7702013254093,
+      "p50_ms": 4.009291,
+      "p95_ms": 5.002735,
+      "p99_ms": 6.246993,
+      "max_ms": 18.114279,
+      "elapsed_s": 7.985863414,
+      "p999_ms": 9.663675,
+      "above_ms": {
+        "10": 8,
+        "20": 0,
+        "50": 0
+      }
+    },
+    {
+      "variant": "before",
+      "clients": 1,
+      "rep": 5,
+      "ops_s": 269.79301517646684,
+      "p50_ms": 3.769744,
+      "p95_ms": 4.900559,
+      "p99_ms": 6.039637,
+      "max_ms": 39.286569,
+      "elapsed_s": 29.65236144,
+      "p999_ms": 12.533017,
+      "above_ms": {
+        "10": 23,
+        "20": 2,
+        "50": 0
+      }
+    },
+    {
+      "variant": "before-light",
+      "clients": 4,
+      "rep": 5,
+      "ops_s": 1063.188858675647,
+      "p50_ms": 3.787905,
+      "p95_ms": 4.573262,
+      "p99_ms": 5.555711,
+      "max_ms": 21.509401,
+      "elapsed_s": 7.524533327,
+      "p999_ms": 7.70463,
+      "above_ms": {
+        "10": 8,
+        "20": 4,
+        "50": 0
+      },
+      "probe_count": 39,
+      "probe_elapsed_sum_ms": 15.934127,
+      "max_record": {
+        "operation_ns": 21509401,
+        "request_ns": 21502274,
+        "worker": 1,
+        "sequence": 162,
+        "request_index": 213,
+        "reason": "threshold",
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            715,
+            3984
+          ],
+          "detail": [
+            1476603995,
+            1476437539,
+            1476718449,
+            1476733308,
+            1497112398,
+            1497148244,
+            1497170806,
+            1476603784
+          ],
+          "dispatch_ns": 20571613,
+          "finished_ns": 1497172575,
+          "request_index": 213,
+          "sync_attempts": 163,
+          "trace": [
+            1476604068,
+            1476717844,
+            1476718064,
+            1476718128,
+            1476733363,
+            1476749476,
+            1497110987,
+            1497130472
+          ]
+        },
+        "probe_ns": 156044,
+        "phases": {
+          "dispatch preparation": 2822,
+          "queue submission": 284,
+          "leader queue": 0,
+          "batch collection": 113776,
+          "selection overhead": 220,
+          "writer lock": 64,
+          "state lock": 321,
+          "validation / encoding / bookkeeping": 14859,
+          "log reservation": 55,
+          "log write": 16113,
+          "log sync": 20361511,
+          "publication lock": 1411,
+          "publication": 18074,
+          "cleanup / replies ahead": 17772,
+          "reply wake / leader exit": 22562,
+          "dispatch finish": 1769,
+          "transport / client residual": 930661,
+          "outside protocol request": 7127
+        },
+        "largest_phase": "log sync",
+        "sync_fraction": 0.9466331024280964
+      },
+      "tail_classification": {
+        "log sync": 8
+      },
+      "sync_majority_count": 8
+    },
+    {
+      "variant": "before-light",
+      "clients": 1,
+      "rep": 5,
+      "ops_s": 284.09577286905466,
+      "p50_ms": 3.694288,
+      "p95_ms": 4.121317,
+      "p99_ms": 5.176347,
+      "max_ms": 13.511759,
+      "elapsed_s": 28.159517895,
+      "p999_ms": 6.351385,
+      "above_ms": {
+        "10": 4,
+        "20": 0,
+        "50": 0
+      },
+      "probe_count": 16,
+      "probe_elapsed_sum_ms": 2.32047,
+      "max_record": {
+        "operation_ns": 13511759,
+        "request_ns": 13498490,
+        "worker": 0,
+        "sequence": 7338,
+        "request_index": 7389,
+        "reason": "threshold",
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            233,
+            1991
+          ],
+          "detail": [
+            35492464233,
+            35492464419,
+            35492713107,
+            35492718810,
+            35505702434,
+            35505716353,
+            35505719694,
+            35492463963
+          ],
+          "dispatch_ns": 13262337,
+          "finished_ns": 35505722448,
+          "request_index": 7389,
+          "sync_attempts": 9339,
+          "trace": [
+            35492464280,
+            35492712855,
+            35492712902,
+            35492712948,
+            35492718857,
+            35492730189,
+            35505700759,
+            35505711813
+          ]
+        },
+        "probe_ns": 149842,
+        "phases": {
+          "dispatch preparation": 3852,
+          "queue submission": 317,
+          "leader queue": 139,
+          "batch collection": 248436,
+          "selection overhead": 47,
+          "writer lock": 46,
+          "state lock": 159,
+          "validation / encoding / bookkeeping": 5703,
+          "log reservation": 47,
+          "log write": 11332,
+          "log sync": 12970570,
+          "publication lock": 1675,
+          "publication": 9379,
+          "cleanup / replies ahead": 4540,
+          "reply wake / leader exit": 3341,
+          "dispatch finish": 2754,
+          "transport / client residual": 236153,
+          "outside protocol request": 13269
+        },
+        "largest_phase": "log sync",
+        "sync_fraction": 0.9599468137346144
+      },
+      "tail_classification": {
+        "log sync": 4
+      },
+      "sync_majority_count": 4
+    },
+    {
+      "variant": "candidate",
+      "clients": 4,
+      "rep": 5,
+      "ops_s": 1051.6568695969054,
+      "p50_ms": 3.848712,
+      "p95_ms": 4.60042,
+      "p99_ms": 5.442359,
+      "max_ms": 14.100625,
+      "elapsed_s": 7.607043924,
+      "p999_ms": 10.818906,
+      "above_ms": {
+        "10": 12,
+        "20": 0,
+        "50": 0
+      }
+    },
+    {
+      "variant": "candidate",
+      "clients": 1,
+      "rep": 5,
+      "ops_s": 306.9151493686602,
+      "p50_ms": 3.414892,
+      "p95_ms": 3.885363,
+      "p99_ms": 4.96209,
+      "max_ms": 12.892404,
+      "elapsed_s": 26.065836165,
+      "p999_ms": 11.873689,
+      "above_ms": {
+        "10": 18,
+        "20": 0,
+        "50": 0
+      }
+    },
+    {
+      "variant": "candidate-light",
+      "clients": 4,
+      "rep": 5,
+      "ops_s": 1014.732987779265,
+      "p50_ms": 3.957665,
+      "p95_ms": 4.905755,
+      "p99_ms": 6.014496,
+      "max_ms": 9.875649,
+      "elapsed_s": 7.883847373,
+      "p999_ms": 7.504344,
+      "above_ms": {
+        "10": 0,
+        "20": 0,
+        "50": 0
+      },
+      "probe_count": 43,
+      "probe_elapsed_sum_ms": 15.885833,
+      "max_record": {
+        "operation_ns": 9875649,
+        "request_ns": 9862811,
+        "worker": 2,
+        "sequence": 1823,
+        "request_index": 1874,
+        "reason": "record",
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            1142,
+            5655
+          ],
+          "detail": [
+            8036766890,
+            8036767321,
+            8037230305,
+            8037250570,
+            8045940297,
+            8045967473,
+            8046023053,
+            8036766064
+          ],
+          "dispatch_ns": 9264959,
+          "finished_ns": 8046025913,
+          "request_index": 1874,
+          "sync_attempts": 1824,
+          "trace": [
+            8036767002,
+            8037229414,
+            8037229705,
+            8037229761,
+            8037250664,
+            8037268415,
+            8045939190,
+            8045964435
+          ]
+        },
+        "probe_ns": 745302,
+        "phases": {
+          "dispatch preparation": 5110,
+          "queue submission": 938,
+          "leader queue": 319,
+          "batch collection": 462093,
+          "selection overhead": 291,
+          "writer lock": 56,
+          "state lock": 544,
+          "validation / encoding / bookkeeping": 20265,
+          "log reservation": 94,
+          "log write": 17751,
+          "log sync": 8670775,
+          "publication lock": 1107,
+          "publication": 24138,
+          "cleanup / replies ahead": 3038,
+          "reply wake / leader exit": 55580,
+          "dispatch finish": 2860,
+          "transport / client residual": 597852,
+          "outside protocol request": 12838
+        },
+        "largest_phase": "log sync",
+        "sync_fraction": 0.8779954613615774
+      },
+      "tail_classification": {},
+      "sync_majority_count": 0
+    },
+    {
+      "variant": "candidate-light",
+      "clients": 1,
+      "rep": 5,
+      "ops_s": 305.98939043376686,
+      "p50_ms": 3.437608,
+      "p95_ms": 3.931495,
+      "p99_ms": 5.162239,
+      "max_ms": 14.811643,
+      "elapsed_s": 26.144697333,
+      "p999_ms": 7.142605,
+      "above_ms": {
+        "10": 3,
+        "20": 0,
+        "50": 0
+      },
+      "probe_count": 7,
+      "probe_elapsed_sum_ms": 1.169239,
+      "max_record": {
+        "operation_ns": 14811643,
+        "request_ns": 14800642,
+        "worker": 0,
+        "sequence": 6131,
+        "request_index": 6182,
+        "reason": "threshold",
+        "ok": true,
+        "diagnostic": {
+          "commit_ok": true,
+          "costs": [
+            113,
+            1500
+          ],
+          "detail": [
+            30297737169,
+            30297737394,
+            30297737760,
+            30297742487,
+            30312265161,
+            30312281199,
+            30312284219,
+            30297736897
+          ],
+          "dispatch_ns": 14553409,
+          "finished_ns": 30312287145,
+          "request_index": 6182,
+          "sync_attempts": 8132,
+          "trace": [
+            30297737225,
+            30297737516,
+            30297737563,
+            30297737610,
+            30297742534,
+            30297749586,
+            30312263360,
+            30312276688
+          ]
+        },
+        "probe_ns": 167422,
+        "phases": {
+          "dispatch preparation": 3161,
+          "queue submission": 328,
+          "leader queue": 169,
+          "batch collection": 122,
+          "selection overhead": 47,
+          "writer lock": 47,
+          "state lock": 150,
+          "validation / encoding / bookkeeping": 4727,
+          "log reservation": 47,
+          "log write": 7052,
+          "log sync": 14513774,
+          "publication lock": 1801,
+          "publication": 11527,
+          "cleanup / replies ahead": 4511,
+          "reply wake / leader exit": 3020,
+          "dispatch finish": 2926,
+          "transport / client residual": 247233,
+          "outside protocol request": 11001
+        },
+        "largest_phase": "log sync",
+        "sync_fraction": 0.9798895369001265
+      },
+      "tail_classification": {
+        "log sync": 3
+      },
+      "sync_majority_count": 3
+    }
+  ]
+}

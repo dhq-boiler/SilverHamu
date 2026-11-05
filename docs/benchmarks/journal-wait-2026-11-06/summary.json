@@ -1,0 +1,82 @@
+[
+  {
+    "case": "candidate-profile-trace-r1-c4-rate800-normal",
+    "syncs": 282,
+    "journals": 282,
+    "worst": {
+      "tid": 2020,
+      "device": "8,64",
+      "transaction": 3224037,
+      "start_ns": 82310958041000,
+      "scheduled_ns": 80000,
+      "runnable_ns": 16000,
+      "blocked_ns": 6057000,
+      "phases": [
+        [
+          "start",
+          82310958041000
+        ],
+        [
+          "locking",
+          82310958041000
+        ],
+        [
+          "flushing",
+          82310958045000
+        ],
+        [
+          "logging",
+          82310958046000
+        ],
+        [
+          "end",
+          82310964194000
+        ]
+      ],
+      "end_ns": 82310964194000,
+      "duration_ns": 6153000
+    },
+    "max_runnable_ns": 31000,
+    "block_events": 3102
+  },
+  {
+    "case": "candidate-profile-trace-r1-c1-rate200-normal",
+    "syncs": 997,
+    "journals": 997,
+    "worst": {
+      "tid": 2020,
+      "device": "8,64",
+      "transaction": 3224829,
+      "start_ns": 82317285885000,
+      "scheduled_ns": 38000,
+      "runnable_ns": 8000,
+      "blocked_ns": 11999000,
+      "phases": [
+        [
+          "start",
+          82317285885000
+        ],
+        [
+          "locking",
+          82317285885000
+        ],
+        [
+          "flushing",
+          82317285888000
+        ],
+        [
+          "logging",
+          82317285888000
+        ],
+        [
+          "end",
+          82317297930000
+        ]
+      ],
+      "end_ns": 82317297930000,
+      "duration_ns": 12045000
+    },
+    "max_runnable_ns": 87000,
+    "block_events": 10981
+  }
+]

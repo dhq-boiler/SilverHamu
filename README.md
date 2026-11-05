@@ -665,3 +665,11 @@ The same server binary was measured with kernel tracing off/on, at 100,000 rows 
 ![Kernel tracing observer effect](docs/benchmarks/sync-os-2026-11-05/observer.svg)
 
 See the [full results, safety checks, raw traces and limitations](docs/benchmarks/sync-os-2026-11-05/README.md). Filesystem/journal blocking is distinguished from runnable-to-scheduled delay; guest observations do not identify physical-device latency. The commit policy and durability guarantees are unchanged.
+
+## Follow-up: journal scheduling and the I/O attribution limit
+
+A short pilot separated journal-thread scheduling, but did not establish ownership of shared/split block I/O. The long comparison was stopped at its feasibility gate; no speedup or durability change is claimed.
+
+![Journal wait feasibility pilot](docs/benchmarks/journal-wait-2026-11-06/journal-waits.svg)
+
+See [the measured boundaries, preliminary observer results and raw evidence](docs/benchmarks/journal-wait-2026-11-06/README.md).

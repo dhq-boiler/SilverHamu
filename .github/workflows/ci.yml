@@ -30,6 +30,8 @@ jobs:
         env:
           CATDB_DIAGNOSTICS: 'pull'
       - run: python benchmarks/backlog-tail/test_analysis.py
+      - run: python benchmarks/sync-os/test_analysis.py
+      - run: python benchmarks/journal-wait/test_analysis.py
       - if: contains(matrix.features, 'backlog-batch')
         run: python benchmarks/backlog-tail/test_protocol.py
       - run: python benchmarks/backlog/test_schedule.py

@@ -173,7 +173,7 @@ fn run(state: Arc<Mutex<State>>, stop: Arc<(Mutex<bool>, Condvar)>, counters: Ar
                     counters.io_deferrals.fetch_add(1, Ordering::Relaxed);
                     None
                 } else {
-                    let retired = guard.collect();
+                    let retired = guard.collect_with_keys(32);
                     let pending = guard.gc_pending();
                     let charge = retired.charge;
                     counters

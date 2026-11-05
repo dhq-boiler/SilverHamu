@@ -1,0 +1,25 @@
+{
+  "baseline_commit": "80423f2",
+  "baseline_runtime": "c0c8cff",
+  "selected_runtime": "424e2a5",
+  "selected_final_commit": "99b92b8",
+  "burst_runtime": "afcef4c",
+  "paced_runtime": "0c2009d",
+  "ci_url": "https://github.com/dhq-boiler/catdb/actions/runs/41952589201",
+  "ci_status": "success",
+  "main_features": "service",
+  "native_features": [
+    "service,lock-timing",
+    "service"
+  ],
+  "fixed_log_in_benchmarks": false,
+  "notes": "All native comparisons use the same binary per cooperative/background pair. Main compares previous release to selected candidate. Final commit restores conservative production logic and extends failure tests; source images were built before this test-only extension. See per-cohort environment.json for actual image IDs.",
+  "source_sha256": {
+    "src/reclamation.rs": "f4c5f8e037d14b8f374cded17e324b0ab8fe93a0050eba92a9bf3aef4fa1a277",
+    "src/transactions.rs": "1a2b46be8477060c285aa1470a447f6a037bc1013062a24eea5ac11b843565ec",
+    "src/service.rs": "31414c70b17b69d4703fd403d7c658f879ce0c87b8b09386a387071f549054c3",
+    "src/bin/reclamation-bench.rs": "186ff7d35e3aaaf60e7dd26b9930dfb0bf23ca92f8e7fa340d2935c28c0d69f0",
+    "benchmarks/reclamation/run.py": "92c5e56caa1c2829dfe0b4f368394760bc193b9c64ecb765367db677006f19b6",
+    "benchmarks/reclamation/auxiliary.py": "5ac6b4d7e37bbfeb01665bcccb7d903c92ee5aeed01006035d351a70f988464b"
+  }
+}

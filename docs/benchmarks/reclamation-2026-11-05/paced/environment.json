@@ -1,0 +1,11 @@
+{
+  "cpus": 2,
+  "memory_gib": 4,
+  "reps": 3,
+  "images": {
+    "cooperative": "sha256:7ad59c0a918afb0fee6e60d6451ae955038cd8959eb91136dcf02887d335c2ac",
+    "background": "sha256:7ad59c0a918afb0fee6e60d6451ae955038cd8959eb91136dcf02887d335c2ac",
+    "cooperative-light": "sha256:79fa1a51cba800914ddee596a7f76b72f3a8e87f5173131bae822217b8d4eec3",
+    "background-light": "sha256:79fa1a51cba800914ddee596a7f76b72f3a8e87f5173131bae822217b8d4eec3"
+  }
+}

@@ -1,10 +1,15 @@
 """Recompute native percentiles from raw per-thread samples and retain all runs."""
 import gzip,json,math,pathlib,statistics,sys
 p=pathlib.Path(sys.argv[1]); rows=json.loads((p/'results.json').read_text(encoding='utf-8'));assert len(rows)==36
+assert {(r['scenario'],r['variant'],r['rep']) for r in rows} == {(s,v,n) for s in ('mixed','large','gc') for v in ('cooperative','background','cooperative-light','background-light') for n in (1,2,3)}
 computed=[]
 for r in rows:
  with gzip.open(p/r['raw_file'],'rt',encoding='utf-8') as f:raw=json.load(f)
  assert raw['verified'] and raw['scenario']==r['scenario']
+ assert raw['variant']==r['variant'] and raw['rep']==r['rep']
+ assert raw['background']==r['variant'].startswith('background')
+ assert raw['lock_timing']==(not r['variant'].endswith('-light'))
+ assert raw['budget_drained']==[0,0,0,raw['rows']*(272+raw['value_bytes']),0]
  c={k:r[k] for k in ('variant','scenario','rep')}
  for group in ('readers','writers'):
   samples=[]
@@ -15,6 +20,7 @@ for r in rows:
   samples.sort();c[group+'_count']=len(samples)
   c[group+'_p99_ms']=samples[math.ceil(len(samples)*.99)-1]/1e6 if samples else 0
   c[group+'_max_ms']=samples[-1]/1e6 if samples else 0
+ assert c['writers_count']==(0 if r['scenario']=='gc' else 400 if r['scenario']=='large' else 1200)
  c['write_ops_s']=c['writers_count']/r['elapsed_s']
  c['hold_max_ms']=max([r['main_hold'][2],r['worker_max_lock_hold_ns']]+[t['hold'][2] for g in ('readers','writers') for t in r[g]])/1e6
  c['drop_ms']=r['drop_ns']/1e6;c['drain_ms']=r['drain_ns']/1e6;c['total_gc_ms']=c['drop_ms']+c['drain_ms']

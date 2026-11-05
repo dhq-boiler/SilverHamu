@@ -187,6 +187,33 @@ See the [full tradeoffs, memory results and safety checks](docs/benchmarks/read-
 [native diagnostic results](docs/benchmarks/read-gc-2026-11-05/auxiliary/table.md),
 and [reproduction commands](benchmarks/read-gc/README.md).
 
+### Follow-up: optional background reclamation
+
+An opt-in worker moves version reclamation off transaction begin/drop. Three
+scheduling candidates were measured; the conservative policy is retained and
+**disabled by default**, because it trades collection speed for request latency.
+
+In the native old-generation-release workload, read p99 improves from
+**0.078 to 0.023 ms**, and the worst read across all three repeats falls from
+**32.239 to 1.277 ms**. Complete reclamation instead grows from **55.689 to
+319.453 ms**. Post-drain heap and modeled retained data agree; the extra worker's
+stack and total process RSS were not measured. Timing-omitted runs retain the
+same tradeoff; all native measurements still include allocation accounting.
+
+![Native reclamation read tail and total collection time, including observer comparison](docs/benchmarks/reclamation-2026-11-05/native.svg)
+
+The ordinary 100k-record / 256-B service comparison is mixed: four-client updates
+are **1,037 to 1,028 ops/s**, p99 **5.697 to 5.591 ms**, while lookup throughput
+and several worst response times worsen. All **288,000 operations, 48 full-content
+checks and six restarts** pass. No durability barrier is weakened.
+
+![Service comparison with and without background reclamation](docs/benchmarks/reclamation-2026-11-05/service/reclamation.svg)
+
+See the [complete report, all three candidates and memory/observer limits](docs/benchmarks/reclamation-2026-11-05/README.md),
+[worst response times](docs/benchmarks/reclamation-2026-11-05/service/maxima.md),
+[reproduction commands](benchmarks/reclamation/README.md), and
+[opt-in configuration](docs/service.md#opt-in-background-reclamation).
+
 ## Build
 
 Requires Rust **1.89 or newer**. Python 3 is used by the optional client and integration tests. Docker is needed only for containers.

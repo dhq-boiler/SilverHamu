@@ -141,3 +141,39 @@ latency guarantee. Resource charges model retained data and buffers, not exact
 allocator capacity or process RSS. Delayed reclamation can temporarily require
 more retained-data budget. The C ABI is unchanged; the new explicit read-only
 entry point is currently available in Rust and the service protocol.
+
+## Opt-in background reclamation
+
+Set `CATDB_BACKGROUND_RECLAMATION=1` when starting the service to move cooperative
+version reclamation off transaction begin/drop. `0` (or unset) keeps the existing
+cooperative policy; other values are rejected. This setting does not alter the
+wire protocol, log format, commit synchronization or snapshot isolation.
+
+Rust applications can call `db.set_background_reclamation(true)?`, and disable
+it with `false`. Repeated enable does not start another thread. A failed thread
+start returns an error and leaves cooperative mode available. One worker per
+database owns shared state, not the database owner; shutdown joins it before
+releasing the ownership file. Closing the last database handle can still take
+time to stop the worker and free database memory.
+
+The worker attempts the data lock without queuing behind active requests. It
+runs at most 16 bounded portions with yields, then requests a 100 microsecond
+pause. Lock contention or active persistence requests a 1 ms pause; no pending
+work requests a 10 ms pause. These are requested sleeps, not timing guarantees.
+Existing per-portion key/version/byte bounds and resource charges remain intact.
+Worker shutdown wakes sleeping maintenance. The idle polling and thread stack
+are additional resource costs; this feature is **disabled by default**.
+
+`reclamation_pending()` checks reclaimable work and an in-progress detached
+portion; it does not mean versions pinned by a live snapshot can be freed.
+`reclamation_status()` reports mode, busy status, lifetime batch count (including empty checks), reclaimed
+charged bytes, and maximum observed worker lock hold. Explicit `collect_garbage()`
+remains synchronous and can assist even in background mode. Poll status with a
+pause if waiting for background completion; do not busy-spin. Concurrent updates
+can create more work after a false result.
+
+Foreground calls can encounter resource limits while reclamation is deferred.
+No unbounded reserve, hidden mutation retry or weakened durability is introduced.
+The optional mode prioritizes request latency at the expense of total collection
+time. See the [measured tradeoffs](benchmarks/reclamation-2026-11-05/README.md).
+The C ABI remains compatible; this new setting is exposed in Rust and the service.

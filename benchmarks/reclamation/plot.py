@@ -70,3 +70,10 @@ table = ["| Workload | Clients | Variant | ops/s | p50 ms | p95 ms | p99 ms |", 
 for c in summary:
     table.append(f"| {works[c['workload']]} | {c['clients']} | {names[c['variant']]} | {c['ops_s']:,.1f} | {c['p50_ms']:.3f} | {c['p95_ms']:.3f} | {c['p99_ms']:.3f} |")
 (root / "table.md").write_text("\n".join(table) + "\n", encoding="utf-8")
+
+maxima = ["| Workload | Clients | Worst cooperative ms | Worst background ms |", "|---|---:|---:|---:|"]
+for work in works:
+    for clients in (1, 4):
+        values = [max(r["max_ms"] for r in rows if r["workload"] == work and r["clients"] == clients and r["variant"] == variant) for variant in names]
+        maxima.append(f"| {work} | {clients} | {values[0]:.3f} | {values[1]:.3f} |")
+(root / "maxima.md").write_text("\n".join(maxima) + "\n", encoding="utf-8")

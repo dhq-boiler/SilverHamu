@@ -1136,23 +1136,45 @@ impl Transaction {
         self.register_range(range.clone())?;
         let state = self.database.state()?;
         let mut permit = state.budget.buffer();
-        let mut result = BTreeMap::new();
-        for (key, versions) in state.rows.range::<[u8], _>(range.bounds()) {
-            if let Some(value) = visible(versions, self.snapshot).and_then(|v| v.value.as_ref()) {
-                permit.add(key.len() + value.len() + 160)?;
-                result.insert(key.clone(), ReadValue::Shared(value.clone()));
-            }
-        }
-        for (key, value) in self.writes.range::<[u8], _>(range.bounds()) {
+        let mut result = Vec::new();
+        let mut stored = state.rows.range::<[u8], _>(range.bounds()).peekable();
+        let mut staged = self.writes.range::<[u8], _>(range.bounds()).peekable();
+        loop {
+            let (key, value) = match (stored.peek(), staged.peek()) {
+                (Some((stored_key, _)), Some((staged_key, _))) if stored_key == staged_key => {
+                    stored.next();
+                    let (key, value) = staged.next().unwrap();
+                    (key, value.as_deref().map(ReadValue::Borrowed))
+                }
+                (Some((stored_key, _)), Some((staged_key, _))) if staged_key < stored_key => {
+                    let (key, value) = staged.next().unwrap();
+                    (key, value.as_deref().map(ReadValue::Borrowed))
+                }
+                (None, Some(_)) => {
+                    let (key, value) = staged.next().unwrap();
+                    (key, value.as_deref().map(ReadValue::Borrowed))
+                }
+                (Some(_), _) => {
+                    let (key, versions) = stored.next().unwrap();
+                    let value = visible(versions, self.snapshot)
+                        .and_then(|version| version.value.clone())
+                        .map(ReadValue::Shared);
+                    (key, value)
+                }
+                (None, None) => break,
+            };
             if let Some(value) = value {
-                permit.add(key.len() + value.len() + 160)?;
-                result.insert(key.clone(), ReadValue::Borrowed(value));
-            } else {
-                result.remove(key);
+                permit.add(key.len() + value.as_ref().len() + 160)?;
+                if result.len() == result.capacity() {
+                    // A one-row initial capacity keeps growth within the per-row reservation.
+                    result.reserve_exact(result.capacity().max(1));
+                }
+                result.push((key.clone(), value));
             }
         }
         permit.add(result.len() * 64)?;
         drop(state);
+        read_copy_hook();
         Ok((
             result
                 .into_iter()
@@ -1784,6 +1806,176 @@ impl<'a> Decoder<'a> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn scan_merge_matches_oracle_for_staged_changes_boundaries_and_old_versions() {
+        let f = Fixture::new();
+        let db = Database::create(&f.0, [96; 16]).unwrap();
+        let mut initial = BTreeMap::new();
+        let mut seed = db.begin().unwrap();
+        for i in 0..1000u64 {
+            let k = (i * 2).to_be_bytes();
+            let v = i.to_be_bytes();
+            seed.put(&k, &v).unwrap();
+            initial.insert(k.to_vec(), v.to_vec());
+        }
+        seed.commit().unwrap();
+        let mut old = db.begin_read().unwrap();
+        let mut tx = db.begin().unwrap();
+        let mut expected = initial.clone();
+        for i in 0..1500u64 {
+            let k = (i * 739 % 2200).to_be_bytes();
+            if i % 3 == 0 {
+                tx.delete(&k).unwrap();
+                expected.remove(k.as_slice());
+            } else {
+                let v = (i + 1).to_be_bytes();
+                tx.put(&k, &v).unwrap();
+                expected.insert(k.to_vec(), v.to_vec());
+            }
+        }
+        let mut latest = db.begin().unwrap();
+        latest.put(&0u64.to_be_bytes(), b"new").unwrap();
+        latest.delete(&2u64.to_be_bytes()).unwrap();
+        latest.commit().unwrap();
+        let ends = [
+            None,
+            Some(0u64.to_be_bytes()),
+            Some(13u64.to_be_bytes()),
+            Some(2000u64.to_be_bytes()),
+            Some(u64::MAX.to_be_bytes()),
+        ];
+        for start in [0u64, 1, 12, 1000, 2200, u64::MAX] {
+            for end in ends {
+                let k = start.to_be_bytes();
+                if end.as_ref().is_some_and(|e| e < &k) {
+                    continue;
+                }
+                let want: Rows = expected
+                    .range::<[u8], _>((
+                        Included(k.as_slice()),
+                        end.as_ref().map_or(Unbounded, |e| Excluded(e.as_slice())),
+                    ))
+                    .map(|(k, v)| (k.clone(), v.clone()))
+                    .collect();
+                assert_eq!(
+                    tx.scan(&k, end.as_ref().map(|e| e.as_slice())).unwrap(),
+                    want
+                );
+            }
+        }
+        assert_eq!(
+            old.scan(b"", None).unwrap(),
+            initial.into_iter().collect::<Rows>()
+        );
+        assert!(matches!(tx.commit(), Err(Error::Conflict(_))));
+        let mut empty = db.begin_read().unwrap();
+        assert!(empty.scan(b"z", Some(b"z")).unwrap().is_empty());
+    }
+
+    #[test]
+    fn scan_merge_budget_boundary_releases_reservations_and_preserves_staged_values() {
+        for count in [0usize, 1, 2, 3, 4, 5, 8, 9, 16, 17] {
+            let bytes = count * (1 + 1 + 224);
+            for limit in [bytes.saturating_sub(1).max(1), bytes.max(1), bytes + 1] {
+                let f = Fixture::new();
+                let db = Database::create_with_limits(
+                    &f.0,
+                    [97; 16],
+                    ResourceLimits {
+                        max_buffer_bytes: limit,
+                        ..ResourceLimits::default()
+                    },
+                )
+                .unwrap();
+                let mut tx = db.begin().unwrap();
+                for i in 0..count {
+                    tx.put(&[i as u8], &[i as u8]).unwrap();
+                }
+                let result = tx.scan_reserved(b"", None);
+                if limit < bytes {
+                    assert!(matches!(result, Err(Error::ResourceExhausted(_))));
+                } else {
+                    let (rows, permit) = result.unwrap();
+                    assert_eq!(rows.len(), count);
+                    assert_eq!(
+                        db.resource_usage().unwrap().current[crate::resources::BUFFER],
+                        bytes
+                    );
+                    drop(rows);
+                    drop(permit);
+                }
+                assert_eq!(
+                    db.resource_usage().unwrap().current[crate::resources::BUFFER],
+                    0
+                );
+                assert_eq!(tx.writes.len(), count);
+                if count > 0 {
+                    assert_eq!(tx.get(&[0]).unwrap(), Some(vec![0]));
+                }
+            }
+        }
+        assert!(3 * std::mem::size_of::<(Vec<u8>, ReadValue<'_>)>() <= 160);
+        assert!(std::mem::size_of::<(Vec<u8>, Vec<u8>)>() <= 64);
+    }
+
+    #[test]
+    fn scan_merge_shadowed_large_values_do_not_consume_output_budget() {
+        let f = Fixture::new();
+        let db = Database::create(&f.0, [98; 16]).unwrap();
+        let mut seed = db.begin().unwrap();
+        seed.put(b"k", &vec![1; 65536]).unwrap();
+        seed.commit().unwrap();
+        let reserved = ResourceLimits::default().max_buffer_bytes - 512;
+        let mut pressure = db.inner.budget.buffer();
+        pressure.add(reserved).unwrap();
+        let mut tx = db.begin().unwrap();
+        tx.put(b"k", b"small").unwrap();
+        assert_eq!(
+            tx.scan(b"", None).unwrap(),
+            vec![(b"k".to_vec(), b"small".to_vec())]
+        );
+        tx.delete(b"k").unwrap();
+        assert!(tx.scan(b"", None).unwrap().is_empty());
+        assert_eq!(
+            db.resource_usage().unwrap().current[crate::resources::BUFFER],
+            reserved
+        );
+        drop(pressure);
+        assert_eq!(
+            db.resource_usage().unwrap().current[crate::resources::BUFFER],
+            0
+        );
+    }
+
+    #[test]
+    fn scan_merge_full_copy_runs_unlocked_and_keeps_original_value() {
+        let f = Fixture::new();
+        let db = Database::create(&f.0, [99; 16]).unwrap();
+        let mut seed = db.begin().unwrap();
+        seed.put(b"k", &vec![1; 65536]).unwrap();
+        seed.commit().unwrap();
+        let gate = Arc::new([std::sync::Barrier::new(2), std::sync::Barrier::new(2)]);
+        std::thread::scope(|scope| {
+            let signal = gate.clone();
+            let reader_db = db.clone();
+            let reader = scope.spawn(move || {
+                let mut tx = reader_db.begin_read().unwrap();
+                READ_COPY_GATE.with(|v| *v.borrow_mut() = Some(signal));
+                tx.scan(b"", None).unwrap()
+            });
+            gate[0].wait();
+            let mut writer = db.begin().unwrap();
+            writer.put(b"k", &vec![2; 65536]).unwrap();
+            let committed = writer.commit();
+            gate[1].wait();
+            committed.unwrap();
+            assert_eq!(
+                reader.join().unwrap(),
+                vec![(b"k".to_vec(), vec![1; 65536])]
+            );
+        });
+    }
+
     #[test]
     fn elision_export_uses_no_write_dependencies_and_preserves_file_content() {
         let f = Fixture::new();
@@ -3183,3 +3375,7 @@ mod generation_guard_bench;
 #[cfg(test)]
 #[path = "../benchmarks/work-elision/tx_bench.rs"]
 mod work_elision_bench;
+
+#[cfg(test)]
+#[path = "../benchmarks/scan-merge/engine_bench.rs"]
+mod scan_merge_bench;

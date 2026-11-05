@@ -1,0 +1,2062 @@
+{
+  "trials": [
+    {
+      "size": 100000,
+      "shape": "mixed",
+      "repeat": 1,
+      "variant": "after",
+      "mode": "alloc",
+      "ns": {
+        "median": 18965400.0,
+        "minimum": 18345900,
+        "maximum": 19459300
+      },
+      "calls": {
+        "median": 200020.0,
+        "minimum": 200020,
+        "maximum": 200021
+      },
+      "bytes": {
+        "median": 14182880.0,
+        "minimum": 14182880,
+        "maximum": 14183072
+      },
+      "buffer_current": {
+        "median": 24000240.0,
+        "minimum": 24000240,
+        "maximum": 24000240
+      },
+      "buffer_peak": {
+        "median": 24000240.0,
+        "minimum": 24000240,
+        "maximum": 24000240
+      },
+      "rows": {
+        "median": 100001.0,
+        "minimum": 100001,
+        "maximum": 100001
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "mixed",
+      "repeat": 1,
+      "variant": "after",
+      "mode": "time",
+      "ns": {
+        "median": 20125200.0,
+        "minimum": 19532200,
+        "maximum": 21903500
+      },
+      "calls": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "bytes": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "buffer_current": {
+        "median": 24000240.0,
+        "minimum": 24000240,
+        "maximum": 24000240
+      },
+      "buffer_peak": {
+        "median": 24000240.0,
+        "minimum": 24000240,
+        "maximum": 24000240
+      },
+      "rows": {
+        "median": 100001.0,
+        "minimum": 100001,
+        "maximum": 100001
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "mixed",
+      "repeat": 1,
+      "variant": "before",
+      "mode": "alloc",
+      "ns": {
+        "median": 41944000.0,
+        "minimum": 40095100,
+        "maximum": 43236700
+      },
+      "calls": {
+        "median": 223335.0,
+        "minimum": 223335,
+        "maximum": 223336
+      },
+      "bytes": {
+        "median": 15748176.0,
+        "minimum": 15748176,
+        "maximum": 15748368
+      },
+      "buffer_current": {
+        "median": 25173456.0,
+        "minimum": 25173456,
+        "maximum": 25173456
+      },
+      "buffer_peak": {
+        "median": 25173456.0,
+        "minimum": 25173456,
+        "maximum": 25173456
+      },
+      "rows": {
+        "median": 100001.0,
+        "minimum": 100001,
+        "maximum": 100001
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "mixed",
+      "repeat": 1,
+      "variant": "before",
+      "mode": "time",
+      "ns": {
+        "median": 43690500.0,
+        "minimum": 41789500,
+        "maximum": 46302300
+      },
+      "calls": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "bytes": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "buffer_current": {
+        "median": 25173456.0,
+        "minimum": 25173456,
+        "maximum": 25173456
+      },
+      "buffer_peak": {
+        "median": 25173456.0,
+        "minimum": 25173456,
+        "maximum": 25173456
+      },
+      "rows": {
+        "median": 100001.0,
+        "minimum": 100001,
+        "maximum": 100001
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "mixed",
+      "repeat": 2,
+      "variant": "after",
+      "mode": "alloc",
+      "ns": {
+        "median": 19221450.0,
+        "minimum": 18363600,
+        "maximum": 20564200
+      },
+      "calls": {
+        "median": 200020.0,
+        "minimum": 200020,
+        "maximum": 200021
+      },
+      "bytes": {
+        "median": 14182880.0,
+        "minimum": 14182880,
+        "maximum": 14183072
+      },
+      "buffer_current": {
+        "median": 24000240.0,
+        "minimum": 24000240,
+        "maximum": 24000240
+      },
+      "buffer_peak": {
+        "median": 24000240.0,
+        "minimum": 24000240,
+        "maximum": 24000240
+      },
+      "rows": {
+        "median": 100001.0,
+        "minimum": 100001,
+        "maximum": 100001
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "mixed",
+      "repeat": 2,
+      "variant": "after",
+      "mode": "time",
+      "ns": {
+        "median": 18732950.0,
+        "minimum": 18195000,
+        "maximum": 19207300
+      },
+      "calls": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "bytes": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "buffer_current": {
+        "median": 24000240.0,
+        "minimum": 24000240,
+        "maximum": 24000240
+      },
+      "buffer_peak": {
+        "median": 24000240.0,
+        "minimum": 24000240,
+        "maximum": 24000240
+      },
+      "rows": {
+        "median": 100001.0,
+        "minimum": 100001,
+        "maximum": 100001
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "mixed",
+      "repeat": 2,
+      "variant": "before",
+      "mode": "alloc",
+      "ns": {
+        "median": 41590150.0,
+        "minimum": 40905800,
+        "maximum": 43100200
+      },
+      "calls": {
+        "median": 223335.0,
+        "minimum": 223335,
+        "maximum": 223336
+      },
+      "bytes": {
+        "median": 15748176.0,
+        "minimum": 15748176,
+        "maximum": 15748368
+      },
+      "buffer_current": {
+        "median": 25173456.0,
+        "minimum": 25173456,
+        "maximum": 25173456
+      },
+      "buffer_peak": {
+        "median": 25173456.0,
+        "minimum": 25173456,
+        "maximum": 25173456
+      },
+      "rows": {
+        "median": 100001.0,
+        "minimum": 100001,
+        "maximum": 100001
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "mixed",
+      "repeat": 2,
+      "variant": "before",
+      "mode": "time",
+      "ns": {
+        "median": 44116900.0,
+        "minimum": 42450700,
+        "maximum": 46910700
+      },
+      "calls": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "bytes": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "buffer_current": {
+        "median": 25173456.0,
+        "minimum": 25173456,
+        "maximum": 25173456
+      },
+      "buffer_peak": {
+        "median": 25173456.0,
+        "minimum": 25173456,
+        "maximum": 25173456
+      },
+      "rows": {
+        "median": 100001.0,
+        "minimum": 100001,
+        "maximum": 100001
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "mixed",
+      "repeat": 3,
+      "variant": "after",
+      "mode": "alloc",
+      "ns": {
+        "median": 19410600.0,
+        "minimum": 18758800,
+        "maximum": 20617900
+      },
+      "calls": {
+        "median": 200020.0,
+        "minimum": 200020,
+        "maximum": 200021
+      },
+      "bytes": {
+        "median": 14182880.0,
+        "minimum": 14182880,
+        "maximum": 14183072
+      },
+      "buffer_current": {
+        "median": 24000240.0,
+        "minimum": 24000240,
+        "maximum": 24000240
+      },
+      "buffer_peak": {
+        "median": 24000240.0,
+        "minimum": 24000240,
+        "maximum": 24000240
+      },
+      "rows": {
+        "median": 100001.0,
+        "minimum": 100001,
+        "maximum": 100001
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "mixed",
+      "repeat": 3,
+      "variant": "after",
+      "mode": "time",
+      "ns": {
+        "median": 19914900.0,
+        "minimum": 19191600,
+        "maximum": 20820400
+      },
+      "calls": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "bytes": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "buffer_current": {
+        "median": 24000240.0,
+        "minimum": 24000240,
+        "maximum": 24000240
+      },
+      "buffer_peak": {
+        "median": 24000240.0,
+        "minimum": 24000240,
+        "maximum": 24000240
+      },
+      "rows": {
+        "median": 100001.0,
+        "minimum": 100001,
+        "maximum": 100001
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "mixed",
+      "repeat": 3,
+      "variant": "before",
+      "mode": "alloc",
+      "ns": {
+        "median": 42364450.0,
+        "minimum": 40956900,
+        "maximum": 45421900
+      },
+      "calls": {
+        "median": 223335.0,
+        "minimum": 223335,
+        "maximum": 223336
+      },
+      "bytes": {
+        "median": 15748176.0,
+        "minimum": 15748176,
+        "maximum": 15748368
+      },
+      "buffer_current": {
+        "median": 25173456.0,
+        "minimum": 25173456,
+        "maximum": 25173456
+      },
+      "buffer_peak": {
+        "median": 25173456.0,
+        "minimum": 25173456,
+        "maximum": 25173456
+      },
+      "rows": {
+        "median": 100001.0,
+        "minimum": 100001,
+        "maximum": 100001
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "mixed",
+      "repeat": 3,
+      "variant": "before",
+      "mode": "time",
+      "ns": {
+        "median": 42708950.0,
+        "minimum": 41439700,
+        "maximum": 43920200
+      },
+      "calls": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "bytes": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "buffer_current": {
+        "median": 25173456.0,
+        "minimum": 25173456,
+        "maximum": 25173456
+      },
+      "buffer_peak": {
+        "median": 25173456.0,
+        "minimum": 25173456,
+        "maximum": 25173456
+      },
+      "rows": {
+        "median": 100001.0,
+        "minimum": 100001,
+        "maximum": 100001
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "plain",
+      "repeat": 1,
+      "variant": "after",
+      "mode": "alloc",
+      "ns": {
+        "median": 16135100.0,
+        "minimum": 15562300,
+        "maximum": 17007000
+      },
+      "calls": {
+        "median": 200018.0,
+        "minimum": 200018,
+        "maximum": 200018
+      },
+      "bytes": {
+        "median": 14182864.0,
+        "minimum": 14182864,
+        "maximum": 14182864
+      },
+      "buffer_current": {
+        "median": 24000000.0,
+        "minimum": 24000000,
+        "maximum": 24000000
+      },
+      "buffer_peak": {
+        "median": 24000000.0,
+        "minimum": 24000000,
+        "maximum": 24000000
+      },
+      "rows": {
+        "median": 100000.0,
+        "minimum": 100000,
+        "maximum": 100000
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "plain",
+      "repeat": 1,
+      "variant": "after",
+      "mode": "time",
+      "ns": {
+        "median": 18296500.0,
+        "minimum": 16750500,
+        "maximum": 20210200
+      },
+      "calls": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "bytes": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "buffer_current": {
+        "median": 24000000.0,
+        "minimum": 24000000,
+        "maximum": 24000000
+      },
+      "buffer_peak": {
+        "median": 24000000.0,
+        "minimum": 24000000,
+        "maximum": 24000000
+      },
+      "rows": {
+        "median": 100000.0,
+        "minimum": 100000,
+        "maximum": 100000
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "plain",
+      "repeat": 1,
+      "variant": "before",
+      "mode": "alloc",
+      "ns": {
+        "median": 37080300.0,
+        "minimum": 36168900,
+        "maximum": 40160900
+      },
+      "calls": {
+        "median": 216667.0,
+        "minimum": 216667,
+        "maximum": 216667
+      },
+      "bytes": {
+        "median": 15694784.0,
+        "minimum": 15694784,
+        "maximum": 15694784
+      },
+      "buffer_current": {
+        "median": 24000000.0,
+        "minimum": 24000000,
+        "maximum": 24000000
+      },
+      "buffer_peak": {
+        "median": 24000000.0,
+        "minimum": 24000000,
+        "maximum": 24000000
+      },
+      "rows": {
+        "median": 100000.0,
+        "minimum": 100000,
+        "maximum": 100000
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "plain",
+      "repeat": 1,
+      "variant": "before",
+      "mode": "time",
+      "ns": {
+        "median": 38467800.0,
+        "minimum": 37101000,
+        "maximum": 42015400
+      },
+      "calls": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "bytes": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "buffer_current": {
+        "median": 24000000.0,
+        "minimum": 24000000,
+        "maximum": 24000000
+      },
+      "buffer_peak": {
+        "median": 24000000.0,
+        "minimum": 24000000,
+        "maximum": 24000000
+      },
+      "rows": {
+        "median": 100000.0,
+        "minimum": 100000,
+        "maximum": 100000
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "plain",
+      "repeat": 2,
+      "variant": "after",
+      "mode": "alloc",
+      "ns": {
+        "median": 16442600.0,
+        "minimum": 15561500,
+        "maximum": 17406200
+      },
+      "calls": {
+        "median": 200018.0,
+        "minimum": 200018,
+        "maximum": 200018
+      },
+      "bytes": {
+        "median": 14182864.0,
+        "minimum": 14182864,
+        "maximum": 14182864
+      },
+      "buffer_current": {
+        "median": 24000000.0,
+        "minimum": 24000000,
+        "maximum": 24000000
+      },
+      "buffer_peak": {
+        "median": 24000000.0,
+        "minimum": 24000000,
+        "maximum": 24000000
+      },
+      "rows": {
+        "median": 100000.0,
+        "minimum": 100000,
+        "maximum": 100000
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "plain",
+      "repeat": 2,
+      "variant": "after",
+      "mode": "time",
+      "ns": {
+        "median": 16290150.0,
+        "minimum": 15474700,
+        "maximum": 17168700
+      },
+      "calls": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "bytes": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "buffer_current": {
+        "median": 24000000.0,
+        "minimum": 24000000,
+        "maximum": 24000000
+      },
+      "buffer_peak": {
+        "median": 24000000.0,
+        "minimum": 24000000,
+        "maximum": 24000000
+      },
+      "rows": {
+        "median": 100000.0,
+        "minimum": 100000,
+        "maximum": 100000
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "plain",
+      "repeat": 2,
+      "variant": "before",
+      "mode": "alloc",
+      "ns": {
+        "median": 37387050.0,
+        "minimum": 36401100,
+        "maximum": 39249100
+      },
+      "calls": {
+        "median": 216667.0,
+        "minimum": 216667,
+        "maximum": 216667
+      },
+      "bytes": {
+        "median": 15694784.0,
+        "minimum": 15694784,
+        "maximum": 15694784
+      },
+      "buffer_current": {
+        "median": 24000000.0,
+        "minimum": 24000000,
+        "maximum": 24000000
+      },
+      "buffer_peak": {
+        "median": 24000000.0,
+        "minimum": 24000000,
+        "maximum": 24000000
+      },
+      "rows": {
+        "median": 100000.0,
+        "minimum": 100000,
+        "maximum": 100000
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "plain",
+      "repeat": 2,
+      "variant": "before",
+      "mode": "time",
+      "ns": {
+        "median": 38079450.0,
+        "minimum": 35916100,
+        "maximum": 39858600
+      },
+      "calls": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "bytes": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "buffer_current": {
+        "median": 24000000.0,
+        "minimum": 24000000,
+        "maximum": 24000000
+      },
+      "buffer_peak": {
+        "median": 24000000.0,
+        "minimum": 24000000,
+        "maximum": 24000000
+      },
+      "rows": {
+        "median": 100000.0,
+        "minimum": 100000,
+        "maximum": 100000
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "plain",
+      "repeat": 3,
+      "variant": "after",
+      "mode": "alloc",
+      "ns": {
+        "median": 17159600.0,
+        "minimum": 16725200,
+        "maximum": 18913000
+      },
+      "calls": {
+        "median": 200018.0,
+        "minimum": 200018,
+        "maximum": 200018
+      },
+      "bytes": {
+        "median": 14182864.0,
+        "minimum": 14182864,
+        "maximum": 14182864
+      },
+      "buffer_current": {
+        "median": 24000000.0,
+        "minimum": 24000000,
+        "maximum": 24000000
+      },
+      "buffer_peak": {
+        "median": 24000000.0,
+        "minimum": 24000000,
+        "maximum": 24000000
+      },
+      "rows": {
+        "median": 100000.0,
+        "minimum": 100000,
+        "maximum": 100000
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "plain",
+      "repeat": 3,
+      "variant": "after",
+      "mode": "time",
+      "ns": {
+        "median": 15731750.0,
+        "minimum": 15252500,
+        "maximum": 16812300
+      },
+      "calls": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "bytes": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "buffer_current": {
+        "median": 24000000.0,
+        "minimum": 24000000,
+        "maximum": 24000000
+      },
+      "buffer_peak": {
+        "median": 24000000.0,
+        "minimum": 24000000,
+        "maximum": 24000000
+      },
+      "rows": {
+        "median": 100000.0,
+        "minimum": 100000,
+        "maximum": 100000
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "plain",
+      "repeat": 3,
+      "variant": "before",
+      "mode": "alloc",
+      "ns": {
+        "median": 37595350.0,
+        "minimum": 36812400,
+        "maximum": 38331900
+      },
+      "calls": {
+        "median": 216667.0,
+        "minimum": 216667,
+        "maximum": 216667
+      },
+      "bytes": {
+        "median": 15694784.0,
+        "minimum": 15694784,
+        "maximum": 15694784
+      },
+      "buffer_current": {
+        "median": 24000000.0,
+        "minimum": 24000000,
+        "maximum": 24000000
+      },
+      "buffer_peak": {
+        "median": 24000000.0,
+        "minimum": 24000000,
+        "maximum": 24000000
+      },
+      "rows": {
+        "median": 100000.0,
+        "minimum": 100000,
+        "maximum": 100000
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "plain",
+      "repeat": 3,
+      "variant": "before",
+      "mode": "time",
+      "ns": {
+        "median": 39970600.0,
+        "minimum": 37998300,
+        "maximum": 41302700
+      },
+      "calls": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "bytes": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "buffer_current": {
+        "median": 24000000.0,
+        "minimum": 24000000,
+        "maximum": 24000000
+      },
+      "buffer_peak": {
+        "median": 24000000.0,
+        "minimum": 24000000,
+        "maximum": 24000000
+      },
+      "rows": {
+        "median": 100000.0,
+        "minimum": 100000,
+        "maximum": 100000
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "mixed",
+      "repeat": 1,
+      "variant": "after",
+      "mode": "alloc",
+      "ns": {
+        "median": 242318400.0,
+        "minimum": 189074900,
+        "maximum": 262562500
+      },
+      "calls": {
+        "median": 2000023.0,
+        "minimum": 2000023,
+        "maximum": 2000024
+      },
+      "bytes": {
+        "median": 116663264.0,
+        "minimum": 116663264,
+        "maximum": 116663456
+      },
+      "buffer_current": {
+        "median": 240000240.0,
+        "minimum": 240000240,
+        "maximum": 240000240
+      },
+      "buffer_peak": {
+        "median": 240000240.0,
+        "minimum": 240000240,
+        "maximum": 240000240
+      },
+      "rows": {
+        "median": 1000001.0,
+        "minimum": 1000001,
+        "maximum": 1000001
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "mixed",
+      "repeat": 1,
+      "variant": "after",
+      "mode": "time",
+      "ns": {
+        "median": 201993150.0,
+        "minimum": 167448400,
+        "maximum": 235639600
+      },
+      "calls": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "bytes": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "buffer_current": {
+        "median": 240000240.0,
+        "minimum": 240000240,
+        "maximum": 240000240
+      },
+      "buffer_peak": {
+        "median": 240000240.0,
+        "minimum": 240000240,
+        "maximum": 240000240
+      },
+      "rows": {
+        "median": 1000001.0,
+        "minimum": 1000001,
+        "maximum": 1000001
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "mixed",
+      "repeat": 1,
+      "variant": "before",
+      "mode": "alloc",
+      "ns": {
+        "median": 550242150.0,
+        "minimum": 429292700,
+        "maximum": 589686700
+      },
+      "calls": {
+        "median": 2173333.0,
+        "minimum": 2173333,
+        "maximum": 2173334
+      },
+      "bytes": {
+        "median": 157004080.0,
+        "minimum": 157004080,
+        "maximum": 157004272
+      },
+      "buffer_current": {
+        "median": 241173456.0,
+        "minimum": 241173456,
+        "maximum": 241173456
+      },
+      "buffer_peak": {
+        "median": 241173456.0,
+        "minimum": 241173456,
+        "maximum": 241173456
+      },
+      "rows": {
+        "median": 1000001.0,
+        "minimum": 1000001,
+        "maximum": 1000001
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "mixed",
+      "repeat": 1,
+      "variant": "before",
+      "mode": "time",
+      "ns": {
+        "median": 556838600.0,
+        "minimum": 434355000,
+        "maximum": 682086700
+      },
+      "calls": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "bytes": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "buffer_current": {
+        "median": 241173456.0,
+        "minimum": 241173456,
+        "maximum": 241173456
+      },
+      "buffer_peak": {
+        "median": 241173456.0,
+        "minimum": 241173456,
+        "maximum": 241173456
+      },
+      "rows": {
+        "median": 1000001.0,
+        "minimum": 1000001,
+        "maximum": 1000001
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "mixed",
+      "repeat": 2,
+      "variant": "after",
+      "mode": "alloc",
+      "ns": {
+        "median": 222978100.0,
+        "minimum": 169448200,
+        "maximum": 234594000
+      },
+      "calls": {
+        "median": 2000023.0,
+        "minimum": 2000023,
+        "maximum": 2000024
+      },
+      "bytes": {
+        "median": 116663264.0,
+        "minimum": 116663264,
+        "maximum": 116663456
+      },
+      "buffer_current": {
+        "median": 240000240.0,
+        "minimum": 240000240,
+        "maximum": 240000240
+      },
+      "buffer_peak": {
+        "median": 240000240.0,
+        "minimum": 240000240,
+        "maximum": 240000240
+      },
+      "rows": {
+        "median": 1000001.0,
+        "minimum": 1000001,
+        "maximum": 1000001
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "mixed",
+      "repeat": 2,
+      "variant": "after",
+      "mode": "time",
+      "ns": {
+        "median": 238039100.0,
+        "minimum": 171423300,
+        "maximum": 256271300
+      },
+      "calls": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "bytes": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "buffer_current": {
+        "median": 240000240.0,
+        "minimum": 240000240,
+        "maximum": 240000240
+      },
+      "buffer_peak": {
+        "median": 240000240.0,
+        "minimum": 240000240,
+        "maximum": 240000240
+      },
+      "rows": {
+        "median": 1000001.0,
+        "minimum": 1000001,
+        "maximum": 1000001
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "mixed",
+      "repeat": 2,
+      "variant": "before",
+      "mode": "alloc",
+      "ns": {
+        "median": 546315550.0,
+        "minimum": 420635100,
+        "maximum": 575325200
+      },
+      "calls": {
+        "median": 2173333.0,
+        "minimum": 2173333,
+        "maximum": 2173334
+      },
+      "bytes": {
+        "median": 157004080.0,
+        "minimum": 157004080,
+        "maximum": 157004272
+      },
+      "buffer_current": {
+        "median": 241173456.0,
+        "minimum": 241173456,
+        "maximum": 241173456
+      },
+      "buffer_peak": {
+        "median": 241173456.0,
+        "minimum": 241173456,
+        "maximum": 241173456
+      },
+      "rows": {
+        "median": 1000001.0,
+        "minimum": 1000001,
+        "maximum": 1000001
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "mixed",
+      "repeat": 2,
+      "variant": "before",
+      "mode": "time",
+      "ns": {
+        "median": 567373950.0,
+        "minimum": 431893800,
+        "maximum": 598388000
+      },
+      "calls": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "bytes": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "buffer_current": {
+        "median": 241173456.0,
+        "minimum": 241173456,
+        "maximum": 241173456
+      },
+      "buffer_peak": {
+        "median": 241173456.0,
+        "minimum": 241173456,
+        "maximum": 241173456
+      },
+      "rows": {
+        "median": 1000001.0,
+        "minimum": 1000001,
+        "maximum": 1000001
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "mixed",
+      "repeat": 3,
+      "variant": "after",
+      "mode": "alloc",
+      "ns": {
+        "median": 216059950.0,
+        "minimum": 164252200,
+        "maximum": 234374800
+      },
+      "calls": {
+        "median": 2000023.0,
+        "minimum": 2000023,
+        "maximum": 2000024
+      },
+      "bytes": {
+        "median": 116663264.0,
+        "minimum": 116663264,
+        "maximum": 116663456
+      },
+      "buffer_current": {
+        "median": 240000240.0,
+        "minimum": 240000240,
+        "maximum": 240000240
+      },
+      "buffer_peak": {
+        "median": 240000240.0,
+        "minimum": 240000240,
+        "maximum": 240000240
+      },
+      "rows": {
+        "median": 1000001.0,
+        "minimum": 1000001,
+        "maximum": 1000001
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "mixed",
+      "repeat": 3,
+      "variant": "after",
+      "mode": "time",
+      "ns": {
+        "median": 224911350.0,
+        "minimum": 167100400,
+        "maximum": 241360400
+      },
+      "calls": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "bytes": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "buffer_current": {
+        "median": 240000240.0,
+        "minimum": 240000240,
+        "maximum": 240000240
+      },
+      "buffer_peak": {
+        "median": 240000240.0,
+        "minimum": 240000240,
+        "maximum": 240000240
+      },
+      "rows": {
+        "median": 1000001.0,
+        "minimum": 1000001,
+        "maximum": 1000001
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "mixed",
+      "repeat": 3,
+      "variant": "before",
+      "mode": "alloc",
+      "ns": {
+        "median": 489284700.0,
+        "minimum": 413275900,
+        "maximum": 525632000
+      },
+      "calls": {
+        "median": 2173333.0,
+        "minimum": 2173333,
+        "maximum": 2173334
+      },
+      "bytes": {
+        "median": 157004080.0,
+        "minimum": 157004080,
+        "maximum": 157004272
+      },
+      "buffer_current": {
+        "median": 241173456.0,
+        "minimum": 241173456,
+        "maximum": 241173456
+      },
+      "buffer_peak": {
+        "median": 241173456.0,
+        "minimum": 241173456,
+        "maximum": 241173456
+      },
+      "rows": {
+        "median": 1000001.0,
+        "minimum": 1000001,
+        "maximum": 1000001
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "mixed",
+      "repeat": 3,
+      "variant": "before",
+      "mode": "time",
+      "ns": {
+        "median": 552496550.0,
+        "minimum": 451350500,
+        "maximum": 614444600
+      },
+      "calls": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "bytes": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "buffer_current": {
+        "median": 241173456.0,
+        "minimum": 241173456,
+        "maximum": 241173456
+      },
+      "buffer_peak": {
+        "median": 241173456.0,
+        "minimum": 241173456,
+        "maximum": 241173456
+      },
+      "rows": {
+        "median": 1000001.0,
+        "minimum": 1000001,
+        "maximum": 1000001
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "plain",
+      "repeat": 1,
+      "variant": "after",
+      "mode": "alloc",
+      "ns": {
+        "median": 187880150.0,
+        "minimum": 157789500,
+        "maximum": 228779800
+      },
+      "calls": {
+        "median": 2000021.0,
+        "minimum": 2000021,
+        "maximum": 2000021
+      },
+      "bytes": {
+        "median": 116663248.0,
+        "minimum": 116663248,
+        "maximum": 116663248
+      },
+      "buffer_current": {
+        "median": 240000000.0,
+        "minimum": 240000000,
+        "maximum": 240000000
+      },
+      "buffer_peak": {
+        "median": 240000000.0,
+        "minimum": 240000000,
+        "maximum": 240000000
+      },
+      "rows": {
+        "median": 1000000.0,
+        "minimum": 1000000,
+        "maximum": 1000000
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "plain",
+      "repeat": 1,
+      "variant": "after",
+      "mode": "time",
+      "ns": {
+        "median": 212065950.0,
+        "minimum": 165054200,
+        "maximum": 233494000
+      },
+      "calls": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "bytes": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "buffer_current": {
+        "median": 240000000.0,
+        "minimum": 240000000,
+        "maximum": 240000000
+      },
+      "buffer_peak": {
+        "median": 240000000.0,
+        "minimum": 240000000,
+        "maximum": 240000000
+      },
+      "rows": {
+        "median": 1000000.0,
+        "minimum": 1000000,
+        "maximum": 1000000
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "plain",
+      "repeat": 1,
+      "variant": "before",
+      "mode": "alloc",
+      "ns": {
+        "median": 520344200.0,
+        "minimum": 440428500,
+        "maximum": 561431500
+      },
+      "calls": {
+        "median": 2166665.0,
+        "minimum": 2166665,
+        "maximum": 2166665
+      },
+      "bytes": {
+        "median": 156950688.0,
+        "minimum": 156950688,
+        "maximum": 156950688
+      },
+      "buffer_current": {
+        "median": 240000000.0,
+        "minimum": 240000000,
+        "maximum": 240000000
+      },
+      "buffer_peak": {
+        "median": 240000000.0,
+        "minimum": 240000000,
+        "maximum": 240000000
+      },
+      "rows": {
+        "median": 1000000.0,
+        "minimum": 1000000,
+        "maximum": 1000000
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "plain",
+      "repeat": 1,
+      "variant": "before",
+      "mode": "time",
+      "ns": {
+        "median": 530497450.0,
+        "minimum": 414725100,
+        "maximum": 588132300
+      },
+      "calls": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "bytes": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "buffer_current": {
+        "median": 240000000.0,
+        "minimum": 240000000,
+        "maximum": 240000000
+      },
+      "buffer_peak": {
+        "median": 240000000.0,
+        "minimum": 240000000,
+        "maximum": 240000000
+      },
+      "rows": {
+        "median": 1000000.0,
+        "minimum": 1000000,
+        "maximum": 1000000
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "plain",
+      "repeat": 2,
+      "variant": "after",
+      "mode": "alloc",
+      "ns": {
+        "median": 202708000.0,
+        "minimum": 160619000,
+        "maximum": 219479600
+      },
+      "calls": {
+        "median": 2000021.0,
+        "minimum": 2000021,
+        "maximum": 2000021
+      },
+      "bytes": {
+        "median": 116663248.0,
+        "minimum": 116663248,
+        "maximum": 116663248
+      },
+      "buffer_current": {
+        "median": 240000000.0,
+        "minimum": 240000000,
+        "maximum": 240000000
+      },
+      "buffer_peak": {
+        "median": 240000000.0,
+        "minimum": 240000000,
+        "maximum": 240000000
+      },
+      "rows": {
+        "median": 1000000.0,
+        "minimum": 1000000,
+        "maximum": 1000000
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "plain",
+      "repeat": 2,
+      "variant": "after",
+      "mode": "time",
+      "ns": {
+        "median": 186086150.0,
+        "minimum": 165127400,
+        "maximum": 209665000
+      },
+      "calls": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "bytes": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "buffer_current": {
+        "median": 240000000.0,
+        "minimum": 240000000,
+        "maximum": 240000000
+      },
+      "buffer_peak": {
+        "median": 240000000.0,
+        "minimum": 240000000,
+        "maximum": 240000000
+      },
+      "rows": {
+        "median": 1000000.0,
+        "minimum": 1000000,
+        "maximum": 1000000
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "plain",
+      "repeat": 2,
+      "variant": "before",
+      "mode": "alloc",
+      "ns": {
+        "median": 512974500.0,
+        "minimum": 429393200,
+        "maximum": 555347000
+      },
+      "calls": {
+        "median": 2166665.0,
+        "minimum": 2166665,
+        "maximum": 2166665
+      },
+      "bytes": {
+        "median": 156950688.0,
+        "minimum": 156950688,
+        "maximum": 156950688
+      },
+      "buffer_current": {
+        "median": 240000000.0,
+        "minimum": 240000000,
+        "maximum": 240000000
+      },
+      "buffer_peak": {
+        "median": 240000000.0,
+        "minimum": 240000000,
+        "maximum": 240000000
+      },
+      "rows": {
+        "median": 1000000.0,
+        "minimum": 1000000,
+        "maximum": 1000000
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "plain",
+      "repeat": 2,
+      "variant": "before",
+      "mode": "time",
+      "ns": {
+        "median": 514334150.0,
+        "minimum": 430041100,
+        "maximum": 618107800
+      },
+      "calls": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "bytes": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "buffer_current": {
+        "median": 240000000.0,
+        "minimum": 240000000,
+        "maximum": 240000000
+      },
+      "buffer_peak": {
+        "median": 240000000.0,
+        "minimum": 240000000,
+        "maximum": 240000000
+      },
+      "rows": {
+        "median": 1000000.0,
+        "minimum": 1000000,
+        "maximum": 1000000
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "plain",
+      "repeat": 3,
+      "variant": "after",
+      "mode": "alloc",
+      "ns": {
+        "median": 190384700.0,
+        "minimum": 158022300,
+        "maximum": 221333600
+      },
+      "calls": {
+        "median": 2000021.0,
+        "minimum": 2000021,
+        "maximum": 2000021
+      },
+      "bytes": {
+        "median": 116663248.0,
+        "minimum": 116663248,
+        "maximum": 116663248
+      },
+      "buffer_current": {
+        "median": 240000000.0,
+        "minimum": 240000000,
+        "maximum": 240000000
+      },
+      "buffer_peak": {
+        "median": 240000000.0,
+        "minimum": 240000000,
+        "maximum": 240000000
+      },
+      "rows": {
+        "median": 1000000.0,
+        "minimum": 1000000,
+        "maximum": 1000000
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "plain",
+      "repeat": 3,
+      "variant": "after",
+      "mode": "time",
+      "ns": {
+        "median": 197401250.0,
+        "minimum": 157844400,
+        "maximum": 237069900
+      },
+      "calls": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "bytes": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "buffer_current": {
+        "median": 240000000.0,
+        "minimum": 240000000,
+        "maximum": 240000000
+      },
+      "buffer_peak": {
+        "median": 240000000.0,
+        "minimum": 240000000,
+        "maximum": 240000000
+      },
+      "rows": {
+        "median": 1000000.0,
+        "minimum": 1000000,
+        "maximum": 1000000
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "plain",
+      "repeat": 3,
+      "variant": "before",
+      "mode": "alloc",
+      "ns": {
+        "median": 531628500.0,
+        "minimum": 415839700,
+        "maximum": 562021400
+      },
+      "calls": {
+        "median": 2166665.0,
+        "minimum": 2166665,
+        "maximum": 2166665
+      },
+      "bytes": {
+        "median": 156950688.0,
+        "minimum": 156950688,
+        "maximum": 156950688
+      },
+      "buffer_current": {
+        "median": 240000000.0,
+        "minimum": 240000000,
+        "maximum": 240000000
+      },
+      "buffer_peak": {
+        "median": 240000000.0,
+        "minimum": 240000000,
+        "maximum": 240000000
+      },
+      "rows": {
+        "median": 1000000.0,
+        "minimum": 1000000,
+        "maximum": 1000000
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "plain",
+      "repeat": 3,
+      "variant": "before",
+      "mode": "time",
+      "ns": {
+        "median": 558324400.0,
+        "minimum": 434756000,
+        "maximum": 649189900
+      },
+      "calls": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "bytes": {
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "buffer_current": {
+        "median": 240000000.0,
+        "minimum": 240000000,
+        "maximum": 240000000
+      },
+      "buffer_peak": {
+        "median": 240000000.0,
+        "minimum": 240000000,
+        "maximum": 240000000
+      },
+      "rows": {
+        "median": 1000000.0,
+        "minimum": 1000000,
+        "maximum": 1000000
+      }
+    }
+  ],
+  "groups": [
+    {
+      "size": 100000,
+      "shape": "plain",
+      "variant": "before",
+      "ns": {
+        "median": 38467800.0,
+        "trial_min": 38079450.0,
+        "trial_max": 39970600.0,
+        "all_max": 42015400
+      },
+      "calls": {
+        "median": 216667.0,
+        "trial_min": 216667.0,
+        "trial_max": 216667.0,
+        "all_max": 216667
+      },
+      "bytes": {
+        "median": 15694784.0,
+        "trial_min": 15694784.0,
+        "trial_max": 15694784.0,
+        "all_max": 15694784
+      },
+      "buffer_current": {
+        "median": 24000000.0,
+        "trial_min": 24000000.0,
+        "trial_max": 24000000.0,
+        "all_max": 24000000
+      },
+      "buffer_peak": {
+        "median": 24000000.0,
+        "trial_min": 24000000.0,
+        "trial_max": 24000000.0,
+        "all_max": 24000000
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "plain",
+      "variant": "after",
+      "ns": {
+        "median": 16290150.0,
+        "trial_min": 15731750.0,
+        "trial_max": 18296500.0,
+        "all_max": 20210200
+      },
+      "calls": {
+        "median": 200018.0,
+        "trial_min": 200018.0,
+        "trial_max": 200018.0,
+        "all_max": 200018
+      },
+      "bytes": {
+        "median": 14182864.0,
+        "trial_min": 14182864.0,
+        "trial_max": 14182864.0,
+        "all_max": 14182864
+      },
+      "buffer_current": {
+        "median": 24000000.0,
+        "trial_min": 24000000.0,
+        "trial_max": 24000000.0,
+        "all_max": 24000000
+      },
+      "buffer_peak": {
+        "median": 24000000.0,
+        "trial_min": 24000000.0,
+        "trial_max": 24000000.0,
+        "all_max": 24000000
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "mixed",
+      "variant": "before",
+      "ns": {
+        "median": 43690500.0,
+        "trial_min": 42708950.0,
+        "trial_max": 44116900.0,
+        "all_max": 46910700
+      },
+      "calls": {
+        "median": 223335.0,
+        "trial_min": 223335.0,
+        "trial_max": 223335.0,
+        "all_max": 223336
+      },
+      "bytes": {
+        "median": 15748176.0,
+        "trial_min": 15748176.0,
+        "trial_max": 15748176.0,
+        "all_max": 15748368
+      },
+      "buffer_current": {
+        "median": 25173456.0,
+        "trial_min": 25173456.0,
+        "trial_max": 25173456.0,
+        "all_max": 25173456
+      },
+      "buffer_peak": {
+        "median": 25173456.0,
+        "trial_min": 25173456.0,
+        "trial_max": 25173456.0,
+        "all_max": 25173456
+      }
+    },
+    {
+      "size": 100000,
+      "shape": "mixed",
+      "variant": "after",
+      "ns": {
+        "median": 19914900.0,
+        "trial_min": 18732950.0,
+        "trial_max": 20125200.0,
+        "all_max": 21903500
+      },
+      "calls": {
+        "median": 200020.0,
+        "trial_min": 200020.0,
+        "trial_max": 200020.0,
+        "all_max": 200021
+      },
+      "bytes": {
+        "median": 14182880.0,
+        "trial_min": 14182880.0,
+        "trial_max": 14182880.0,
+        "all_max": 14183072
+      },
+      "buffer_current": {
+        "median": 24000240.0,
+        "trial_min": 24000240.0,
+        "trial_max": 24000240.0,
+        "all_max": 24000240
+      },
+      "buffer_peak": {
+        "median": 24000240.0,
+        "trial_min": 24000240.0,
+        "trial_max": 24000240.0,
+        "all_max": 24000240
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "plain",
+      "variant": "before",
+      "ns": {
+        "median": 530497450.0,
+        "trial_min": 514334150.0,
+        "trial_max": 558324400.0,
+        "all_max": 649189900
+      },
+      "calls": {
+        "median": 2166665.0,
+        "trial_min": 2166665.0,
+        "trial_max": 2166665.0,
+        "all_max": 2166665
+      },
+      "bytes": {
+        "median": 156950688.0,
+        "trial_min": 156950688.0,
+        "trial_max": 156950688.0,
+        "all_max": 156950688
+      },
+      "buffer_current": {
+        "median": 240000000.0,
+        "trial_min": 240000000.0,
+        "trial_max": 240000000.0,
+        "all_max": 240000000
+      },
+      "buffer_peak": {
+        "median": 240000000.0,
+        "trial_min": 240000000.0,
+        "trial_max": 240000000.0,
+        "all_max": 240000000
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "plain",
+      "variant": "after",
+      "ns": {
+        "median": 197401250.0,
+        "trial_min": 186086150.0,
+        "trial_max": 212065950.0,
+        "all_max": 237069900
+      },
+      "calls": {
+        "median": 2000021.0,
+        "trial_min": 2000021.0,
+        "trial_max": 2000021.0,
+        "all_max": 2000021
+      },
+      "bytes": {
+        "median": 116663248.0,
+        "trial_min": 116663248.0,
+        "trial_max": 116663248.0,
+        "all_max": 116663248
+      },
+      "buffer_current": {
+        "median": 240000000.0,
+        "trial_min": 240000000.0,
+        "trial_max": 240000000.0,
+        "all_max": 240000000
+      },
+      "buffer_peak": {
+        "median": 240000000.0,
+        "trial_min": 240000000.0,
+        "trial_max": 240000000.0,
+        "all_max": 240000000
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "mixed",
+      "variant": "before",
+      "ns": {
+        "median": 556838600.0,
+        "trial_min": 552496550.0,
+        "trial_max": 567373950.0,
+        "all_max": 682086700
+      },
+      "calls": {
+        "median": 2173333.0,
+        "trial_min": 2173333.0,
+        "trial_max": 2173333.0,
+        "all_max": 2173334
+      },
+      "bytes": {
+        "median": 157004080.0,
+        "trial_min": 157004080.0,
+        "trial_max": 157004080.0,
+        "all_max": 157004272
+      },
+      "buffer_current": {
+        "median": 241173456.0,
+        "trial_min": 241173456.0,
+        "trial_max": 241173456.0,
+        "all_max": 241173456
+      },
+      "buffer_peak": {
+        "median": 241173456.0,
+        "trial_min": 241173456.0,
+        "trial_max": 241173456.0,
+        "all_max": 241173456
+      }
+    },
+    {
+      "size": 1000000,
+      "shape": "mixed",
+      "variant": "after",
+      "ns": {
+        "median": 224911350.0,
+        "trial_min": 201993150.0,
+        "trial_max": 238039100.0,
+        "all_max": 256271300
+      },
+      "calls": {
+        "median": 2000023.0,
+        "trial_min": 2000023.0,
+        "trial_max": 2000023.0,
+        "all_max": 2000024
+      },
+      "bytes": {
+        "median": 116663264.0,
+        "trial_min": 116663264.0,
+        "trial_max": 116663264.0,
+        "all_max": 116663456
+      },
+      "buffer_current": {
+        "median": 240000240.0,
+        "trial_min": 240000240.0,
+        "trial_max": 240000240.0,
+        "all_max": 240000240
+      },
+      "buffer_peak": {
+        "median": 240000240.0,
+        "trial_min": 240000240.0,
+        "trial_max": 240000240.0,
+        "all_max": 240000240
+      }
+    }
+  ]
+}

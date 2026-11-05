@@ -290,6 +290,24 @@ See [both cohorts, memory and recovery validation](docs/benchmarks/reclamation-f
 and [reproduction commands](benchmarks/reclamation-front/README.md). Service and
 other-product comparisons were not rerun after the failed native gate.
 
+### Follow-up: full scans without an intermediate tree
+
+Ordered merging replaces the temporary full-scan tree while preserving snapshot
+selection, range dependencies and conservative buffer reservations. At **1M rows**,
+full-result construction changed **530.497 → 197.401 ms** without
+staged changes and **556.839 → 224.911 ms** with 10,000 staged edits.
+These are medians of three trial medians, not p99 or network throughput.
+
+![Full-scan timing, allocation requests and resource reservations](docs/benchmarks/scan-merge-2026-11-05/comparison.svg)
+
+Separate allocation runs and unchanged conservative reservations are both shown:
+allocation requests are **not peak memory or RSS**. All 48 runs checked full
+contents, old snapshots and reopened committed state. See the
+[full report and limitations](docs/benchmarks/scan-merge-2026-11-05/README.md),
+[complete table](docs/benchmarks/scan-merge-2026-11-05/table.md) and
+[reproduction instructions](benchmarks/scan-merge/README.md).
+
+
 ## Build
 
 Requires Rust **1.89 or newer**. Python 3 is used by the optional client and integration tests. Docker is needed only for containers.

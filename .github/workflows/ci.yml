@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        features: [service, "service,fixed-log", "service,wal-direct", "service,wal-prepare", "service,fixed-log,wal-prepare"]
+        features: [service, "service,fixed-log", "service,wal-direct", "service,wal-prepare", "service,fixed-log,wal-prepare", "service,single-client-commit,lock-timing"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -21,6 +21,10 @@ jobs:
       # Subprocess crash fixtures must not overlap other tests' file-lock lifetimes.
       - run: cargo test --locked --features "${{ matrix.features }}" -- --test-threads=1
       - run: cargo build --locked --features "${{ matrix.features }}" --bin catdb-server
+      - if: contains(matrix.features, 'lock-timing')
+        run: python benchmarks/commit-breakdown/test_diagnostics.py
+        env:
+          CATDB_DIAGNOSTICS: '1'
       - run: python tests/service_protocol.py
       - run: python tests/service_protocol.py
         env:

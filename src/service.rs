@@ -129,6 +129,8 @@ impl Server {
 
     pub fn run(self, stop: Arc<AtomicBool>) -> io::Result<()> {
         let active = Arc::new(AtomicUsize::new(0));
+        #[cfg(feature = "single-client-commit")]
+        self.db.set_service_clients(Arc::clone(&active));
         let mut workers: Vec<thread::JoinHandle<()>> = Vec::new();
         let mut failure = None;
         while !stop.load(Ordering::Acquire) {
@@ -312,7 +314,12 @@ fn connection(
             break;
         }
         #[cfg(feature = "lock-timing")]
-        let dispatch_started = crate::transactions::diagnostic_now_ns();
+        let dispatch_started = {
+            crate::transactions::take_commit_trace();
+            crate::transactions::take_commit_detail();
+            crate::transactions::take_commit_costs();
+            crate::transactions::diagnostic_now_ns()
+        };
         let result = dispatch(&db, &mut transaction, &request);
         #[cfg(feature = "lock-timing")]
         let dispatch_finished = crate::transactions::diagnostic_now_ns();
@@ -342,13 +349,18 @@ fn connection(
             }),
         };
         #[cfg(feature = "lock-timing")]
-        let response = if diagnostic && request.get("op").and_then(Value::as_str) == Some("commit")
-        {
+        let response = if diagnostic
+            && matches!(
+                request.get("op").and_then(Value::as_str),
+                Some("commit" | "put_commit" | "delete_commit")
+            ) {
             let mut response = response;
             response["diagnostic"] = json!({
                 "dispatch_ns": dispatch_finished.saturating_sub(dispatch_started),
                 "finished_ns": dispatch_finished,
                 "trace": crate::transactions::take_commit_trace(),
+                "detail": crate::transactions::take_commit_detail(),
+                "costs": crate::transactions::take_commit_costs(),
                 "sync_attempts": db.commit_sync_attempts(),
             });
             response
@@ -628,6 +640,8 @@ mod tests {
         let fixture = Fixture::new();
         let db = fixture.db();
         db.set_group_commit(true);
+        #[cfg(feature = "single-client-commit")]
+        db.set_service_clients(Arc::new(AtomicUsize::new(1)));
         let mut old = db.begin().unwrap();
         let gate = Arc::new([std::sync::Barrier::new(2), std::sync::Barrier::new(2)]);
         db.hold_test_sync(gate.clone());
@@ -660,6 +674,8 @@ mod tests {
     fn single_request_crash_worker() {
         let db = Database::open(std::env::var_os("CATDB_SINGLE_CRASH_PATH").unwrap()).unwrap();
         db.set_group_commit(true);
+        #[cfg(feature = "single-client-commit")]
+        db.set_service_clients(Arc::new(AtomicUsize::new(1)));
         dispatch(
             &db,
             &mut None,

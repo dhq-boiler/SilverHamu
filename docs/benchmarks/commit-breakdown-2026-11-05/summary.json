@@ -1,0 +1,1426 @@
+{
+  "runs": [
+    {
+      "variant": "before",
+      "clients": 1,
+      "ops_s": {
+        "median": 269.96794016041713,
+        "min": 261.86238626102835,
+        "max": 272.2713593019799
+      },
+      "p50_ms": {
+        "median": 3.812482,
+        "min": 3.794907,
+        "max": 3.875557
+      },
+      "p95_ms": {
+        "median": 4.434562,
+        "min": 4.361892,
+        "max": 4.555078
+      },
+      "p99_ms": {
+        "median": 5.664696,
+        "min": 5.545413,
+        "max": 5.882907
+      },
+      "max_ms": {
+        "median": 47.986855,
+        "min": 13.384947,
+        "max": 48.154318
+      }
+    },
+    {
+      "variant": "candidate",
+      "clients": 1,
+      "ops_s": {
+        "median": 288.9154894792528,
+        "min": 284.36943298503235,
+        "max": 297.4387941991781
+      },
+      "p50_ms": {
+        "median": 3.526679,
+        "min": 3.489895,
+        "max": 3.569445
+      },
+      "p95_ms": {
+        "median": 4.211867,
+        "min": 3.979733,
+        "max": 4.347597
+      },
+      "p99_ms": {
+        "median": 5.479777,
+        "min": 5.333111,
+        "max": 5.792006
+      },
+      "max_ms": {
+        "median": 23.884248,
+        "min": 16.439168,
+        "max": 57.786976
+      }
+    },
+    {
+      "variant": "before-diag",
+      "clients": 1,
+      "ops_s": {
+        "median": 271.7884464576243,
+        "min": 261.70772878024013,
+        "max": 272.04736353522304
+      },
+      "p50_ms": {
+        "median": 3.813973,
+        "min": 3.785276,
+        "max": 3.858839
+      },
+      "p95_ms": {
+        "median": 4.387383,
+        "min": 4.377113,
+        "max": 4.646921
+      },
+      "p99_ms": {
+        "median": 5.599815,
+        "min": 5.534936,
+        "max": 6.0771
+      },
+      "max_ms": {
+        "median": 23.321631,
+        "min": 13.099632,
+        "max": 60.6851
+      }
+    },
+    {
+      "variant": "candidate-diag",
+      "clients": 1,
+      "ops_s": {
+        "median": 287.64885248728507,
+        "min": 282.25018772998027,
+        "max": 293.14129144691043
+      },
+      "p50_ms": {
+        "median": 3.584008,
+        "min": 3.530988,
+        "max": 3.620763
+      },
+      "p95_ms": {
+        "median": 4.287831,
+        "min": 4.105578,
+        "max": 4.349521
+      },
+      "p99_ms": {
+        "median": 5.543551,
+        "min": 5.461904,
+        "max": 5.710245
+      },
+      "max_ms": {
+        "median": 26.143679,
+        "min": 13.775879,
+        "max": 41.359748
+      }
+    },
+    {
+      "variant": "before",
+      "clients": 4,
+      "ops_s": {
+        "median": 988.7334390668229,
+        "min": 966.0233520894274,
+        "max": 1028.5219267661494
+      },
+      "p50_ms": {
+        "median": 4.064407,
+        "min": 3.931359,
+        "max": 4.133909
+      },
+      "p95_ms": {
+        "median": 4.959199,
+        "min": 4.68957,
+        "max": 5.286756
+      },
+      "p99_ms": {
+        "median": 6.039637,
+        "min": 5.609834,
+        "max": 6.420972
+      },
+      "max_ms": {
+        "median": 15.517516,
+        "min": 13.490026,
+        "max": 16.753154
+      }
+    },
+    {
+      "variant": "candidate",
+      "clients": 4,
+      "ops_s": {
+        "median": 1005.124144877677,
+        "min": 969.882502694344,
+        "max": 1008.9813261973868
+      },
+      "p50_ms": {
+        "median": 4.000698,
+        "min": 3.98415,
+        "max": 4.111332
+      },
+      "p95_ms": {
+        "median": 4.820004,
+        "min": 4.800898,
+        "max": 5.208139
+      },
+      "p99_ms": {
+        "median": 5.730268,
+        "min": 5.704762,
+        "max": 6.573334
+      },
+      "max_ms": {
+        "median": 13.711128,
+        "min": 10.882776,
+        "max": 18.776398
+      }
+    },
+    {
+      "variant": "before-diag",
+      "clients": 4,
+      "ops_s": {
+        "median": 1001.3411394961314,
+        "min": 995.1674650481831,
+        "max": 1002.4258920857008
+      },
+      "p50_ms": {
+        "median": 4.00111,
+        "min": 3.991698,
+        "max": 4.037601
+      },
+      "p95_ms": {
+        "median": 4.904748,
+        "min": 4.793643,
+        "max": 4.962728
+      },
+      "p99_ms": {
+        "median": 5.944801,
+        "min": 5.864123,
+        "max": 5.998403
+      },
+      "max_ms": {
+        "median": 13.283354,
+        "min": 8.807245,
+        "max": 45.647852
+      }
+    },
+    {
+      "variant": "candidate-diag",
+      "clients": 4,
+      "ops_s": {
+        "median": 953.9874582886855,
+        "min": 933.5778432831488,
+        "max": 989.5188886545045
+      },
+      "p50_ms": {
+        "median": 4.157032,
+        "min": 4.042045,
+        "max": 4.264157
+      },
+      "p95_ms": {
+        "median": 5.449002,
+        "min": 5.065511,
+        "max": 5.529625
+      },
+      "p99_ms": {
+        "median": 6.579355,
+        "min": 6.159275,
+        "max": 6.776422
+      },
+      "max_ms": {
+        "median": 13.654818,
+        "min": 13.62603,
+        "max": 13.681723
+      }
+    }
+  ],
+  "diagnosis": [
+    {
+      "variant": "before-diag",
+      "clients": 4,
+      "rep": 1,
+      "stages": {
+        "dispatch preparation": {
+          "mean_ms": 0.003922033875,
+          "p99_ms": 0.006884,
+          "slowest_1pct_mean_ms": 0.004257375
+        },
+        "queue submission": {
+          "mean_ms": 0.000531418625,
+          "p99_ms": 0.001228,
+          "slowest_1pct_mean_ms": 0.0005953625
+        },
+        "leader queue": {
+          "mean_ms": 0.0010708979999999998,
+          "p99_ms": 0.000525,
+          "slowest_1pct_mean_ms": 0.1006336125
+        },
+        "batch collection": {
+          "mean_ms": 0.182056626625,
+          "p99_ms": 0.509395,
+          "slowest_1pct_mean_ms": 0.231722
+        },
+        "selection overhead": {
+          "mean_ms": 0.000185683375,
+          "p99_ms": 0.000356,
+          "slowest_1pct_mean_ms": 0.000223275
+        },
+        "writer lock": {
+          "mean_ms": 8.17185e-05,
+          "p99_ms": 0.000169,
+          "slowest_1pct_mean_ms": 0.00010535
+        },
+        "state lock": {
+          "mean_ms": 0.00035740212500000003,
+          "p99_ms": 0.000844,
+          "slowest_1pct_mean_ms": 0.00041941250000000004
+        },
+        "validation / encoding / bookkeeping": {
+          "mean_ms": 0.016449937249999998,
+          "p99_ms": 0.02928,
+          "slowest_1pct_mean_ms": 0.019331025
+        },
+        "log reservation": {
+          "mean_ms": 8.217149999999999e-05,
+          "p99_ms": 0.000461,
+          "slowest_1pct_mean_ms": 0.000109425
+        },
+        "log write": {
+          "mean_ms": 0.020583305,
+          "p99_ms": 0.0397,
+          "slowest_1pct_mean_ms": 0.023934337500000003
+        },
+        "log sync": {
+          "mean_ms": 3.22012111875,
+          "p99_ms": 4.851533,
+          "slowest_1pct_mean_ms": 5.40345695
+        },
+        "publication lock": {
+          "mean_ms": 0.000591372125,
+          "p99_ms": 0.001648,
+          "slowest_1pct_mean_ms": 0.0010038375
+        },
+        "publication": {
+          "mean_ms": 0.01419442175,
+          "p99_ms": 0.031354,
+          "slowest_1pct_mean_ms": 0.0199853625
+        },
+        "cleanup / replies ahead": {
+          "mean_ms": 0.014301831749999999,
+          "p99_ms": 0.04664,
+          "slowest_1pct_mean_ms": 0.014054012500000001
+        },
+        "reply wake / leader exit": {
+          "mean_ms": 0.030830221875,
+          "p99_ms": 0.062781,
+          "slowest_1pct_mean_ms": 0.03816645
+        },
+        "dispatch finish": {
+          "mean_ms": 0.001967499375,
+          "p99_ms": 0.007972,
+          "slowest_1pct_mean_ms": 0.002457825
+        },
+        "transport / client residual": {
+          "mean_ms": 0.499127988,
+          "p99_ms": 0.901988,
+          "slowest_1pct_mean_ms": 0.623622575
+        }
+      },
+      "groups": 2001,
+      "updates_per_group": 3.99800099950025,
+      "group_sync_mean_ms": 3.219949488255872,
+      "request_mean_ms": 4.0064556485,
+      "slowest_1pct_mean_ms": 6.4840781875,
+      "validation_group_mean_us": 0.8006851574212893,
+      "encoding_group_mean_us": 4.207687156421789
+    },
+    {
+      "variant": "before-diag",
+      "clients": 1,
+      "rep": 1,
+      "stages": {
+        "dispatch preparation": {
+          "mean_ms": 0.004170256999999999,
+          "p99_ms": 0.008554,
+          "slowest_1pct_mean_ms": 0.004953
+        },
+        "queue submission": {
+          "mean_ms": 0.000400931,
+          "p99_ms": 0.000969,
+          "slowest_1pct_mean_ms": 0.0004617125
+        },
+        "leader queue": {
+          "mean_ms": 0.00020139850000000002,
+          "p99_ms": 0.000621,
+          "slowest_1pct_mean_ms": 0.0002571
+        },
+        "batch collection": {
+          "mean_ms": 0.26115154625000003,
+          "p99_ms": 0.313346,
+          "slowest_1pct_mean_ms": 0.26324017499999997
+        },
+        "selection overhead": {
+          "mean_ms": 0.00014538475,
+          "p99_ms": 0.000555,
+          "slowest_1pct_mean_ms": 0.0002137125
+        },
+        "writer lock": {
+          "mean_ms": 5.5793375e-05,
+          "p99_ms": 0.00014,
+          "slowest_1pct_mean_ms": 7.016249999999999e-05
+        },
+        "state lock": {
+          "mean_ms": 0.0003181665,
+          "p99_ms": 0.001011,
+          "slowest_1pct_mean_ms": 0.00042916250000000003
+        },
+        "validation / encoding / bookkeeping": {
+          "mean_ms": 0.007203938625,
+          "p99_ms": 0.016052,
+          "slowest_1pct_mean_ms": 0.00900525
+        },
+        "log reservation": {
+          "mean_ms": 0.000117028,
+          "p99_ms": 0.000441,
+          "slowest_1pct_mean_ms": 9.620000000000001e-05
+        },
+        "log write": {
+          "mean_ms": 0.01295302075,
+          "p99_ms": 0.032915,
+          "slowest_1pct_mean_ms": 0.016418775
+        },
+        "log sync": {
+          "mean_ms": 3.162442317125,
+          "p99_ms": 5.009497,
+          "slowest_1pct_mean_ms": 6.7639502375
+        },
+        "publication lock": {
+          "mean_ms": 0.000612928125,
+          "p99_ms": 0.001747,
+          "slowest_1pct_mean_ms": 0.0012836500000000001
+        },
+        "publication": {
+          "mean_ms": 0.005493495125,
+          "p99_ms": 0.012125,
+          "slowest_1pct_mean_ms": 0.0093007375
+        },
+        "cleanup / replies ahead": {
+          "mean_ms": 0.002674712875,
+          "p99_ms": 0.005823,
+          "slowest_1pct_mean_ms": 0.004621875
+        },
+        "reply wake / leader exit": {
+          "mean_ms": 0.00205095925,
+          "p99_ms": 0.004568,
+          "slowest_1pct_mean_ms": 0.0033208125
+        },
+        "dispatch finish": {
+          "mean_ms": 0.001281243375,
+          "p99_ms": 0.003008,
+          "slowest_1pct_mean_ms": 0.002205625
+        },
+        "transport / client residual": {
+          "mean_ms": 0.2009462865,
+          "p99_ms": 0.349622,
+          "slowest_1pct_mean_ms": 0.2669991
+        }
+      },
+      "groups": 8000,
+      "updates_per_group": 1.0,
+      "group_sync_mean_ms": 3.162442317125,
+      "request_mean_ms": 3.662219407125,
+      "slowest_1pct_mean_ms": 7.3468272875,
+      "validation_group_mean_us": 0.18440325000000002,
+      "encoding_group_mean_us": 2.1848445
+    },
+    {
+      "variant": "candidate-diag",
+      "clients": 4,
+      "rep": 1,
+      "stages": {
+        "dispatch preparation": {
+          "mean_ms": 0.004328448,
+          "p99_ms": 0.00838,
+          "slowest_1pct_mean_ms": 0.00476505
+        },
+        "queue submission": {
+          "mean_ms": 0.00060400875,
+          "p99_ms": 0.001491,
+          "slowest_1pct_mean_ms": 0.00067965
+        },
+        "leader queue": {
+          "mean_ms": 0.00137528325,
+          "p99_ms": 0.000633,
+          "slowest_1pct_mean_ms": 0.1301388125
+        },
+        "batch collection": {
+          "mean_ms": 0.20012547325000002,
+          "p99_ms": 0.585323,
+          "slowest_1pct_mean_ms": 0.26399177500000004
+        },
+        "selection overhead": {
+          "mean_ms": 0.0002371555,
+          "p99_ms": 0.000641,
+          "slowest_1pct_mean_ms": 0.000252675
+        },
+        "writer lock": {
+          "mean_ms": 6.5960875e-05,
+          "p99_ms": 0.00016,
+          "slowest_1pct_mean_ms": 7.4575e-05
+        },
+        "state lock": {
+          "mean_ms": 0.000376598125,
+          "p99_ms": 0.000916,
+          "slowest_1pct_mean_ms": 0.00043363749999999996
+        },
+        "validation / encoding / bookkeeping": {
+          "mean_ms": 0.01919149625,
+          "p99_ms": 0.036171,
+          "slowest_1pct_mean_ms": 0.023026262500000002
+        },
+        "log reservation": {
+          "mean_ms": 4.8877125e-05,
+          "p99_ms": 0.000123,
+          "slowest_1pct_mean_ms": 5.17e-05
+        },
+        "log write": {
+          "mean_ms": 0.02347464325,
+          "p99_ms": 0.053467,
+          "slowest_1pct_mean_ms": 0.0305192625
+        },
+        "log sync": {
+          "mean_ms": 3.398631140375,
+          "p99_ms": 5.612004,
+          "slowest_1pct_mean_ms": 6.4198077875
+        },
+        "publication lock": {
+          "mean_ms": 0.0008437982500000001,
+          "p99_ms": 0.00202,
+          "slowest_1pct_mean_ms": 0.0014933875
+        },
+        "publication": {
+          "mean_ms": 0.017327525125,
+          "p99_ms": 0.038142,
+          "slowest_1pct_mean_ms": 0.023633675
+        },
+        "cleanup / replies ahead": {
+          "mean_ms": 0.015993093,
+          "p99_ms": 0.051429,
+          "slowest_1pct_mean_ms": 0.017294900000000002
+        },
+        "reply wake / leader exit": {
+          "mean_ms": 0.033767888749999996,
+          "p99_ms": 0.066697,
+          "slowest_1pct_mean_ms": 0.0472608125
+        },
+        "dispatch finish": {
+          "mean_ms": 0.002320626625,
+          "p99_ms": 0.009418,
+          "slowest_1pct_mean_ms": 0.00363525
+        },
+        "transport / client residual": {
+          "mean_ms": 0.5508739645,
+          "p99_ms": 1.066299,
+          "slowest_1pct_mean_ms": 0.8714909000000001
+        }
+      },
+      "groups": 2001,
+      "updates_per_group": 3.99800099950025,
+      "group_sync_mean_ms": 3.398741595702149,
+      "request_mean_ms": 4.269585981,
+      "slowest_1pct_mean_ms": 7.8385501125,
+      "validation_group_mean_us": 1.0243098450774613,
+      "encoding_group_mean_us": 5.023009995002499
+    },
+    {
+      "variant": "candidate-diag",
+      "clients": 1,
+      "rep": 1,
+      "stages": {
+        "dispatch preparation": {
+          "mean_ms": 0.004075847374999999,
+          "p99_ms": 0.008985,
+          "slowest_1pct_mean_ms": 0.004753899999999999
+        },
+        "queue submission": {
+          "mean_ms": 0.0004065455,
+          "p99_ms": 0.000956,
+          "slowest_1pct_mean_ms": 0.0005099624999999999
+        },
+        "leader queue": {
+          "mean_ms": 0.00018878225,
+          "p99_ms": 0.000565,
+          "slowest_1pct_mean_ms": 0.00022192500000000001
+        },
+        "batch collection": {
+          "mean_ms": 0.00017076325,
+          "p99_ms": 0.000638,
+          "slowest_1pct_mean_ms": 0.0002118
+        },
+        "selection overhead": {
+          "mean_ms": 4.324825e-05,
+          "p99_ms": 0.000179,
+          "slowest_1pct_mean_ms": 4.23625e-05
+        },
+        "writer lock": {
+          "mean_ms": 5.087225e-05,
+          "p99_ms": 0.000122,
+          "slowest_1pct_mean_ms": 4.88375e-05
+        },
+        "state lock": {
+          "mean_ms": 0.00014243950000000002,
+          "p99_ms": 0.000318,
+          "slowest_1pct_mean_ms": 0.000175475
+        },
+        "validation / encoding / bookkeeping": {
+          "mean_ms": 0.00686765825,
+          "p99_ms": 0.033026,
+          "slowest_1pct_mean_ms": 0.007550725
+        },
+        "log reservation": {
+          "mean_ms": 5.480925e-05,
+          "p99_ms": 0.000122,
+          "slowest_1pct_mean_ms": 6.222500000000001e-05
+        },
+        "log write": {
+          "mean_ms": 0.011725581249999999,
+          "p99_ms": 0.031375,
+          "slowest_1pct_mean_ms": 0.0154433875
+        },
+        "log sync": {
+          "mean_ms": 3.169209015625,
+          "p99_ms": 5.145698,
+          "slowest_1pct_mean_ms": 6.485274775000001
+        },
+        "publication lock": {
+          "mean_ms": 0.000614118625,
+          "p99_ms": 0.001761,
+          "slowest_1pct_mean_ms": 0.0012563875
+        },
+        "publication": {
+          "mean_ms": 0.00528461175,
+          "p99_ms": 0.012443,
+          "slowest_1pct_mean_ms": 0.0090057375
+        },
+        "cleanup / replies ahead": {
+          "mean_ms": 0.0026215071250000003,
+          "p99_ms": 0.006188,
+          "slowest_1pct_mean_ms": 0.0049094625
+        },
+        "reply wake / leader exit": {
+          "mean_ms": 0.00196735175,
+          "p99_ms": 0.004815,
+          "slowest_1pct_mean_ms": 0.0035117875
+        },
+        "dispatch finish": {
+          "mean_ms": 0.00127328975,
+          "p99_ms": 0.003029,
+          "slowest_1pct_mean_ms": 0.002254875
+        },
+        "transport / client residual": {
+          "mean_ms": 0.190411404125,
+          "p99_ms": 0.344737,
+          "slowest_1pct_mean_ms": 0.26249725
+        }
+      },
+      "groups": 8000,
+      "updates_per_group": 1.0,
+      "group_sync_mean_ms": 3.169209015625,
+      "request_mean_ms": 3.395107845875,
+      "slowest_1pct_mean_ms": 6.797730875,
+      "validation_group_mean_us": 0.18640825,
+      "encoding_group_mean_us": 1.861917625
+    },
+    {
+      "variant": "candidate-diag",
+      "clients": 4,
+      "rep": 2,
+      "stages": {
+        "dispatch preparation": {
+          "mean_ms": 0.0041091800000000005,
+          "p99_ms": 0.008118,
+          "slowest_1pct_mean_ms": 0.0050763125
+        },
+        "queue submission": {
+          "mean_ms": 0.000548035625,
+          "p99_ms": 0.001318,
+          "slowest_1pct_mean_ms": 0.0006468125
+        },
+        "leader queue": {
+          "mean_ms": 0.0011720192500000001,
+          "p99_ms": 0.000542,
+          "slowest_1pct_mean_ms": 0.1107697625
+        },
+        "batch collection": {
+          "mean_ms": 0.186595133125,
+          "p99_ms": 0.543523,
+          "slowest_1pct_mean_ms": 0.24157415
+        },
+        "selection overhead": {
+          "mean_ms": 0.0002080565,
+          "p99_ms": 0.000542,
+          "slowest_1pct_mean_ms": 0.0002187875
+        },
+        "writer lock": {
+          "mean_ms": 5.9888375000000006e-05,
+          "p99_ms": 0.000131,
+          "slowest_1pct_mean_ms": 6.02625e-05
+        },
+        "state lock": {
+          "mean_ms": 0.000341117625,
+          "p99_ms": 0.00086,
+          "slowest_1pct_mean_ms": 0.00038505
+        },
+        "validation / encoding / bookkeeping": {
+          "mean_ms": 0.017444085374999998,
+          "p99_ms": 0.0303,
+          "slowest_1pct_mean_ms": 0.0206455625
+        },
+        "log reservation": {
+          "mean_ms": 6.0602375e-05,
+          "p99_ms": 0.000224,
+          "slowest_1pct_mean_ms": 6.433750000000001e-05
+        },
+        "log write": {
+          "mean_ms": 0.021474362375,
+          "p99_ms": 0.052698,
+          "slowest_1pct_mean_ms": 0.02420085
+        },
+        "log sync": {
+          "mean_ms": 3.22600362725,
+          "p99_ms": 5.089316,
+          "slowest_1pct_mean_ms": 6.93559655
+        },
+        "publication lock": {
+          "mean_ms": 0.00055612825,
+          "p99_ms": 0.001515,
+          "slowest_1pct_mean_ms": 0.0010315875
+        },
+        "publication": {
+          "mean_ms": 0.0147788655,
+          "p99_ms": 0.032339,
+          "slowest_1pct_mean_ms": 0.024299150000000002
+        },
+        "cleanup / replies ahead": {
+          "mean_ms": 0.014605555625,
+          "p99_ms": 0.047979,
+          "slowest_1pct_mean_ms": 0.0163431125
+        },
+        "reply wake / leader exit": {
+          "mean_ms": 0.031223071124999998,
+          "p99_ms": 0.062462,
+          "slowest_1pct_mean_ms": 0.0383929625
+        },
+        "dispatch finish": {
+          "mean_ms": 0.0021931265,
+          "p99_ms": 0.007744,
+          "slowest_1pct_mean_ms": 0.00352255
+        },
+        "transport / client residual": {
+          "mean_ms": 0.5057401155,
+          "p99_ms": 0.950705,
+          "slowest_1pct_mean_ms": 0.6790381999999999
+        }
+      },
+      "groups": 2002,
+      "updates_per_group": 3.996003996003996,
+      "group_sync_mean_ms": 3.226025385114885,
+      "request_mean_ms": 4.027112970375,
+      "slowest_1pct_mean_ms": 8.101866,
+      "validation_group_mean_us": 0.8988456543456543,
+      "encoding_group_mean_us": 4.586357642357642
+    },
+    {
+      "variant": "candidate-diag",
+      "clients": 1,
+      "rep": 2,
+      "stages": {
+        "dispatch preparation": {
+          "mean_ms": 0.004896575,
+          "p99_ms": 0.009958,
+          "slowest_1pct_mean_ms": 0.005815587499999999
+        },
+        "queue submission": {
+          "mean_ms": 0.0004972041249999999,
+          "p99_ms": 0.001221,
+          "slowest_1pct_mean_ms": 0.00057225
+        },
+        "leader queue": {
+          "mean_ms": 0.00023017175,
+          "p99_ms": 0.000714,
+          "slowest_1pct_mean_ms": 0.0002595625
+        },
+        "batch collection": {
+          "mean_ms": 0.00018470575,
+          "p99_ms": 0.000663,
+          "slowest_1pct_mean_ms": 0.0002443875
+        },
+        "selection overhead": {
+          "mean_ms": 4.9202e-05,
+          "p99_ms": 0.000357,
+          "slowest_1pct_mean_ms": 5.3125e-05
+        },
+        "writer lock": {
+          "mean_ms": 5.319025e-05,
+          "p99_ms": 0.000141,
+          "slowest_1pct_mean_ms": 5.5925e-05
+        },
+        "state lock": {
+          "mean_ms": 0.000161606625,
+          "p99_ms": 0.000551,
+          "slowest_1pct_mean_ms": 0.0001839625
+        },
+        "validation / encoding / bookkeeping": {
+          "mean_ms": 0.007096801875,
+          "p99_ms": 0.012586,
+          "slowest_1pct_mean_ms": 0.0086320875
+        },
+        "log reservation": {
+          "mean_ms": 6.205525e-05,
+          "p99_ms": 0.000169,
+          "slowest_1pct_mean_ms": 7.15e-05
+        },
+        "log write": {
+          "mean_ms": 0.013846474125000001,
+          "p99_ms": 0.034192,
+          "slowest_1pct_mean_ms": 0.01748155
+        },
+        "log sync": {
+          "mean_ms": 3.2571037124999997,
+          "p99_ms": 5.356035,
+          "slowest_1pct_mean_ms": 7.71274175
+        },
+        "publication lock": {
+          "mean_ms": 0.000723563375,
+          "p99_ms": 0.001925,
+          "slowest_1pct_mean_ms": 0.0014375375
+        },
+        "publication": {
+          "mean_ms": 0.006811391375,
+          "p99_ms": 0.014322,
+          "slowest_1pct_mean_ms": 0.010270212499999999
+        },
+        "cleanup / replies ahead": {
+          "mean_ms": 0.0031484276249999998,
+          "p99_ms": 0.006868,
+          "slowest_1pct_mean_ms": 0.0050928625
+        },
+        "reply wake / leader exit": {
+          "mean_ms": 0.002627821,
+          "p99_ms": 0.005287,
+          "slowest_1pct_mean_ms": 0.0041443625
+        },
+        "dispatch finish": {
+          "mean_ms": 0.001659355,
+          "p99_ms": 0.003526,
+          "slowest_1pct_mean_ms": 0.0027090625
+        },
+        "transport / client residual": {
+          "mean_ms": 0.222877573,
+          "p99_ms": 0.362722,
+          "slowest_1pct_mean_ms": 0.3009643125
+        }
+      },
+      "groups": 8000,
+      "updates_per_group": 1.0,
+      "group_sync_mean_ms": 3.2571037124999997,
+      "request_mean_ms": 3.5220298306249997,
+      "slowest_1pct_mean_ms": 8.070730037499999,
+      "validation_group_mean_us": 0.23509875,
+      "encoding_group_mean_us": 2.241869125
+    },
+    {
+      "variant": "before-diag",
+      "clients": 4,
+      "rep": 2,
+      "stages": {
+        "dispatch preparation": {
+          "mean_ms": 0.00405902275,
+          "p99_ms": 0.008076,
+          "slowest_1pct_mean_ms": 0.0054908125
+        },
+        "queue submission": {
+          "mean_ms": 0.00055542075,
+          "p99_ms": 0.001295,
+          "slowest_1pct_mean_ms": 0.0006336499999999999
+        },
+        "leader queue": {
+          "mean_ms": 0.0031863715,
+          "p99_ms": 0.000599,
+          "slowest_1pct_mean_ms": 0.31101948749999997
+        },
+        "batch collection": {
+          "mean_ms": 0.184223686625,
+          "p99_ms": 0.521679,
+          "slowest_1pct_mean_ms": 0.290112475
+        },
+        "selection overhead": {
+          "mean_ms": 0.00022210537500000002,
+          "p99_ms": 0.000589,
+          "slowest_1pct_mean_ms": 0.00024025
+        },
+        "writer lock": {
+          "mean_ms": 7.9737625e-05,
+          "p99_ms": 0.00015,
+          "slowest_1pct_mean_ms": 9.44e-05
+        },
+        "state lock": {
+          "mean_ms": 0.000365645,
+          "p99_ms": 0.000854,
+          "slowest_1pct_mean_ms": 0.0005013999999999999
+        },
+        "validation / encoding / bookkeeping": {
+          "mean_ms": 0.01697832025,
+          "p99_ms": 0.032088,
+          "slowest_1pct_mean_ms": 0.0209485875
+        },
+        "log reservation": {
+          "mean_ms": 7.5983375e-05,
+          "p99_ms": 0.000431,
+          "slowest_1pct_mean_ms": 0.000149825
+        },
+        "log write": {
+          "mean_ms": 0.02073980175,
+          "p99_ms": 0.043665,
+          "slowest_1pct_mean_ms": 0.028374325000000002
+        },
+        "log sync": {
+          "mean_ms": 3.185834088,
+          "p99_ms": 4.887217,
+          "slowest_1pct_mean_ms": 5.7179340375
+        },
+        "publication lock": {
+          "mean_ms": 0.0007160055,
+          "p99_ms": 0.002035,
+          "slowest_1pct_mean_ms": 0.0013341
+        },
+        "publication": {
+          "mean_ms": 0.014808948375,
+          "p99_ms": 0.03239,
+          "slowest_1pct_mean_ms": 0.022458125
+        },
+        "cleanup / replies ahead": {
+          "mean_ms": 0.014342302250000001,
+          "p99_ms": 0.045747,
+          "slowest_1pct_mean_ms": 0.014535575
+        },
+        "reply wake / leader exit": {
+          "mean_ms": 0.03082466875,
+          "p99_ms": 0.060194,
+          "slowest_1pct_mean_ms": 0.040611699999999994
+        },
+        "dispatch finish": {
+          "mean_ms": 0.0020312942499999998,
+          "p99_ms": 0.007727,
+          "slowest_1pct_mean_ms": 0.0030584
+        },
+        "transport / client residual": {
+          "mean_ms": 0.50050473675,
+          "p99_ms": 0.939531,
+          "slowest_1pct_mean_ms": 0.7554545875
+        }
+      },
+      "groups": 2003,
+      "updates_per_group": 3.9940089865202197,
+      "group_sync_mean_ms": 3.1865713674488267,
+      "request_mean_ms": 3.9795481388750003,
+      "slowest_1pct_mean_ms": 7.2129517375,
+      "validation_group_mean_us": 0.8439805292061907,
+      "encoding_group_mean_us": 4.324387918122816
+    },
+    {
+      "variant": "before-diag",
+      "clients": 1,
+      "rep": 2,
+      "stages": {
+        "dispatch preparation": {
+          "mean_ms": 0.004892647375,
+          "p99_ms": 0.010844,
+          "slowest_1pct_mean_ms": 0.0062058
+        },
+        "queue submission": {
+          "mean_ms": 0.000488935625,
+          "p99_ms": 0.001198,
+          "slowest_1pct_mean_ms": 0.0005978250000000001
+        },
+        "leader queue": {
+          "mean_ms": 0.000241468,
+          "p99_ms": 0.000741,
+          "slowest_1pct_mean_ms": 0.0003489875
+        },
+        "batch collection": {
+          "mean_ms": 0.261599074625,
+          "p99_ms": 0.286205,
+          "slowest_1pct_mean_ms": 0.26400366249999996
+        },
+        "selection overhead": {
+          "mean_ms": 0.00018190049999999998,
+          "p99_ms": 0.000731,
+          "slowest_1pct_mean_ms": 0.000259075
+        },
+        "writer lock": {
+          "mean_ms": 6.262187500000001e-05,
+          "p99_ms": 0.000197,
+          "slowest_1pct_mean_ms": 7.390000000000001e-05
+        },
+        "state lock": {
+          "mean_ms": 0.00039030537500000004,
+          "p99_ms": 0.001245,
+          "slowest_1pct_mean_ms": 0.000513525
+        },
+        "validation / encoding / bookkeeping": {
+          "mean_ms": 0.007968085375,
+          "p99_ms": 0.017121,
+          "slowest_1pct_mean_ms": 0.009634887500000001
+        },
+        "log reservation": {
+          "mean_ms": 7.197037500000001e-05,
+          "p99_ms": 0.000377,
+          "slowest_1pct_mean_ms": 0.0001120625
+        },
+        "log write": {
+          "mean_ms": 0.014101939749999999,
+          "p99_ms": 0.032138,
+          "slowest_1pct_mean_ms": 0.0183336
+        },
+        "log sync": {
+          "mean_ms": 3.2783672965000004,
+          "p99_ms": 5.474881,
+          "slowest_1pct_mean_ms": 7.93225755
+        },
+        "publication lock": {
+          "mean_ms": 0.00082279275,
+          "p99_ms": 0.002114,
+          "slowest_1pct_mean_ms": 0.0015417999999999999
+        },
+        "publication": {
+          "mean_ms": 0.006441001,
+          "p99_ms": 0.014791,
+          "slowest_1pct_mean_ms": 0.010594712499999999
+        },
+        "cleanup / replies ahead": {
+          "mean_ms": 0.0029985685,
+          "p99_ms": 0.006926,
+          "slowest_1pct_mean_ms": 0.0048248875
+        },
+        "reply wake / leader exit": {
+          "mean_ms": 0.002514142625,
+          "p99_ms": 0.00555,
+          "slowest_1pct_mean_ms": 0.0038856625
+        },
+        "dispatch finish": {
+          "mean_ms": 0.00147165025,
+          "p99_ms": 0.003621,
+          "slowest_1pct_mean_ms": 0.0025038375000000002
+        },
+        "transport / client residual": {
+          "mean_ms": 0.21821704574999998,
+          "p99_ms": 0.378285,
+          "slowest_1pct_mean_ms": 0.3082848375
+        }
+      },
+      "groups": 8000,
+      "updates_per_group": 1.0,
+      "group_sync_mean_ms": 3.2783672965000004,
+      "request_mean_ms": 3.80083144625,
+      "slowest_1pct_mean_ms": 8.563976612500001,
+      "validation_group_mean_us": 0.207973625,
+      "encoding_group_mean_us": 2.506796875
+    },
+    {
+      "variant": "before-diag",
+      "clients": 4,
+      "rep": 3,
+      "stages": {
+        "dispatch preparation": {
+          "mean_ms": 0.003929005875,
+          "p99_ms": 0.007397,
+          "slowest_1pct_mean_ms": 0.004760675
+        },
+        "queue submission": {
+          "mean_ms": 0.00055286075,
+          "p99_ms": 0.001221,
+          "slowest_1pct_mean_ms": 0.0006622125
+        },
+        "leader queue": {
+          "mean_ms": 0.0013214295,
+          "p99_ms": 0.000598,
+          "slowest_1pct_mean_ms": 0.12535469999999999
+        },
+        "batch collection": {
+          "mean_ms": 0.181669747375,
+          "p99_ms": 0.502437,
+          "slowest_1pct_mean_ms": 0.21833378750000002
+        },
+        "selection overhead": {
+          "mean_ms": 0.00019608487500000002,
+          "p99_ms": 0.000477,
+          "slowest_1pct_mean_ms": 0.0002154625
+        },
+        "writer lock": {
+          "mean_ms": 7.93585e-05,
+          "p99_ms": 0.000169,
+          "slowest_1pct_mean_ms": 0.0001047125
+        },
+        "state lock": {
+          "mean_ms": 0.000366126375,
+          "p99_ms": 0.000767,
+          "slowest_1pct_mean_ms": 0.0004327875
+        },
+        "validation / encoding / bookkeeping": {
+          "mean_ms": 0.016486459,
+          "p99_ms": 0.032648,
+          "slowest_1pct_mean_ms": 0.019499475
+        },
+        "log reservation": {
+          "mean_ms": 6.55975e-05,
+          "p99_ms": 0.000299,
+          "slowest_1pct_mean_ms": 0.00010558750000000001
+        },
+        "log write": {
+          "mean_ms": 0.02001896075,
+          "p99_ms": 0.043851,
+          "slowest_1pct_mean_ms": 0.0253180625
+        },
+        "log sync": {
+          "mean_ms": 3.200614199625,
+          "p99_ms": 4.900868,
+          "slowest_1pct_mean_ms": 7.624564287499999
+        },
+        "publication lock": {
+          "mean_ms": 0.000575060375,
+          "p99_ms": 0.001485,
+          "slowest_1pct_mean_ms": 0.0011529875
+        },
+        "publication": {
+          "mean_ms": 0.01433457325,
+          "p99_ms": 0.032479,
+          "slowest_1pct_mean_ms": 0.021954625
+        },
+        "cleanup / replies ahead": {
+          "mean_ms": 0.014002846874999999,
+          "p99_ms": 0.044095,
+          "slowest_1pct_mean_ms": 0.0174438125
+        },
+        "reply wake / leader exit": {
+          "mean_ms": 0.030472317,
+          "p99_ms": 0.0593,
+          "slowest_1pct_mean_ms": 0.039532225
+        },
+        "dispatch finish": {
+          "mean_ms": 0.0019127439999999999,
+          "p99_ms": 0.005779,
+          "slowest_1pct_mean_ms": 0.0027528
+        },
+        "transport / client residual": {
+          "mean_ms": 0.491011882,
+          "p99_ms": 0.877039,
+          "slowest_1pct_mean_ms": 0.686962925
+        }
+      },
+      "groups": 2001,
+      "updates_per_group": 3.99800099950025,
+      "group_sync_mean_ms": 3.2006980339830085,
+      "request_mean_ms": 3.977609253625,
+      "slowest_1pct_mean_ms": 8.789151125,
+      "validation_group_mean_us": 0.8188575712143928,
+      "encoding_group_mean_us": 4.010878060969516
+    },
+    {
+      "variant": "before-diag",
+      "clients": 1,
+      "rep": 3,
+      "stages": {
+        "dispatch preparation": {
+          "mean_ms": 0.004190473,
+          "p99_ms": 0.00876,
+          "slowest_1pct_mean_ms": 0.0049116625
+        },
+        "queue submission": {
+          "mean_ms": 0.00044015,
+          "p99_ms": 0.001082,
+          "slowest_1pct_mean_ms": 0.000533625
+        },
+        "leader queue": {
+          "mean_ms": 0.00026464725,
+          "p99_ms": 0.00081,
+          "slowest_1pct_mean_ms": 0.0005504625
+        },
+        "batch collection": {
+          "mean_ms": 0.261315649875,
+          "p99_ms": 0.291713,
+          "slowest_1pct_mean_ms": 0.26246379999999997
+        },
+        "selection overhead": {
+          "mean_ms": 0.00017843812500000002,
+          "p99_ms": 0.000739,
+          "slowest_1pct_mean_ms": 0.0002222625
+        },
+        "writer lock": {
+          "mean_ms": 6.0125125e-05,
+          "p99_ms": 0.00014,
+          "slowest_1pct_mean_ms": 6.1125e-05
+        },
+        "state lock": {
+          "mean_ms": 0.000333140625,
+          "p99_ms": 0.000981,
+          "slowest_1pct_mean_ms": 0.0003872625
+        },
+        "validation / encoding / bookkeeping": {
+          "mean_ms": 0.007326925875,
+          "p99_ms": 0.015076,
+          "slowest_1pct_mean_ms": 0.008934787500000001
+        },
+        "log reservation": {
+          "mean_ms": 6.579187500000001e-05,
+          "p99_ms": 0.000328,
+          "slowest_1pct_mean_ms": 7.5675e-05
+        },
+        "log write": {
+          "mean_ms": 0.01288632525,
+          "p99_ms": 0.033028,
+          "slowest_1pct_mean_ms": 0.0154125625
+        },
+        "log sync": {
+          "mean_ms": 3.1581561256249997,
+          "p99_ms": 4.956588,
+          "slowest_1pct_mean_ms": 5.8430634375
+        },
+        "publication lock": {
+          "mean_ms": 0.000597642,
+          "p99_ms": 0.001671,
+          "slowest_1pct_mean_ms": 0.0010997374999999999
+        },
+        "publication": {
+          "mean_ms": 0.005706601375,
+          "p99_ms": 0.012376,
+          "slowest_1pct_mean_ms": 0.008736837499999999
+        },
+        "cleanup / replies ahead": {
+          "mean_ms": 0.002591572375,
+          "p99_ms": 0.005759,
+          "slowest_1pct_mean_ms": 0.00379995
+        },
+        "reply wake / leader exit": {
+          "mean_ms": 0.002070466875,
+          "p99_ms": 0.004854,
+          "slowest_1pct_mean_ms": 0.0034266375
+        },
+        "dispatch finish": {
+          "mean_ms": 0.001264856875,
+          "p99_ms": 0.002909,
+          "slowest_1pct_mean_ms": 0.001981475
+        },
+        "transport / client residual": {
+          "mean_ms": 0.20058697849999998,
+          "p99_ms": 0.342509,
+          "slowest_1pct_mean_ms": 0.2705832
+        }
+      },
+      "groups": 8000,
+      "updates_per_group": 1.0,
+      "group_sync_mean_ms": 3.1581561256249997,
+      "request_mean_ms": 3.658035910625,
+      "slowest_1pct_mean_ms": 6.4262445,
+      "validation_group_mean_us": 0.187454,
+      "encoding_group_mean_us": 2.277719375
+    },
+    {
+      "variant": "candidate-diag",
+      "clients": 4,
+      "rep": 3,
+      "stages": {
+        "dispatch preparation": {
+          "mean_ms": 0.0044160575,
+          "p99_ms": 0.008397,
+          "slowest_1pct_mean_ms": 0.0047618
+        },
+        "queue submission": {
+          "mean_ms": 0.000599517,
+          "p99_ms": 0.001459,
+          "slowest_1pct_mean_ms": 0.00067105
+        },
+        "leader queue": {
+          "mean_ms": 0.001038816625,
+          "p99_ms": 0.00065,
+          "slowest_1pct_mean_ms": 0.09617677499999999
+        },
+        "batch collection": {
+          "mean_ms": 0.19657938475,
+          "p99_ms": 0.562098,
+          "slowest_1pct_mean_ms": 0.28214673749999997
+        },
+        "selection overhead": {
+          "mean_ms": 0.00023481874999999999,
+          "p99_ms": 0.000641,
+          "slowest_1pct_mean_ms": 0.0002649875
+        },
+        "writer lock": {
+          "mean_ms": 6.2337125e-05,
+          "p99_ms": 0.000131,
+          "slowest_1pct_mean_ms": 7.016249999999999e-05
+        },
+        "state lock": {
+          "mean_ms": 0.000382199,
+          "p99_ms": 0.00092,
+          "slowest_1pct_mean_ms": 0.0004464375
+        },
+        "validation / encoding / bookkeeping": {
+          "mean_ms": 0.0189562265,
+          "p99_ms": 0.036831,
+          "slowest_1pct_mean_ms": 0.019927
+        },
+        "log reservation": {
+          "mean_ms": 6.932337499999999e-05,
+          "p99_ms": 0.000362,
+          "slowest_1pct_mean_ms": 8.75375e-05
+        },
+        "log write": {
+          "mean_ms": 0.022726672375,
+          "p99_ms": 0.046056,
+          "slowest_1pct_mean_ms": 0.0234313375
+        },
+        "log sync": {
+          "mean_ms": 3.3208982665,
+          "p99_ms": 5.489715,
+          "slowest_1pct_mean_ms": 6.3600314749999995
+        },
+        "publication lock": {
+          "mean_ms": 0.000786149375,
+          "p99_ms": 0.002035,
+          "slowest_1pct_mean_ms": 0.0015742249999999998
+        },
+        "publication": {
+          "mean_ms": 0.016860295625,
+          "p99_ms": 0.036349,
+          "slowest_1pct_mean_ms": 0.023771599999999997
+        },
+        "cleanup / replies ahead": {
+          "mean_ms": 0.01588580825,
+          "p99_ms": 0.051174,
+          "slowest_1pct_mean_ms": 0.0157072625
+        },
+        "reply wake / leader exit": {
+          "mean_ms": 0.033625155500000004,
+          "p99_ms": 0.065387,
+          "slowest_1pct_mean_ms": 0.0409507125
+        },
+        "dispatch finish": {
+          "mean_ms": 0.002390977,
+          "p99_ms": 0.009112,
+          "slowest_1pct_mean_ms": 0.0031547
+        },
+        "transport / client residual": {
+          "mean_ms": 0.5401669265,
+          "p99_ms": 1.016995,
+          "slowest_1pct_mean_ms": 0.6942042625
+        }
+      },
+      "groups": 2002,
+      "updates_per_group": 3.996003996003996,
+      "group_sync_mean_ms": 3.3213255579420577,
+      "request_mean_ms": 4.17567893175,
+      "slowest_1pct_mean_ms": 7.5673780625,
+      "validation_group_mean_us": 1.0051248751248751,
+      "encoding_group_mean_us": 5.1121118881118885
+    },
+    {
+      "variant": "candidate-diag",
+      "clients": 1,
+      "rep": 3,
+      "stages": {
+        "dispatch preparation": {
+          "mean_ms": 0.004201609625,
+          "p99_ms": 0.009185,
+          "slowest_1pct_mean_ms": 0.005423025
+        },
+        "queue submission": {
+          "mean_ms": 0.000475535125,
+          "p99_ms": 0.001109,
+          "slowest_1pct_mean_ms": 0.000578575
+        },
+        "leader queue": {
+          "mean_ms": 0.00024185037500000002,
+          "p99_ms": 0.000773,
+          "slowest_1pct_mean_ms": 0.000351175
+        },
+        "batch collection": {
+          "mean_ms": 0.0001650305,
+          "p99_ms": 0.000611,
+          "slowest_1pct_mean_ms": 0.00019865
+        },
+        "selection overhead": {
+          "mean_ms": 4.6241624999999996e-05,
+          "p99_ms": 0.00033,
+          "slowest_1pct_mean_ms": 5.05625e-05
+        },
+        "writer lock": {
+          "mean_ms": 5.5382375000000005e-05,
+          "p99_ms": 0.000123,
+          "slowest_1pct_mean_ms": 5.9212499999999996e-05
+        },
+        "state lock": {
+          "mean_ms": 0.000150351,
+          "p99_ms": 0.000433,
+          "slowest_1pct_mean_ms": 0.0001722375
+        },
+        "validation / encoding / bookkeeping": {
+          "mean_ms": 0.0066417162500000005,
+          "p99_ms": 0.01207,
+          "slowest_1pct_mean_ms": 0.007769600000000001
+        },
+        "log reservation": {
+          "mean_ms": 5.5135750000000005e-05,
+          "p99_ms": 0.000132,
+          "slowest_1pct_mean_ms": 6.0337499999999996e-05
+        },
+        "log write": {
+          "mean_ms": 0.012247719375,
+          "p99_ms": 0.027675,
+          "slowest_1pct_mean_ms": 0.015440012500000001
+        },
+        "log sync": {
+          "mean_ms": 3.21845690575,
+          "p99_ms": 5.219172,
+          "slowest_1pct_mean_ms": 6.0169893
+        },
+        "publication lock": {
+          "mean_ms": 0.0007036369999999999,
+          "p99_ms": 0.001995,
+          "slowest_1pct_mean_ms": 0.0013364874999999999
+        },
+        "publication": {
+          "mean_ms": 0.005862877375,
+          "p99_ms": 0.013091,
+          "slowest_1pct_mean_ms": 0.009405487499999999
+        },
+        "cleanup / replies ahead": {
+          "mean_ms": 0.0027036967500000003,
+          "p99_ms": 0.006015,
+          "slowest_1pct_mean_ms": 0.004492287500000001
+        },
+        "reply wake / leader exit": {
+          "mean_ms": 0.001923268625,
+          "p99_ms": 0.004167,
+          "slowest_1pct_mean_ms": 0.0030572875
+        },
+        "dispatch finish": {
+          "mean_ms": 0.00150436825,
+          "p99_ms": 0.003403,
+          "slowest_1pct_mean_ms": 0.0025044250000000002
+        },
+        "transport / client residual": {
+          "mean_ms": 0.20222646212499998,
+          "p99_ms": 0.352077,
+          "slowest_1pct_mean_ms": 0.28038965000000005
+        }
+      },
+      "groups": 8000,
+      "updates_per_group": 1.0,
+      "group_sync_mean_ms": 3.21845690575,
+      "request_mean_ms": 3.457661787875,
+      "slowest_1pct_mean_ms": 6.3482783125,
+      "validation_group_mean_us": 0.194420875,
+      "encoding_group_mean_us": 2.0987455
+    }
+  ]
+}

@@ -43,6 +43,8 @@ fn cohort_delay(
 #[derive(Default)]
 pub(super) struct GroupCommit {
     enabled: AtomicBool,
+    #[cfg(feature = "single-client-commit")]
+    clients: std::sync::OnceLock<Arc<std::sync::atomic::AtomicUsize>>,
     syncs: AtomicU64,
     pending: Mutex<Vec<Request>>,
     #[cfg(feature = "group-handoff")]
@@ -68,6 +70,8 @@ struct Request {
     response: Sender<Reply>,
     #[cfg(feature = "lock-timing")]
     submitted: u64,
+    #[cfg(feature = "lock-timing")]
+    entry: [u64; 2],
     #[cfg(feature = "group-handoff")]
     queued: Instant,
 }
@@ -76,6 +80,10 @@ struct Reply {
     result: Result<u64>,
     #[cfg(feature = "lock-timing")]
     trace: [u64; 8],
+    #[cfg(feature = "lock-timing")]
+    detail: [u64; 8],
+    #[cfg(feature = "lock-timing")]
+    costs: [u64; 2],
 }
 
 #[cfg(feature = "commit-window")]
@@ -86,6 +94,11 @@ pub struct CommitOutcome {
 }
 
 impl Database {
+    #[cfg(feature = "single-client-commit")]
+    pub(crate) fn set_service_clients(&self, clients: Arc<std::sync::atomic::AtomicUsize>) {
+        let _ = self.inner.group.clients.set(clients);
+    }
+
     #[cfg(test)]
     pub(crate) fn hold_test_sync(&self, gate: Arc<[std::sync::Barrier; 2]>) {
         *self.inner.group.sync_gate.lock().unwrap() = Some(gate);
@@ -185,6 +198,13 @@ impl GroupCommit {
 
     #[cfg(feature = "commit-window")]
     fn submit_many(&self, transactions: Vec<Transaction>) -> Result<Vec<Reply>> {
+        #[cfg(feature = "lock-timing")]
+        {
+            take_commit_trace();
+            take_commit_detail();
+            take_commit_costs();
+            detail_mark(7);
+        }
         #[cfg(feature = "wal-prepare")]
         let transactions = {
             let mut txs = transactions;
@@ -196,6 +216,8 @@ impl GroupCommit {
         if transactions.is_empty() {
             return Ok(Vec::new());
         }
+        #[cfg(feature = "lock-timing")]
+        detail_mark(0);
         let mut pending = self.pending.lock().map_err(|_| Error::Poisoned)?;
         let bytes: usize = pending
             .iter()
@@ -215,6 +237,8 @@ impl GroupCommit {
                 response,
                 #[cfg(feature = "lock-timing")]
                 submitted: diagnostic_now_ns(),
+                #[cfg(feature = "lock-timing")]
+                entry: COMMIT_DETAIL.with(|v| [v.get()[7], v.get()[0]]),
                 queued: Instant::now(),
             });
         }
@@ -235,6 +259,15 @@ impl GroupCommit {
             })
             .collect()
     }
+    #[cfg(feature = "single-client-commit")]
+    fn single_service_client(&self) -> bool {
+        // A newly arriving connection can miss this cohort; it still serializes
+        // through the writer and receives success only after its own durability step.
+        self.clients
+            .get()
+            .is_some_and(|clients| clients.load(Ordering::Acquire) == 1)
+    }
+
     pub fn enabled(&self) -> bool {
         self.enabled.load(Ordering::Relaxed)
     }
@@ -275,6 +308,8 @@ impl GroupCommit {
             guard
         };
         #[cfg(feature = "lock-timing")]
+        detail_mark(1);
+        #[cfg(feature = "lock-timing")]
         let collection = self
             .collection_enabled
             .load(Ordering::Relaxed)
@@ -308,6 +343,10 @@ impl GroupCommit {
             *self.recent_group.lock().map_err(|_| Error::Poisoned)?,
             Instant::now(),
         );
+        #[cfg(feature = "single-client-commit")]
+        let single_client = self.single_service_client();
+        #[cfg(feature = "single-client-commit")]
+        let delay = if single_client { Duration::ZERO } else { delay };
         if wake_on_four && !delay.is_zero() {
             pending = self
                 .ready
@@ -322,6 +361,12 @@ impl GroupCommit {
         #[cfg(feature = "handoff-refill")]
         {
             let refill = refill_delay(wake_on_four, delay, handed_off, pending.len());
+            #[cfg(feature = "single-client-commit")]
+            let refill = if single_client {
+                Duration::ZERO
+            } else {
+                refill
+            };
             if !refill.is_zero() {
                 pending = self
                     .ready
@@ -373,6 +418,10 @@ impl GroupCommit {
         }
         #[cfg(feature = "lock-timing")]
         let trace = take_commit_trace();
+        #[cfg(feature = "lock-timing")]
+        let detail = take_commit_detail();
+        #[cfg(feature = "lock-timing")]
+        let costs = take_commit_costs();
         #[cfg(feature = "handoff-refill")]
         {
             let successful = results.iter().filter(|result| result.is_ok()).count();
@@ -389,10 +438,22 @@ impl GroupCommit {
                 v[0] = request.submitted;
                 v
             };
+            #[cfg(feature = "lock-timing")]
+            let detail = {
+                let mut v = detail;
+                v[0] = request.entry[1];
+                v[7] = request.entry[0];
+                v[5] = diagnostic_now_ns();
+                v
+            };
             let _ = request.response.send(Reply {
                 result,
                 #[cfg(feature = "lock-timing")]
                 trace,
+                #[cfg(feature = "lock-timing")]
+                detail,
+                #[cfg(feature = "lock-timing")]
+                costs,
             });
         }
         Ok(())
@@ -406,6 +467,8 @@ impl GroupCommit {
             tx
         };
         let (response, receiver) = mpsc::channel();
+        #[cfg(feature = "lock-timing")]
+        detail_mark(0);
         let mut pending = self.pending.lock().map_err(|_| Error::Poisoned)?;
         let bytes: usize = pending
             .iter()
@@ -421,6 +484,8 @@ impl GroupCommit {
             response,
             #[cfg(feature = "lock-timing")]
             submitted: diagnostic_now_ns(),
+            #[cfg(feature = "lock-timing")]
+            entry: COMMIT_DETAIL.with(|v| [v.get()[7], v.get()[0]]),
             #[cfg(feature = "group-handoff")]
             queued: Instant::now(),
         });
@@ -438,7 +503,12 @@ impl GroupCommit {
             .recv()
             .map_err(|error| Error::CommitUncertain(io::Error::other(error)))?;
         #[cfg(feature = "lock-timing")]
-        COMMIT_TRACE.with(|trace| trace.set(reply.trace));
+        {
+            COMMIT_TRACE.with(|trace| trace.set(reply.trace));
+            COMMIT_DETAIL.with(|trace| trace.set(reply.detail));
+            COMMIT_COSTS.with(|value| value.set(reply.costs));
+            detail_mark(6);
+        }
         reply.result
     }
 }
@@ -465,6 +535,8 @@ fn persist_group(
     let Ok(mut state) = database.state() else {
         return requests.iter().map(|_| Err(Error::Poisoned)).collect();
     };
+    #[cfg(feature = "lock-timing")]
+    detail_mark(2);
     let mut results = Vec::with_capacity(requests.len());
     let mut accepted = Vec::new();
     let mut frames = Vec::new();
@@ -508,6 +580,8 @@ fn persist_group(
     if accepted.is_empty() {
         return results;
     }
+    #[cfg(feature = "lock-timing")]
+    detail_mark(3);
     state.reserve_log(wal_bytes);
     #[cfg(feature = "lock-timing")]
     trace_mark(4);
@@ -551,6 +625,43 @@ fn persist_group(
 
 #[cfg(test)]
 mod tests {
+    #[cfg(feature = "single-client-commit")]
+    #[test]
+    fn single_client_hint_tracks_zero_one_many_and_disconnect_without_affecting_embedded() {
+        let group = GroupCommit::default();
+        assert!(!group.single_service_client());
+        let count = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        group.clients.set(Arc::clone(&count)).unwrap();
+        for n in [0, 1, 2, 4, 256, 2, 1, 0] {
+            count.store(n, Ordering::Release);
+            assert_eq!(group.single_service_client(), n == 1);
+        }
+    }
+
+    #[cfg(feature = "lock-timing")]
+    #[test]
+    fn diagnostic_failure_keeps_reached_phases_and_never_invents_sync_or_publication() {
+        let f = Fixture::new();
+        let db = Database::create(&f.0, [119; 16]).unwrap();
+        take_commit_trace();
+        take_commit_detail();
+        take_commit_costs();
+        let mut requests = [request(write(&db, b"a"))];
+        let results = persist_group(&db, &mut requests, |_, _| {
+            trace_mark(5);
+            Err(io::Error::other("injected sync failure"))
+        });
+        assert!(matches!(results[0], Err(Error::CommitUncertain(_))));
+        let trace = take_commit_trace();
+        assert!(trace[4] > 0 && trace[5] >= trace[4]);
+        assert_eq!(trace[6..], [0, 0]);
+        assert!(take_commit_detail()[4] >= trace[5]);
+        assert!(take_commit_costs().iter().all(|n| *n > 0));
+        assert_eq!(take_commit_trace(), [0; 8]);
+        assert_eq!(take_commit_detail(), [0; 8]);
+        assert_eq!(take_commit_costs(), [0; 2]);
+    }
+
     #[cfg(feature = "wal-prepare")]
     #[test]
     fn wal_preparation_group_preserves_earlier_write_read_and_range_conflicts() {
@@ -706,6 +817,8 @@ mod tests {
             response: mpsc::channel().0,
             #[cfg(feature = "lock-timing")]
             submitted: diagnostic_now_ns(),
+            #[cfg(feature = "lock-timing")]
+            entry: COMMIT_DETAIL.with(|v| [v.get()[7], v.get()[0]]),
             #[cfg(feature = "group-handoff")]
             queued: Instant::now(),
         }

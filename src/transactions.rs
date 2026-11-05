@@ -621,6 +621,8 @@ impl Database {
         drop(state);
         let outcome = persist(&mut file);
         let mut state = self.state().map_err(io::Error::other)?;
+        #[cfg(feature = "lock-timing")]
+        detail_mark(4);
         state.file = Some(file);
         if let Err(error) = outcome {
             state.poisoned = true;
@@ -1128,6 +1130,8 @@ impl Transaction {
     }
 
     fn commit_frame(&mut self, sequence: u64, extra: usize) -> Result<(Vec<u8>, BufferPermit)> {
+        #[cfg(feature = "lock-timing")]
+        let _cost = CommitCost(1, diagnostic_now_ns());
         #[cfg(feature = "wal-prepare")]
         if let Some(mut prepared) = self.prepared.take() {
             finish_frame(&mut prepared.frame, sequence);
@@ -1478,6 +1482,9 @@ impl Transaction {
         #[cfg(feature = "lock-timing")]
         {
             take_commit_trace();
+            take_commit_detail();
+            take_commit_costs();
+            detail_mark(7);
             trace_mark(0);
         }
         let database = self.database.clone();
@@ -1502,6 +1509,8 @@ impl Transaction {
     }
 
     fn validate_commit(&self, state: &State, earlier: &BTreeSet<&[u8]>) -> Result<()> {
+        #[cfg(feature = "lock-timing")]
+        let _cost = CommitCost(0, diagnostic_now_ns());
         for key in self.writes.keys() {
             if (state.sequence != self.snapshot && state.changed(key, self.snapshot))
                 || earlier.contains(key.as_slice())
@@ -1542,6 +1551,7 @@ impl Transaction {
         }
         #[cfg(feature = "lock-timing")]
         {
+            detail_mark(1);
             trace_mark(1);
             trace_mark(2);
         }
@@ -1551,7 +1561,10 @@ impl Transaction {
         #[cfg(feature = "lock-timing")]
         trace_mark(3);
         let mut state = database.state()?;
-        self.validate_commit(&state, &BTreeSet::new())?;
+        #[cfg(feature = "lock-timing")]
+        detail_mark(2);
+        let validation = self.validate_commit(&state, &BTreeSet::new());
+        validation?;
         let sequence = state
             .sequence
             .checked_add(1)
@@ -1566,6 +1579,8 @@ impl Transaction {
             return Err(Error::Limit("WAL bytes; checkpoint support required"));
         }
         state.check_log_capacity(bytes)?;
+        #[cfg(feature = "lock-timing")]
+        detail_mark(3);
         state.reserve_log(bytes);
         #[cfg(feature = "lock-timing")]
         trace_mark(4);
@@ -3722,6 +3737,46 @@ pub fn take_checkpoint_timing() -> [u64; 8] {
 thread_local! {
     static COMMIT_TRACE: std::cell::Cell<[u64; 8]> = const { std::cell::Cell::new([0; 8]) };
 }
+#[cfg(feature = "lock-timing")]
+thread_local! {
+    static COMMIT_DETAIL: std::cell::Cell<[u64; 8]> = const { std::cell::Cell::new([0; 8]) };
+}
+#[cfg(feature = "lock-timing")]
+thread_local! {
+    static COMMIT_COSTS: std::cell::Cell<[u64; 2]> = const { std::cell::Cell::new([0; 2]) };
+}
+#[cfg(feature = "lock-timing")]
+struct CommitCost(usize, u64);
+#[cfg(feature = "lock-timing")]
+impl Drop for CommitCost {
+    fn drop(&mut self) {
+        COMMIT_COSTS.with(|cell| {
+            let mut value = cell.get();
+            value[self.0] += diagnostic_now_ns() - self.1;
+            cell.set(value);
+        });
+    }
+}
+/// Cumulative validation and frame-construction nanoseconds for this batch.
+#[cfg(feature = "lock-timing")]
+pub fn take_commit_costs() -> [u64; 2] {
+    COMMIT_COSTS.with(|value| value.replace([0; 2]))
+}
+#[cfg(feature = "lock-timing")]
+fn detail_mark(index: usize) {
+    COMMIT_DETAIL.with(|trace| {
+        let mut value = trace.get();
+        value[index] = diagnostic_now_ns();
+        trace.set(value);
+    });
+}
+/// Pending wait, collection start, state acquired, reserve start, publication lock,
+/// reply ready, reply received, commit entry. Zero means that phase was not reached.
+#[cfg(feature = "lock-timing")]
+pub fn take_commit_detail() -> [u64; 8] {
+    COMMIT_DETAIL.with(|trace| trace.replace([0; 8]))
+}
+
 #[cfg(feature = "lock-timing")]
 pub fn diagnostic_now_ns() -> u64 {
     static ORIGIN: std::sync::OnceLock<std::time::Instant> = std::sync::OnceLock::new();

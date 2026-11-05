@@ -1,0 +1,75 @@
+{
+  "utc": "2026-11-05T07:40:42.903630+00:00",
+  "rows": 100000,
+  "value_bytes": 256,
+  "ops": 8000,
+  "reps": 1,
+  "single_variants": [
+    "diagnostic"
+  ],
+  "profile": true,
+  "profile_variants": [],
+  "clients": [
+    1,
+    4
+  ],
+  "workloads": [
+    "update"
+  ],
+  "server_cpus": 2,
+  "client_cpus": 2,
+  "memory_gib_each": 4,
+  "variants": {
+    "diagnostic": {
+      "image": "catdb-commit-diagnostic:local",
+      "id": "sha256:cce93d84997e9175a0f328c5c10d117b856db60146bb7207df80c9adf851f737"
+    }
+  },
+  "source_sha256": {
+    "benchmarks\\runner.py": "aa313e3ba0969e60f1c6917acfff090c572e4a25f5bbe60b04d319a410e754e0",
+    "benchmarks\\commit-breakdown\\client.py": "2aa8efd1261b730619bb83a9b8f60e574b334b6d96e33fa1538704d943da844f",
+    "src\\group_commit.rs": "50b44d92508930078d6e387f9bd276551b38f6064fcea1e4773a15e22afc9cfc",
+    "src\\service.rs": "bf8af8df9dc65571816a338b918cd1b1a965064bf52311617e2b7a1ca5695306"
+  },
+  "runs": [
+    {
+      "variant": "diagnostic",
+      "rep": 1,
+      "status": "passed",
+      "checks": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-1",
+          "rows": 100000,
+          "sha256": "f0a6d2c3ac62e3021f5c0f7bffd0f915fe2de0768a7eeaa5e1bd3046ccbed887",
+          "expected_sha256": "f0a6d2c3ac62e3021f5c0f7bffd0f915fe2de0768a7eeaa5e1bd3046ccbed887",
+          "updated_keys": 14319,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "f0a6d2c3ac62e3021f5c0f7bffd0f915fe2de0768a7eeaa5e1bd3046ccbed887",
+          "expected_sha256": "f0a6d2c3ac62e3021f5c0f7bffd0f915fe2de0768a7eeaa5e1bd3046ccbed887",
+          "updated_keys": 14319,
+          "empty_and_last": true
+        }
+      ]
+    }
+  ]
+}

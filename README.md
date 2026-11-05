@@ -347,6 +347,27 @@ preparation discarded 384 of 512 prepared frames per trial. See the
 [reproduction commands](benchmarks/wal-preparation/README.md).
 
 
+### Follow-up: commit latency breakdown and sole-connection collection
+
+Durable log synchronization still takes about **3.2 ms** in the current workload.
+New per-request diagnostics cover `put_commit` and separate collection, locks,
+encoding, writes, sync and reply handling. An opt-in `single-client-commit`
+candidate omits collection waiting when only one service connection exists.
+
+In three uninstrumented trials (100k rows, 256B, 8,000 updates), one-client median
+throughput changed **270.0 → 288.9 updates/s** and p99 **5.665 → 5.480 ms**.
+Four-client medians changed **988.7 → 1,005.1 updates/s**, p99 **6.040 → 5.730 ms**,
+but individual trials reversed direction and worst responses increased.
+**The candidate remains opt-in; the default policy is unchanged.**
+
+![Commit collection comparison with instrumentation disabled](docs/benchmarks/commit-breakdown-2026-11-05/service.svg)
+
+All 192,000 primary/observer updates and 48 full-content/restart checks passed.
+Sync-before-success and recovery ordering are unchanged. See the
+[breakdown and observer-effect figure](docs/benchmarks/commit-breakdown-2026-11-05/breakdown.svg),
+[full results and limitations](docs/benchmarks/commit-breakdown-2026-11-05/README.md),
+and [reproduction commands](benchmarks/commit-breakdown/README.md).
+
 ## Build
 
 Requires Rust **1.89 or newer**. Python 3 is used by the optional client and integration tests. Docker is needed only for containers.

@@ -1,0 +1,41 @@
+{
+  "service,lock-timing,single-client-commit": {
+    "passed": 142,
+    "failed": 0,
+    "ignored": 12,
+    "log_sha256": "9846d62ec44ce9e086f446a03ccb78e9ef9c9149327a6788e3249352ef8db707"
+  },
+  "service,fixed-log,single-client-commit": {
+    "passed": 150,
+    "failed": 0,
+    "ignored": 13,
+    "log_sha256": "0e4aba030134043e84ee42c62ee99850a697f0d37dd994d179ef35ad62798c7e"
+  },
+  "service_protocol_with_diagnostics": {
+    "passed": 21,
+    "failed": 0
+  },
+  "profile_and_phase_checks": {
+    "passed": 4,
+    "failed": 0
+  },
+  "c_abi": {
+    "passed": 35,
+    "failed": 0
+  },
+  "clippy": {
+    "features": "service,lock-timing,single-client-commit,commit-window,wal-prepare",
+    "targets": "all",
+    "warnings_denied": true,
+    "passed": true
+  },
+  "benchmark": {
+    "primary_updates": 96000,
+    "observer_updates": 96000,
+    "full_content_checks": 48,
+    "recorded_trace_checks": 96000,
+    "rejected": 0,
+    "retries": 0
+  },
+  "physical_power_loss_tested": false
+}

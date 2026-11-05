@@ -1,0 +1,85 @@
+{
+  "parent_commit": "c6a429c03576072d8c8c753123e1e72898e54380",
+  "measured_builds": "All four use measured-source.zip; only feature lists differ.",
+  "features": {
+    "before": "service",
+    "before-diag": "service,lock-timing",
+    "candidate": "service,single-client-commit",
+    "candidate-diag": "service,single-client-commit,lock-timing"
+  },
+  "archives": {
+    "parent-source.zip": "0005ff168b6598d5b275c538d55713fcdcb6c1115fb0a0dcc8f2fc1fa2408380",
+    "measured-source.zip": "ed486eecae008e774efb35c69fb3ef56eb2ad70147a29fd2af3f1960ab51b634"
+  },
+  "client_image_id": "sha256:39802503b80b1a6c6f55632fb407b2a47d410316450c48fab246be81adf22f38",
+  "docker": {
+    "Client": {
+      "Version": "29.9.2",
+      "ApiVersion": "1.56",
+      "DefaultAPIVersion": "1.56",
+      "GitCommit": "a82e528",
+      "GoVersion": "go1.26.10",
+      "Os": "windows",
+      "Arch": "amd64",
+      "BuildTime": "Tue Oct 20 19:44:07 2026",
+      "Context": "desktop-linux"
+    },
+    "Server": {
+      "Platform": {
+        "Name": "Docker Desktop 4.98.0 (245422)"
+      },
+      "Version": "29.9.2",
+      "ApiVersion": "1.56",
+      "MinAPIVersion": "1.40",
+      "Os": "linux",
+      "Arch": "amd64",
+      "Components": [
+        {
+          "Name": "Engine",
+          "Version": "29.9.2",
+          "Details": {
+            "ApiVersion": "1.56",
+            "Arch": "amd64",
+            "BuildTime": "Tue Oct 20 18:45:02 2026",
+            "Experimental": "false",
+            "GitCommit": "0367cbe",
+            "GoVersion": "go1.26.10",
+            "KernelVersion": "6.18.54.1-microsoft-standard-WSL2",
+            "MinAPIVersion": "1.40",
+            "Module": "github.com/moby/moby/v2",
+            "ModuleVersion": "v2.0.0+unknown",
+            "Os": "linux"
+          }
+        },
+        {
+          "Name": "containerd",
+          "Version": "v2.4.2",
+          "Details": {
+            "GitCommit": "b7a25261e029d68978bbf290df0a62fc819b3c51"
+          }
+        },
+        {
+          "Name": "runc",
+          "Version": "1.5.2",
+          "Details": {
+            "GitCommit": "v1.5.2-0-g29dd3dc2"
+          }
+        },
+        {
+          "Name": "docker-init",
+          "Version": "0.19.0",
+          "Details": {
+            "GitCommit": "de40ad0"
+          }
+        }
+      ],
+      "GitCommit": "0367cbe",
+      "GoVersion": "go1.26.10",
+      "KernelVersion": "6.18.54.1-microsoft-standard-WSL2",
+      "BuildTime": "2026-10-20T18:45:02.000000000+00:00"
+    }
+  },
+  "final_changes_after_measurement": "Only service test setup, test/analysis/report scripts, CI and documentation; runtime paths in measured-source.zip are retained.",
+  "performance_interference": "No builds, Rust/Python test suites or chart generation overlapped timed cohorts. Small source/doc reads and file edits occurred on the host.",
+  "no_power_loss_claim": true
+}

@@ -1,0 +1,14 @@
+{
+  "baseline": "4d09365",
+  "registry_prototype": "0ae18bf",
+  "atomic_prototype": "44207da",
+  "restored_production": "0755213",
+  "runtime_changes_adopted": false,
+  "candidate_ci": 41965553592,
+  "restored_ci": 41965900906,
+  "raw_summary_sha256": {
+    "atomic\\results.json": "b79509e57e0cb8dd6063f1e763174c66fe635b3347db5c1b036939444bd38bee",
+    "native\\results.json": "d091f9c539e8dd9f70274f804b51ccdb617f41e9228a77c112e7e85c6d01fac3",
+    "service\\results.json": "6b17692b914828de33e876b7e9128b64fc5eb457e0542f7320f54bffa0cc920a"
+  }
+}

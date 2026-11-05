@@ -18,7 +18,7 @@ names = {"before": "Previous background", "background": "Candidate"}
 colors = {"before": "#767676", "background": "#0072B2"}
 works = {"get": "Key lookup", "range100": "Read 100 consecutive records", "update": "Replace one value + durable commit"}
 fig, axes = plt.subplots(3, 2, figsize=(13, 10), layout="constrained")
-fig.suptitle("catdb service: shorter contention pauses (prototype not adopted)\n100,000 records | 256-byte values | same Python client", fontsize=17, fontweight="bold")
+fig.suptitle((sys.argv[2] if len(sys.argv) > 2 else "catdb service: shorter contention pauses (prototype not adopted)") + "\n100,000 records | 256-byte values | same Python client", fontsize=17, fontweight="bold")
 summary = []
 for i, (work, title) in enumerate(works.items()):
     cells = []

@@ -1,0 +1,16 @@
+{
+  "scenarios": [
+    "mixed",
+    "large",
+    "gc"
+  ],
+  "cpus": 2,
+  "memory_gib": 4,
+  "reps": 3,
+  "images": {
+    "before": "sha256:de8ccbdb563567e57f959da47ea2892ae9b04498769a2d9b5e4944832cabe7ef",
+    "after": "sha256:a9779ccd5abf333bbcc63cc54ccf58df53173d60c89e190add3a561f08c73a28",
+    "before-light": "sha256:0b423537d7c065e8b2b9384f3298658635b7c6c156639d39a3c9d83e14f751c0",
+    "after-light": "sha256:6bed3879a19b1172d6a2dd403288bd36c61579036cf0ea872628ee169770a7c3"
+  }
+}

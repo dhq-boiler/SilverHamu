@@ -235,6 +235,24 @@ are retained. See the [cause, all candidates, safety and memory limits](docs/ben
 [service comparison figure](docs/benchmarks/reclamation-cost-2026-11-05/service/reclamation.svg),
 and [reproduction commands](benchmarks/reclamation-cost/README.md).
 
+### Follow-up: fewer shared-lock acquisitions
+
+Two snapshot-registration prototypes reduce data-state lock acquisitions from
+**three to two per read**, but neither meets the combined latency and completion
+goal. **The production implementation remains unchanged.**
+
+The atomic-release prototype reduces profiled reclamation **286.492 → 199.247 ms**
+and worst read **1.178 → 1.016 ms**, while read p99 regresses
+**0.026 → 0.034 ms**. With lighter instrumentation, reclamation instead grows
+**228.955 → 288.662 ms**. Both favorable and unfavorable results are retained.
+
+![Two snapshot-registration prototypes compared with their paired controls](docs/benchmarks/reclamation-pins-2026-11-05/native.svg)
+
+All 72 native runs pass consistency and reopen checks. Drained data charges
+match; the prototype registry adds 40 bytes to measured final heap. See the
+[report, safety tests, memory limits and service comparison](docs/benchmarks/reclamation-pins-2026-11-05/README.md)
+and [reproduction commands](benchmarks/reclamation-pins/README.md).
+
 ## Build
 
 Requires Rust **1.89 or newer**. Python 3 is used by the optional client and integration tests. Docker is needed only for containers.

@@ -160,6 +160,7 @@ fn run(state: Arc<Mutex<State>>, stop: Arc<(Mutex<bool>, Condvar)>, counters: Ar
         }
         counters.busy.store(true, Ordering::Release);
         let busy = Busy(&counters.busy);
+        let mut contended = false;
         let pending = match state.try_lock() {
             Ok(guard) => {
                 let started = std::time::Instant::now();
@@ -196,6 +197,7 @@ fn run(state: Arc<Mutex<State>>, stop: Arc<(Mutex<bool>, Condvar)>, counters: Ar
                 }
             }
             Err(std::sync::TryLockError::WouldBlock) => {
+                contended = true;
                 #[cfg(feature = "lock-timing")]
                 counters.lock_misses.fetch_add(1, Ordering::Relaxed);
                 None
@@ -218,6 +220,7 @@ fn run(state: Arc<Mutex<State>>, stop: Arc<(Mutex<bool>, Condvar)>, counters: Ar
         // Contending for the lock must not put maintenance ahead of queued requests.
         let pause = match pending {
             Some(false) => Duration::from_millis(10),
+            None if contended => Duration::from_micros(100),
             None => Duration::from_millis(1),
             Some(true) => Duration::from_micros(100),
         };

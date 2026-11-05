@@ -1,0 +1,18 @@
+{
+  "date": "2026-11-05",
+  "timezone": "Asia/Tokyo",
+  "cpu": "AMD Ryzen 9 5950X 16-Core Processor",
+  "os": "Windows-10-10.0.26100-SP0",
+  "rust": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+  "baseline_commit": "8b94b10784d220936ea2b63b71504cc19df32523",
+  "build": "rustc --edition 2024 -O benchmarks/generation-index/bench.rs",
+  "threads": 1,
+  "final_runs": 12,
+  "pilot_runs": 12,
+  "timer": "std::time::Instant",
+  "measured_source_sha256": {
+    "index.rs": "bcad314e2075c7c45cd8c549928b6a49b45efa5323350b18c625b43ee8647c48",
+    "bench.rs": "fcc6cd26139cab576d0b300b1f370583393664e304b521489b266aaab415c4d9"
+  },
+  "post_measurement_change": "Clippy-only collapse of nested conditions in the untimed retained_bytes traversal; exact measured source is archived under measured-source/."
+}

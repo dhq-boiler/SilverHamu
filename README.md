@@ -386,6 +386,22 @@ python scripts/catdb-client.py --token-file .secrets/catdb-token < requests.json
 
 In PowerShell, use `Get-Content requests.jsonl | python scripts/catdb-client.py --token-file .secrets/catdb-token`. Keys and values are hexadecimal byte strings. Authentication is handled by the client. It never retries an uncertain commit automatically.
 
+### Experiment: subtree generations for range validation
+
+A matched count-tree prototype adds each subtree's maximum update generation.
+At 1,000,000 rows with updates localized elsewhere, unchanged-half range validation
+p99 falls from **22.4 ms to 1.0 µs**, versus the same tree with a global-generation guard.
+But update p99 and rank100 latency worsen, and estimated retained node memory rises
+**11.1%**. Broad ranges with early conflicts can favor plain traversal.
+
+![Count and generation index: benefits and costs](docs/benchmarks/generation-index-2026-11-05/comparison.svg)
+
+This is a **single-threaded in-memory index experiment with u64 values**, not a
+service speedup or persistence change. The tree is not adopted in the engine.
+See the [audit of the five original ideas, complete results, tests and limitations](docs/benchmarks/generation-index-2026-11-05/README.md).
+A whole-database generation guard can already skip checks when no committed
+updates occurred; same-group writes would still need independent validation.
+
 ## Tests
 
 ```sh

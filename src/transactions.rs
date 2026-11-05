@@ -12,7 +12,10 @@ use std::fs::{File, OpenOptions};
 use std::io::{self, Read, Seek, SeekFrom, Write};
 use std::ops::Bound::{Excluded, Included, Unbounded};
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex, MutexGuard};
+use std::sync::{
+    Arc, Mutex, MutexGuard,
+    atomic::{AtomicUsize, Ordering},
+};
 
 #[cfg(feature = "fixed-log")]
 #[path = "fixed_log.rs"]
@@ -226,39 +229,42 @@ struct State {
 }
 
 #[derive(Default)]
-struct SnapshotRegistry(Mutex<BTreeMap<u64, usize>>);
+struct SnapshotRegistry(Mutex<BTreeMap<u64, Arc<AtomicUsize>>>);
 impl SnapshotRegistry {
-    fn pin(&self, sequence: u64) {
-        *self
-            .0
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .entry(sequence)
-            .or_default() += 1;
-    }
-    fn unpin(&self, sequence: u64) {
+    fn pin(&self, sequence: u64) -> Arc<AtomicUsize> {
         let mut active = self.0.lock().unwrap_or_else(|e| e.into_inner());
-        if let Some(count) = active.get_mut(&sequence) {
-            *count -= 1;
-            if *count == 0 {
-                active.remove(&sequence);
-            }
+        let count = active
+            .entry(sequence)
+            .or_insert_with(|| Arc::new(AtomicUsize::new(0)));
+        count.fetch_add(1, Ordering::AcqRel);
+        count.clone()
+    }
+    fn unpin(&self, sequence: u64, count: &Arc<AtomicUsize>) {
+        if count.fetch_sub(1, Ordering::AcqRel) != 1 {
+            return;
+        }
+        let mut active = self.0.lock().unwrap_or_else(|e| e.into_inner());
+        // A new reader may have pinned the same generation after the decrement.
+        if active.get(&sequence).is_some_and(|current| {
+            Arc::ptr_eq(current, count) && current.load(Ordering::Acquire) == 0
+        }) {
+            active.remove(&sequence);
         }
     }
     fn floor(&self, current: u64) -> u64 {
         self.0
             .lock()
             .unwrap_or_else(|e| e.into_inner())
-            .keys()
-            .next()
-            .copied()
-            .unwrap_or(current)
+            .iter()
+            .find(|(_, count)| count.load(Ordering::Acquire) != 0)
+            .map_or(current, |(sequence, _)| *sequence)
     }
     fn count(&self) -> usize {
         self.0
             .lock()
             .unwrap_or_else(|e| e.into_inner())
             .values()
+            .map(|count| count.load(Ordering::Acquire))
             .sum()
     }
 }
@@ -334,6 +340,7 @@ impl KeyRange {
 pub struct Transaction {
     database: Database,
     snapshot: u64,
+    snapshot_count: Arc<AtomicUsize>,
     read_only: bool,
     reads: BTreeSet<Vec<u8>>,
     ranges: Vec<KeyRange>,
@@ -1048,10 +1055,11 @@ impl Database {
             state.budget.replace(ACTIVE, 0, 1)?;
             let snapshot = state.sequence;
             // Pinning outside the state lock could resurrect a generation already reclaimed.
-            state.active.pin(snapshot);
+            let snapshot_count = state.active.pin(snapshot);
             Ok(Transaction {
                 database: self.clone(),
                 snapshot,
+                snapshot_count,
                 read_only,
                 reads: BTreeSet::new(),
                 ranges: Vec::new(),
@@ -1456,7 +1464,10 @@ impl Transaction {
 impl Drop for Transaction {
     fn drop(&mut self) {
         // Releasing a pin never acquires state while holding the registry lock.
-        self.database.inner.snapshots.unpin(self.snapshot);
+        self.database
+            .inner
+            .snapshots
+            .unpin(self.snapshot, &self.snapshot_count);
         self.database.inner.budget.release(ACTIVE, 1);
         self.database
             .inner
@@ -1466,13 +1477,13 @@ impl Drop for Transaction {
             .inner
             .budget
             .release(DEPENDENCIES, self.dependency_charge);
-        if !self.database.inner.reclaimer.enabled() {
-            if let Ok(state) = self.database.inner.state.lock() {
-                let mut state = wrap_state(state);
-                let retired = state.collect();
-                drop(state);
-                drop(retired);
-            }
+        if !self.database.inner.reclaimer.enabled()
+            && let Ok(state) = self.database.inner.state.lock()
+        {
+            let mut state = wrap_state(state);
+            let retired = state.collect();
+            drop(state);
+            drop(retired);
         }
     }
 }
@@ -3107,19 +3118,66 @@ mod read_copy_tests {
     fn bv_snapshot_registry_keeps_duplicate_and_out_of_order_generations() {
         let registry = SnapshotRegistry::default();
         assert_eq!(registry.floor(9), 9);
-        registry.pin(3);
-        registry.pin(3);
-        registry.pin(7);
-        registry.pin(5);
+        let first = registry.pin(3);
+        let second = registry.pin(3);
+        let seventh = registry.pin(7);
+        let fifth = registry.pin(5);
         assert_eq!(registry.count(), 4);
-        registry.unpin(3);
+        registry.unpin(3, &first);
         assert_eq!(registry.floor(9), 3);
-        registry.unpin(5);
-        registry.unpin(3);
+        registry.unpin(5, &fifth);
+        registry.unpin(3, &second);
         assert_eq!(registry.floor(9), 7);
-        registry.unpin(7);
+        registry.unpin(7, &seventh);
         assert_eq!(registry.floor(9), 9);
         assert_eq!(registry.count(), 0);
+    }
+
+    #[test]
+    fn st_last_release_cannot_remove_a_repinned_generation() {
+        let registry = Arc::new(SnapshotRegistry::default());
+        let count = registry.pin(7);
+        let active = registry.0.lock().unwrap();
+        let released = count.clone();
+        let shared = registry.clone();
+        let worker = std::thread::spawn(move || shared.unpin(7, &released));
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(2);
+        while count.load(Ordering::Acquire) != 0 && std::time::Instant::now() < deadline {
+            std::thread::yield_now();
+        }
+        let zero_observed = count.load(Ordering::Acquire) == 0;
+        if zero_observed {
+            active.get(&7).unwrap().fetch_add(1, Ordering::AcqRel);
+        }
+        drop(active);
+        worker.join().unwrap();
+        assert!(zero_observed);
+        assert_eq!(registry.floor(9), 7);
+        assert_eq!(registry.count(), 1);
+        registry.unpin(7, &count);
+        assert_eq!(registry.floor(9), 9);
+    }
+
+    #[test]
+    fn st_nonlast_release_does_not_wait_for_registry_lock() {
+        let registry = Arc::new(SnapshotRegistry::default());
+        let count = registry.pin(7);
+        let other = registry.pin(7);
+        let active = registry.0.lock().unwrap();
+        let shared = registry.clone();
+        let (sent, received) = std::sync::mpsc::channel();
+        let worker = std::thread::spawn(move || {
+            shared.unpin(7, &other);
+            sent.send(()).unwrap();
+        });
+        let completed = received
+            .recv_timeout(std::time::Duration::from_secs(2))
+            .is_ok();
+        drop(active);
+        worker.join().unwrap();
+        assert!(completed);
+        assert_eq!(registry.count(), 1);
+        registry.unpin(7, &count);
     }
 
     #[test]
@@ -3138,7 +3196,7 @@ mod read_copy_tests {
         w.commit().unwrap();
         let before = db.resource_usage().unwrap().current[RETAINED];
         let mut state = db.state().unwrap();
-        state.active.unpin(old.snapshot);
+        state.active.0.lock().unwrap().remove(&old.snapshot);
         let retired = state.collect();
         assert_eq!(retired.charge, 1088);
         assert_eq!(state.budget.snapshot().unwrap().current[RETAINED], before);

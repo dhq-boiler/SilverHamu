@@ -540,6 +540,81 @@ fn persist_group(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn global_guard_keeps_group_range_conflicts_for_insert_update_delete_and_boundaries() {
+        for operation in ["insert", "update", "delete"] {
+            for key in [b"a".as_slice(), b"m", b"z"] {
+                let f = Fixture::new();
+                let db = Database::create(&f.0, [84; 16]).unwrap();
+                if operation != "insert" {
+                    write(&db, key).commit().unwrap();
+                }
+                let old = db.begin_read().unwrap();
+                let mut first = db.begin().unwrap();
+                if operation == "delete" {
+                    first.delete(key).unwrap();
+                } else {
+                    first.put(key, b"new").unwrap();
+                }
+                let mut second = write(&db, b"side");
+                second.scan(b"a", Some(b"z")).unwrap();
+                assert_eq!(second.snapshot, db.current_version().unwrap());
+                let mut requests = [first, second].map(request);
+                let results = persist_group(&db, &mut requests, |file, frames| {
+                    for frame in frames {
+                        file.write_all(frame)?;
+                    }
+                    file.sync_all()
+                });
+                assert!(results[0].is_ok());
+                if key == b"z" {
+                    assert!(results[1].is_ok());
+                } else {
+                    assert!(matches!(
+                        results[1],
+                        Err(Error::Conflict(ConflictKind::Range))
+                    ));
+                }
+                drop(requests);
+                drop(old);
+                drop(db);
+                let db = Database::open(&f.0).unwrap();
+                assert_eq!(
+                    db.begin_read().unwrap().get(b"side").unwrap().is_some(),
+                    key == b"z"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn global_guard_keeps_same_group_point_dependencies_and_empty_ranges() {
+        let f = Fixture::new();
+        let db = Database::create(&f.0, [85; 16]).unwrap();
+        let first = write(&db, b"m");
+        let same = write(&db, b"m");
+        let mut read = write(&db, b"read-side");
+        read.get(b"m").unwrap();
+        let mut empty = write(&db, b"empty-side");
+        empty.scan(b"m", Some(b"m")).unwrap();
+        let mut requests = [first, same, read, empty].map(request);
+        let results = persist_group(&db, &mut requests, |file, frames| {
+            for frame in frames {
+                file.write_all(frame)?;
+            }
+            file.sync_all()
+        });
+        assert!(matches!(
+            &results[..],
+            [
+                Ok(_),
+                Err(Error::Conflict(ConflictKind::Write)),
+                Err(Error::Conflict(ConflictKind::Read)),
+                Ok(_)
+            ]
+        ));
+    }
+
     use super::*;
 
     struct Fixture(PathBuf);
@@ -1228,6 +1303,7 @@ mod tests {
         db.set_group_commit(true);
         db.set_group_commit_wake_on_four(true);
         let mut tx = write(&db, b"a");
+        tx.scan(b"", None).unwrap();
         tx.put(b"b", b"value").unwrap();
         let _ = tx.commit();
         panic!("group crash point not reached");
@@ -1336,10 +1412,9 @@ mod tests {
             let database = Database::create(&fixture.0, [0; 16]).unwrap();
             database.set_background_reclamation(background).unwrap();
             write(&database, b"confirmed").commit().unwrap();
-            let mut requests = [
-                request(write(&database, b"a")),
-                request(write(&database, b"b")),
-            ];
+            let mut first = write(&database, b"a");
+            first.scan(b"q", Some(b"r")).unwrap();
+            let mut requests = [request(first), request(write(&database, b"b"))];
             let results = persist_group(&database, &mut requests, |file, frames| {
                 file.write_all(&frames[0])?;
                 file.write_all(&frames[1][..frames[1].len() - 1])?;

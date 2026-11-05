@@ -402,6 +402,25 @@ See the [audit of the five original ideas, complete results, tests and limitatio
 A whole-database generation guard can already skip checks when no committed
 updates occurred; same-group writes would still need independent validation.
 
+### Follow-up: production generation guard
+
+The production engine now skips committed-state range scans when the transaction
+snapshot still equals the database generation. **Same-group earlier writes are
+always checked**, and durable acknowledgement is unchanged.
+
+In matched 100k/1M single-writer tests, with three before/after trials per
+local/spread distribution, 1M-row range-read-then-update commit p99 falls from
+**25.20 to 3.13 ms** (local) and **24.69 to 3.06 ms** (spread). All 24 runs pass
+current, old-snapshot and reopened-state full-content checks. This is a targeted
+range-validation workload, not a remeasurement of four-client service throughput.
+
+![Production generation guard: validation and durable commit latency](docs/benchmarks/global-generation-2026-11-05/comparison.svg)
+
+Advancing-generation transactions still scan; the 100k/local stale-range p99
+worsens from 365 to 820 µs. The [full report](docs/benchmarks/global-generation-2026-11-05/README.md)
+includes that result, all-trial maxima, safety checks, raw samples and reproduction
+commands. No persistent metadata or file-format change is needed.
+
 ## Tests
 
 ```sh

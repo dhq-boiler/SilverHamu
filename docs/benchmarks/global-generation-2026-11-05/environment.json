@@ -1,0 +1,25 @@
+{
+  "date": "2026-11-05",
+  "timezone": "Asia/Tokyo",
+  "cpu": "AMD Ryzen 9 5950X 16-Core Processor",
+  "os": "Windows-10-10.0.26100-SP0",
+  "rust": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+  "before_commit": "73d3ff692a7710f63cb14448a3b16ca5f80d7f30",
+  "build": "cargo test --locked --release --features service --lib --no-run",
+  "threads": 1,
+  "group_commit": false,
+  "trials": 24,
+  "commit_samples": 4608,
+  "validation_samples": 9216,
+  "full_content_checks": 72,
+  "source_sha256": {
+    "before-transactions.rs": "84a6a063d3c062a2ccb7a7adc84794b5d2ac0a8f383358ec3bfe1f678a1dca8f",
+    "after-transactions.rs": "2122a80444b1c569d650096e934b1ca54129ef410f8332469eead87e7fa927ed",
+    "before-engine_bench.rs": "3ad858f42b3172f20d7a440636893330f5b360878af34440234985c02e2de7ea",
+    "after-engine_bench.rs": "10dc976da9addc2424ecf48f0645274f7e1b56c2af3766e434ed59503363bdc6"
+  },
+  "binary_sha256": {
+    "before": "d3a49b3f170bebb9a585f244c70d7f57b5f5f68ad5d9f6d74e71a6bf7ae23fbd",
+    "after": "7560b37d9e797fb6321a7c45ea7dca34666934422c6a6edd353fc869f49d6b36"
+  }
+}

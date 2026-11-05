@@ -1346,10 +1346,12 @@ impl Transaction {
             }
         }
         for range in &self.ranges {
-            if state
-                .rows
-                .range::<[u8], _>(range.bounds())
-                .any(|(_, v)| v.back().unwrap().sequence > self.snapshot)
+            // Same-group writes are not reflected in state.sequence until publication.
+            if (state.sequence != self.snapshot
+                && state
+                    .rows
+                    .range::<[u8], _>(range.bounds())
+                    .any(|(_, v)| v.back().unwrap().sequence > self.snapshot))
                 || earlier.range::<[u8], _>(range.bounds()).next().is_some()
             {
                 return Err(Error::Conflict(ConflictKind::Range));
@@ -3104,3 +3106,7 @@ mod read_copy_tests {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "../benchmarks/global-generation/engine_bench.rs"]
+mod generation_guard_bench;

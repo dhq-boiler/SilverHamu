@@ -160,7 +160,6 @@ fn run(state: Arc<Mutex<State>>, stop: Arc<(Mutex<bool>, Condvar)>, counters: Ar
         }
         counters.busy.store(true, Ordering::Release);
         let busy = Busy(&counters.busy);
-        let mut persisting = false;
         let pending = match state.try_lock() {
             Ok(guard) => {
                 let started = std::time::Instant::now();
@@ -169,7 +168,6 @@ fn run(state: Arc<Mutex<State>>, stop: Arc<(Mutex<bool>, Condvar)>, counters: Ar
                     return;
                 }
                 if guard.file.is_none() {
-                    persisting = true;
                     #[cfg(feature = "lock-timing")]
                     counters.io_deferrals.fetch_add(1, Ordering::Relaxed);
                     None
@@ -220,8 +218,7 @@ fn run(state: Arc<Mutex<State>>, stop: Arc<(Mutex<bool>, Condvar)>, counters: Ar
         // Contending for the lock must not put maintenance ahead of queued requests.
         let pause = match pending {
             Some(false) => Duration::from_millis(10),
-            None if persisting => Duration::from_millis(1),
-            None => Duration::from_micros(500),
+            None => Duration::from_millis(1),
             Some(true) => Duration::from_micros(100),
         };
         let stopped = stop.0.lock().unwrap_or_else(|e| e.into_inner());

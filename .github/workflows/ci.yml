@@ -35,6 +35,7 @@ jobs:
       - run: python benchmarks/request-id/test_analysis.py
       - run: python benchmarks/flush-parent/test_analysis.py
       - run: python benchmarks/storage-stage/test_analysis.py
+      - run: python benchmarks/observer-loss/test_analysis.py
       - if: contains(matrix.features, 'backlog-batch')
         run: python benchmarks/backlog-tail/test_protocol.py
       - run: python benchmarks/backlog/test_schedule.py

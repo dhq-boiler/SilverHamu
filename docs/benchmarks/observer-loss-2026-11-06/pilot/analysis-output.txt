@@ -1,0 +1,142 @@
+[
+  {
+    "case": "candidate-profile-trace-full-r1-c4-rate800-normal",
+    "mode": "full",
+    "quality_errors": [],
+    "valid_capture": true,
+    "gate": true,
+    "trace_bytes": 221775,
+    "event_count": 33268,
+    "misses": {},
+    "before_misses": {},
+    "extra_return_misses": {
+      "rq_update_return": 0,
+      "fp_return": 0,
+      "st_queue_return": 0,
+      "st_channel_return": 0
+    },
+    "matched_flushes": 554,
+    "analysis_errors": []
+  },
+  {
+    "case": "candidate-profile-trace-full-r1-c1-rate200-normal",
+    "mode": "full",
+    "quality_errors": [],
+    "valid_capture": true,
+    "gate": true,
+    "trace_bytes": 623743,
+    "event_count": 99852,
+    "misses": {},
+    "before_misses": {},
+    "extra_return_misses": {
+      "rq_update_return": 0,
+      "fp_return": 0,
+      "st_queue_return": 0,
+      "st_channel_return": 0
+    },
+    "matched_flushes": 2000,
+    "analysis_errors": []
+  },
+  {
+    "case": "candidate-profile-trace-minimal-r1-c4-rate800-normal",
+    "mode": "minimal",
+    "quality_errors": [],
+    "valid_capture": true,
+    "gate": true,
+    "trace_bytes": 169092,
+    "event_count": 26435,
+    "misses": {},
+    "before_misses": {},
+    "extra_return_misses": {
+      "fp_return": 0,
+      "st_queue_return": 0,
+      "st_channel_return": 0
+    },
+    "matched_flushes": 564,
+    "analysis_errors": []
+  },
+  {
+    "case": "candidate-profile-trace-minimal-r1-c1-rate200-normal",
+    "mode": "minimal",
+    "quality_errors": [],
+    "valid_capture": true,
+    "gate": true,
+    "trace_bytes": 439853,
+    "event_count": 73743,
+    "misses": {},
+    "before_misses": {},
+    "extra_return_misses": {
+      "fp_return": 0,
+      "st_queue_return": 0,
+      "st_channel_return": 0
+    },
+    "matched_flushes": 2000,
+    "analysis_errors": []
+  },
+  {
+    "case": "candidate-profile-trace-capacity-r1-c4-rate800-normal",
+    "mode": "capacity",
+    "quality_errors": [],
+    "valid_capture": true,
+    "gate": true,
+    "trace_bytes": 219367,
+    "event_count": 33218,
+    "misses": {},
+    "before_misses": {},
+    "extra_return_misses": {
+      "rq_update_return": 0,
+      "fp_return": 0,
+      "st_queue_return": 0,
+      "st_channel_return": 0
+    },
+    "matched_flushes": 552,
+    "analysis_errors": []
+  },
+  {
+    "case": "candidate-profile-trace-capacity-r1-c1-rate200-normal",
+    "mode": "capacity",
+    "quality_errors": [],
+    "valid_capture": true,
+    "gate": true,
+    "trace_bytes": 621353,
+    "event_count": 99689,
+    "misses": {},
+    "before_misses": {},
+    "extra_return_misses": {
+      "rq_update_return": 0,
+      "fp_return": 0,
+      "st_queue_return": 0,
+      "st_channel_return": 0
+    },
+    "matched_flushes": 1998,
+    "analysis_errors": []
+  },
+  {
+    "case": "candidate-profile-trace-standard-r1-c4-rate800-normal",
+    "mode": "standard",
+    "quality_errors": [],
+    "valid_capture": true,
+    "gate": false,
+    "trace_bytes": 156073,
+    "event_count": 20932,
+    "misses": {},
+    "before_misses": {},
+    "extra_return_misses": {},
+    "limitation": "No direct request-pointer and journal-parent mapping; not eligible for causal comparison",
+    "analysis_errors": []
+  },
+  {
+    "case": "candidate-profile-trace-standard-r1-c1-rate200-normal",
+    "mode": "standard",
+    "quality_errors": [],
+    "valid_capture": true,
+    "gate": false,
+    "trace_bytes": 387996,
+    "event_count": 54731,
+    "misses": {},
+    "before_misses": {},
+    "extra_return_misses": {},
+    "limitation": "No direct request-pointer and journal-parent mapping; not eligible for causal comparison",
+    "analysis_errors": []
+  }
+]

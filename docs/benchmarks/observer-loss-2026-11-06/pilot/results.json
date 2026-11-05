@@ -1,0 +1,910 @@
+[
+  {
+    "clients": 4,
+    "rep": 1,
+    "rate": 800,
+    "scenario": "normal",
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 1000,
+    "completed": 1000,
+    "rejected": 0,
+    "errors": [],
+    "elapsed_s": 1.252911846,
+    "ops_s": 798.1407496405777,
+    "sync_attempts": 267,
+    "syncs_s": 213.10358015403423,
+    "updates_per_sync": 3.745318352059925,
+    "injected_stalls": 0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "injected_stall_ns": [
+            0,
+            0,
+            0
+          ],
+          "injected_stalls": 0,
+          "ok": true,
+          "sync_attempts": 0,
+          "version": "100"
+        },
+        "after": {
+          "injected_stall_ns": [
+            0,
+            0,
+            0
+          ],
+          "injected_stalls": 0,
+          "ok": true,
+          "sync_attempts": 267,
+          "version": "1100"
+        }
+      },
+      "origin_ns": 94254581100810,
+      "drained_ns": 94255835445655,
+      "outstanding_capacity": 64,
+      "batch_limit": 8,
+      "armed_client_ns": 94254480825423,
+      "armed_done_ns": 94254480977434
+    },
+    "stall": {
+      "start_ms": 1100,
+      "duration_ms": 0,
+      "delay_ms": 0,
+      "count": 0
+    },
+    "response": {
+      "p50_ms": 6.540996,
+      "p99_ms": 14.665483,
+      "max_ms": 20.325562,
+      "above_ms": {
+        "10": 25,
+        "20": 1,
+        "50": 0
+      }
+    },
+    "operation": {
+      "p50_ms": 4.802143,
+      "p99_ms": 8.600133,
+      "max_ms": 17.086925,
+      "above_ms": {
+        "10": 5,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 1.510391,
+      "p99_ms": 5.821623,
+      "max_ms": 13.24654,
+      "above_ms": {
+        "10": 4,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "variant": "candidate-profile-off",
+    "events_file": "candidate-profile-off-r1-update-c4-rate800-normal-events.json.gz",
+    "batches_file": "candidate-profile-off-r1-update-c4-rate800-normal-batches.json.gz",
+    "diagnostics_file": "candidate-profile-off-r1-update-c4-rate800-normal-diagnostics.json.gz"
+  },
+  {
+    "clients": 1,
+    "rep": 1,
+    "rate": 200,
+    "scenario": "normal",
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 1000,
+    "completed": 1000,
+    "rejected": 0,
+    "errors": [],
+    "elapsed_s": 4.998803892,
+    "ops_s": 200.04785576813345,
+    "sync_attempts": 999,
+    "syncs_s": 199.8478079123653,
+    "updates_per_sync": 1.001001001001001,
+    "injected_stalls": 0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "injected_stall_ns": [
+            0,
+            0,
+            0
+          ],
+          "injected_stalls": 0,
+          "ok": true,
+          "sync_attempts": 267,
+          "version": "1100"
+        },
+        "after": {
+          "injected_stall_ns": [
+            0,
+            0,
+            0
+          ],
+          "injected_stalls": 0,
+          "ok": true,
+          "sync_attempts": 1266,
+          "version": "2100"
+        }
+      },
+      "origin_ns": 94257493926995,
+      "drained_ns": 94262493300569,
+      "outstanding_capacity": 64,
+      "batch_limit": 8,
+      "armed_client_ns": 94257393649112,
+      "armed_done_ns": 94257393853465
+    },
+    "stall": {
+      "start_ms": 1100,
+      "duration_ms": 0,
+      "delay_ms": 0,
+      "count": 0
+    },
+    "response": {
+      "p50_ms": 4.284793,
+      "p99_ms": 6.773438,
+      "max_ms": 10.427517,
+      "above_ms": {
+        "10": 1,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "operation": {
+      "p50_ms": 4.116719,
+      "p99_ms": 5.740927,
+      "max_ms": 9.480715,
+      "above_ms": {
+        "10": 0,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 0.159938,
+      "p99_ms": 1.6409,
+      "max_ms": 5.455215,
+      "above_ms": {
+        "10": 0,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "variant": "candidate-profile-off",
+    "events_file": "candidate-profile-off-r1-update-c1-rate200-normal-events.json.gz",
+    "batches_file": "candidate-profile-off-r1-update-c1-rate200-normal-batches.json.gz",
+    "diagnostics_file": "candidate-profile-off-r1-update-c1-rate200-normal-diagnostics.json.gz"
+  },
+  {
+    "clients": 4,
+    "rep": 1,
+    "rate": 800,
+    "scenario": "normal",
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 1000,
+    "completed": 1000,
+    "rejected": 0,
+    "errors": [],
+    "elapsed_s": 1.255085509,
+    "ops_s": 796.758462135985,
+    "sync_attempts": 277,
+    "syncs_s": 220.70209401166787,
+    "updates_per_sync": 3.6101083032490973,
+    "injected_stalls": 0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "injected_stall_ns": [
+            0,
+            0,
+            0
+          ],
+          "injected_stalls": 0,
+          "ok": true,
+          "sync_attempts": 0,
+          "version": "100"
+        },
+        "after": {
+          "injected_stall_ns": [
+            0,
+            0,
+            0
+          ],
+          "injected_stalls": 0,
+          "ok": true,
+          "sync_attempts": 277,
+          "version": "1100"
+        }
+      },
+      "origin_ns": 94272179541904,
+      "drained_ns": 94273435948415,
+      "outstanding_capacity": 64,
+      "batch_limit": 8,
+      "armed_client_ns": 94272079263829,
+      "armed_done_ns": 94272079398556
+    },
+    "stall": {
+      "start_ms": 1100,
+      "duration_ms": 0,
+      "delay_ms": 0,
+      "count": 0
+    },
+    "response": {
+      "p50_ms": 6.229753,
+      "p99_ms": 8.707324,
+      "max_ms": 11.229647,
+      "above_ms": {
+        "10": 3,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "operation": {
+      "p50_ms": 4.791089,
+      "p99_ms": 8.098336,
+      "max_ms": 11.075576,
+      "above_ms": {
+        "10": 1,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 1.230127,
+      "p99_ms": 3.676482,
+      "max_ms": 6.260835,
+      "above_ms": {
+        "10": 0,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "variant": "candidate-profile-trace-full",
+    "kernel_trace": "candidate-profile-trace-full-r1-c4-rate800-normal",
+    "events_file": "candidate-profile-trace-full-r1-update-c4-rate800-normal-events.json.gz",
+    "batches_file": "candidate-profile-trace-full-r1-update-c4-rate800-normal-batches.json.gz",
+    "diagnostics_file": "candidate-profile-trace-full-r1-update-c4-rate800-normal-diagnostics.json.gz"
+  },
+  {
+    "clients": 1,
+    "rep": 1,
+    "rate": 200,
+    "scenario": "normal",
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 1000,
+    "completed": 1000,
+    "rejected": 0,
+    "errors": [],
+    "elapsed_s": 4.998770539,
+    "ops_s": 200.049190535569,
+    "sync_attempts": 1000,
+    "syncs_s": 200.049190535569,
+    "updates_per_sync": 1.0,
+    "injected_stalls": 0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "injected_stall_ns": [
+            0,
+            0,
+            0
+          ],
+          "injected_stalls": 0,
+          "ok": true,
+          "sync_attempts": 277,
+          "version": "1100"
+        },
+        "after": {
+          "injected_stall_ns": [
+            0,
+            0,
+            0
+          ],
+          "injected_stalls": 0,
+          "ok": true,
+          "sync_attempts": 1277,
+          "version": "2100"
+        }
+      },
+      "origin_ns": 94276998743721,
+      "drained_ns": 94281998038362,
+      "outstanding_capacity": 64,
+      "batch_limit": 8,
+      "armed_client_ns": 94276898560411,
+      "armed_done_ns": 94276898691856
+    },
+    "stall": {
+      "start_ms": 1100,
+      "duration_ms": 0,
+      "delay_ms": 0,
+      "count": 0
+    },
+    "response": {
+      "p50_ms": 4.383873,
+      "p99_ms": 6.52301,
+      "max_ms": 9.201017,
+      "above_ms": {
+        "10": 0,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "operation": {
+      "p50_ms": 4.191995,
+      "p99_ms": 6.223658,
+      "max_ms": 7.71072,
+      "above_ms": {
+        "10": 0,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 0.161718,
+      "p99_ms": 1.550949,
+      "max_ms": 4.226924,
+      "above_ms": {
+        "10": 0,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "variant": "candidate-profile-trace-full",
+    "kernel_trace": "candidate-profile-trace-full-r1-c1-rate200-normal",
+    "events_file": "candidate-profile-trace-full-r1-update-c1-rate200-normal-events.json.gz",
+    "batches_file": "candidate-profile-trace-full-r1-update-c1-rate200-normal-batches.json.gz",
+    "diagnostics_file": "candidate-profile-trace-full-r1-update-c1-rate200-normal-diagnostics.json.gz"
+  },
+  {
+    "clients": 4,
+    "rep": 1,
+    "rate": 800,
+    "scenario": "normal",
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 1000,
+    "completed": 1000,
+    "rejected": 0,
+    "errors": [],
+    "elapsed_s": 1.254348379,
+    "ops_s": 797.2266849798352,
+    "sync_attempts": 282,
+    "syncs_s": 224.81792516431352,
+    "updates_per_sync": 3.5460992907801416,
+    "injected_stalls": 0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "injected_stall_ns": [
+            0,
+            0,
+            0
+          ],
+          "injected_stalls": 0,
+          "ok": true,
+          "sync_attempts": 0,
+          "version": "100"
+        },
+        "after": {
+          "injected_stall_ns": [
+            0,
+            0,
+            0
+          ],
+          "injected_stalls": 0,
+          "ok": true,
+          "sync_attempts": 282,
+          "version": "1100"
+        }
+      },
+      "origin_ns": 94293545261458,
+      "drained_ns": 94294801210853,
+      "outstanding_capacity": 64,
+      "batch_limit": 8,
+      "armed_client_ns": 94293445004678,
+      "armed_done_ns": 94293445151805
+    },
+    "stall": {
+      "start_ms": 1100,
+      "duration_ms": 0,
+      "delay_ms": 0,
+      "count": 0
+    },
+    "response": {
+      "p50_ms": 6.071472,
+      "p99_ms": 9.330563,
+      "max_ms": 12.089228,
+      "above_ms": {
+        "10": 7,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "operation": {
+      "p50_ms": 4.808108,
+      "p99_ms": 7.960374,
+      "max_ms": 10.715096,
+      "above_ms": {
+        "10": 3,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 1.077226,
+      "p99_ms": 3.757026,
+      "max_ms": 7.109681,
+      "above_ms": {
+        "10": 0,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "variant": "candidate-profile-trace-minimal",
+    "kernel_trace": "candidate-profile-trace-minimal-r1-c4-rate800-normal",
+    "events_file": "candidate-profile-trace-minimal-r1-update-c4-rate800-normal-events.json.gz",
+    "batches_file": "candidate-profile-trace-minimal-r1-update-c4-rate800-normal-batches.json.gz",
+    "diagnostics_file": "candidate-profile-trace-minimal-r1-update-c4-rate800-normal-diagnostics.json.gz"
+  },
+  {
+    "clients": 1,
+    "rep": 1,
+    "rate": 200,
+    "scenario": "normal",
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 1000,
+    "completed": 1000,
+    "rejected": 0,
+    "errors": [],
+    "elapsed_s": 4.999474111,
+    "ops_s": 200.02103777270668,
+    "sync_attempts": 1000,
+    "syncs_s": 200.02103777270668,
+    "updates_per_sync": 1.0,
+    "injected_stalls": 0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "injected_stall_ns": [
+            0,
+            0,
+            0
+          ],
+          "injected_stalls": 0,
+          "ok": true,
+          "sync_attempts": 282,
+          "version": "1100"
+        },
+        "after": {
+          "injected_stall_ns": [
+            0,
+            0,
+            0
+          ],
+          "injected_stalls": 0,
+          "ok": true,
+          "sync_attempts": 1282,
+          "version": "2100"
+        }
+      },
+      "origin_ns": 94298075420229,
+      "drained_ns": 94303075533456,
+      "outstanding_capacity": 64,
+      "batch_limit": 8,
+      "armed_client_ns": 94297975246266,
+      "armed_done_ns": 94297975366066
+    },
+    "stall": {
+      "start_ms": 1100,
+      "duration_ms": 0,
+      "delay_ms": 0,
+      "count": 0
+    },
+    "response": {
+      "p50_ms": 4.331187,
+      "p99_ms": 6.536227,
+      "max_ms": 7.92208,
+      "above_ms": {
+        "10": 0,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "operation": {
+      "p50_ms": 4.146437,
+      "p99_ms": 5.69351,
+      "max_ms": 7.753527,
+      "above_ms": {
+        "10": 0,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 0.167678,
+      "p99_ms": 1.5648,
+      "max_ms": 2.949278,
+      "above_ms": {
+        "10": 0,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "variant": "candidate-profile-trace-minimal",
+    "kernel_trace": "candidate-profile-trace-minimal-r1-c1-rate200-normal",
+    "events_file": "candidate-profile-trace-minimal-r1-update-c1-rate200-normal-events.json.gz",
+    "batches_file": "candidate-profile-trace-minimal-r1-update-c1-rate200-normal-batches.json.gz",
+    "diagnostics_file": "candidate-profile-trace-minimal-r1-update-c1-rate200-normal-diagnostics.json.gz"
+  },
+  {
+    "clients": 4,
+    "rep": 1,
+    "rate": 800,
+    "scenario": "normal",
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 1000,
+    "completed": 1000,
+    "rejected": 0,
+    "errors": [],
+    "elapsed_s": 1.25464901,
+    "ops_s": 797.0356586022413,
+    "sync_attempts": 276,
+    "syncs_s": 219.9818417742186,
+    "updates_per_sync": 3.6231884057971016,
+    "injected_stalls": 0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "injected_stall_ns": [
+            0,
+            0,
+            0
+          ],
+          "injected_stalls": 0,
+          "ok": true,
+          "sync_attempts": 0,
+          "version": "100"
+        },
+        "after": {
+          "injected_stall_ns": [
+            0,
+            0,
+            0
+          ],
+          "injected_stalls": 0,
+          "ok": true,
+          "sync_attempts": 276,
+          "version": "1100"
+        }
+      },
+      "origin_ns": 94314225587602,
+      "drained_ns": 94315481783265,
+      "outstanding_capacity": 64,
+      "batch_limit": 8,
+      "armed_client_ns": 94314125371865,
+      "armed_done_ns": 94314125500163
+    },
+    "stall": {
+      "start_ms": 1100,
+      "duration_ms": 0,
+      "delay_ms": 0,
+      "count": 0
+    },
+    "response": {
+      "p50_ms": 6.241154,
+      "p99_ms": 10.460422,
+      "max_ms": 12.895876,
+      "above_ms": {
+        "10": 13,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "operation": {
+      "p50_ms": 4.793837,
+      "p99_ms": 8.45409,
+      "max_ms": 10.933212,
+      "above_ms": {
+        "10": 3,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 1.240502,
+      "p99_ms": 4.68985,
+      "max_ms": 7.936156,
+      "above_ms": {
+        "10": 0,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "variant": "candidate-profile-trace-capacity",
+    "kernel_trace": "candidate-profile-trace-capacity-r1-c4-rate800-normal",
+    "events_file": "candidate-profile-trace-capacity-r1-update-c4-rate800-normal-events.json.gz",
+    "batches_file": "candidate-profile-trace-capacity-r1-update-c4-rate800-normal-batches.json.gz",
+    "diagnostics_file": "candidate-profile-trace-capacity-r1-update-c4-rate800-normal-diagnostics.json.gz"
+  },
+  {
+    "clients": 1,
+    "rep": 1,
+    "rate": 200,
+    "scenario": "normal",
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 1000,
+    "completed": 1000,
+    "rejected": 0,
+    "errors": [],
+    "elapsed_s": 4.99868467,
+    "ops_s": 200.05262704438604,
+    "sync_attempts": 999,
+    "syncs_s": 199.85257441734166,
+    "updates_per_sync": 1.001001001001001,
+    "injected_stalls": 0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "injected_stall_ns": [
+            0,
+            0,
+            0
+          ],
+          "injected_stalls": 0,
+          "ok": true,
+          "sync_attempts": 276,
+          "version": "1100"
+        },
+        "after": {
+          "injected_stall_ns": [
+            0,
+            0,
+            0
+          ],
+          "injected_stalls": 0,
+          "ok": true,
+          "sync_attempts": 1275,
+          "version": "2100"
+        }
+      },
+      "origin_ns": 94318982832428,
+      "drained_ns": 94323982125360,
+      "outstanding_capacity": 64,
+      "batch_limit": 8,
+      "armed_client_ns": 94318882660472,
+      "armed_done_ns": 94318882784894
+    },
+    "stall": {
+      "start_ms": 1100,
+      "duration_ms": 0,
+      "delay_ms": 0,
+      "count": 0
+    },
+    "response": {
+      "p50_ms": 4.270438,
+      "p99_ms": 6.524159,
+      "max_ms": 14.112862,
+      "above_ms": {
+        "10": 2,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "operation": {
+      "p50_ms": 4.100926,
+      "p99_ms": 5.684626,
+      "max_ms": 13.952321,
+      "above_ms": {
+        "10": 1,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 0.154873,
+      "p99_ms": 1.550244,
+      "max_ms": 9.146635,
+      "above_ms": {
+        "10": 0,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "variant": "candidate-profile-trace-capacity",
+    "kernel_trace": "candidate-profile-trace-capacity-r1-c1-rate200-normal",
+    "events_file": "candidate-profile-trace-capacity-r1-update-c1-rate200-normal-events.json.gz",
+    "batches_file": "candidate-profile-trace-capacity-r1-update-c1-rate200-normal-batches.json.gz",
+    "diagnostics_file": "candidate-profile-trace-capacity-r1-update-c1-rate200-normal-diagnostics.json.gz"
+  },
+  {
+    "clients": 4,
+    "rep": 1,
+    "rate": 800,
+    "scenario": "normal",
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 1000,
+    "completed": 1000,
+    "rejected": 0,
+    "errors": [],
+    "elapsed_s": 1.253551828,
+    "ops_s": 797.733270905493,
+    "sync_attempts": 279,
+    "syncs_s": 222.56758258263255,
+    "updates_per_sync": 3.5842293906810037,
+    "injected_stalls": 0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "injected_stall_ns": [
+            0,
+            0,
+            0
+          ],
+          "injected_stalls": 0,
+          "ok": true,
+          "sync_attempts": 0,
+          "version": "100"
+        },
+        "after": {
+          "injected_stall_ns": [
+            0,
+            0,
+            0
+          ],
+          "injected_stalls": 0,
+          "ok": true,
+          "sync_attempts": 279,
+          "version": "1100"
+        }
+      },
+      "origin_ns": 94336008953838,
+      "drained_ns": 94337264476235,
+      "outstanding_capacity": 64,
+      "batch_limit": 8,
+      "armed_client_ns": 94335908672646,
+      "armed_done_ns": 94335908801902
+    },
+    "stall": {
+      "start_ms": 1100,
+      "duration_ms": 0,
+      "delay_ms": 0,
+      "count": 0
+    },
+    "response": {
+      "p50_ms": 6.105122,
+      "p99_ms": 9.655255,
+      "max_ms": 12.019503,
+      "above_ms": {
+        "10": 7,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "operation": {
+      "p50_ms": 4.817861,
+      "p99_ms": 7.961899,
+      "max_ms": 9.724989,
+      "above_ms": {
+        "10": 0,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 1.109084,
+      "p99_ms": 4.207363,
+      "max_ms": 7.042008,
+      "above_ms": {
+        "10": 0,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "variant": "candidate-profile-trace-standard",
+    "kernel_trace": "candidate-profile-trace-standard-r1-c4-rate800-normal",
+    "events_file": "candidate-profile-trace-standard-r1-update-c4-rate800-normal-events.json.gz",
+    "batches_file": "candidate-profile-trace-standard-r1-update-c4-rate800-normal-batches.json.gz",
+    "diagnostics_file": "candidate-profile-trace-standard-r1-update-c4-rate800-normal-diagnostics.json.gz"
+  },
+  {
+    "clients": 1,
+    "rep": 1,
+    "rate": 200,
+    "scenario": "normal",
+    "rows": 100000,
+    "value_bytes": 256,
+    "attempted": 1000,
+    "completed": 1000,
+    "rejected": 0,
+    "errors": [],
+    "elapsed_s": 4.999348877,
+    "ops_s": 200.02604831213102,
+    "sync_attempts": 1000,
+    "syncs_s": 200.02604831213102,
+    "updates_per_sync": 1.0,
+    "injected_stalls": 0,
+    "schedule": {
+      "counters": {
+        "before": {
+          "injected_stall_ns": [
+            0,
+            0,
+            0
+          ],
+          "injected_stalls": 0,
+          "ok": true,
+          "sync_attempts": 279,
+          "version": "1100"
+        },
+        "after": {
+          "injected_stall_ns": [
+            0,
+            0,
+            0
+          ],
+          "injected_stalls": 0,
+          "ok": true,
+          "sync_attempts": 1279,
+          "version": "2100"
+        }
+      },
+      "origin_ns": 94340157323615,
+      "drained_ns": 94345157192106,
+      "outstanding_capacity": 64,
+      "batch_limit": 8,
+      "armed_client_ns": 94340057009171,
+      "armed_done_ns": 94340057220174
+    },
+    "stall": {
+      "start_ms": 1100,
+      "duration_ms": 0,
+      "delay_ms": 0,
+      "count": 0
+    },
+    "response": {
+      "p50_ms": 4.366632,
+      "p99_ms": 6.134768,
+      "max_ms": 8.011326,
+      "above_ms": {
+        "10": 0,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "operation": {
+      "p50_ms": 4.188686,
+      "p99_ms": 5.518651,
+      "max_ms": 7.787945,
+      "above_ms": {
+        "10": 0,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "queue": {
+      "p50_ms": 0.159613,
+      "p99_ms": 1.164921,
+      "max_ms": 3.037005,
+      "above_ms": {
+        "10": 0,
+        "20": 0,
+        "50": 0
+      }
+    },
+    "variant": "candidate-profile-trace-standard",
+    "kernel_trace": "candidate-profile-trace-standard-r1-c1-rate200-normal",
+    "events_file": "candidate-profile-trace-standard-r1-update-c1-rate200-normal-events.json.gz",
+    "batches_file": "candidate-profile-trace-standard-r1-update-c1-rate200-normal-batches.json.gz",
+    "diagnostics_file": "candidate-profile-trace-standard-r1-update-c1-rate200-normal-diagnostics.json.gz"
+  }
+]

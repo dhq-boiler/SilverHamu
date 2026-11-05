@@ -697,3 +697,11 @@ The same flush is now followed from block dispatch through virtual-storage drive
 ![Virtual storage stages](docs/benchmarks/storage-stage-2026-11-06/flush-stages.svg)
 
 See [observer overhead, matched requests, failed captures and limits](docs/benchmarks/storage-stage-2026-11-06/README.md).
+
+## Follow-up: reducing observer work while retaining loss checks
+
+A 12-probe observer is compared with the previous 15-probe version. Record size, latency and rejected captures are reported separately; no missing-event check is waived and no production DB speedup is claimed.
+
+![Observer comparison](docs/benchmarks/observer-loss-2026-11-06/observer-comparison.svg)
+
+See [the pilot, repeated comparison, loss evidence and limits](docs/benchmarks/observer-loss-2026-11-06/README.md).

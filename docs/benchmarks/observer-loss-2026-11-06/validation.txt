@@ -1,0 +1,37 @@
+analysis.txt
+Ran 11 tests in 0.001s
+OK
+build.txt
+ffi.txt
+Ran 35 tests in 0.577s
+OK
+parent-analysis.txt
+Ran 15 tests in 0.001s
+OK
+previous-analysis.txt
+Ran 3 tests in 0.000s
+OK
+protocol.txt
+Ran 30 tests in 5.944s
+OK
+release.txt
+rust.txt
+test result: ok. 73 passed; 0 failed; 11 ignored; 0 measured; 0 filtered out; finished in 6.50s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 5 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 1.29s
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.70s
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.39s
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 16.31s
+test result: ok. 26 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 17.13s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+stage-analysis.txt
+Ran 19 tests in 0.001s
+OK

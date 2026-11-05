@@ -104,7 +104,6 @@ impl Drop for Reclaimer {
     }
 }
 fn run(state: Arc<Mutex<State>>, stop: Arc<(Mutex<bool>, Condvar)>, counters: Arc<Counters>) {
-    let mut burst = 0;
     loop {
         if *stop.0.lock().unwrap_or_else(|e| e.into_inner()) {
             return;
@@ -138,17 +137,11 @@ fn run(state: Arc<Mutex<State>>, stop: Arc<(Mutex<bool>, Condvar)>, counters: Ar
             Err(std::sync::TryLockError::Poisoned(_)) => return,
         };
         drop(busy);
-        if pending == Some(true) && burst < 15 {
-            burst += 1;
-            thread::yield_now();
-            continue;
-        }
-        burst = 0;
         // Contending for the lock must not put maintenance ahead of queued requests.
         let pause = match pending {
             Some(false) => Duration::from_millis(10),
             None => Duration::from_millis(1),
-            Some(true) => Duration::from_micros(100),
+            Some(true) => Duration::from_micros(10),
         };
         let stopped = stop.0.lock().unwrap_or_else(|e| e.into_inner());
         if *stopped {

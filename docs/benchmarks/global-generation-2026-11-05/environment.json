@@ -21,5 +21,12 @@
   "binary_sha256": {
     "before": "d3a49b3f170bebb9a585f244c70d7f57b5f5f68ad5d9f6d74e71a6bf7ae23fbd",
     "after": "7560b37d9e797fb6321a7c45ea7dca34666934422c6a6edd353fc869f49d6b36"
-  }
+  },
+  "git_lf_source_sha256": {
+    "before-transactions.rs": "59c8f024334b3a26a71a1d9a89d5c0ec6fd0e135c5897d94af160a0e001031ed",
+    "after-transactions.rs": "9138dffd319aef55a2c38a9d3bd3dabd719520dab203ff41952abbfa25bb3fab",
+    "before-engine_bench.rs": "3ad858f42b3172f20d7a440636893330f5b360878af34440234985c02e2de7ea",
+    "after-engine_bench.rs": "10dc976da9addc2424ecf48f0645274f7e1b56c2af3766e434ed59503363bdc6"
+  },
+  "hash_note": "source_sha256 hashes the Windows working-file bytes used at compilation; git_lf_source_sha256 hashes the archived Git content after CRLF-to-LF normalization."
 }

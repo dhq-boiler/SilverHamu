@@ -87,3 +87,5 @@ python benchmarks/global-generation/report.py artifacts/global-guard-runs-new ar
 ```
 
 All named build/run/report directories must be new. `build.py` extracts the fixed baseline commit and attaches the same benchmark; it never switches or overwrites the current checkout. Allow roughly a few minutes and several GiB of free workspace, depending on compilation caches. The run retains synthetic WALs for inspection; only CSV results are published. PALV and user libraries are not modified.
+
+Source provenance includes both compiled Windows working-file hashes and Git-normalized LF hashes; use `git_lf_source_sha256` when checking the archived files from GitHub. Line-ending normalization does not change the Rust source semantics.

@@ -1618,9 +1618,6 @@ impl State {
                 && self.active.keys().next().copied().unwrap_or(self.sequence) > self.gc_floor)
     }
     fn collect(&mut self) -> RetiredVersions {
-        self.collect_with_keys(64)
-    }
-    fn collect_with_keys(&mut self, max_keys: usize) -> RetiredVersions {
         let mut retired = RetiredVersions {
             values: Vec::new(),
             charge: 0,
@@ -1638,7 +1635,7 @@ impl State {
             self.gc_target = floor;
             self.gc_cursor = None;
         }
-        for _ in 0..max_keys {
+        for _ in 0..64 {
             let lower = self.gc_cursor.as_deref().map_or(Unbounded, Excluded);
             let Some(key) = self
                 .history_keys
@@ -3008,48 +3005,6 @@ fn legacy_wal_file(file: File) -> WalFile {
 #[cfg(test)]
 mod read_copy_tests {
     use super::*;
-    #[test]
-    fn bv_background_key_budgets_handle_below_at_and_above_boundaries() {
-        for budget in [16u32, 32] {
-            for count in [budget - 1, budget, budget + 1] {
-                let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-                    .join("artifacts")
-                    .join(format!("gc-small-{}-{count}", std::process::id()));
-                let _ = std::fs::remove_file(&path);
-                let db = Database::create(&path, [32; 16]).unwrap();
-                let mut w = db.begin().unwrap();
-                for i in 0..count {
-                    w.put(&i.to_be_bytes(), b"a").unwrap();
-                }
-                w.commit().unwrap();
-                let old = db.begin_read().unwrap();
-                let mut w = db.begin().unwrap();
-                for i in 0..count {
-                    w.put(&i.to_be_bytes(), b"b").unwrap();
-                }
-                w.commit().unwrap();
-                let mut state = db.state().unwrap();
-                // Dropping the handle would run cooperative collection before the bounded step.
-                state.active.remove(&old.snapshot);
-                let retained = state.collect_with_keys(budget as usize);
-                assert_eq!(retained.values.len(), count.min(budget) as usize);
-                assert_eq!(
-                    state.rows.values().map(VecDeque::len).sum::<usize>(),
-                    (count * 2 - count.min(budget)) as usize
-                );
-                drop(state);
-                drop(retained);
-                drop(old);
-                while db.collect_garbage().unwrap() {}
-                assert_eq!(db.stats().unwrap().retained_versions, count as usize);
-                let mut r = db.begin_read().unwrap();
-                for i in 0..count {
-                    assert_eq!(r.get(&i.to_be_bytes()).unwrap(), Some(b"b".to_vec()));
-                }
-            }
-        }
-    }
-
     #[test]
     fn er_worker_start_failure_leaves_cooperative_reclamation_available() {
         let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))

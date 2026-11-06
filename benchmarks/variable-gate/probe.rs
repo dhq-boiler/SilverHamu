@@ -84,6 +84,21 @@ fn recover(image:&[Block])->io::Result<Recovered> {
         let copies:Vec<Record>=(0..2).filter_map(|lane|Record::decode(&image[at(selector.bank,slot,lane)]))
             .filter(|r|(r.kind==1 || r.kind==3) && r.epoch==selector.epoch && r.bank==selector.bank).collect();
         if copies.is_empty() {if slot==0 {return Err(err("selected checkpoint missing"));}gap=true;continue;}
+        // An envelope CRC over a complete CRC-protected frame cannot prove inner identity.
+        let count=copies.len();let mut stale=0;
+        let copies:Vec<Record>=copies.into_iter().filter(|r|{
+            if r.writes().is_ok(){return true;}
+            if r.kind==3 && r.payload_len as usize>=PREFIX_BYTES+12+TRAILER_BYTES{
+                let inner_seq=u64::from_le_bytes(r.payload[PREFIX_BYTES..PREFIX_BYTES+8].try_into().unwrap());
+                if inner_seq<r.seq && (Record{seq:inner_seq,..*r}).writes().is_ok(){stale+=1;}
+            }
+            false
+        }).collect();
+        if copies.is_empty(){
+            // Only a fully validated older transaction proves stale payload; arbitrary corruption stays an error.
+            if stale==count && slot!=0{gap=true;continue;}
+            return Err(err("no valid inner copy"));
+        }
         if gap {return Err(err("valid record after missing pair"));}
         if copies.len()==2 && copies[0]!=copies[1] {return Err(err("data copies disagree"));}
         let r=copies[0];
@@ -154,7 +169,9 @@ impl Store {
         for lane in 0..2 {self.put(at(r.bank,slot,lane),&r.encode(),"append",&format!("append-{lane}"),hook)?;}
         self.sync("append",hook)?;self.state.last=r;self.state.used=slot;self.visible=Arc::new(next);hook("append.published")?;self.poisoned=false;Ok(())
     }
-    fn switch(&mut self,hook:Hook<'_>)->io::Result<()> {
+    fn switch(&mut self,hook:Hook<'_>)->io::Result<()> {self.switch_policy(true,hook)}
+    fn switch_reuse(&mut self,hook:Hook<'_>)->io::Result<()> {self.switch_policy(false,hook)}
+    fn switch_policy(&mut self,clear:bool,hook:Hook<'_>)->io::Result<()> {
         if self.poisoned {return Err(err("poisoned"));}
         let epoch=self.state.selector.epoch.checked_add(1).ok_or_else(||err("epoch overflow"))?;
         let old=self.state.selector.bank;let new=1-old;
@@ -162,14 +179,15 @@ impl Store {
         let (r,capacity,length)=pack(1,new,epoch,self.state.last.seq,0,&writes)?;
         self.costs.frame_capacity_peak=self.costs.frame_capacity_peak.max(capacity);self.costs.frame_length_peak=self.costs.frame_length_peak.max(length);
         self.costs.checkpoint_clone_bytes=self.visible.iter().map(|(k,v)|k.len()+v.len()).sum();self.poisoned=true;
-        for slot in 0..=CAP {for lane in 0..2 {self.put(at(new,slot,lane),&[0;N],"switch-data","switch-clear",hook)?;}}
+        if clear {for slot in 0..=CAP {for lane in 0..2 {self.put(at(new,slot,lane),&[0;N],"switch-data","switch-clear",hook)?;}}}
         for lane in 0..2 {self.put(at(new,0,lane),&r.encode(),"switch-data",&format!("switch-data-{lane}"),hook)?;}
         self.sync("switch-data",hook)?;
         for lane in 0..2 {self.put(root(epoch,lane),&r.selector().encode(),"switch-selector",&format!("switch-selector-{lane}"),hook)?;}
         self.sync("switch-selector",hook)?;self.state=Recovered{selector:r.selector(),last:r,used:0,repairs:Vec::new(),rows:Data::new()};hook("switch.published")?;
         // Clearing the old bank before both selectors are synced could destroy the only restart target.
-        for slot in 0..=CAP {for lane in 0..2 {self.put(at(old,slot,lane),&[0;N],"reclaim","reclaim",hook)?;}}
-        self.sync("reclaim",hook)?;self.poisoned=false;Ok(())
+        if clear {for slot in 0..=CAP {for lane in 0..2 {self.put(at(old,slot,lane),&[0;N],"reclaim","reclaim",hook)?;}}
+            self.sync("reclaim",hook)?;}
+        self.poisoned=false;Ok(())
     }
 }
 
@@ -263,6 +281,67 @@ mod tests {
         for pos in 0..end{let mut b=a.clone();b[at(0,1,1)][pos]^=1;assert_eq!(recover(&b).unwrap().rows,expected(&writes()));}
         let(p,mut s)=fixture();let old=s.visible.clone();let mut points=Vec::new();s.append(&change(),&mut |point|{points.push(point.to_owned());assert_eq!(*old,expected(&writes()));Ok(())}).unwrap();assert!(points.iter().position(|p|p=="append.synced").unwrap()<points.iter().position(|p|p=="append.published").unwrap());assert_eq!(*Store::open(&p,&mut noop).unwrap().visible,*s.visible);
         damage(&p,at(0,2,1));drop(s);let reopened=Store::open(&p,&mut noop).unwrap();assert_eq!(reopened.costs.categories["repair-data"].1,1);println!("fresh single-copy repair costs: {:?}",reopened.costs);println!("{end} meaningful byte single-bit corruptions restored from peer");
+    }
+
+    #[test]
+    fn reuse_eq_same_workload_costs_and_old_snapshots(){
+        let mut results=Vec::new();
+        for clear in [true,false]{let(p,mut s)=fixture();let old=s.visible.clone();s.append(&change(),&mut noop).unwrap();for _ in 0..3{s.switch_policy(clear,&mut noop).unwrap();s.append(&change(),&mut noop).unwrap();assert_eq!(*Store::open(&p,&mut noop).unwrap().visible,*s.visible);}assert_eq!(*old,expected(&writes()));assert_eq!(s.file.metadata().unwrap().len(),393216);
+            let categories=&s.costs.categories;let bytes:u64=["switch-data","switch-selector","reclaim"].iter().map(|k|categories.get(k).map_or(0,|v|v.0)).sum();let syncs:u64=["switch-data","switch-selector","reclaim"].iter().map(|k|categories.get(k).map_or(0,|v|v.1)).sum();assert_eq!((bytes,syncs),if clear{(1009650,9)}else{(26610,6)});println!("reuse comparison clear={clear}: {:?}; transition_bytes={bytes} transition_syncs={syncs}; reopen_match=true",s.costs);results.push((*s.visible).clone());}
+        assert_eq!(results[0],results[1]);
+    }
+    fn short()->WriteSet {[(vec![],Some(vec![4])),(b"a".to_vec(),None),(vec![0,255,0],None),(b"new".to_vec(),Some(vec![]))].into()}
+    fn reused_fixture()->(PathBuf,Store){let(p,mut s)=fixture();s.append(&change(),&mut noop).unwrap();s.switch_reuse(&mut noop).unwrap();s.append(&writes(),&mut noop).unwrap();s.switch_reuse(&mut noop).unwrap();(p,s)}
+    #[test]
+    fn reuse_st_repeated_long_short_records_capacity_and_epoch_exhaustion(){
+        let(p,mut s)=reused_fixture();let old=s.visible.clone();for round in 0..8{let w=if round%2==0{short()}else{change()};while s.state.used<CAP{s.append(&w,&mut noop).unwrap();}let before=fs::read(&p).unwrap();assert!(s.append(&w,&mut noop).is_err());assert_eq!(fs::read(&p).unwrap(),before);s.switch_reuse(&mut noop).unwrap();let reopened=Store::open(&p,&mut noop).unwrap();assert_eq!(*reopened.visible,*s.visible);assert!(reopened.costs.categories.is_empty());}
+        let mut want=expected(&writes());apply(&mut want,&change());apply(&mut want,&writes());assert_eq!(*old,want);let before=fs::read(&p).unwrap();s.state.selector.epoch=u64::MAX;assert!(s.switch_reuse(&mut noop).is_err());assert_eq!(fs::read(&p).unwrap(),before);
+    }
+    #[test]
+    fn reuse_model_recovers_torn_reuse_after_full_inner_validation(){
+        let mut a=model();let mut rejected=0;
+        for epoch in 2..=4{let current=recover(&a).unwrap();let bank=1-current.selector.bank;let w:WriteSet=current.rows.iter().map(|(k,v)|(k.clone(),Some(v.clone()))).collect();let(r,_,_)=pack(1,bank,epoch,current.last.seq,0,&w).unwrap();let b=r.encode();let end=H+r.payload_len as usize;
+            for lane in 0..2{for cut in [0,1,32,63,64,65,4095,4096,end-1,end]{let mut partial=a.clone();partial[at(bank,0,lane)][..cut].copy_from_slice(&b[..cut]);assert_eq!(recover(&partial).unwrap().rows,current.rows);}}
+            for lane in 0..2{a[at(bank,0,lane)][..end].copy_from_slice(&b[..end]);}
+            for x in 0..=H{for y in 0..=H{let mut partial=a.clone();for(lane,cut)in [(0,x),(1,y)]{partial[root(epoch,lane)][..cut].copy_from_slice(&r.selector().encode()[..cut]);}assert_eq!(recover(&partial).unwrap().rows,current.rows);}}
+            for lane in 0..2{a[root(epoch,lane)][..H].copy_from_slice(&r.selector().encode()[..H]);}
+            let w=if epoch%2==0{short()}else{change()};let(t,_,_)=pack(3,bank,epoch,r.seq+1,r.checksum(),&w).unwrap();let b=t.encode();let end=H+t.payload_len as usize;
+            for x in [0,1,32,63,64,65,end-1,end]{for y in [0,1,32,63,64,65,end-1,end]{let mut partial=a.clone();for(lane,cut)in [(0,x),(1,y)]{partial[at(bank,1,lane)][..cut].copy_from_slice(&b[..cut]);}let mut next=current.rows.clone();apply(&mut next,&w);match recover(&partial){Ok(got)=>{assert!(got.rows==current.rows || got.rows==next);if x==end || y==end{assert_eq!(got.rows,next);}},Err(e)=>{assert!(x<end && y<end,"valid peer must recover");assert_eq!(e.to_string(),"no valid inner copy");rejected+=1;println!("REJECTED reuse model: epoch={epoch} left_prefix={x} right_prefix={y} frame_end={end}: {e}");}}}}
+            for lane in 0..2{a[at(bank,1,lane)][..end].copy_from_slice(&b[..end]);}
+            for lane in 0..2{let mut damaged=a.clone();damaged[root(epoch,lane)][..H].fill(0);assert_eq!(recover(&damaged).unwrap().rows,recover(&a).unwrap().rows);}
+        }assert_eq!(rejected,0);println!("Reuse model: {rejected} refused interrupted states; 12675 selector prefixes, 60 checkpoint prefixes, 192 append prefix pairs, 6 selector damage cases examined");
+    }
+    #[test]
+    fn reuse_er_interrupted_switch_retry_after_more_updates(){
+        for point in ["switch-data-0.half","switch-data-1.written","switch-data.before-sync","switch-data.synced","switch-selector-0.half","switch-selector-0.written","switch-selector-1.half","switch-selector.before-sync","switch-selector.synced","switch.published"]{
+            let(p,mut s)=reused_fixture();let before=s.visible.clone();let mut hit=false;assert!(s.switch_reuse(&mut |n|if n==point{hit=true;Err(err("phase failure"))}else{Ok(())}).is_err());assert!(hit);assert!(s.append(&short(),&mut noop).is_err());drop(s);let mut s=Store::open(&p,&mut noop).unwrap();assert_eq!(*s.visible,*before);s.append(&short(),&mut noop).unwrap();let want=s.visible.clone();s.switch_reuse(&mut noop).unwrap();drop(s);assert_eq!(*Store::open(&p,&mut noop).unwrap().visible,*want);
+        }
+    }
+    #[test]
+    fn reuse_er_damage_repair_negative_control_and_capacity(){
+        let(p,mut s)=reused_fixture();s.append(&short(),&mut noop).unwrap();let want=s.visible.clone();let bank=s.state.selector.bank;let used=s.state.used;let epoch=s.state.selector.epoch;drop(s);damage(&p,at(bank,used,1));damage(&p,root(epoch,1));let mut hit=false;assert!(Store::open(&p,&mut |n|if n=="repair-data.before-sync"{hit=true;Err(err("repair interrupted"))}else{Ok(())}).is_err());assert!(hit);let mut s=Store::open(&p,&mut noop).unwrap();assert_eq!(*s.visible,*want);s.switch_reuse(&mut noop).unwrap();s.append(&change(),&mut noop).unwrap();let mut a=Store::image(&mut s.file).unwrap();for lane in 0..2{a[at(s.state.selector.bank,1,lane)][..H].fill(0);}assert_ne!(recover(&a).unwrap().rows,*s.visible);println!("negative control: both-copy loss remains outside the contract");
+        let p=dir().join("capacity.log");let mut s=Store::create(&p).unwrap();for k in [1,2]{s.append(&[(vec![k],Some(vec![k;9000]))].into(),&mut noop).unwrap();}let before=fs::read(&p).unwrap();assert!(s.switch_reuse(&mut noop).is_err());assert_eq!(fs::read(&p).unwrap(),before);
+    }
+    #[test]
+    #[ignore]
+    fn reuse_child(){let p=PathBuf::from(std::env::var_os("REUSE_PATH").unwrap());let ready=PathBuf::from(std::env::var_os("REUSE_READY").unwrap());let target=std::env::var("REUSE_PHASE").unwrap();let mode=std::env::var("REUSE_MODE").unwrap();let mut hook=|name:&str|{if name==target{fs::write(&ready,name)?;loop{std::thread::park();}}Ok(())};let mut s=Store::open(&p,&mut hook).unwrap();if mode=="switch"{s.switch_reuse(&mut hook).unwrap();}else if mode=="append"{s.append(&short(),&mut hook).unwrap();}}
+    #[test]
+    fn reuse_er_external_kills_then_update_retry_and_reopen(){
+        let groups=[("switch",vec!["switch-data-0.half","switch-data-1.written","switch-data.before-sync","switch-data.synced","switch-selector-0.half","switch-selector-0.written","switch-selector-1.half","switch-selector.before-sync","switch-selector.synced","switch.published"]),("append",vec!["append-0.half","append-0.written","append-1.half","append-1.written","append.before-sync","append.synced","append.published"]),("repair",vec!["repair-data.before-sync","repair-data.synced","repair-selector.before-sync","repair-selector.synced","open-ready"])];
+        for(mode,points)in groups{for point in points{for cycle in 0..2{let(p,mut s)=reused_fixture();if cycle==1{s.append(&short(),&mut noop).unwrap();s.switch_reuse(&mut noop).unwrap();}let old=s.visible.clone();let mut next=(*old).clone();apply(&mut next,&short());let bank=s.state.selector.bank;let epoch=s.state.selector.epoch;drop(s);if mode=="repair"{damage(&p,at(bank,0,1));damage(&p,root(epoch,1));}let ready=p.with_extension("ready");let mut child=Command::new(std::env::current_exe().unwrap()).args(["--exact","transactions::variable_gate::tests::reuse_child","--ignored","--nocapture"]).env("REUSE_PATH",&p).env("REUSE_READY",&ready).env("REUSE_PHASE",point).env("REUSE_MODE",mode).stdout(Stdio::null()).stderr(Stdio::inherit()).spawn().unwrap();let deadline=Instant::now()+Duration::from_secs(10);loop{if fs::read_to_string(&ready).ok().as_deref()==Some(point){break;}if Instant::now()>deadline{let _=child.kill();let _=child.wait();panic!("reuse barrier timeout {point}");}assert!(child.try_wait().unwrap().is_none(),"early exit {point}");std::thread::sleep(Duration::from_millis(5));}child.kill().unwrap();assert!(!child.wait().unwrap().success());let mut s=Store::open(&p,&mut noop).unwrap();assert!(*s.visible==*old || (mode=="append" && *s.visible==next));if point=="append.synced" || point=="append.published"{assert_eq!(*s.visible,next);}s.append(&change(),&mut noop).unwrap();let want=s.visible.clone();s.switch_reuse(&mut noop).unwrap();assert_eq!(*Store::open(&p,&mut noop).unwrap().visible,*want);println!("reuse external kill recovered/retried: {mode}/{cycle}/{point}");}}}
+    }
+
+    #[test]
+    fn reuse_negative_nested_crc_does_not_bind_inner_sequence(){
+        let w=writes();let(a,_,_)=pack(3,0,1,1,0,&w).unwrap();let(b,_,_)=pack(3,0,3,3,0,&w).unwrap();let n=a.payload_len as usize;assert_ne!(a.payload,b.payload);assert_eq!(crc(&a.payload[..n]),crc(&b.payload[..n]));let mut torn=b.encode();torn[H..H+n].copy_from_slice(&a.payload[..n]);let decoded=Record::decode(&torn).expect("outer check accepts this constructed tear");assert!(decoded.writes().is_err());
+        let mut image=initial();let base=recover(&image).unwrap();let(old,_,_)=pack(3,0,1,0,base.last.checksum(),&w).unwrap();let(new,_,_)=pack(3,0,1,1,base.last.checksum(),&w).unwrap();let mut torn=new.encode();torn[H..H+n].copy_from_slice(&old.payload[..n]);image[at(0,1,0)]=new.encode();image[at(0,1,1)]=torn;assert_eq!(recover(&image).unwrap().rows,expected(&w));image[at(0,1,0)]=torn;assert!(recover(&image).unwrap().rows.is_empty());println!("negative control: outer CRC alone accepts stale payload; full inner validation selects current peer or recognizes a fully validated older transaction");
+    }
+
+    #[test]
+    fn reuse_er_stale_classification_rejects_future_and_holes(){
+        let w=writes();let mut image=initial();let base=recover(&image).unwrap();let(new,_,_)=pack(3,0,1,1,base.last.checksum(),&w).unwrap();let(future,_,_)=pack(3,0,1,2,base.last.checksum(),&w).unwrap();let n=new.payload_len as usize;let mut torn=new.encode();torn[H..H+n].copy_from_slice(&future.payload[..n]);for lane in 0..2{image[at(0,1,lane)]=torn;}assert!(recover(&image).is_err());
+        let(old,_,_)=pack(3,0,1,0,base.last.checksum(),&w).unwrap();torn[H..H+n].copy_from_slice(&old.payload[..n]);for lane in 0..2{image[at(0,1,lane)]=torn;image[at(0,2,lane)]=future.encode();}assert!(recover(&image).is_err());
+        let(checkpoint,_,_)=pack(1,0,1,0,0,&w).unwrap();let mut invalid=checkpoint.encode();invalid[H..H+n].copy_from_slice(&future.payload[..n]);let mut image=initial();for lane in 0..2{image[at(0,0,lane)]=invalid;}assert!(recover(&image).is_err());
     }
 
 }

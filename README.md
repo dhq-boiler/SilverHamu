@@ -6,6 +6,21 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Bounded epoch-reuse experiment
+
+In the small variable-length fixture, retaining obsolete bank bytes reduces
+transition writes **336,550 → 8,870 bytes (-97.36%)** and sync calls **3 → 2**.
+File size and ordinary append costs are unchanged. This is write accounting,
+not a measured throughput or latency improvement.
+
+Naively removing clearing failed a recovery model: an outer CRC over an already
+CRC-protected frame did not distinguish a stale inner sequence. Full inner validation
+and narrowly identifying validated older transactions resolved the selected cases.
+The corrected test-only candidate passes 44 added external kills and 12,675 added
+selector-prefix combinations; the failed variants and both-copy-loss counterexample
+remain recorded. Production behavior and defaults are unchanged.
+[Matched costs, failure analysis, limits and raw results](docs/benchmarks/epoch-reuse-2026-11-07/README.md).
+
 ## Variable-length production-codec gate
 
 A test-only dual-copy store now reuses the production WAL encoder/decoder.

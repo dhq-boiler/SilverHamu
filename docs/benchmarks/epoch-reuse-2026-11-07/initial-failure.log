@@ -1,0 +1,191 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 389B 0.0s done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/rust:1.89-bookworm
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/8] FROM docker.io/library/rust:1.89-bookworm
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 215.46kB 0.0s done
+#5 DONE 0.0s
+
+#6 [2/8] WORKDIR /build
+#6 CACHED
+
+#7 [3/8] COPY Cargo.toml Cargo.lock ./
+#7 CACHED
+
+#8 [4/8] COPY src ./src
+#8 CACHED
+
+#9 [5/8] COPY benchmarks ./benchmarks
+#9 DONE 0.1s
+
+#10 [6/8] RUN cargo test --locked --release --lib variable_gate -- --nocapture --test-threads=1
+#10 0.435     Updating crates.io index
+#10 0.851    Compiling catdb v0.1.0 (/build)
+#10 1.555 warning: method `hold_test_sync` is never used
+#10 1.555    --> src/group_commit.rs:130:19
+#10 1.555     |
+#10 1.555 123 | impl Database {
+#10 1.555     | ------------- method in this implementation
+#10 1.555 ...
+#10 1.555 130 |     pub(crate) fn hold_test_sync(&self, gate: Arc<[std::sync::Barrier; 2]>) {
+#10 1.555     |                   ^^^^^^^^^^^^^^
+#10 1.555     |
+#10 1.555     = note: `#[warn(dead_code)]` on by default
+#10 1.555
+#10 4.398 warning: `catdb` (lib test) generated 1 warning
+#10 4.398     Finished `release` profile [optimized] target(s) in 4.07s
+#10 4.404      Running unittests src/lib.rs (target/release/deps/newdbms-476c349154e50b45)
+#10 4.406
+#10 4.406 running 19 tests
+#10 4.406 test transactions::variable_gate::tests::bv_checkpoint_capacity_and_log_capacity_reject_before_writes ... ok
+#10 4.432 test transactions::variable_gate::tests::bv_page_and_exact_slot_boundaries_preserve_rejected_state ... ok
+#10 4.463 test transactions::variable_gate::tests::bv_production_total_bytes_and_sequence_limits ... ok
+#10 4.482 test transactions::variable_gate::tests::child_phase ... ignored
+#10 4.482 test transactions::variable_gate::tests::eq_atomic_changes_empty_noop_old_read_repeated_switch_and_costs ... variable costs: Costs { categories: {"append": (43490, 5), "initialization": (393216, 2), "reclaim": (491520, 3), "switch-data": (517746, 3), "switch-selector": (384, 3)}, frame_capacity_peak: 4307, frame_length_peak: 4307, checkpoint_clone_bytes: 4236 }
+#10 4.513 ok
+#10 4.513 test transactions::variable_gate::tests::er_external_kills_preserve_acknowledged_and_atomic_pending_changes ... external kill recovered: append/append-0.half
+#10 4.543 external kill recovered: append/append-0.written
+#10 4.560 external kill recovered: append/append-1.half
+#10 4.575 external kill recovered: append/append-1.written
+#10 4.590 external kill recovered: append/append.before-sync
+#10 4.604 external kill recovered: append/append.synced
+#10 4.619 external kill recovered: append/append.published
+#10 4.639 external kill recovered: repair/repair-data-7.half
+#10 4.658 external kill recovered: repair/repair-data-7.written
+#10 4.678 external kill recovered: repair/repair-data.before-sync
+#10 4.700 external kill recovered: repair/repair-data.synced
+#10 4.720 external kill recovered: repair/repair-selector-3.half
+#10 4.737 external kill recovered: repair/repair-selector-3.written
+#10 4.755 external kill recovered: repair/repair-selector.before-sync
+#10 4.773 external kill recovered: repair/repair-selector.synced
+#10 4.791 external kill recovered: repair/open-ready
+#10 4.805 external kill recovered: switch/switch-clear.half
+#10 4.820 external kill recovered: switch/switch-data-0.half
+#10 4.835 external kill recovered: switch/switch-data-1.written
+#10 4.849 external kill recovered: switch/switch-data.before-sync
+#10 4.862 external kill recovered: switch/switch-data.synced
+#10 4.876 external kill recovered: switch/switch-selector-0.half
+#10 4.892 external kill recovered: switch/switch-selector-0.written
+#10 4.907 external kill recovered: switch/switch-selector-1.half
+#10 4.921 external kill recovered: switch/switch-selector.before-sync
+#10 4.941 external kill recovered: switch/switch-selector.synced
+#10 4.959 external kill recovered: switch/switch.published
+#10 4.972 external kill recovered: switch/reclaim.half
+#10 4.988 external kill recovered: switch/reclaim.before-sync
+#10 5.006 external kill recovered: switch/reclaim.synced
+#10 5.006 ok
+#10 5.006 test transactions::variable_gate::tests::er_one_copy_damage_each_meaningful_byte_and_sync_before_publish ... fresh single-copy repair costs: Costs { categories: {"repair-data": (4369, 1)}, frame_capacity_peak: 0, frame_length_peak: 0, checkpoint_clone_bytes: 0 }
+#10 5.718 4269 meaningful byte single-bit corruptions restored from peer
+#10 5.718 ok
+#10 5.718 test transactions::variable_gate::tests::er_partial_copies_and_repair_keep_whole_transaction ... negative control: both copies lost can discard acknowledged transaction
+#10 5.733 ok
+#10 5.733 test transactions::variable_gate::tests::er_phase_failures_poison_writer_and_repair_before_writable ... repair costs: Costs { categories: {"repair-selector": (64, 1)}, frame_capacity_peak: 0, frame_length_peak: 0, checkpoint_clone_bytes: 0 }
+#10 5.789 ok
+#10 5.789 test transactions::variable_gate::tests::er_untrusted_lengths_inner_corruption_and_padding ... ok
+#10 5.791 test transactions::variable_gate::tests::er_valid_outer_checksums_do_not_hide_invalid_inner_operations ... ok
+#10 5.792 test transactions::variable_gate::tests::reuse_child ... ignored
+#10 5.792 test transactions::variable_gate::tests::reuse_eq_same_workload_costs_and_old_snapshots ... reuse comparison clear=true: Costs { categories: {"append": (43490, 5), "initialization": (393216, 2), "reclaim": (491520, 3), "switch-data": (517746, 3), "switch-selector": (384, 3)}, frame_capacity_peak: 4307, frame_length_peak: 4307, checkpoint_clone_bytes: 4236 }; transition_bytes=1009650 transition_syncs=9; reopen_match=true
+#10 5.844 reuse comparison clear=false: Costs { categories: {"append": (43490, 5), "initialization": (393216, 2), "switch-data": (26226, 3), "switch-selector": (384, 3)}, frame_capacity_peak: 4307, frame_length_peak: 4307, checkpoint_clone_bytes: 4236 }; transition_bytes=26610 transition_syncs=6; reopen_match=true
+#10 5.844 ok
+#10 5.844 test transactions::variable_gate::tests::reuse_er_damage_repair_negative_control_and_capacity ... negative control: both-copy loss remains outside the contract
+#10 5.880 ok
+#10 5.880 test transactions::variable_gate::tests::reuse_er_external_kills_then_update_retry_and_reopen ... reuse external kill recovered/retried: switch/0/switch-data-0.half
+#10 5.943 reuse external kill recovered/retried: switch/1/switch-data-0.half
+#10 5.975 reuse external kill recovered/retried: switch/0/switch-data-1.written
+#10 6.006 reuse external kill recovered/retried: switch/1/switch-data-1.written
+#10 6.035 reuse external kill recovered/retried: switch/0/switch-data.before-sync
+#10 6.069 reuse external kill recovered/retried: switch/1/switch-data.before-sync
+#10 6.096 reuse external kill recovered/retried: switch/0/switch-data.synced
+#10 6.128 reuse external kill recovered/retried: switch/1/switch-data.synced
+#10 6.155 reuse external kill recovered/retried: switch/0/switch-selector-0.half
+#10 6.188 reuse external kill recovered/retried: switch/1/switch-selector-0.half
+#10 6.220 reuse external kill recovered/retried: switch/0/switch-selector-0.written
+#10 6.255 reuse external kill recovered/retried: switch/1/switch-selector-0.written
+#10 6.284 reuse external kill recovered/retried: switch/0/switch-selector-1.half
+#10 6.320 reuse external kill recovered/retried: switch/1/switch-selector-1.half
+#10 6.348 reuse external kill recovered/retried: switch/0/switch-selector.before-sync
+#10 6.381 reuse external kill recovered/retried: switch/1/switch-selector.before-sync
+#10 6.408 reuse external kill recovered/retried: switch/0/switch-selector.synced
+#10 6.444 reuse external kill recovered/retried: switch/1/switch-selector.synced
+#10 6.472 reuse external kill recovered/retried: switch/0/switch.published
+#10 6.504 reuse external kill recovered/retried: switch/1/switch.published
+#10 6.531 reuse external kill recovered/retried: append/0/append-0.half
+#10 6.562 reuse external kill recovered/retried: append/1/append-0.half
+#10 6.591 reuse external kill recovered/retried: append/0/append-0.written
+#10 6.622 reuse external kill recovered/retried: append/1/append-0.written
+#10 6.651 reuse external kill recovered/retried: append/0/append-1.half
+#10 6.684 reuse external kill recovered/retried: append/1/append-1.half
+#10 6.712 reuse external kill recovered/retried: append/0/append-1.written
+#10 6.743 reuse external kill recovered/retried: append/1/append-1.written
+#10 6.769 reuse external kill recovered/retried: append/0/append.before-sync
+#10 6.800 reuse external kill recovered/retried: append/1/append.before-sync
+#10 6.825 reuse external kill recovered/retried: append/0/append.synced
+#10 6.858 reuse external kill recovered/retried: append/1/append.synced
+#10 6.884 reuse external kill recovered/retried: append/0/append.published
+#10 6.916 reuse external kill recovered/retried: append/1/append.published
+#10 6.948 reuse external kill recovered/retried: repair/0/repair-data.before-sync
+#10 6.983 reuse external kill recovered/retried: repair/1/repair-data.before-sync
+#10 7.017 reuse external kill recovered/retried: repair/0/repair-data.synced
+#10 7.053 reuse external kill recovered/retried: repair/1/repair-data.synced
+#10 7.084 reuse external kill recovered/retried: repair/0/repair-selector.before-sync
+#10 7.118 reuse external kill recovered/retried: repair/1/repair-selector.before-sync
+#10 7.155 reuse external kill recovered/retried: repair/0/repair-selector.synced
+#10 7.196 reuse external kill recovered/retried: repair/1/repair-selector.synced
+#10 7.229 reuse external kill recovered/retried: repair/0/open-ready
+#10 7.264 reuse external kill recovered/retried: repair/1/open-ready
+#10 7.264 ok
+#10 7.264 test transactions::variable_gate::tests::reuse_er_interrupted_switch_retry_after_more_updates ... ok
+#10 7.492 test transactions::variable_gate::tests::reuse_model_old_slots_partial_overwrite_and_selector_reuse ...
+#10 9.639 thread 'transactions::variable_gate::tests::reuse_model_old_slots_partial_overwrite_and_selector_reuse' panicked at src/../benchmarks/variable-gate/probe.rs:294:283:
+#10 9.639 called `Result::unwrap()` on an `Err` value: Custom { kind: Other, error: "inner sequence or checkpoint deletion" }
+#10 9.639 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+#10 9.639 FAILED
+#10 9.639 test transactions::variable_gate::tests::reuse_st_repeated_long_short_records_capacity_and_epoch_exhaustion ... ok
+#10 9.732 test transactions::variable_gate::tests::st_selector_prefixes_keep_variable_checkpoint_across_reuse ... 8450 selector prefix combinations passed
+#10 11.07 ok
+#10 11.07
+#10 11.07 failures:
+#10 11.07
+#10 11.07 failures:
+#10 11.07     transactions::variable_gate::tests::reuse_model_old_slots_partial_overwrite_and_selector_reuse
+#10 11.07
+#10 11.07 test result: FAILED. 16 passed; 1 failed; 2 ignored; 0 measured; 55 filtered out; finished in 6.67s
+#10 11.07
+#10 11.08 error: test failed, to rerun pass `--lib`
+#10 ERROR: process "/bin/sh -c cargo test --locked --release --lib variable_gate -- --nocapture --test-threads=1" did not complete successfully: exit code: 101
+------
+ > [6/8] RUN cargo test --locked --release --lib variable_gate -- --nocapture --test-threads=1:
+11.07 ok
+11.07
+11.07 failures:
+11.07
+11.07 failures:
+11.07     transactions::variable_gate::tests::reuse_model_old_slots_partial_overwrite_and_selector_reuse
+11.07
+11.07 test result: FAILED. 16 passed; 1 failed; 2 ignored; 0 measured; 55 filtered out; finished in 6.67s
+11.07
+11.08 error: test failed, to rerun pass `--lib`
+------
+Dockerfile:6
+--------------------
+   4 |     COPY src ./src
+   5 |     COPY benchmarks ./benchmarks
+   6 | >>> RUN cargo test --locked --release --lib variable_gate -- --nocapture --test-threads=1
+   7 |     RUN cargo test --locked --release --lib -- --test-threads=1
+   8 |     RUN cargo test --locked --release --lib --features service,wal-direct -- --test-threads=1
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c cargo test --locked --release --lib variable_gate -- --nocapture --test-threads=1" did not complete successfully: exit code: 101
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/5i1m6vs44x7dsx912qwloczdl

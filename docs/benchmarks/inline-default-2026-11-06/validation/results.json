@@ -1,0 +1,12 @@
+{
+  "rust": {
+    "passed": 143,
+    "failed": 0,
+    "ignored": 11
+  },
+  "fallback": {
+    "passed": 152,
+    "failed": 0,
+    "ignored": 13
+  }
+}

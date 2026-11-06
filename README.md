@@ -16,6 +16,27 @@ catdb is a Rust key-value database that runs either **embedded, without a servic
 - An optional authenticated TCP service with bounded connections, requests, and transaction lifetimes.
 - A non-root Docker image and Compose configuration with persistent storage.
 
+## Inline latest is now the default
+
+The latest value is held directly in each key's history, with heap history used
+for older versions. Normal embedded, service and Docker builds now enable
+`inline-latest`; the separate history-elision optimization remains opt-in.
+Existing files and APIs are unchanged. Use `--no-default-features` to build the
+previous deque layout (add `--features service` for the service).
+
+The 1M-row / 1-CPU / 512-MiB qualification retained an old reader during mixed
+traffic. All **96,000 requests**, **30 full-content checks**, and **six seed checks**
+passed, including forced-stop recovery. RSS stayed near **420 MiB**.
+This adoption is for memory capacity, not higher speed: write p99 median was
+**5.540 → 6.008 ms (+8.5%)** versus the earlier explicit-feature build; the worst
+response was **14.657 → 15.935 ms**. All individual trials and limitations remain
+visible. A 512-MiB service limit is not a 512-MiB total-machine guarantee.
+
+![Default qualification with all trials](docs/benchmarks/inline-default-2026-11-06/qualification.svg)
+
+See [safety, compatibility, all measurements and rollback](docs/benchmarks/inline-default-2026-11-06/README.md).
+The project remains Experimental.
+
 ## What is not promised
 
 - No SQL parser, relational query optimizer, replication, or automatic failover.
@@ -781,7 +802,8 @@ Fully aged WAL reopens at 512 MiB changed from **0/3 to 3/3 successful**.
 The tradeoff is explicit: hot-history release + GC rose **15.921 to
 20.674 ms**. Separately, uninstrumented service mixed-write p99 changed
 **6.174 to 6.309 ms**; no uniform latency improvement is claimed.
-The feature remains opt-in (`inline-latest`), with the default unchanged.
+At that experiment, `inline-latest` remained opt-in. See the later
+[default qualification](#inline-latest-is-now-the-default) for the current setting.
 
 ![Inline latest service comparison](docs/benchmarks/inline-latest-2026-11-06/service.svg)
 
@@ -831,14 +853,14 @@ See [phase attribution, observer limitations, raw records and reproduction](docs
 
 With one million rows already updated once, `inline-latest` completed a
 512-MiB pilot and **three subsequent read/write trials**, including old snapshots,
-budget refusal/recovery and process-crash recovery. Default deque was OOM-killed
+budget refusal/recovery and process-crash recovery. The then-default deque was OOM-killed
 before ready in its 512-MiB pilot and was not retried.
 
 At the same 1-GiB limit, median sampled mixed-phase RSS peaks were
 **538.5 / 419.6 MiB** for deque / inline.
 Mixed write p99 was **5.405 / 5.215 ms**;
 inline at 512 MiB was **5.282 ms**. Memory capacity and speed
-are separate outcomes; the opt-in feature and default remain unchanged.
+are separate outcomes; that experiment left the feature opt-in.
 One inline/1-GiB trial worsened to **19.482-ms write p99 / 33.417-ms maximum**,
 so the median is not evidence of a uniform speedup.
 
@@ -870,6 +892,6 @@ the uninstrumented original event. Measurement overhead remains uncertain.
 Inline RSS retained its approximately **22%** advantage (**419.48 vs 538.52 MiB**).
 112,000 requests, 50 full-content service checks and ten full seed checks passed,
 including old generations, budget-refusal recovery and process-crash recovery.
-No evidence-backed engine change was justified, so defaults remain unchanged
+No evidence-backed engine change was justified, so that experiment left defaults unchanged
 and the conditional candidate/512-MiB follow-up was not run.
 See [time-window analysis, observer comparison, raw data and reproduction](docs/benchmarks/aged-tail-2026-11-06/README.md).

@@ -22,7 +22,7 @@ def measured(rows,start,end):
         'cpu_core_percent':(last['cpu']['usage_usec']-first['cpu']['usage_usec'])/1e6/span*100,
         'throttled_usec':last['cpu']['throttled_usec']-first['cpu']['throttled_usec']}
 
-def summarize(raw):
+def summarize(raw, *, pin_reader=False):
     schedule=json.loads((raw/'schedule.json').read_text());out=[];failed=set();hashes=set()
     for entry in schedule:
         condition=(entry['variant'],entry['memory_mib']);assert condition not in failed,'failed condition was repeated'
@@ -43,7 +43,9 @@ def summarize(raw):
         row['safety_probe']=result['safety_probe']
         for phase in ['read','mixed']:
             m=json.loads(data(case/(phase+'-raw.json')));records=m['records'];assert len(records)==m['ops']
-            assert not m['pin_reader'] and not m['errors']
+            assert m['pin_reader']==pin_reader and not m['errors']
+            if pin_reader and phase=='mixed':
+                assert m['old_snapshot_checked_keys']==m['by_kind']['write']['completed']
             assert len({x['seq'] for x in records})==len(records)
             perf={'ops':m['ops'],'completed':m['completed'],'queue_rejected':m['queue_rejected'],'ops_s':m['ops_s'],'by_kind':{}}
             for kind in ['read','write']:

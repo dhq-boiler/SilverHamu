@@ -6,6 +6,16 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Single-sync recovery safety gate
+
+A preliminary Rust recovery model rejected the simple self-validating-prefix
+candidate: interrupted writes and post-acknowledgement suffix damage can leave
+identical bytes. Silently discarding the tail loses acknowledged data in one
+history; rejecting it prevents automatic recovery in the other. Six model tests
+reproduce this limitation, not a production safety pass. No performance trial,
+engine/default change or new speedup is claimed.
+[Counterexample, scope and next design requirements](docs/benchmarks/single-sync-gate-2026-11-07/README.md).
+
 ## Durable I/O: log growth versus reuse
 
 Matched single-writer observations show catdb syncing an extending log in about

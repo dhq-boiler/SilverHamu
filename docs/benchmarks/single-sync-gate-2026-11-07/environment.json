@@ -1,0 +1,12 @@
+{
+  "recorded_utc": "2026-11-06T22:41:58.544190+00:00",
+  "kind": "in-memory byte-image recovery model; no real sync or performance measurement",
+  "image_tag": "rust:1.89-bookworm",
+  "image_id": "sha256:096b9dd60acf6140d936a45412498b7b18338cdf1604f0efa8dcc215a36161cc",
+  "source_sha256_lf": "4092d67191d052eaff5c29350d59514f5f8c04be82dd1e233f56acf0e1e3bbc8",
+  "tests_passed": 6,
+  "ambiguous_tail_cuts": 127,
+  "candidate_safety_gate": "rejected",
+  "performance_gate": "not entered",
+  "production_changes": false
+}

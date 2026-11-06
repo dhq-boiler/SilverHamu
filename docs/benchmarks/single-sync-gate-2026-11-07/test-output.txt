@@ -1,0 +1,13 @@
+
+running 6 tests
+test bv_empty_exact_capacity_and_rejection_do_not_replace_visible_data ... ok
+test eq_st_valid_chain_reopens_and_old_values_survive_publication ... ok
+test er_failed_sync_does_not_publish_success ... ok
+test er_fragment_order_and_stale_suffix_do_not_make_a_partial_new_frame_valid ... ok
+test er_identical_bytes_cannot_distinguish_interrupted_append_from_damaged_acknowledged_tail ... cut64_first_frame=[43, 41, 54, 50, 52, 4f, 42, 45, 07, 00, 00, 00, 00, 00, 00, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 40, 00, 00, 00, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 0b, 43, 4f, 4d, 4d, 49, 54, 30, 31, 07, 00, 00, 00, 00, 00, 00, 00, 01, 00, 00, 00, 00, 00, 00, 00, b1, aa, 77, de, 4e, 55, 88, 21]
+cut64_identical_tail=[43, 41, 54, 50, 52, 4f, 42, 45, 07, 00, 00, 00, 00, 00, 00, 00, 02, 00, 00, 00, 00, 00, 00, 00, b1, aa, 77, de, 40, 00, 00, 00, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00]
+127 ambiguous tail cuts: speed gate FAILED (expected counterexample)
+ok
+test st_old_generation_reordered_sequence_and_broken_chain_are_rejected ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

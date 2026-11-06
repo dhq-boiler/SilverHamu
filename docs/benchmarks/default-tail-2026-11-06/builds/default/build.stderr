@@ -1,0 +1,13 @@
+   Compiling cfg_aliases v0.2.2
+   Compiling libc v0.2.191
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.154
+   Compiling bitflags v2.13.2
+   Compiling cfg-if v1.0.5
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling nix v0.31.3
+   Compiling ctrlc v3.5.2
+   Compiling catdb v0.1.0 (/build)
+    Finished `release` profile [optimized] target(s) in 5.06s

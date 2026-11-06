@@ -1,0 +1,38 @@
+{
+  "commit": "115f1c079d081a9f03309cfd5d54602a5ebf36f0",
+  "image": "sha256:bb9167b5fef0f5694d5930c59da16572ce8ca497b07ee2ba451fa1f6fbeef821",
+  "utc": "2026-11-06T10:42:12.318003+00:00",
+  "arguments": {
+    "out": "C:\\Git\\catdb\\artifacts\\default-tail-2026-11-06\\raw\\control-1-same-a",
+    "rows": [
+      1000000
+    ],
+    "cpus": [
+      1
+    ],
+    "memory": [
+      512
+    ],
+    "reps": 1,
+    "ops": 8000,
+    "sample": 1,
+    "rate": 1000.0,
+    "recover_memory": null,
+    "retained_bytes": 671088640,
+    "image": "catdb-default-tail:same-a",
+    "age_seed": true,
+    "safety_probe": true,
+    "staged_bytes": 4096,
+    "diagnostics": false,
+    "pin_reader": 1
+  },
+  "docker": {
+    "ServerVersion": "29.9.2",
+    "NCPU": 32,
+    "MemTotal": 67380625408,
+    "Driver": "overlay2",
+    "OSType": "linux",
+    "Architecture": "x86_64",
+    "KernelVersion": "6.18.54.1-microsoft-standard-WSL2"
+  }
+}

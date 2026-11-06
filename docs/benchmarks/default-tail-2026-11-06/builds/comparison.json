@@ -1,0 +1,32 @@
+{
+  "normalized_features_equal": true,
+  "packages_equal": true,
+  "explicit_root_features": [
+    "group-handoff",
+    "handoff-refill",
+    "inline-latest",
+    "service"
+  ],
+  "default_root_features": [
+    "default",
+    "group-handoff",
+    "handoff-refill",
+    "inline-latest",
+    "service"
+  ],
+  "toolchains_equal": true,
+  "binaries": {
+    "explicit": [
+      "0c8542c303088ad74ad0e9214130a1230e6a6475a23029e4f7953671b13e4d46  /matched/release/catdb-server",
+      "79be579083dd2f727188390f2a7d16adbecd53f889404bee83392c4d4ac5881a  /matched/release/libnewdbms.so"
+    ],
+    "default": [
+      "6f106d81b5450db3c3fda99443c438ba76b737aab7dc792777abc089ec14d7af  /matched/release/catdb-server",
+      "830a2691b18eac8fb3f25d3ffdec5a308e3ab25dc6464738a1307d18acd523b1  /matched/release/libnewdbms.so"
+    ]
+  },
+  "text": {
+    "explicit": "9206eecda2aae19acfcfaebb08dff9597f4ba2341622731a98b65e1b106ec758",
+    "default": "a2a92378b5ea05f9bbc35aa2cbb102b890ee2eec25419a9c074c741c6f2645f2"
+  }
+}

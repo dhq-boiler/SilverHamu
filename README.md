@@ -37,6 +37,12 @@ visible. A 512-MiB service limit is not a 512-MiB total-machine guarantee.
 See [safety, compatibility, all measurements and rollback](docs/benchmarks/inline-default-2026-11-06/README.md).
 The project remains Experimental.
 
+A [matched-build follow-up](docs/benchmarks/default-tail-2026-11-06/README.md)
+did **not reproduce a consistent default-feature slowdown**: the rebuilt binaries
+matched the previous images, paired results changed direction, and identical-image
+controls showed substantial response-time variation. The original 8.5% observation
+remains visible; its cause is unresolved. No engine change or speedup is claimed.
+
 ## What is not promised
 
 - No SQL parser, relational query optimizer, replication, or automatic failover.
@@ -895,3 +901,18 @@ including old generations, budget-refusal recovery and process-crash recovery.
 No evidence-backed engine change was justified, so that experiment left defaults unchanged
 and the conditional candidate/512-MiB follow-up was not run.
 See [time-window analysis, observer comparison, raw data and reproduction](docs/benchmarks/aged-tail-2026-11-06/README.md).
+
+## Follow-up: separating default-feature effects from run-to-run delays
+
+The matched-source, matched-toolchain comparison at 1M rows / 1 CPU / 512 MiB
+reversed the earlier aggregate result. Identical-default-image controls also
+varied substantially. This is evidence against treating the original 8.5% difference
+as an established effect of enabling the default feature; it is not proof that
+latency variation is harmless or that code layout cannot matter.
+
+![Matched builds and identical-binary controls](docs/benchmarks/default-tail-2026-11-06/comparison.svg)
+
+160,000 requests, 50 full-content service checks and ten full seed checks passed,
+including old generations, refusal/recovery and forced-stop recovery. The default,
+engine and durability remain unchanged. See [every trial, build hashes, timing
+windows, limitations and reproduction](docs/benchmarks/default-tail-2026-11-06/README.md).

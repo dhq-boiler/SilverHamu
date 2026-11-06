@@ -1,0 +1,26 @@
+{
+  "builder_id": "sha256:3d9dad5bfc434479bded49e234a403ff127fb153a20911a5e63894097623398e",
+  "runtime_id": "sha256:29044adcbb04e4b247a0429e06147f5e3f08167a84a7a22964bce2d8b17aa903",
+  "variants": {
+    "explicit": {
+      "image_id": "sha256:d7911a176fab2b9a7fa787b84a6242b9698a304972b050cb16e31c978ea5472d",
+      "same_runtime_layers": true,
+      "runtime_sha256": [
+        "0c8542c303088ad74ad0e9214130a1230e6a6475a23029e4f7953671b13e4d46",
+        "79be579083dd2f727188390f2a7d16adbecd53f889404bee83392c4d4ac5881a"
+      ],
+      "matches_previous_image": true,
+      "matches_build_record": true
+    },
+    "default": {
+      "image_id": "sha256:bb9167b5fef0f5694d5930c59da16572ce8ca497b07ee2ba451fa1f6fbeef821",
+      "same_runtime_layers": true,
+      "runtime_sha256": [
+        "6f106d81b5450db3c3fda99443c438ba76b737aab7dc792777abc089ec14d7af",
+        "830a2691b18eac8fb3f25d3ffdec5a308e3ab25dc6464738a1307d18acd523b1"
+      ],
+      "matches_previous_image": true,
+      "matches_build_record": true
+    }
+  }
+}

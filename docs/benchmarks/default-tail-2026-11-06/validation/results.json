@@ -1,0 +1,10 @@
+{
+  "audit_tests": 4,
+  "analysis_tests": 5,
+  "existing_client_tests": 8,
+  "C_ABI_tests": 35,
+  "service_tests": 23,
+  "failed": 0,
+  "engine_and_cargo_unchanged_from": "115f1c079d081a9f03309cfd5d54602a5ebf36f0",
+  "rust_recovery_windows_linux_gate": "GitHub CI for this commit"
+}

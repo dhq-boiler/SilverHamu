@@ -10,7 +10,7 @@ def run(*args,timeout=600,env=None):
     return p.stdout.strip()
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--out',type=pathlib.Path,required=True);p.add_argument('--rows',nargs='+',type=int,default=[100000,1000000]);p.add_argument('--cpus',nargs='+',type=int,default=[1,2]);p.add_argument('--memory',nargs='+',type=int,default=[512,1024,2048]);p.add_argument('--reps',type=int,default=3);p.add_argument('--ops',type=int,default=8000);p.add_argument('--sample',type=int,choices=[0,1],default=1);p.add_argument('--rate',type=float,default=1000);p.add_argument('--recover-memory',type=int);p.add_argument('--retained-bytes',type=int);p.add_argument('--image',default=IMAGE);p.add_argument('--pin-reader',type=int,choices=[0,1],default=1);a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--out',type=pathlib.Path,required=True);p.add_argument('--rows',nargs='+',type=int,default=[100000,1000000]);p.add_argument('--cpus',nargs='+',type=int,default=[1,2]);p.add_argument('--memory',nargs='+',type=int,default=[512,1024,2048]);p.add_argument('--reps',type=int,default=3);p.add_argument('--ops',type=int,default=8000);p.add_argument('--sample',type=int,choices=[0,1],default=1);p.add_argument('--rate',type=float,default=1000);p.add_argument('--recover-memory',type=int);p.add_argument('--retained-bytes',type=int);p.add_argument('--image',default=IMAGE);p.add_argument('--diagnostics',action='store_true');p.add_argument('--pin-reader',type=int,choices=[0,1],default=1);a=p.parse_args()
     if a.retained_bytes is not None and a.retained_bytes<=0: p.error('--retained-bytes must be positive')
     out=a.out.resolve();out.mkdir(parents=True,exist_ok=False)
     token=secrets.token_hex(24);env=dict(os.environ,BENCH_PASSWORD=secrets.token_hex(16),BENCH_TOKEN=token)
@@ -46,7 +46,7 @@ def main():
                         return json.loads(run('docker','exec',client,'python','/bench-src/resource-envelope/client.py',action,*extra,timeout=timeout))
                     def boot(phase):
                         start=time.monotonic()
-                        run('docker','run','-d','--name',server,'--network',network,'--network-alias','database','--cpus',cpus,'--memory',f'{memory}m','--memory-swap',f'{memory}m','--pids-limit','128',*mount,'-e',f'SAMPLE={a.sample}','-e',f'PHASE={phase}','-e',f'RETAINED_BYTES={a.retained_bytes or ""}','-v',vol+':/data',a.image,'python','/bench-src/resource-envelope/supervisor.py',env=env)
+                        run('docker','run','-d','--name',server,'--network',network,'--network-alias','database','--cpus',cpus,'--memory',f'{memory}m','--memory-swap',f'{memory}m','--pids-limit','128',*mount,*(['-e','CATDB_DIAGNOSTICS=1'] if a.diagnostics else []),'-e',f'SAMPLE={a.sample}','-e',f'PHASE={phase}','-e',f'RETAINED_BYTES={a.retained_bytes or ""}','-v',vol+':/data',a.image,'python','/bench-src/resource-envelope/supervisor.py',env=env)
                         local.append(('container',server))
                         ready=execute('ready',timeout=75);ready['launch_to_ready_ms']=(time.monotonic()-start)*1000
                         limits=json.loads(run('docker','exec',client,'cat',f'/data/{phase}-limits.json'))

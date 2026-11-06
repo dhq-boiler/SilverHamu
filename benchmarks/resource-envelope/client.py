@@ -52,7 +52,8 @@ def measure(work,ops,rate,capacity,pin_reader=True):
                 rec={'seq':seq,'kind':kind,'planned':planned,'enqueued':enqueued,'began':began,'status':'ok'}
                 try:
                     if kind=='write':
-                        require(c.request(op='put_commit',key=key(k).hex(),value=value(k,seq+1).hex()))
+                        response=require(c.request(op='put_commit',key=key(k).hex(),value=value(k,seq+1).hex()))
+                        if 'diagnostic' in response: rec['diagnostic']=response['diagnostic']
                         with lock: changes[str(k)]=seq+1
                     else:
                         b=bytes.fromhex(require(c.request(op='get_latest',key=key(k).hex()))['value'])

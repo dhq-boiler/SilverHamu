@@ -810,3 +810,19 @@ is claimed.
 288,000 requests, 0 queue refusals,
 0 errors and 249 successful full-content checks.
 See [all three variants, pinned control, memory, bounds, recovery and raw data](docs/benchmarks/skip-history-2026-11-06/README.md).
+
+## Follow-up: is freeing old values delaying commits?
+
+A bounded 1M-row / 1-CPU pilot found direct retirement in **779 of 800**
+instrumented updates. Old-value release took at most **0.860 microseconds**;
+the slowest update was **12.931 ms**, with **12.330 ms** inside the sync envelope.
+There is insufficient evidence to change reclamation placement, so defaults
+remain unchanged and the conditional long comparison was not run.
+
+![Retirement diagnostic pilot, all trials](docs/benchmarks/retirement-timing-2026-11-06/pilot.svg)
+
+Instrumentation-on p99s were higher; two short trials per mode cannot separate
+observer cost from storage variability. This is not a speedup claim or an
+explanation of the prior p99 regression. All 16,000 requests and 16 full-content
+checks passed, including recovery after process termination.
+See [phase attribution, observer limitations, raw records and reproduction](docs/benchmarks/retirement-timing-2026-11-06/README.md).

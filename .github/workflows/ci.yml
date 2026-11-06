@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        features: [service, "service,history-metrics,allocation-metrics,skip-unneeded-history", "service,fixed-log,skip-unneeded-history", "service,history-metrics,allocation-metrics,inline-latest", "service,fixed-log,inline-latest", "service,history-metrics,allocation-metrics", "service,fixed-log", "service,wal-direct", "service,wal-prepare", "service,fixed-log,wal-prepare", "service,single-client-commit,lock-timing,benchmark-metrics", "service,backlog-batch,benchmark-metrics,sync-stall,lock-timing"]
+        features: [service, "service,retirement-timing", "service,history-metrics,allocation-metrics,skip-unneeded-history", "service,fixed-log,skip-unneeded-history", "service,history-metrics,allocation-metrics,inline-latest", "service,fixed-log,inline-latest", "service,history-metrics,allocation-metrics", "service,fixed-log", "service,wal-direct", "service,wal-prepare", "service,fixed-log,wal-prepare", "service,single-client-commit,lock-timing,benchmark-metrics", "service,backlog-batch,benchmark-metrics,sync-stall,lock-timing"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -36,6 +36,7 @@ jobs:
       - run: python benchmarks/flush-parent/test_analysis.py
       - run: python benchmarks/storage-stage/test_analysis.py
       - run: python benchmarks/observer-loss/test_analysis.py
+      - run: python benchmarks/retirement-timing/test_analysis.py
       - run: python benchmarks/resource-envelope/test_client.py
       - if: contains(matrix.features, 'backlog-batch')
         run: python benchmarks/backlog-tail/test_protocol.py

@@ -286,6 +286,8 @@ fn same_token(a: &[u8], b: &[u8]) -> bool {
 
 #[cfg(feature = "lock-timing")]
 struct CommitDiagnostic {
+    #[cfg(feature = "retirement-timing")]
+    retirement: Option<[u64; 6]>,
     request_index: u64,
     dispatch_ns: u64,
     finished_ns: u64,
@@ -299,7 +301,7 @@ struct CommitDiagnostic {
 #[cfg(feature = "lock-timing")]
 impl CommitDiagnostic {
     fn json(&self) -> Value {
-        json!({
+        let value = json!({
             "request_index": self.request_index,
             "dispatch_ns": self.dispatch_ns,
             "finished_ns": self.finished_ns,
@@ -308,7 +310,14 @@ impl CommitDiagnostic {
             "costs": self.costs,
             "sync_attempts": self.sync_attempts,
             "commit_ok": self.commit_ok,
-        })
+        });
+        #[cfg(feature = "retirement-timing")]
+        let value = {
+            let mut v = value;
+            v["retirement"] = json!(self.retirement);
+            v
+        };
+        value
     }
 }
 
@@ -431,6 +440,8 @@ fn connection(
         }
         #[cfg(feature = "lock-timing")]
         let dispatch_started = {
+            #[cfg(feature = "retirement-timing")]
+            crate::transactions::take_retirement_trace();
             crate::transactions::take_commit_trace();
             crate::transactions::take_commit_detail();
             crate::transactions::take_commit_costs();
@@ -479,6 +490,8 @@ fn connection(
                 Some("commit" | "put_commit" | "delete_commit")
             ) {
             let record = CommitDiagnostic {
+                #[cfg(feature = "retirement-timing")]
+                retirement: Some(crate::transactions::take_retirement_trace()),
                 request_index,
                 dispatch_ns: dispatch_finished.saturating_sub(dispatch_started),
                 finished_ns: dispatch_finished,
@@ -518,6 +531,8 @@ fn connection(
                     TAIL_SYNC.with(|items| std::mem::take(&mut *items.borrow_mut()));
                 if items.is_empty() {
                     items.push(CommitDiagnostic {
+                        #[cfg(feature = "retirement-timing")]
+                        retirement: Some(crate::transactions::take_retirement_trace()),
                         request_index,
                         dispatch_ns: dispatch_finished.saturating_sub(dispatch_started),
                         finished_ns: dispatch_finished,
@@ -689,6 +704,8 @@ fn dispatch_operation(
                         TAIL_SYNC.with(|items| items.borrow_mut().push(outcome.sync_start));
                         TAIL_ITEMS.with(|items| {
                             items.borrow_mut().push(CommitDiagnostic {
+                                #[cfg(feature = "retirement-timing")]
+                                retirement: None,
                                 request_index: 0,
                                 dispatch_ns: 0,
                                 finished_ns: outcome.detail[6],

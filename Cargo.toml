@@ -36,6 +36,7 @@ sync-stall = []
 history-metrics = []
 inline-latest = []
 skip-unneeded-history = ["inline-latest"]
+retirement-timing = ["skip-unneeded-history", "lock-timing"]
 allocation-metrics = []
 
 [[bin]]

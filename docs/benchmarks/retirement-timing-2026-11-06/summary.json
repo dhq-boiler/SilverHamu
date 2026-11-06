@@ -1,0 +1,296 @@
+[
+  {
+    "case": "pilot-1-off",
+    "mode": "off",
+    "writes": 400,
+    "errors": 0,
+    "rejected": 0,
+    "write_ms": {
+      "count": 400,
+      "median": 3.7387495,
+      "p99": 4.486152,
+      "max": 5.170238
+    },
+    "read_ms": {
+      "count": 1600,
+      "median": 0.193726,
+      "p99": 0.336522,
+      "max": 0.859847
+    },
+    "ops_s": 1000.1749285946614,
+    "whole_boot_peak_mib": {
+      "rss": 414.21484375,
+      "memory": 422.78515625,
+      "swap": 0.0
+    }
+  },
+  {
+    "case": "pilot-2-on",
+    "mode": "on",
+    "writes": 400,
+    "errors": 0,
+    "rejected": 0,
+    "write_ms": {
+      "count": 400,
+      "median": 3.8020295,
+      "p99": 5.131911,
+      "max": 5.821762
+    },
+    "read_ms": {
+      "count": 1600,
+      "median": 0.1968835,
+      "p99": 0.325428,
+      "max": 0.993782
+    },
+    "ops_s": 1000.1692131282385,
+    "phases_us": {
+      "publish_to_free": {
+        "count": 400,
+        "median": 0.133,
+        "p99": 0.51,
+        "max": 0.652
+      },
+      "free": {
+        "count": 400,
+        "median": 0.18,
+        "p99": 0.717,
+        "max": 0.86
+      },
+      "free_to_writer_release": {
+        "count": 400,
+        "median": 0.189,
+        "p99": 0.69,
+        "max": 0.765
+      },
+      "writer_to_persist_return": {
+        "count": 400,
+        "median": 0.037,
+        "p99": 0.076,
+        "max": 8.623
+      },
+      "persist_to_reply_ready": {
+        "count": 400,
+        "median": 0.595,
+        "p99": 1.577,
+        "max": 2.494
+      },
+      "reply_ready_to_received": {
+        "count": 400,
+        "median": 1.813,
+        "p99": 9.748,
+        "max": 16.813
+      },
+      "received_to_dispatch_end": {
+        "count": 400,
+        "median": 1.1285,
+        "p99": 2.012,
+        "max": 2.484
+      },
+      "sync_envelope": {
+        "count": 400,
+        "median": 3285.9629999999997,
+        "p99": 4489.552,
+        "max": 5298.215
+      },
+      "publication": {
+        "count": 400,
+        "median": 3.098,
+        "p99": 7.14,
+        "max": 15.037
+      },
+      "writer_wait": {
+        "count": 400,
+        "median": 0.047,
+        "p99": 0.113,
+        "max": 0.123
+      },
+      "collection": {
+        "count": 400,
+        "median": 256.853,
+        "p99": 344.677,
+        "max": 1041.202
+      }
+    },
+    "groups": 400,
+    "eligible_groups": 397,
+    "retired_versions": 397,
+    "retired_bytes": 127040,
+    "eligible_free_us": {
+      "count": 397,
+      "median": 0.18,
+      "p99": 0.718,
+      "max": 0.86
+    },
+    "worst_write": {
+      "seq": 1000,
+      "total_ms": 5.821762,
+      "client_queue_ms": 0.059699,
+      "dispatch_ms": 5.600634,
+      "phases_us": {
+        "publish_to_free": 0.141,
+        "free": 0.085,
+        "free_to_writer_release": 0.199,
+        "writer_to_persist_return": 0.038,
+        "persist_to_reply_ready": 0.906,
+        "reply_ready_to_received": 11.854,
+        "received_to_dispatch_end": 1.228,
+        "sync_envelope": 5298.215,
+        "publication": 3.674,
+        "writer_wait": 0.056,
+        "collection": 259.576
+      }
+    },
+    "whole_boot_peak_mib": {
+      "rss": 413.95703125,
+      "memory": 423.40234375,
+      "swap": 0.0
+    }
+  },
+  {
+    "case": "pilot-3-on",
+    "mode": "on",
+    "writes": 400,
+    "errors": 0,
+    "rejected": 0,
+    "write_ms": {
+      "count": 400,
+      "median": 3.844893,
+      "p99": 6.190735,
+      "max": 12.931015
+    },
+    "read_ms": {
+      "count": 1600,
+      "median": 0.2036625,
+      "p99": 0.310185,
+      "max": 1.277754
+    },
+    "ops_s": 1000.1217518217014,
+    "phases_us": {
+      "publish_to_free": {
+        "count": 400,
+        "median": 0.16,
+        "p99": 0.696,
+        "max": 4.036
+      },
+      "free": {
+        "count": 400,
+        "median": 0.179,
+        "p99": 0.612,
+        "max": 0.649
+      },
+      "free_to_writer_release": {
+        "count": 400,
+        "median": 0.235,
+        "p99": 0.771,
+        "max": 0.922
+      },
+      "writer_to_persist_return": {
+        "count": 400,
+        "median": 0.037,
+        "p99": 0.075,
+        "max": 0.094
+      },
+      "persist_to_reply_ready": {
+        "count": 400,
+        "median": 0.771,
+        "p99": 2.568,
+        "max": 5.032
+      },
+      "reply_ready_to_received": {
+        "count": 400,
+        "median": 2.079,
+        "p99": 17.504,
+        "max": 24.707
+      },
+      "received_to_dispatch_end": {
+        "count": 400,
+        "median": 1.26,
+        "p99": 2.323,
+        "max": 11.607
+      },
+      "sync_envelope": {
+        "count": 400,
+        "median": 3304.499,
+        "p99": 5187.66,
+        "max": 12329.864
+      },
+      "publication": {
+        "count": 400,
+        "median": 3.598,
+        "p99": 11.542,
+        "max": 127.27
+      },
+      "writer_wait": {
+        "count": 400,
+        "median": 0.047,
+        "p99": 0.169,
+        "max": 0.339
+      },
+      "collection": {
+        "count": 400,
+        "median": 257.93399999999997,
+        "p99": 1017.736,
+        "max": 1066.218
+      }
+    },
+    "groups": 399,
+    "eligible_groups": 382,
+    "retired_versions": 382,
+    "retired_bytes": 122240,
+    "eligible_free_us": {
+      "count": 382,
+      "median": 0.179,
+      "p99": 0.621,
+      "max": 0.649
+    },
+    "worst_write": {
+      "seq": 1685,
+      "total_ms": 12.931015,
+      "client_queue_ms": 0.105521,
+      "dispatch_ms": 12.624795,
+      "phases_us": {
+        "publish_to_free": 0.16,
+        "free": 0.075,
+        "free_to_writer_release": 0.254,
+        "writer_to_persist_return": 0.038,
+        "persist_to_reply_ready": 0.583,
+        "reply_ready_to_received": 12.802,
+        "received_to_dispatch_end": 1.289,
+        "sync_envelope": 12329.864,
+        "publication": 4.29,
+        "writer_wait": 0.047,
+        "collection": 259.467
+      }
+    },
+    "whole_boot_peak_mib": {
+      "rss": 413.97265625,
+      "memory": 422.86328125,
+      "swap": 0.0
+    }
+  },
+  {
+    "case": "pilot-4-off",
+    "mode": "off",
+    "writes": 400,
+    "errors": 0,
+    "rejected": 0,
+    "write_ms": {
+      "count": 400,
+      "median": 3.9305675,
+      "p99": 5.939513,
+      "max": 6.34587
+    },
+    "read_ms": {
+      "count": 1600,
+      "median": 0.2120145,
+      "p99": 0.351735,
+      "max": 0.871781
+    },
+    "ops_s": 1000.1575598211865,
+    "whole_boot_peak_mib": {
+      "rss": 414.1953125,
+      "memory": 426.99609375,
+      "swap": 0.0
+    }
+  }
+]

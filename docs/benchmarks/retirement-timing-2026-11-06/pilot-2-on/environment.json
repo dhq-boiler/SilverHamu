@@ -1,0 +1,35 @@
+{
+  "commit": "b2295f8228098642e14cc212ae5272866ad1f771",
+  "image": "sha256:36dd80f2293c8b0906a99f61aa7831e197b6cc21e848722e8835d77be0a4a687",
+  "utc": "2026-11-06T06:54:42.363685+00:00",
+  "arguments": {
+    "out": "C:\\Git\\catdb\\docs\\benchmarks\\retirement-timing-2026-11-06\\pilot-2-on",
+    "rows": [
+      1000000
+    ],
+    "cpus": [
+      1
+    ],
+    "memory": [
+      1024
+    ],
+    "reps": 1,
+    "ops": 2000,
+    "sample": 1,
+    "rate": 1000.0,
+    "recover_memory": null,
+    "retained_bytes": 671088640,
+    "image": "catdb-retirement:on",
+    "diagnostics": true,
+    "pin_reader": 0
+  },
+  "docker": {
+    "ServerVersion": "29.9.2",
+    "NCPU": 32,
+    "MemTotal": 67380625408,
+    "Driver": "overlay2",
+    "OSType": "linux",
+    "Architecture": "x86_64",
+    "KernelVersion": "6.18.54.1-microsoft-standard-WSL2"
+  }
+}

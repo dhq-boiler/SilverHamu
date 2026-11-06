@@ -1,0 +1,8 @@
+{
+  "Cargo.toml": "f28d938cb83c8f2e2722e95e7608209d4dbca9d165a3e93242d1f6f1dfd0c078",
+  "src\\transactions.rs": "39bd870918e0b8e3951cf872f05f0c3550c2b35c8783a6f22490dca888c6a129",
+  "src\\group_commit.rs": "6bbaa29158dfb225e0762ec7eae93a206bc5329cf59edc1180d573bf7438a9a0",
+  "src\\service.rs": "e70d6845fd9d3aac197f2f2753ce66e655ef59ffc64daba24d050af036ac4f5a",
+  "benchmarks\\resource-envelope\\client.py": "5134fde56d11ba2a62fa3314f097967fa8993a34b5aee75b43cc97ea2e3dc5b0",
+  "benchmarks\\resource-envelope\\run.py": "6c78245a6ff74ea6a8a3c9837a220068a51312b38e793a6973ac99f8e01c90e6"
+}

@@ -226,6 +226,56 @@ struct State {
     budget: Arc<Budget>,
 }
 
+#[cfg(feature = "retirement-timing")]
+thread_local! {
+    static RETIREMENT_TRACE: std::cell::Cell<[u64; 6]> = const { std::cell::Cell::new([0; 6]) };
+}
+/// Free start/end, writer released, retired versions/charged bytes, group persist returned.
+/// Zero timestamps mean the phase was not reached. Times share diagnostic_now_ns's clock.
+#[cfg(feature = "retirement-timing")]
+pub fn take_retirement_trace() -> [u64; 6] {
+    RETIREMENT_TRACE.with(|v| v.replace([0; 6]))
+}
+#[cfg(feature = "retirement-timing")]
+fn retirement_mark(index: usize) {
+    RETIREMENT_TRACE.with(|v| {
+        let mut a = v.get();
+        a[index] = diagnostic_now_ns();
+        v.set(a);
+    });
+}
+#[cfg(feature = "retirement-timing")]
+struct TimedWriter<'a>(Option<std::sync::MutexGuard<'a, ()>>);
+#[cfg(feature = "retirement-timing")]
+impl Drop for TimedWriter<'_> {
+    fn drop(&mut self) {
+        drop(self.0.take());
+        retirement_mark(2);
+    }
+}
+#[cfg(all(test, feature = "retirement-timing"))]
+thread_local! {
+    static RETIREMENT_HOOK: std::cell::RefCell<Option<Box<dyn FnOnce()>>> = const { std::cell::RefCell::new(None) };
+}
+#[cfg(feature = "skip-unneeded-history")]
+fn drop_commit_retirement(retired: RetiredVersions) {
+    #[cfg(feature = "retirement-timing")]
+    RETIREMENT_TRACE.with(|v| {
+        let mut a = v.get();
+        a[0] = diagnostic_now_ns();
+        a[3] = retired.values.len() as u64;
+        a[4] = retired.charge as u64;
+        v.set(a);
+    });
+    #[cfg(all(test, feature = "retirement-timing"))]
+    if let Some(hook) = RETIREMENT_HOOK.with(|v| v.borrow_mut().take()) {
+        hook();
+    }
+    drop(retired);
+    #[cfg(feature = "retirement-timing")]
+    retirement_mark(1);
+}
+
 struct RetiredVersions {
     values: Vec<Version>,
     // Unboxing here would free the deque header while the state lock is held.
@@ -1697,7 +1747,11 @@ impl Transaction {
         }
         #[cfg(feature = "wal-prepare")]
         self.prepare_log()?;
+        #[cfg(feature = "retirement-timing")]
+        take_retirement_trace();
         let _writer = database.inner.writer.lock().map_err(|_| Error::Poisoned)?;
+        #[cfg(feature = "retirement-timing")]
+        let _writer = TimedWriter(Some(_writer));
         #[cfg(feature = "lock-timing")]
         trace_mark(3);
         let mut state = database.state()?;
@@ -1741,7 +1795,7 @@ impl Transaction {
             {
                 state.poisoned = true;
                 drop(state);
-                drop(retired);
+                drop_commit_retirement(retired);
                 return Err(Error::CommitUncertain(io::Error::other(error)));
             }
             #[cfg(not(feature = "skip-unneeded-history"))]
@@ -1756,7 +1810,7 @@ impl Transaction {
         #[cfg(feature = "skip-unneeded-history")]
         {
             drop(state);
-            drop(retired);
+            drop_commit_retirement(retired);
         }
         Ok(sequence)
     }
@@ -3062,6 +3116,90 @@ mod tests {
         assert_eq!(
             db.begin_read().unwrap().get(b"k").unwrap(),
             Some(b"c".to_vec())
+        );
+    }
+
+    #[cfg(feature = "retirement-timing")]
+    #[test]
+    fn st_retirement_delay_preserves_publication_budget_and_writer_order() {
+        let path = Fixture::new();
+        let db = Database::create(&path.0, [95; 16]).unwrap();
+        let mut tx = db.begin().unwrap();
+        tx.put(b"k", &[1; 256]).unwrap();
+        tx.commit_single().unwrap();
+        let before = db.resource_usage().unwrap().current[RETAINED];
+        let observer = db.clone();
+        RETIREMENT_HOOK.with(|v| {
+            *v.borrow_mut() = Some(Box::new(move || {
+                assert!(observer.inner.writer.try_lock().is_err());
+                assert_eq!(
+                    observer.resource_usage().unwrap().current[RETAINED],
+                    before + 320
+                );
+                assert_eq!(
+                    observer.begin_read().unwrap().get(b"k").unwrap(),
+                    Some(vec![2; 256])
+                );
+                std::thread::sleep(std::time::Duration::from_millis(10));
+                assert_eq!(
+                    observer.resource_usage().unwrap().current[RETAINED],
+                    before + 320
+                );
+            }))
+        });
+        let mut tx = db.begin().unwrap();
+        tx.put(b"k", &[2; 256]).unwrap();
+        tx.commit_single().unwrap();
+        let a = take_retirement_trace();
+        assert!(a[0] > 0 && a[1] - a[0] >= 10_000_000 && a[2] >= a[1]);
+        assert_eq!(&a[3..5], &[1, 320]);
+        assert_eq!(a[5], 0);
+        assert_eq!(take_retirement_trace(), [0; 6]);
+        assert_eq!(db.resource_usage().unwrap().current[RETAINED], before);
+        assert!(db.inner.writer.try_lock().is_ok());
+        drop(db);
+        let db = Database::open(&path.0).unwrap();
+        assert_eq!(
+            db.begin_read().unwrap().get(b"k").unwrap(),
+            Some(vec![2; 256])
+        );
+    }
+    #[cfg(feature = "retirement-timing")]
+    #[test]
+    fn eq_er_retirement_trace_distinguishes_pinned_empty_and_failed_commits() {
+        let path = Fixture::new();
+        let db = Database::create(&path.0, [96; 16]).unwrap();
+        let mut tx = db.begin().unwrap();
+        tx.put(b"k", b"old").unwrap();
+        tx.commit_single().unwrap();
+        assert_eq!(take_retirement_trace()[3], 0);
+        let mut old = db.begin_read().unwrap();
+        let mut tx = db.begin().unwrap();
+        tx.put(b"k", b"new").unwrap();
+        tx.commit_single().unwrap();
+        let a = take_retirement_trace();
+        assert!(a[0] > 0 && a[1] >= a[0] && a[2] >= a[1]);
+        assert_eq!(a[3], 0);
+        assert_eq!(old.get(b"k").unwrap(), Some(b"old".to_vec()));
+        drop(old);
+        take_retirement_trace();
+        db.begin().unwrap().commit_single().unwrap();
+        assert_eq!(take_retirement_trace(), [0; 6]);
+        let mut tx = db.begin().unwrap();
+        tx.put(b"k", b"bad").unwrap();
+        assert!(matches!(
+            tx.commit_with(|_, _| Err(io::Error::other("injected"))),
+            Err(Error::CommitUncertain(_))
+        ));
+        let a = take_retirement_trace();
+        assert_eq!(&a[..2], &[0, 0]);
+        assert!(a[2] > 0);
+        assert_eq!(&a[3..], &[0, 0, 0]);
+        drop(db);
+        let db = Database::open(&path.0).unwrap();
+        assert_eq!(
+            db.begin_read().unwrap().get(b"k").unwrap(),
+            Some(b"new".to_vec())
         );
     }
 

@@ -94,6 +94,8 @@ struct Request {
 }
 
 struct Reply {
+    #[cfg(feature = "retirement-timing")]
+    retirement: [u64; 6],
     result: Result<u64>,
     #[cfg(feature = "lock-timing")]
     trace: [u64; 8],
@@ -504,6 +506,10 @@ impl GroupCommit {
             }
             result
         });
+        #[cfg(feature = "retirement-timing")]
+        retirement_mark(5);
+        #[cfg(feature = "retirement-timing")]
+        let retirement = take_retirement_trace();
         if let Some(timing) = timing.filter(|timing| timing[2] != 0) {
             self.timings.lock().unwrap().push(timing);
         }
@@ -540,6 +546,8 @@ impl GroupCommit {
                 v
             };
             let _ = request.response.send(Reply {
+                #[cfg(feature = "retirement-timing")]
+                retirement,
                 result,
                 #[cfg(feature = "lock-timing")]
                 trace,
@@ -605,6 +613,8 @@ impl GroupCommit {
             COMMIT_SYNC_START.with(|value| value.set(reply.sync_start));
             detail_mark(6);
         }
+        #[cfg(feature = "retirement-timing")]
+        RETIREMENT_TRACE.with(|v| v.set(reply.retirement));
         reply.result
     }
 }
@@ -621,11 +631,15 @@ fn persist_group(
     requests: &mut [Request],
     persist: impl FnOnce(&mut WalFile, &[Vec<u8>]) -> io::Result<()>,
 ) -> Vec<Result<u64>> {
+    #[cfg(feature = "retirement-timing")]
+    take_retirement_trace();
     #[cfg(feature = "lock-timing")]
     trace_mark(2);
     let Ok(_writer) = database.inner.writer.lock() else {
         return requests.iter().map(|_| Err(Error::Poisoned)).collect();
     };
+    #[cfg(feature = "retirement-timing")]
+    let _writer = TimedWriter(Some(_writer));
     #[cfg(feature = "lock-timing")]
     trace_mark(3);
     let Ok(mut state) = database.state() else {
@@ -727,13 +741,37 @@ fn persist_group(
     #[cfg(feature = "skip-unneeded-history")]
     {
         drop(state);
-        drop(retired);
+        drop_commit_retirement(retired);
     }
     results
 }
 
 #[cfg(test)]
 mod tests {
+    #[cfg(feature = "retirement-timing")]
+    #[test]
+    fn st_group_retirement_trace_reaches_requester_after_writer_release() {
+        let f = Fixture::new();
+        let db = Database::create(&f.0, [97; 16]).unwrap();
+        db.set_group_commit(true);
+        write(&db, b"a").commit().unwrap();
+        let before = db.resource_usage().unwrap().current[RETAINED];
+        let observer = db.clone();
+        RETIREMENT_HOOK.with(|v| {
+            *v.borrow_mut() = Some(Box::new(move || {
+                assert!(observer.inner.writer.try_lock().is_err());
+                assert!(observer.inner.state.try_lock().is_ok());
+                assert!(observer.resource_usage().unwrap().current[RETAINED] > before);
+                std::thread::sleep(Duration::from_millis(10));
+            }))
+        });
+        write(&db, b"a").commit().unwrap();
+        let a = take_retirement_trace();
+        let d = take_commit_detail();
+        assert!(a[0] > 0 && a[1] - a[0] >= 10_000_000 && a[2] >= a[1] && a[5] >= a[2]);
+        assert_eq!(a[3], 1);
+        assert!(d[5] >= a[5] && d[6] >= d[5]);
+    }
     #[cfg(feature = "single-client-commit")]
     #[test]
     fn single_client_hint_tracks_zero_one_many_and_disconnect_without_affecting_embedded() {

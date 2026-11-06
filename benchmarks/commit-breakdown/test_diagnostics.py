@@ -26,6 +26,12 @@ class DiagnosticTests(protocol.ServiceTests):
         self.assertLessEqual(p[5],p[6]);self.assertLessEqual(p[6],d['finished_ns'])
         self.assertLessEqual(sum(c),p[3]-p[2])
         self.assertLess(len(json.dumps(d)),2048)
+        if 'retirement' in d:
+            a=d['retirement'];self.assertEqual(len(a),6)
+            order=[t[7],a[0],a[1],a[2],a[5],p[5],p[6],d['finished_ns']]
+            self.assertTrue(all(x>0 for x in order));self.assertEqual(order,sorted(order))
+            self.assertLessEqual(a[3],128)
+
 
     def test_diagnostic_single_mutations_and_invalid_requests_do_not_reuse_trace(self):
         client=self.client()
@@ -34,6 +40,7 @@ class DiagnosticTests(protocol.ServiceTests):
         self.assertFalse(r['ok']);self.assertEqual(r['diagnostic']['trace'],[0]*8)
         self.assertEqual(r['diagnostic']['detail'],[0]*8)
         self.assertEqual(r['diagnostic']['costs'],[0]*2)
+        if 'retirement' in r['diagnostic']:self.assertEqual(r['diagnostic']['retirement'],[0]*6)
         self.check_complete(self.ok(client,op='delete_commit',key='01'))
         self.ok(client,op='begin')
         self.ok(client,op='put',key='02',value='cd')

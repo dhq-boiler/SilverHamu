@@ -33,6 +33,8 @@ def main():
     phase_table=['| Server phase | Probe 2 p99 / max ms | Probe 3 p99 / max ms |','|---|---:|---:|']
     for name in diags[0]['phases_ms']:
         phase_table.append('| '+name+' | '+' | '.join(f"{x['phases_ms'][name]['p99']:.6f} / {x['phases_ms'][name]['max']:.6f}" for x in diags)+' |')
+    for name in ['latency.svg','windows.svg']:
+        svg=root/name;svg.write_text('\n'.join(line.rstrip() for line in svg.read_text().splitlines())+'\n')
     request_count=sum(x['requests'] for x in trials);checks=sum(x['full_checks'] for x in trials)
     medians={v:{'write_p99_ms':statistics.median(x['mixed']['write']['response_ms']['p99'] for x in mains if x['variant']==v),'rss_mib':statistics.median(x['resources']['rss_peak_mib'] for x in mains if x['variant']==v)} for v in ['deque','inline']}
     (root/'medians.json').write_text(json.dumps(medians,indent=2))

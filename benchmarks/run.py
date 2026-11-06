@@ -9,15 +9,16 @@ def run(*args,env=None,timeout=600):
     return r.stdout.strip()
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--out',required=True,type=pathlib.Path);p.add_argument('--rows',type=int,default=100000);p.add_argument('--ops',type=int,default=8000);p.add_argument('--reps',type=int,default=3);p.add_argument('--engines',nargs='+',default=['catdb-embedded','sqlite','catdb-service','postgres','mysql','oracle']);args=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--single-request',action='store_true');p.add_argument('--image',default='catdb-comparison:local');p.add_argument('--out',required=True,type=pathlib.Path);p.add_argument('--rows',type=int,default=100000);p.add_argument('--ops',type=int,default=8000);p.add_argument('--reps',type=int,default=3);p.add_argument('--engines',nargs='+',default=['catdb-embedded','sqlite','catdb-service','postgres','mysql','oracle']);args=p.parse_args()
+    IMAGES['catdb-service']=args.image
     out=args.out.resolve();out.mkdir(parents=True,exist_ok=False)
-    environment={'utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'rows':args.rows,'value_bytes':256,'ops_per_case':args.ops,'reps':args.reps,'git_commit':run('git','-C',str(ROOT),'rev-parse','HEAD'),'docker':json.loads(run('docker','info','--format','{{json .}}')),'images':{},'source_sha256':{},'runs':[], 'skipped':{'sql-server':'SQL Server 2022 Developer/Express/Evaluation license section 5 requires prior written permission for disclosure; permission not obtained, not measured.'}}
+    environment={'utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'rows':args.rows,'value_bytes':256,'ops_per_case':args.ops,'reps':args.reps,'single_request':args.single_request,'git_commit':run('git','-C',str(ROOT),'rev-parse','HEAD'),'docker':json.loads(run('docker','info','--format','{{json .}}')),'images':{},'source_sha256':{},'runs':[], 'skipped':{'sql-server':'SQL Server 2022 Developer/Express/Evaluation license section 5 requires prior written permission for disclosure; permission not obtained, not measured.'}}
     # Publish only hardware/runtime fields; Docker info can contain workstation names and paths.
     environment['docker']={k:environment['docker'].get(k) for k in ['ServerVersion','NCPU','MemTotal','Driver','OSType','Architecture','KernelVersion']}
     for f in ['runner.py','run.py','Dockerfile']:
         environment['source_sha256'][f]=hashlib.sha256((ROOT/'benchmarks'/f).read_bytes()).hexdigest()
     for engine in args.engines:
-        image=IMAGES.get(engine,'catdb-comparison:local')
+        image=IMAGES.get(engine,args.image)
         environment['images'][engine]=json.loads(run('docker','image','inspect',image,'--format','{{json .RepoDigests}}')) or json.loads(run('docker','image','inspect',image,'--format','{{json .Id}}'))
     all_results=[]
     def save():
@@ -29,19 +30,19 @@ def main():
         if rep==3:order=order[2:]+order[:2]
         for engine in order:
             prefix='catdb-bench-'+uuid.uuid4().hex[:10];network=prefix+'-net';volume=prefix+'-data';db=prefix+'-db';client=prefix+'-client';containers=[]
-            env=dict(os.environ);env.update(BENCH_PASSWORD='B!'+secrets.token_hex(18),BENCH_TOKEN=secrets.token_hex(32),BENCH_ROWS=str(args.rows),BENCH_OPS=str(args.ops))
+            env=dict(os.environ);env.update(BENCH_PASSWORD='B!'+secrets.token_hex(18),BENCH_TOKEN=secrets.token_hex(32),BENCH_ROWS=str(args.rows),BENCH_OPS=str(args.ops),BENCH_SINGLE_REQUEST='1' if args.single_request else '0')
             entry={'engine':engine,'rep':rep,'status':'running','verification':[]};environment['runs'].append(entry);save()
             print(f'{engine} rep {rep}: preparing',flush=True)
             try:
                 run('docker','network','create','--internal',network);run('docker','volume','create',volume)
                 common=['--cpus','2','--memory','4g','--network',network]
-                run('docker','run','-d','--name',client,*common,'-v',volume+':/data','-v',str(ROOT/'benchmarks')+':/bench-src:ro','-e','BENCH_PASSWORD','-e','BENCH_TOKEN','-e','BENCH_ROWS','-e','BENCH_OPS','catdb-comparison:local',env=env);containers.append(client)
+                run('docker','run','-d','--name',client,*common,'-v',volume+':/data','-v',str(ROOT/'benchmarks')+':/bench-src:ro','-e','BENCH_PASSWORD','-e','BENCH_TOKEN','-e','BENCH_ROWS','-e','BENCH_OPS','-e','BENCH_SINGLE_REQUEST',args.image,env=env);containers.append(client)
                 def execute(action,*extra):
                     return json.loads(run('docker','exec','-e','PYTHONPATH=/bench',client,'python','/bench-src/runner.py',action,engine,*map(str,extra),timeout=600))
                 if engine=='catdb-service':
                     execute('init')
                     run('docker','exec',client,'python','-c',"import os,pathlib;p=pathlib.Path('/data/token');p.write_text(os.environ['BENCH_TOKEN']);p.chmod(0o400);os.chown(p,10001,10001)")
-                    run('docker','run','-d','--name',db,*common,'--network-alias','database','--user','10001:10001','-v',volume+':/data','catdb-comparison:local','catdb-server','--db','/data/catdb.wal','--bind','0.0.0.0:7400','--allow-remote','--token-file','/data/token','--transaction-timeout-secs','3600',env=env);containers.append(db)
+                    run('docker','run','-d','--name',db,*common,'--network-alias','database','--user','10001:10001','-v',volume+':/data',args.image,'catdb-server','--db','/data/catdb.wal','--bind','0.0.0.0:7400','--allow-remote','--token-file','/data/token','--transaction-timeout-secs','3600',env=env);containers.append(db)
                 elif engine in ['postgres','mysql','oracle']:
                     env.update(POSTGRES_PASSWORD=env['BENCH_PASSWORD'],MYSQL_PASSWORD=env['BENCH_PASSWORD'],MYSQL_ROOT_PASSWORD=env['BENCH_PASSWORD'],ORACLE_PWD=env['BENCH_PASSWORD'])
                     opts={'postgres':['-e','POSTGRES_USER=bench','-e','POSTGRES_DB=bench','-e','POSTGRES_PASSWORD','-v',volume+':/var/lib/postgresql'],

@@ -4,6 +4,13 @@ This is an **experimental, client-observed microbenchmark**, not a SQL benchmark
 TPC result, engine-only speed limit, or claim of product equivalence. catdb does
 not provide the relational features of the SQL systems in this comparison.
 
+## Current one-request API refresh
+
+Use `--single-request` to measure the current catdb service single-operation API.
+Use `--image` to select a freshly built comparison harness without replacing old
+images. The default adapter remains legacy for historical reproduction.
+[Refreshed comparison commands and limits](peer-refresh/README.md).
+
 ## Run
 
 Requires Python 3 on the host and Docker running Linux containers. No host ports

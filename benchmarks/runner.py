@@ -77,6 +77,20 @@ class Remote:
     def rollback(self):self.request(op='rollback')
     def close(self):self.client.close()
 
+class SingleRemote(Remote):
+    def begin(self): self.pending=None
+    def get(self,k):
+        r=self.request(op='get_latest',key=k.hex())
+        return bytes.fromhex(r['value']) if r.get('value') is not None else None
+    def scan(self,k,rows=100):
+        return [(bytes.fromhex(a),bytes.fromhex(b)) for a,b in self.request(op='scan_latest',start=k.hex(),rows=rows,bytes=64000,visits=65536)['rows']]
+    def put(self,k,v): self.pending=(k,v)
+    def commit(self):
+        k,v=self.pending
+        self.request(op='put_commit',key=k.hex(),value=v.hex())
+        self.pending=None
+    def rollback(self): self.pending=None
+
 class SQL:
     def __init__(self,engine):
         self.engine=engine
@@ -219,5 +233,7 @@ if __name__=='__main__':
     if args.action=='init':initialize(args.engine);result={'initialized':ROWS}
     elif args.action=='verify':result=verify(args.engine)
     elif args.action=='metadata':result=metadata(args.engine)
-    else:result=measure(args.engine,args.workload,args.clients,args.rep)
+    else:
+        if args.engine=='catdb-service' and os.environ.get('BENCH_SINGLE_REQUEST')=='1':Remote=SingleRemote
+        result=measure(args.engine,args.workload,args.clients,args.rep)
     print(json.dumps(result,default=str))

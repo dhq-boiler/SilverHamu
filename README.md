@@ -6,6 +6,21 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Refreshed DBMS API comparison
+
+Fresh 100k-row /256B /1- and 4-client measurements use the current default catdb
+and its one-request service API, with SQLite, PostgreSQL, MySQL and Oracle Free.
+At four clients catdb reaches **1,133 durable updates/s**, versus PostgreSQL
+**1,298** and Oracle Free **1,280**; median update p99 is **5.08 /5.55 /5.37ms**
+respectively. catdb has higher throughput for the tested service lookup and
+100-row read paths. In embedded single-client updates SQLite reaches 596/s versus
+catdb 303/s; catdb does not lead every workload. These are Python API microbenchmarks, not a general DBMS ranking.
+
+[All repetitions, conditions, integrity checks and legacy API supplement](docs/benchmarks/peer-refresh-2026-11-07/README.md).
+
+![Refreshed service comparison](docs/benchmarks/peer-refresh-2026-11-07/main/service.svg)
+![Refreshed embedded comparison](docs/benchmarks/peer-refresh-2026-11-07/main/embedded.svg)
+
 ## Optional JSON frame buffering experiment
 
 At aged 1M rows /1 CPU /512MiB /1,000 requests/s, bounded connection-local

@@ -10,6 +10,7 @@ WORK={'get':'Key lookup','range100':'Read 100 consecutive records','update':'Rep
 def main():
     p=argparse.ArgumentParser();p.add_argument('directory',type=pathlib.Path);root=p.parse_args().directory
     records=json.loads((root/'results.json').read_text());env=json.loads((root/'environment.json').read_text())
+    if env.get('single_request'):NAMES['catdb-service']='catdb (1-request TCP)'
     assert env['reps']==3 and len(env['runs'])==18
     assert all(r['status']=='passed' and len(r['verification'])==8 for r in env['runs'])
     assert len(records)==108 and all(not r['errors'] and r['completed']==r['attempted'] for r in records)

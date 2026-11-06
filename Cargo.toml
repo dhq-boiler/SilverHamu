@@ -76,3 +76,8 @@ required-features = ["service", "history-metrics", "allocation-metrics"]
 name = "wire-probe"
 path = "src/bin/wire-probe.rs"
 required-features = ["service", "wire-metrics"]
+
+[[bin]]
+name = "solo-update-bench"
+path = "src/bin/solo-update-bench.rs"
+required-features = ["service"]

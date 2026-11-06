@@ -1,0 +1,302 @@
+[
+  {
+    "variant": "cabi-on",
+    "rep": 1,
+    "ops_s": 281.82615661834785,
+    "p99_ms": 5.577097,
+    "max_ms": 14.032377
+  },
+  {
+    "variant": "rust-on",
+    "rep": 1,
+    "ops_s": 283.5212627307372,
+    "p99_ms": 5.544324,
+    "max_ms": 13.472085
+  },
+  {
+    "variant": "sqlite",
+    "rep": 1,
+    "ops_s": 542.7000159216517,
+    "p99_ms": 4.13415,
+    "max_ms": 18.404838
+  },
+  {
+    "variant": "cabi-off",
+    "rep": 1,
+    "ops_s": 310.65411937344965,
+    "p99_ms": 5.203162,
+    "max_ms": 15.211217
+  },
+  {
+    "variant": "rust-off",
+    "rep": 1,
+    "ops_s": 316.08514763343555,
+    "p99_ms": 4.92164,
+    "max_ms": 15.860588
+  },
+  {
+    "variant": "rust-on-diag",
+    "rep": 1,
+    "ops_s": 281.4229699171814,
+    "p99_ms": 5.670696,
+    "max_ms": 13.696486,
+    "mean_ms": {
+      "begin_put": 0.0008551305,
+      "collection": 0.271319805375,
+      "commit_front": 0.007313949375,
+      "log_write": 0.01028303075,
+      "sync_entry": 4.2287500000000005e-05,
+      "sync": 3.25085992375,
+      "publish": 0.00478929,
+      "finish": 0.0062184385,
+      "clock_edges": 7.811575e-05
+    },
+    "slowest_one_percent_mean_ms": {
+      "begin_put": 0.001017375,
+      "collection": 0.27415425,
+      "commit_front": 0.0090367125,
+      "log_write": 0.012863,
+      "sync_entry": 3.9275e-05,
+      "sync": 7.586564425,
+      "publish": 0.008034050000000001,
+      "finish": 0.009816799999999999,
+      "clock_edges": 9.9125e-05
+    }
+  },
+  {
+    "variant": "rust-off-diag",
+    "rep": 1,
+    "ops_s": 314.20622563504736,
+    "p99_ms": 5.407324,
+    "max_ms": 12.93127,
+    "mean_ms": {
+      "begin_put": 0.0012329561249999998,
+      "collection": 0.0,
+      "commit_front": 0.005213196,
+      "log_write": 0.010043317875,
+      "sync_entry": 3.11075e-05,
+      "sync": 3.156298845375,
+      "publish": 0.004714954625,
+      "finish": 0.00234244625,
+      "clock_edges": 6.13375e-05
+    },
+    "slowest_one_percent_mean_ms": {
+      "begin_put": 0.0013996875,
+      "collection": 0.0,
+      "commit_front": 0.005970837499999999,
+      "log_write": 0.0124825625,
+      "sync_entry": 3.1875e-05,
+      "sync": 6.41912655,
+      "publish": 0.008343924999999999,
+      "finish": 0.0037370625,
+      "clock_edges": 5.33125e-05
+    }
+  },
+  {
+    "variant": "sqlite-pinned",
+    "rep": 1,
+    "ops_s": 281.88568028640117,
+    "p99_ms": 5.52164,
+    "max_ms": 23.48241
+  },
+  {
+    "variant": "sqlite-pinned",
+    "rep": 2,
+    "ops_s": 282.2025049904732,
+    "p99_ms": 5.450845,
+    "max_ms": 13.576358
+  },
+  {
+    "variant": "rust-off-diag",
+    "rep": 2,
+    "ops_s": 308.8370637498594,
+    "p99_ms": 5.499183,
+    "max_ms": 19.132074,
+    "mean_ms": {
+      "begin_put": 0.0012319765,
+      "collection": 0.0,
+      "commit_front": 0.0053355254999999996,
+      "log_write": 0.0102482005,
+      "sync_entry": 3.207525e-05,
+      "sync": 3.211025282875,
+      "publish": 0.004989855375,
+      "finish": 0.0022740635000000004,
+      "clock_edges": 5.4622999999999995e-05
+    },
+    "slowest_one_percent_mean_ms": {
+      "begin_put": 0.0012346500000000001,
+      "collection": 0.0,
+      "commit_front": 0.0067126375,
+      "log_write": 0.01242455,
+      "sync_entry": 3.1275e-05,
+      "sync": 6.52015385,
+      "publish": 0.008867162500000001,
+      "finish": 0.0035546625,
+      "clock_edges": 5.275e-05
+    }
+  },
+  {
+    "variant": "rust-on-diag",
+    "rep": 2,
+    "ops_s": 281.4961045295637,
+    "p99_ms": 5.598628,
+    "max_ms": 18.11504,
+    "mean_ms": {
+      "begin_put": 0.000837484375,
+      "collection": 0.273438864875,
+      "commit_front": 0.0070389085,
+      "log_write": 0.010052136375,
+      "sync_entry": 4.1986875e-05,
+      "sync": 3.24886396675,
+      "publish": 0.004401946,
+      "finish": 0.006163491625,
+      "clock_edges": 5.6282874999999994e-05
+    },
+    "slowest_one_percent_mean_ms": {
+      "begin_put": 0.0009797375,
+      "collection": 0.2776800625,
+      "commit_front": 0.008447725,
+      "log_write": 0.012176787500000001,
+      "sync_entry": 3.8049999999999997e-05,
+      "sync": 7.5102683,
+      "publish": 0.007951825,
+      "finish": 0.0097847,
+      "clock_edges": 7.636249999999999e-05
+    }
+  },
+  {
+    "variant": "rust-off",
+    "rep": 2,
+    "ops_s": 309.9558400277391,
+    "p99_ms": 5.41852,
+    "max_ms": 23.289009
+  },
+  {
+    "variant": "cabi-off",
+    "rep": 2,
+    "ops_s": 307.7005588603131,
+    "p99_ms": 5.466855,
+    "max_ms": 20.80366
+  },
+  {
+    "variant": "sqlite",
+    "rep": 2,
+    "ops_s": 538.0189598954815,
+    "p99_ms": 4.115774,
+    "max_ms": 18.727694
+  },
+  {
+    "variant": "rust-on",
+    "rep": 2,
+    "ops_s": 279.4200313387776,
+    "p99_ms": 5.617834,
+    "max_ms": 15.122279
+  },
+  {
+    "variant": "cabi-on",
+    "rep": 2,
+    "ops_s": 276.7368775112524,
+    "p99_ms": 5.638832,
+    "max_ms": 18.66337
+  },
+  {
+    "variant": "sqlite",
+    "rep": 3,
+    "ops_s": 540.9431580271222,
+    "p99_ms": 3.919815,
+    "max_ms": 19.087068
+  },
+  {
+    "variant": "cabi-off",
+    "rep": 3,
+    "ops_s": 308.8726715324446,
+    "p99_ms": 5.056545,
+    "max_ms": 22.234347
+  },
+  {
+    "variant": "rust-off",
+    "rep": 3,
+    "ops_s": 307.41700058661206,
+    "p99_ms": 5.430372,
+    "max_ms": 24.102444
+  },
+  {
+    "variant": "rust-on-diag",
+    "rep": 3,
+    "ops_s": 286.0800833922299,
+    "p99_ms": 5.407151,
+    "max_ms": 13.86175,
+    "mean_ms": {
+      "begin_put": 0.0008462246249999999,
+      "collection": 0.27462242625,
+      "commit_front": 0.0071932195,
+      "log_write": 0.010324833375,
+      "sync_entry": 3.9155875e-05,
+      "sync": 3.190256056125,
+      "publish": 0.0045016855,
+      "finish": 0.00613022325,
+      "clock_edges": 5.407625e-05
+    },
+    "slowest_one_percent_mean_ms": {
+      "begin_put": 0.00093065,
+      "collection": 0.2770255875,
+      "commit_front": 0.0085736125,
+      "log_write": 0.012626637500000001,
+      "sync_entry": 3.91e-05,
+      "sync": 5.8670029,
+      "publish": 0.008170725,
+      "finish": 0.0092525625,
+      "clock_edges": 5.79625e-05
+    }
+  },
+  {
+    "variant": "rust-off-diag",
+    "rep": 3,
+    "ops_s": 311.28938953287474,
+    "p99_ms": 4.758159,
+    "max_ms": 13.211143,
+    "mean_ms": {
+      "begin_put": 0.0011488681249999999,
+      "collection": 0.0,
+      "commit_front": 0.005121952875,
+      "log_write": 0.010084358375,
+      "sync_entry": 3.1687625e-05,
+      "sync": 3.1863251676249997,
+      "publish": 0.004750152624999999,
+      "finish": 0.00233586325,
+      "clock_edges": 5.3355e-05
+    },
+    "slowest_one_percent_mean_ms": {
+      "begin_put": 0.00104265,
+      "collection": 0.0,
+      "commit_front": 0.00588975,
+      "log_write": 0.0122961625,
+      "sync_entry": 2.9725e-05,
+      "sync": 5.7932812375,
+      "publish": 0.007661837499999999,
+      "finish": 0.0035036625,
+      "clock_edges": 5.3375e-05
+    }
+  },
+  {
+    "variant": "sqlite-pinned",
+    "rep": 3,
+    "ops_s": 278.61171784924716,
+    "p99_ms": 5.513344,
+    "max_ms": 19.905188
+  },
+  {
+    "variant": "cabi-on",
+    "rep": 3,
+    "ops_s": 281.7083375669915,
+    "p99_ms": 5.504912,
+    "max_ms": 13.781646
+  },
+  {
+    "variant": "rust-on",
+    "rep": 3,
+    "ops_s": 281.9662740709156,
+    "p99_ms": 5.565106,
+    "max_ms": 13.416204
+  }
+]

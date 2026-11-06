@@ -6,6 +6,19 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Single-writer bottleneck investigation
+
+With 100k rows /one writer /2 CPU /4GiB, C ABI and direct Rust both reach about 282
+updates/s with grouping and 309–310/s without it. SQLite reaches 541/s. Matched
+Rust diagnostics attribute 91–99% of request elapsed time to log synchronization;
+removing the 0.273ms collection wait helps but does not explain the whole gap.
+Worst observed latencies did not improve consistently; defaults are unchanged.
+SQLite's retained-reader sensitivity points to WAL lifecycle as a next hypothesis,
+not a proven physical-I/O cause.
+[Full results, safety, observer effect and raw data](docs/benchmarks/solo-update-2026-11-07/README.md).
+
+![Single-writer elapsed phases](docs/benchmarks/solo-update-2026-11-07/phases.svg)
+
 ## Refreshed DBMS API comparison
 
 Fresh 100k-row /256B /1- and 4-client measurements use the current default catdb

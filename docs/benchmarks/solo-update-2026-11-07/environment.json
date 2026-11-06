@@ -1,0 +1,163 @@
+{
+  "utc": "2026-11-06T18:25:05.515243+00:00",
+  "rows": 100000,
+  "ops": 8000,
+  "reps": 3,
+  "cpu": 2,
+  "memory_gib": 4,
+  "old_snapshot_retained": false,
+  "image": "sha256:1473ef47248f65ee13b65ee6685a0e0896149d2ad3df879fa8909348c1561d56",
+  "source_sha256": {
+    "src/bin/solo-update-bench.rs": "c640335f659041ebbf7743ba5fb623cc3660f32162890f712e3209baed2d4998",
+    "benchmarks/solo-update/client.py": "aaab73de20a0199104f7d9da0503f8a2938c8356e7d1a0b231992f8ad8327f98",
+    "benchmarks/solo-update/run.py": "a8554f5597a258c37f61e25dfd6dbbef9301a9907e4014372bcdd90450d39f19",
+    "src/group_commit.rs": "6bbaa29158dfb225e0762ec7eae93a206bc5329cf59edc1180d573bf7438a9a0",
+    "src/transactions.rs": "3820bbffa75166d8fdc8c84637b0b3c52004d74922829feb4c3fc0fbe19f2777"
+  },
+  "runs": [
+    {
+      "rep": 1,
+      "variant": "cabi-on",
+      "status": "passed",
+      "file": "r1-cabi-on.json.gz"
+    },
+    {
+      "rep": 1,
+      "variant": "rust-on",
+      "status": "passed",
+      "file": "r1-rust-on.json.gz"
+    },
+    {
+      "rep": 1,
+      "variant": "sqlite",
+      "status": "passed",
+      "file": "r1-sqlite.json.gz"
+    },
+    {
+      "rep": 1,
+      "variant": "cabi-off",
+      "status": "passed",
+      "file": "r1-cabi-off.json.gz"
+    },
+    {
+      "rep": 1,
+      "variant": "rust-off",
+      "status": "passed",
+      "file": "r1-rust-off.json.gz"
+    },
+    {
+      "rep": 1,
+      "variant": "rust-on-diag",
+      "status": "passed",
+      "file": "r1-rust-on-diag.json.gz"
+    },
+    {
+      "rep": 1,
+      "variant": "rust-off-diag",
+      "status": "passed",
+      "file": "r1-rust-off-diag.json.gz"
+    },
+    {
+      "rep": 1,
+      "variant": "sqlite-pinned",
+      "status": "passed",
+      "file": "r1-sqlite-pinned.json.gz"
+    },
+    {
+      "rep": 2,
+      "variant": "sqlite-pinned",
+      "status": "passed",
+      "file": "r2-sqlite-pinned.json.gz"
+    },
+    {
+      "rep": 2,
+      "variant": "rust-off-diag",
+      "status": "passed",
+      "file": "r2-rust-off-diag.json.gz"
+    },
+    {
+      "rep": 2,
+      "variant": "rust-on-diag",
+      "status": "passed",
+      "file": "r2-rust-on-diag.json.gz"
+    },
+    {
+      "rep": 2,
+      "variant": "rust-off",
+      "status": "passed",
+      "file": "r2-rust-off.json.gz"
+    },
+    {
+      "rep": 2,
+      "variant": "cabi-off",
+      "status": "passed",
+      "file": "r2-cabi-off.json.gz"
+    },
+    {
+      "rep": 2,
+      "variant": "sqlite",
+      "status": "passed",
+      "file": "r2-sqlite.json.gz"
+    },
+    {
+      "rep": 2,
+      "variant": "rust-on",
+      "status": "passed",
+      "file": "r2-rust-on.json.gz"
+    },
+    {
+      "rep": 2,
+      "variant": "cabi-on",
+      "status": "passed",
+      "file": "r2-cabi-on.json.gz"
+    },
+    {
+      "rep": 3,
+      "variant": "sqlite",
+      "status": "passed",
+      "file": "r3-sqlite.json.gz"
+    },
+    {
+      "rep": 3,
+      "variant": "cabi-off",
+      "status": "passed",
+      "file": "r3-cabi-off.json.gz"
+    },
+    {
+      "rep": 3,
+      "variant": "rust-off",
+      "status": "passed",
+      "file": "r3-rust-off.json.gz"
+    },
+    {
+      "rep": 3,
+      "variant": "rust-on-diag",
+      "status": "passed",
+      "file": "r3-rust-on-diag.json.gz"
+    },
+    {
+      "rep": 3,
+      "variant": "rust-off-diag",
+      "status": "passed",
+      "file": "r3-rust-off-diag.json.gz"
+    },
+    {
+      "rep": 3,
+      "variant": "sqlite-pinned",
+      "status": "passed",
+      "file": "r3-sqlite-pinned.json.gz"
+    },
+    {
+      "rep": 3,
+      "variant": "cabi-on",
+      "status": "passed",
+      "file": "r3-cabi-on.json.gz"
+    },
+    {
+      "rep": 3,
+      "variant": "rust-on",
+      "status": "passed",
+      "file": "r3-rust-on.json.gz"
+    }
+  ]
+}

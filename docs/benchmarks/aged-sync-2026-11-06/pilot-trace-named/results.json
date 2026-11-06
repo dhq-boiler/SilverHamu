@@ -1,0 +1,160 @@
+[
+  {
+    "name": "r1-n1000000-c1-m512",
+    "rows": 1000000,
+    "cpus": 1,
+    "memory_mib": 512,
+    "rep": 1,
+    "sample": 1,
+    "retained_bytes": 671088640,
+    "status": "passed",
+    "verification": [
+      {
+        "phase": "initial",
+        "rows": 1000000,
+        "sha256": "67b0f400a60fe58495e9146efd785d8533e93ee47882703caaee58add471aa90",
+        "updated": 1000000,
+        "passed": true
+      },
+      {
+        "phase": "read",
+        "rows": 1000000,
+        "sha256": "67b0f400a60fe58495e9146efd785d8533e93ee47882703caaee58add471aa90",
+        "updated": 1000000,
+        "passed": true
+      },
+      {
+        "phase": "mixed",
+        "rows": 1000000,
+        "sha256": "7ef6fd9ab753ae35ab65aa5698899cd5f7b95a0b6ee9215998977495c16cf46a",
+        "updated": 1000000,
+        "passed": true
+      },
+      {
+        "phase": "safety",
+        "rows": 1000000,
+        "sha256": "39ad068afd1c6240a9f9d22a3c26c3a03275eae0212d6697de6bbf633be861cb",
+        "updated": 1000000,
+        "passed": true
+      },
+      {
+        "phase": "reopen",
+        "rows": 1000000,
+        "sha256": "39ad068afd1c6240a9f9d22a3c26c3a03275eae0212d6697de6bbf633be861cb",
+        "updated": 1000000,
+        "passed": true
+      }
+    ],
+    "measurements": [
+      {
+        "work": "read",
+        "ops": 1000,
+        "rate": 1000.0,
+        "capacity_per_kind": 64,
+        "elapsed_s": 0.999565673,
+        "start_ns": 154261581195930,
+        "finish_ns": 154262580761603,
+        "completed": 1000,
+        "ops_s": 1000.43451572191,
+        "pin_reader": true,
+        "old_snapshot_checked_keys": 0,
+        "p99_ms": 0.364347,
+        "max_ms": 0.903483,
+        "queue_rejected": 0,
+        "errors": [],
+        "by_kind": {
+          "read": {
+            "completed": 1000,
+            "p99_ms": 0.364347
+          }
+        },
+        "sync_before": 0,
+        "sync_after": 0,
+        "sync_attempts": 0,
+        "host_begin_ns": 1190547828000000,
+        "host_end_ns": 1190552281000000
+      },
+      {
+        "work": "mixed",
+        "ops": 1000,
+        "rate": 1000.0,
+        "capacity_per_kind": 64,
+        "elapsed_s": 0.999643972,
+        "start_ns": 154272273944826,
+        "finish_ns": 154273273588798,
+        "completed": 1000,
+        "ops_s": 1000.3561548010815,
+        "pin_reader": true,
+        "old_snapshot_checked_keys": 200,
+        "p99_ms": 6.808866,
+        "max_ms": 10.634192,
+        "queue_rejected": 0,
+        "errors": [],
+        "by_kind": {
+          "write": {
+            "completed": 200,
+            "p99_ms": 7.987893
+          },
+          "read": {
+            "completed": 800,
+            "p99_ms": 0.424599
+          }
+        },
+        "sync_before": 0,
+        "sync_after": 199,
+        "sync_attempts": 199,
+        "host_begin_ns": 1190558953000000,
+        "host_end_ns": 1190563906000000
+      }
+    ],
+    "boot": {
+      "timing": {
+        "ready_wait_ms": 2128.179376,
+        "launch_to_ready_ms": 3250.0
+      },
+      "limits": {
+        "cpu.max": "100000 100000",
+        "memory.max": "536870912",
+        "memory.swap.max": "0"
+      },
+      "process_ready": {
+        "process_ready_ms": 2515.9223829978146,
+        "poll_resolution_ms": 100
+      }
+    },
+    "safety_probe": {
+      "old_generation_updates_checked": 8,
+      "staged_refusal": "resource_exhausted",
+      "prior_staged_value_preserved": true,
+      "commit_after_rollback": true
+    },
+    "stop_state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 1,
+      "Error": "",
+      "StartedAt": "2026-11-06T12:01:57.67305935Z",
+      "FinishedAt": "2026-11-06T12:02:37.35335713Z"
+    },
+    "reopen": {
+      "timing": {
+        "ready_wait_ms": 2159.185706,
+        "launch_to_ready_ms": 3187.0000001508743
+      },
+      "limits": {
+        "cpu.max": "100000 100000",
+        "memory.max": "536870912",
+        "memory.swap.max": "0"
+      },
+      "process_ready": {
+        "process_ready_ms": 2516.045883996412,
+        "poll_resolution_ms": 100
+      }
+    }
+  }
+]

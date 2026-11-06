@@ -43,6 +43,16 @@ matched the previous images, paired results changed direction, and identical-ima
 controls showed substantial response-time variation. The original 8.5% observation
 remains visible; its cause is unresolved. No engine change or speedup is claimed.
 
+A [kernel-observer follow-up](docs/benchmarks/aged-sync-2026-11-06/README.md)
+partitioned **4,794 log syncs** on the same diagnostic binary. Blocking accounted
+for **98.47–98.59%** of sync time; runnable CPU wait in the slowest calls was only
+**0.007–0.017 ms**. Blocking is **not** a measurement of physical disk latency.
+Observer off/on write p99 medians were **5.891 / 5.478 ms**, while the worst write
+response was **12.702 / 14.569 ms**. Paired effects varied; no speedup or engine
+change is claimed. All **96,000 requests** and recovery checks passed.
+
+![Same-binary kernel observer comparison](docs/benchmarks/aged-sync-2026-11-06/latency.svg)
+
 ## What is not promised
 
 - No SQL parser, relational query optimizer, replication, or automatic failover.

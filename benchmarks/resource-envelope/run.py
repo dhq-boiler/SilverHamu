@@ -10,13 +10,13 @@ def run(*args,timeout=600,env=None):
     return p.stdout.strip()
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--out',type=pathlib.Path,required=True);p.add_argument('--rows',nargs='+',type=int,default=[100000,1000000]);p.add_argument('--cpus',nargs='+',type=int,default=[1,2]);p.add_argument('--memory',nargs='+',type=int,default=[512,1024,2048]);p.add_argument('--reps',type=int,default=3);p.add_argument('--ops',type=int,default=8000);p.add_argument('--sample',type=int,choices=[0,1],default=1);p.add_argument('--rate',type=float,default=1000);p.add_argument('--recover-memory',type=int);p.add_argument('--retained-bytes',type=int);p.add_argument('--image',default=IMAGE);p.add_argument('--age-seed',action='store_true');p.add_argument('--safety-probe',action='store_true');p.add_argument('--staged-bytes',type=int);p.add_argument('--diagnostics',action='store_true');p.add_argument('--pin-reader',type=int,choices=[0,1],default=1);a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--out',type=pathlib.Path,required=True);p.add_argument('--rows',nargs='+',type=int,default=[100000,1000000]);p.add_argument('--cpus',nargs='+',type=int,default=[1,2]);p.add_argument('--memory',nargs='+',type=int,default=[512,1024,2048]);p.add_argument('--reps',type=int,default=3);p.add_argument('--ops',type=int,default=8000);p.add_argument('--sample',type=int,choices=[0,1],default=1);p.add_argument('--rate',type=float,default=1000);p.add_argument('--recover-memory',type=int);p.add_argument('--retained-bytes',type=int);p.add_argument('--image',default=IMAGE);p.add_argument('--age-seed',action='store_true');p.add_argument('--safety-probe',action='store_true');p.add_argument('--staged-bytes',type=int);p.add_argument('--diagnostics',action='store_true');p.add_argument('--pin-reader',type=int,choices=[0,1],default=1);p.add_argument('--kernel-mode',choices=['off','trace']);a=p.parse_args()
     if a.retained_bytes is not None and a.retained_bytes<=0: p.error('--retained-bytes must be positive')
     if a.staged_bytes is not None and a.staged_bytes<=0:p.error('--staged-bytes must be positive')
     if a.safety_probe and a.staged_bytes!=4096:p.error('--safety-probe requires --staged-bytes 4096')
     out=a.out.resolve();out.mkdir(parents=True,exist_ok=False)
     token=secrets.token_hex(24);env=dict(os.environ,BENCH_PASSWORD=secrets.token_hex(16),BENCH_TOKEN=token)
-    uid='catdb-resource-'+uuid.uuid4().hex[:10];network=uid+'-net';seeds={};created=[];results=[]
+    thread_tag='as-'+uuid.uuid4().hex[:10];uid='catdb-resource-'+uuid.uuid4().hex[:10];network=uid+'-net';seeds={};created=[];results=[]
     metadata={'commit':run('git','-C',ROOT,'rev-parse','HEAD'),'image':run('docker','image','inspect',a.image,'--format','{{.Id}}'),'utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'arguments':{k:str(v) if isinstance(v,pathlib.Path) else v for k,v in vars(a).items()},'docker':json.loads(run('docker','info','--format','{{json .}}'))}
     metadata['docker']={k:metadata['docker'].get(k) for k in ['ServerVersion','NCPU','MemTotal','Driver','OSType','Architecture','KernelVersion']}
     (out/'environment.json').write_text(json.dumps(metadata,indent=2))
@@ -45,13 +45,13 @@ def main():
                 try:
                     run('docker','volume','create',vol);local.append(('volume',vol))
                     run('docker','run','--rm','--network',network,'-v',seeds[rows]+':/seed:ro','-v',vol+':/data',a.image,'python','-c',"import pathlib,shutil;[shutil.copy2(p,pathlib.Path('/data')/p.name) for p in pathlib.Path('/seed').iterdir()]")
-                    run('docker','run','-d','--name',client,'--network',network,'--cpus','2','--memory','2g','--memory-swap','2g',*mount,'-e',f'BENCH_ROWS={rows}','-v',vol+':/data',a.image,env=env);local.append(('container',client))
+                    run('docker','run','-d','--name',client,'--network',network,'--cpus','2','--memory','2g','--memory-swap','2g',*mount,'-e',f'BENCH_ROWS={rows}','-v',vol+':/data',*(['-v',str(caseout)+':/host-results'] if a.kernel_mode else []),a.image,env=env);local.append(('container',client))
                     run('docker','exec',client,'python','-c',"import os,pathlib;p=pathlib.Path('/data/token');p.write_text(os.environ['BENCH_TOKEN']);p.chmod(0o400)")
                     def execute(action,*extra,timeout=600):
-                        return json.loads(run('docker','exec',client,'python','/bench-src/resource-envelope/client.py',action,*extra,timeout=timeout))
+                        return json.loads(run('docker','exec',client,'python',('/bench-src/aged-sync/client.py' if a.kernel_mode else '/bench-src/resource-envelope/client.py'),action,*extra,timeout=timeout))
                     def boot(phase):
                         start=time.monotonic()
-                        run('docker','run','-d','--name',server,'--network',network,'--network-alias','database','--cpus',cpus,'--memory',f'{memory}m','--memory-swap',f'{memory}m','--pids-limit','128',*mount,*(['-e','CATDB_DIAGNOSTICS=1'] if a.diagnostics else []),'-e',f'SAMPLE={a.sample}','-e',f'PHASE={phase}','-e',f'RETAINED_BYTES={a.retained_bytes or ""}','-e',f'STAGED_BYTES={a.staged_bytes or ""}','-v',vol+':/data',a.image,'python','/bench-src/resource-envelope/supervisor.py',env=env)
+                        run('docker','run','-d','--name',server,'--network',network,'--network-alias','database','--cpus',cpus,'--memory',f'{memory}m','--memory-swap',f'{memory}m','--pids-limit','128',*mount,*(['-e','CATDB_BENCH_THREAD_NAME='+thread_tag] if a.kernel_mode else []),*(['-e','CATDB_DIAGNOSTICS=1'] if a.diagnostics else []),'-e',f'SAMPLE={a.sample}','-e',f'PHASE={phase}','-e',f'RETAINED_BYTES={a.retained_bytes or ""}','-e',f'STAGED_BYTES={a.staged_bytes or ""}','-v',vol+':/data',a.image,'python','/bench-src/resource-envelope/supervisor.py',env=env)
                         local.append(('container',server))
                         ready=execute('ready',timeout=75);ready['launch_to_ready_ms']=(time.monotonic()-start)*1000
                         limits=json.loads(run('docker','exec',client,'cat',f'/data/{phase}-limits.json'))
@@ -65,7 +65,12 @@ def main():
                     workloads=['read','mixed'] if rep%2 else ['mixed','read']
                     for work in workloads:
                         begin=time.monotonic_ns()
-                        m=execute('measure','--work',work,'--ops',str(a.ops),'--rate',str(a.rate),'--pin-reader',str(a.pin_reader));m['host_begin_ns']=begin;m['host_end_ns']=time.monotonic_ns();entry['measurements'].append(m)
+                        if a.kernel_mode:
+                            import importlib.util
+                            spec=importlib.util.spec_from_file_location('aged_sync_host',ROOT/'benchmarks/aged-sync/host.py');hook=importlib.util.module_from_spec(spec);spec.loader.exec_module(hook)
+                            m=hook.measure(execute,work,a.ops,a.rate,a.pin_reader,server,a.image,caseout/(work+'-kernel'),a.kernel_mode)
+                        else:m=execute('measure','--work',work,'--ops',str(a.ops),'--rate',str(a.rate),'--pin-reader',str(a.pin_reader))
+                        m['host_begin_ns']=begin;m['host_end_ns']=time.monotonic_ns();entry['measurements'].append(m)
                         assert not m['errors'],m['errors'][:2]
                         entry['verification'].append({'phase':work,**execute('verify')});save()
                     if a.safety_probe:

@@ -164,7 +164,7 @@ impl Server {
                     let config = Arc::clone(&self.config);
                     let stopping = Arc::clone(&stop);
                     match thread::Builder::new()
-                        .name("catdb-client".into())
+                        .name(client_thread_name())
                         .spawn(move || {
                             struct Permit(Arc<AtomicUsize>);
                             impl Drop for Permit {
@@ -1195,5 +1195,40 @@ mod tail_buffer_tests {
         }
         assert_eq!(buffer.drain()["remaining"], 0);
         assert_eq!(buffer.dropped, 1);
+    }
+}
+
+fn client_thread_name() -> String {
+    #[cfg(feature = "benchmark-metrics")]
+    {
+        benchmark_thread_name(std::env::var("CATDB_BENCH_THREAD_NAME").ok().as_deref())
+    }
+    #[cfg(not(feature = "benchmark-metrics"))]
+    {
+        "catdb-client".into()
+    }
+}
+
+#[cfg(feature = "benchmark-metrics")]
+fn benchmark_thread_name(requested: Option<&str>) -> String {
+    requested
+        .filter(|name| {
+            (1..=15).contains(&name.len())
+                && name.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-')
+        })
+        .unwrap_or("catdb-client")
+        .into()
+}
+
+#[cfg(all(test, feature = "benchmark-metrics"))]
+mod observer_name_tests {
+    #[test]
+    fn bv_observer_name_respects_kernel_length_and_rejects_unsafe_filters() {
+        for value in [None, Some(""), Some("abcdefghijklmnop"), Some("x\"||"), Some("日本語")] {
+            assert_eq!(super::benchmark_thread_name(value), "catdb-client");
+        }
+        for value in ["a", "as-123456789abc", "abcdefghijklmno"] {
+            assert_eq!(super::benchmark_thread_name(Some(value)), value);
+        }
     }
 }

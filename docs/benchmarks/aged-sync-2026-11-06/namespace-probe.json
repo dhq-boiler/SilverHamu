@@ -1,0 +1,15 @@
+{
+  "child": {
+    "namespace_pid": 11783
+  },
+  "events": [
+    "  catdb-os-probe-26071   [022] ..... 154041.600580: sys_fsync(fd: 3)",
+    "  catdb-os-probe-26071   [022] ..... 154041.600581: sys_fsync -> 0x0"
+  ],
+  "trace_header": [
+    "# tracer: nop",
+    "#",
+    "# entries-in-buffer/entries-written: 2/2   #P:32",
+    "#"
+  ]
+}

@@ -1,0 +1,28 @@
+test_bv_connection_cap_and_slot_reuse (__main__.ServiceTests.test_bv_connection_cap_and_slot_reuse) ... ok
+test_bv_invalid_frames_and_limits_do_not_mutate (__main__.ServiceTests.test_bv_invalid_frames_and_limits_do_not_mutate) ... ok
+test_bv_request_frame_accepts_exact_maximum_and_previous_byte (__main__.ServiceTests.test_bv_request_frame_accepts_exact_maximum_and_previous_byte) ... ok
+test_bv_resource_arguments_reject_invalid_values_without_touching_database (__main__.ServiceTests.test_bv_resource_arguments_reject_invalid_values_without_touching_database) ... ok
+test_bv_retained_admission_boundary_and_reopen_refusal_preserve_values (__main__.ServiceTests.test_bv_retained_admission_boundary_and_reopen_refusal_preserve_values) ... ok
+test_bv_single_requests_limits_leave_connection_and_data_intact (__main__.ServiceTests.test_bv_single_requests_limits_leave_connection_and_data_intact) ... ok
+test_bv_slow_partial_frame_times_out (__main__.ServiceTests.test_bv_slow_partial_frame_times_out) ... ok
+test_bv_transaction_deadline_is_not_reset_by_requests (__main__.ServiceTests.test_bv_transaction_deadline_is_not_reset_by_requests) ... ok
+test_cc_four_writers_acknowledged_commits_survive_kill (__main__.ServiceTests.test_cc_four_writers_acknowledged_commits_survive_kill) ... ok
+test_eq_empty_value_missing_update_delete_and_restart (__main__.ServiceTests.test_eq_empty_value_missing_update_delete_and_restart) ... ok
+test_eq_single_requests_crud_pages_ping_and_reopen (__main__.ServiceTests.test_eq_single_requests_crud_pages_ping_and_reopen) ... ok
+test_er_buffer_refusal_does_not_break_following_reads (__main__.ServiceTests.test_er_buffer_refusal_does_not_break_following_reads) ... ok
+test_er_remote_bind_requires_explicit_opt_in_and_token_file_is_bounded (__main__.ServiceTests.test_er_remote_bind_requires_explicit_opt_in_and_token_file_is_bounded) ... ok
+test_er_second_owner_and_corrupt_existing_file_refused (__main__.ServiceTests.test_er_second_owner_and_corrupt_existing_file_refused) ... ok
+test_er_single_request_acknowledgements_survive_process_exit (__main__.ServiceTests.test_er_single_request_acknowledgements_survive_process_exit) ... ok
+test_er_wrong_auth_and_protocol_are_rejected (__main__.ServiceTests.test_er_wrong_auth_and_protocol_are_rejected) ... ok
+test_st_dependency_limit_refusal_releases_on_rollback (__main__.ServiceTests.test_st_dependency_limit_refusal_releases_on_rollback) ... ok
+test_st_disconnect_discards_staged_values (__main__.ServiceTests.test_st_disconnect_discards_staged_values) ... ok
+test_st_old_generation_read_and_same_key_conflicts (__main__.ServiceTests.test_st_old_generation_read_and_same_key_conflicts) ... ok
+test_st_range_conflict_and_paged_snapshot_across_checkpoint (__main__.ServiceTests.test_st_range_conflict_and_paged_snapshot_across_checkpoint) ... ok
+test_st_read_only_snapshot_rejects_mutations_and_survives_updates (__main__.ServiceTests.test_st_read_only_snapshot_rejects_mutations_and_survives_updates) ... ok
+test_st_single_requests_reject_active_transaction_without_discarding_it (__main__.ServiceTests.test_st_single_requests_reject_active_transaction_without_discarding_it) ... ok
+test_st_staged_limit_refusal_preserves_prior_changes_and_releases_budget (__main__.ServiceTests.test_st_staged_limit_refusal_preserves_prior_changes_and_releases_budget) ... ok
+
+----------------------------------------------------------------------
+Ran 23 tests in 4.157s
+
+OK

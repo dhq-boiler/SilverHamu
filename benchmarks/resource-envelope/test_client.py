@@ -44,6 +44,12 @@ class WorkloadTests(unittest.TestCase):
     def test_ER_corrupted_values_fail_full_verification(self):
         Fake.values[key(99).hex()]='00'
         with self.assertRaises(AssertionError):m.verify()
+    def test_ST_observer_gate_finishes_once_before_timed_arrivals(self):
+        ready=[]
+        r=m.measure('mixed',20,1000,64,before_start=lambda:ready.append(time.monotonic_ns()))
+        self.assertEqual(len(ready),1);self.assertLessEqual(ready[0],r['start_ns'])
+        self.assertTrue(all(x['planned']>=ready[0] for x in r['records']))
+        self.assertFalse(r['errors']);self.assertTrue(m.verify()['passed'])
     def test_BV_invalid_capacity_rejected(self):
         with self.assertRaises(AssertionError):m.measure('read',10,100,0)
 

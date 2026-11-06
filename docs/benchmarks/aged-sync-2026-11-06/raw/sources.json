@@ -1,0 +1,18 @@
+{
+  "src/service.rs": "d19fb2864e893a1d01f315beac02161df88728f27cea6fe5c7f5137b9f05b7a8",
+  "src/transactions.rs": "39bd870918e0b8e3951cf872f05f0c3550c2b35c8783a6f22490dca888c6a129",
+  "src/group_commit.rs": "6bbaa29158dfb225e0762ec7eae93a206bc5329cf59edc1180d573bf7438a9a0",
+  "Cargo.toml": "22d1233726281cadcdab1639f4bb5bc6eabf26e2f2e192a3cc6bfcf210c026cd",
+  "Cargo.lock": "df9a4a2f931c9a3e3d2d1076aea9650b9297334ec81f574cb2f333d77dc5bef6",
+  "benchmarks/resource-envelope/run.py": "4257fa87f3cb72c5d2dc671fd6f6230540801cb2756dc030e1b4da091bf23d80",
+  "benchmarks/resource-envelope/client.py": "c2727d6921ab71ff05b6bc13ff0021d78e13da5fc3d6c620db9de08045e3cb5b",
+  "benchmarks/aged-sync/analyze.py": "c943de05f1bb9f1123e8ac29abdb16915c7fb835eb40ce7998f5ed8a0bff587d",
+  "benchmarks/aged-sync/client.py": "33319537103a2e224227681d57cf11e4b641567cc9548d0ca7c54d25fa35e67f",
+  "benchmarks/aged-sync/collect.py": "03c69766baaf82bdba348cbba2a9a52ee34a6413cd99e752b5b650c054cc6371",
+  "benchmarks/aged-sync/host.py": "341c15bdcb641b68f0a6990549dcf4d52ac08cb4dd860c9bc01c514f6de5a77f",
+  "benchmarks/aged-sync/identity.py": "57483fccb5d6a65515b4fe5a7381d502a243cc78565d6288e45815bc122dd255",
+  "benchmarks/aged-sync/probe.py": "89e9136dea7903a168626f9fdc5638ec1d131c5965beb164e4630b3074d3d080",
+  "benchmarks/aged-sync/run.py": "c1fd2f3abd4c31a8618994ddd0590fbd57e26739cb3ac474860c0397c2aebc7c",
+  "benchmarks/aged-sync/test_analysis.py": "5a7ee90e6b86d77fc3911cee964562bfd9fd045c2ce94b5e4ac7181033334fcd",
+  "benchmarks/aged-sync/test_identity.py": "acf9b98929de125cb08178272aa6664dcd50ddcb727bbba0d66dfdff30544be6"
+}

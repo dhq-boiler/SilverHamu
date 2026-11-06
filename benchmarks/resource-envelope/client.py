@@ -30,7 +30,7 @@ def quantile(samples,p):
     a=sorted(samples)
     return a[max(0,math.ceil(p*len(a))-1)]/1e6 if a else None
 
-def measure(work,ops,rate,capacity,pin_reader=True):
+def measure(work,ops,rate,capacity,pin_reader=True,before_start=None):
     assert ops>0 and rate>0 and capacity>0 and (ops+4)//5<=ROWS
     initial=json.loads((DATA/'updated.json').read_text())
     pin=connect() if pin_reader else None
@@ -44,7 +44,8 @@ def measure(work,ops,rate,capacity,pin_reader=True):
         except Exception as e:
             setup_errors.append(str(e)); ready.abort(); return
         try:
-            ready.wait(timeout=30); start_event.wait(timeout=30)
+            ready.wait(timeout=30)
+            if not start_event.wait(timeout=60):raise TimeoutError("measurement start gate expired")
             while True:
                 item=qs[kind].get()
                 if item is None: qs[kind].task_done(); break
@@ -70,6 +71,7 @@ def measure(work,ops,rate,capacity,pin_reader=True):
     for t in threads:t.start()
     ready.wait(timeout=35)
     if setup_errors: raise RuntimeError(setup_errors)
+    if before_start is not None:before_start()
     t0=time.monotonic_ns();start_event.set();rng=random.Random(739)
     for seq in range(ops):
         planned=t0+int(seq*1e9/rate)

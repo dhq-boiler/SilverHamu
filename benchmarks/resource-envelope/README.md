@@ -131,3 +131,48 @@ snapshots through deletion/reinsertion and budget refusal are also covered by
 `tests/resource_limits.rs`. Existing persistence and conflict tests remain in
 the regression suite. No service budget, file format or durability setting is
 relaxed by the candidate.
+
+
+## History capacity after aging
+
+The `history-capacity-bench` binary uses the actual persistent Rust database and
+opt-in `history-metrics` observation. It is an embedded diagnostic, not a service
+throughput benchmark. Production defaults, GC, WAL format and budgets are unchanged.
+The optional `allocation-metrics` feature counts live bytes requested through
+Rust's global allocator in this binary only; it does not measure malloc usable
+size or all process allocations. History scans hold the DB lock and are outside
+the response-time windows. Do not poll them on a production request path.
+
+```sh
+docker build -f benchmarks/resource-envelope/history-capacity.Dockerfile -t catdb-history-capacity:local .
+python benchmarks/resource-envelope/history_capacity_run.py --out artifacts/history-capacity-pilot --rows 100000 --observer both
+python benchmarks/resource-envelope/history_capacity_run.py --out artifacts/history-capacity-million --rows 1000000 --observer both --reps 3 --check512
+```
+
+Start the million-row comparison only if the pilot can distinguish live history
+storage, spare capacity, and RSS after release. Each phase has a 180-second child
+deadline; GC has a 60-second deadline. Each case owns a new Docker volume and
+containers, removed after records are copied. A failed 512-MiB reopen is retained
+as a failed phase, followed by verification/checkpoint at 1 GiB and a separate
+512-MiB reopen of the checkpoint. It is never silently counted as a successful
+aged-log reopen.
+
+Spread aging updates 25/50/100% of rows in 1,000-row transactions, draining GC
+after each batch. Hot aging updates the first 1% of rows sixteen times with an
+old reader pinned. This state preparation is separate from response-time samples:
+1,000 point reads and four closed-loop writers with 100 commits each. Those four
+writers rewrite keys 0..3 to their already expected values; they can further grow
+those four histories, which subsequent capacity snapshots include. These windows
+are not comparable to fixed-arrival network/service benchmark p99 values.
+
+Counting/scanning is off/on in the paired builds, with reversed order in even
+rounds. The common 100-ms cgroup observer remains active in both builds; its own
+overhead is not isolated here. Seed creation uses 2 CPUs / 4 GiB outside measured
+phases; aging/reopen uses 1 CPU / 1 GiB. The explicit retained-data budget is
+640 MiB, and swap is disabled. File-cache charge, RSS and live requested bytes
+are recorded separately. These are warm-host-cache container measurements.
+
+The final Linux `malloc_trim(0)` is a diagnostic intervention after the latency
+windows. Unchanged live requested bytes with falling RSS demonstrates releasable
+allocator-held pages; it does not identify every remaining byte or propose trim
+for production. Full verification runs again afterward.

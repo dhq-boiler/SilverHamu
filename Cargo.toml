@@ -33,6 +33,8 @@ handoff-refill = ["group-handoff"]
 commit-window = ["group-handoff"]
 adaptive-window = ["commit-window"]
 sync-stall = []
+history-metrics = []
+allocation-metrics = []
 
 [[bin]]
 name = "catdb"
@@ -52,3 +54,8 @@ required-features = ["service", "lock-timing"]
 name = "reclamation-bench"
 path = "src/bin/reclamation-bench.rs"
 required-features = ["service"]
+
+[[bin]]
+name = "history-capacity-bench"
+path = "src/bin/history-capacity-bench.rs"
+required-features = ["service", "history-metrics"]

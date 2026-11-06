@@ -1,0 +1,20 @@
+{
+  "utc": "2026-11-06T04:29:46.784425+00:00",
+  "image": "sha256:d7f0eb02d1a2eaa6dd2d6ae5d6c789b44f7cfd5c8633efb358e5f8e8b4bbfe59",
+  "base_commit": "995ced35f733c66c2b1bbd71ea064036020b436b",
+  "args": {
+    "out": "C:\\Git\\NewDBMS\\artifacts\\history-capacity-pilot",
+    "rows": 100000,
+    "reps": 1,
+    "observer": "both",
+    "check512": false
+  },
+  "source_sha256": {
+    "Cargo.toml": "ec21953a106f81b01298bec25fe9b90ff42aa6ba45e9661239a6112931bff227",
+    "src/transactions.rs": "c2f8476f656e83379026bc5577b9b7ae00d25ba22d1e51aee7000abf57932f3b",
+    "src/bin/history-capacity-bench.rs": "b6611758ee9da81a39dd40b0c6a069b85d9af602c17e33c54a73a398e7403d7e",
+    "benchmarks/resource-envelope/history_capacity_run.py": "6e2edc31d349d077296cc6e56cdca5955686305d142a58ba484c8879b6d9e2a2",
+    "benchmarks/resource-envelope/history_capacity_observer.py": "88cbb096526e3457fad8da33a686ba4f02e9e2f2cdf300e68285da9eeeeab789",
+    "benchmarks/resource-envelope/history-capacity.Dockerfile": "585d2fc1a110f158e86a829c7bc8aa4a85e59fe36d336603d53aede552296c48"
+  }
+}

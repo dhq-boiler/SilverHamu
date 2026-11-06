@@ -753,3 +753,19 @@ grown histories still retain capacity. Across the passing fixtures,
 process-crash recovery and OOM rescue. Update-p99 medians at 1 GiB changed from
 6.623 to 7.185 ms at 1 CPU (worse), and 7.050 to 6.835 ms at 2 CPUs; no uniform
 latency improvement is claimed. See [per-trial latency, controls, limits and reproduction](docs/benchmarks/history-one-2026-11-06/README.md).
+
+## Follow-up: aging reveals two different kinds of retained memory
+
+The diagnostic separates still-allocated spare history slots from freed allocator
+pages. After spreading updates to all 1M keys and draining GC, unused history
+capacity reached **68.676 MiB** and process RSS **537.363 MiB**. Hot updates instead
+showed RSS remaining high after live allocations fell; diagnostic trim released
+about **41.6 MiB** while live requested bytes stayed unchanged.
+
+![History capacity after aging](docs/benchmarks/history-capacity-2026-11-06/capacity.svg)
+
+All six 512-MiB reopens of the fully aged WAL hit OOM; all passed after verification
+and checkpointing at 1 GiB. The study passed 142 full-content checks, but
+timing observation caused or coincided with large, inconsistent p99 differences;
+no latency improvement or negligible observer cost is claimed. Production GC and
+defaults remain unchanged. See [all stages, observer results, recovery and limits](docs/benchmarks/history-capacity-2026-11-06/README.md).

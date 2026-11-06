@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        features: [service, "service,fixed-log", "service,wal-direct", "service,wal-prepare", "service,fixed-log,wal-prepare", "service,single-client-commit,lock-timing,benchmark-metrics", "service,backlog-batch,benchmark-metrics,sync-stall,lock-timing"]
+        features: [service, "service,history-metrics,allocation-metrics", "service,fixed-log", "service,wal-direct", "service,wal-prepare", "service,fixed-log,wal-prepare", "service,single-client-commit,lock-timing,benchmark-metrics", "service,backlog-batch,benchmark-metrics,sync-stall,lock-timing"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -61,6 +61,8 @@ jobs:
       - run: cargo build --locked --release --features "${{ matrix.features }}" --lib
       - run: python -m unittest discover -s tests -p "*ffi_checks.py"
       - run: cargo clippy --locked --features "${{ matrix.features }}" --lib --bin catdb-server -- -D warnings
+      - if: contains(matrix.features, 'history-metrics')
+        run: cargo clippy --locked --features "${{ matrix.features }}" --bin history-capacity-bench -- -D warnings
   container:
     runs-on: ubuntu-latest
     steps:

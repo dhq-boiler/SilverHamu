@@ -354,6 +354,18 @@ pub struct Stats {
     pub wal_bytes: u64,
 }
 
+#[cfg(feature = "history-metrics")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct HistoryMetrics {
+    pub records: usize,
+    pub versions: usize,
+    pub capacity_slots: usize,
+    pub version_size: usize,
+    pub key_capacity_bytes: usize,
+    pub value_bytes: usize,
+    pub history_keys: usize,
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct ExportInfo {
     pub version: u64,
@@ -1086,6 +1098,31 @@ impl Database {
             active_transactions: state.active.values().sum(),
             wal_bytes: state.wal_bytes,
         })
+    }
+
+    #[cfg(feature = "history-metrics")]
+    pub fn history_metrics(&self) -> Result<HistoryMetrics> {
+        let state = self.state()?;
+        let mut result = HistoryMetrics {
+            records: state.rows.len(),
+            versions: 0,
+            capacity_slots: 0,
+            version_size: std::mem::size_of::<Version>(),
+            key_capacity_bytes: 0,
+            value_bytes: 0,
+            history_keys: state.history_keys.len(),
+        };
+        for (key, versions) in &state.rows {
+            result.key_capacity_bytes += key.capacity();
+            result.versions += versions.len();
+            result.capacity_slots += versions.capacity();
+            result.value_bytes += versions
+                .iter()
+                .filter_map(|v| v.value.as_ref())
+                .map(|v| v.len())
+                .sum::<usize>();
+        }
+        Ok(result)
     }
 
     pub fn resource_usage(&self) -> Result<ResourceUsage> {

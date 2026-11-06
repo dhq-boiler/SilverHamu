@@ -10,7 +10,8 @@ def run(*args,timeout=600,env=None):
     return p.stdout.strip()
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--out',type=pathlib.Path,required=True);p.add_argument('--rows',nargs='+',type=int,default=[100000,1000000]);p.add_argument('--cpus',nargs='+',type=int,default=[1,2]);p.add_argument('--memory',nargs='+',type=int,default=[512,1024,2048]);p.add_argument('--reps',type=int,default=3);p.add_argument('--ops',type=int,default=8000);p.add_argument('--sample',type=int,choices=[0,1],default=1);p.add_argument('--rate',type=float,default=1000);p.add_argument('--recover-memory',type=int);p.add_argument('--retained-bytes',type=int);p.add_argument('--image',default=IMAGE);p.add_argument('--age-seed',action='store_true');p.add_argument('--safety-probe',action='store_true');p.add_argument('--staged-bytes',type=int);p.add_argument('--diagnostics',action='store_true');p.add_argument('--pin-reader',type=int,choices=[0,1],default=1);p.add_argument('--kernel-mode',choices=['off','trace']);p.add_argument('--storage-mode',choices=['volume','bind']);p.add_argument('--bind-root',type=pathlib.Path);p.add_argument('--preparation-budget',type=int);p.add_argument('--batch-limit',type=int,choices=[1,8]);p.add_argument('--stall-scenario',choices=['normal','single'],default='normal');a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--read-ramp',action='store_true');p.add_argument('--out',type=pathlib.Path,required=True);p.add_argument('--rows',nargs='+',type=int,default=[100000,1000000]);p.add_argument('--cpus',nargs='+',type=int,default=[1,2]);p.add_argument('--memory',nargs='+',type=int,default=[512,1024,2048]);p.add_argument('--reps',type=int,default=3);p.add_argument('--ops',type=int,default=8000);p.add_argument('--sample',type=int,choices=[0,1],default=1);p.add_argument('--rate',type=float,default=1000);p.add_argument('--recover-memory',type=int);p.add_argument('--retained-bytes',type=int);p.add_argument('--image',default=IMAGE);p.add_argument('--age-seed',action='store_true');p.add_argument('--safety-probe',action='store_true');p.add_argument('--staged-bytes',type=int);p.add_argument('--diagnostics',action='store_true');p.add_argument('--pin-reader',type=int,choices=[0,1],default=1);p.add_argument('--kernel-mode',choices=['off','trace']);p.add_argument('--storage-mode',choices=['volume','bind']);p.add_argument('--bind-root',type=pathlib.Path);p.add_argument('--preparation-budget',type=int);p.add_argument('--batch-limit',type=int,choices=[1,8]);p.add_argument('--stall-scenario',choices=['normal','single'],default='normal');a=p.parse_args()
+    if a.read_ramp and (a.batch_limit or a.kernel_mode):p.error('read ramp requires ordinary service client')
     if a.preparation_budget is not None and (not a.batch_limit or not a.staged_bytes or not 0<a.preparation_budget<=a.staged_bytes):p.error('preparation budget requires batch API and must fit staged budget')
     if a.batch_limit and a.kernel_mode:p.error('batch workload owns its measurement gate')
     if a.retained_bytes is not None and a.retained_bytes<=0: p.error('--retained-bytes must be positive')
@@ -62,7 +63,7 @@ def main():
                     run('docker','run','-d','--name',client,'--network',network,'--cpus','2','--memory','2g','--memory-swap','2g',*case_mount,'-e',f'BENCH_ROWS={rows}','-v',data_source+':/data',*(['-v',str(caseout)+':/host-results'] if a.kernel_mode else []),a.image,env=env);local.append(('container',client))
                     run('docker','exec',client,'python','-c',"import os,pathlib;p=pathlib.Path(os.environ.get('CATDB_BENCH_CONTROL','/data'))/'token';p.write_text(os.environ['BENCH_TOKEN']);p.chmod(0o400)")
                     def execute(action,*extra,timeout=600):
-                        return json.loads(run('docker','exec',client,'python',('/bench-src/constrained-backlog/client.py' if a.batch_limit else '/bench-src/aged-sync/client.py' if a.kernel_mode else '/bench-src/resource-envelope/client.py'),action,*extra,timeout=timeout))
+                        return json.loads(run('docker','exec',client,'python',('/bench-src/wire-buffer/ramp_client.py' if a.read_ramp else '/bench-src/constrained-backlog/client.py' if a.batch_limit else '/bench-src/aged-sync/client.py' if a.kernel_mode else '/bench-src/resource-envelope/client.py'),action,*extra,timeout=timeout))
                     def boot(phase):
                         start=time.monotonic()
                         run('docker','run','-d','--name',server,'--network',network,'--network-alias','database','--cpus',cpus,'--memory',f'{memory}m','--memory-swap',f'{memory}m','--pids-limit','128',*case_mount,*(['-e','CATDB_BENCH_THREAD_NAME='+thread_tag] if a.kernel_mode else []),*(['-e','CATDB_DIAGNOSTICS=1'] if a.diagnostics else []),'-e',f'SAMPLE={a.sample}','-e',f'PHASE={phase}','-e',f'RETAINED_BYTES={a.retained_bytes or ""}','-e',f'STAGED_BYTES={a.staged_bytes or ""}','-v',data_source+':/data',a.image,'python','/bench-src/resource-envelope/supervisor.py',env=env)
@@ -79,7 +80,7 @@ def main():
                         entry['storage_probe']=json.loads(run('docker','exec',client,'python','/bench-src/storage-path/probe.py'))
                         entry['mounts']=json.loads(run('docker','inspect',server,'--format','{{json .Mounts}}'));save()
                     entry['verification'].append({'phase':'initial',**execute('verify')})
-                    workloads=['read','mixed'] if rep%2 else ['mixed','read']
+                    workloads=['ramp'] if a.read_ramp else ['read','mixed'] if rep%2 else ['mixed','read']
                     for work in workloads:
                         begin=time.monotonic_ns()
                         if a.kernel_mode:
@@ -114,7 +115,7 @@ def main():
                     if ('container',server) in local:
                         try:run('docker','stop','--time','10',server,timeout=20)
                         except Exception:pass
-                    for pattern in ['boot-command.json','reopen-command.json','rescue-command.json','boot-resources.jsonl','reopen-resources.jsonl','rescue-resources.jsonl','boot-exit.json','reopen-exit.json','rescue-exit.json','boot-server.log','reopen-server.log','rescue-server.log','read-raw.json','mixed-raw.json']:
+                    for pattern in ['boot-command.json','reopen-command.json','rescue-command.json','boot-resources.jsonl','reopen-resources.jsonl','rescue-resources.jsonl','boot-exit.json','reopen-exit.json','rescue-exit.json','boot-server.log','reopen-server.log','rescue-server.log','read-raw.json','mixed-raw.json','ramp-raw.json']:
                         try:run('docker','cp',client+':'+control+'/'+pattern,caseout/pattern)
                         except Exception:pass
                     for kind,n in reversed(local):remove(kind,n)

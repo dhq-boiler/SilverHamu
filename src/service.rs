@@ -201,7 +201,7 @@ impl Server {
 }
 
 fn transfer_read(
-    stream: &mut TcpStream,
+    stream: &mut impl Read,
     bytes: &mut [u8],
     deadline: Instant,
     stop: &AtomicBool,
@@ -227,7 +227,7 @@ fn transfer_read(
     Ok(())
 }
 
-fn receive(stream: &mut TcpStream, deadline: Instant, stop: &AtomicBool) -> io::Result<Value> {
+fn receive(stream: &mut impl Read, deadline: Instant, stop: &AtomicBool) -> io::Result<Value> {
     let mut prefix = [0; 4];
     transfer_read(stream, &mut prefix, deadline, stop)?;
     let length = u32::from_be_bytes(prefix) as usize;
@@ -240,7 +240,7 @@ fn receive(stream: &mut TcpStream, deadline: Instant, stop: &AtomicBool) -> io::
 }
 
 fn send(
-    stream: &mut TcpStream,
+    stream: &mut impl Write,
     value: &Value,
     deadline: Instant,
     stop: &AtomicBool,
@@ -372,26 +372,56 @@ impl TailBuffer {
     }
 }
 
+#[cfg(feature = "wire-buffer")]
+#[path = "service_wire.rs"]
+mod buffered_wire;
+#[cfg(feature = "wire-buffer")]
+use buffered_wire::Wire;
+#[cfg(not(feature = "wire-buffer"))]
+#[derive(Default)]
+struct Wire {}
+#[cfg(not(feature = "wire-buffer"))]
+impl Wire {
+    fn receive(
+        &mut self,
+        stream: &mut impl Read,
+        deadline: Instant,
+        stop: &AtomicBool,
+    ) -> io::Result<Value> {
+        receive(stream, deadline, stop)
+    }
+    fn send(
+        &mut self,
+        stream: &mut impl Write,
+        value: &Value,
+        deadline: Instant,
+        stop: &AtomicBool,
+    ) -> io::Result<()> {
+        send(stream, value, deadline, stop)
+    }
+}
+
 fn connection(
     mut stream: TcpStream,
     db: Database,
     config: &Config,
     stop: &AtomicBool,
 ) -> io::Result<()> {
+    let mut wire = Wire::default();
     stream.set_nodelay(true)?;
     stream.set_read_timeout(Some(Duration::from_millis(100)))?;
     stream.set_write_timeout(Some(Duration::from_millis(100)))?;
     let deadline = Instant::now() + config.request_timeout.min(Duration::from_secs(5));
-    let auth = receive(&mut stream, deadline, stop)?;
+    let auth = wire.receive(&mut stream, deadline, stop)?;
     let token = auth.get("token").and_then(Value::as_str).unwrap_or("");
     if auth.get("op").and_then(Value::as_str) != Some("auth")
         || auth.get("version").and_then(Value::as_u64) != Some(1)
         || !same_token(token.as_bytes(), &config.token)
     {
-        send(&mut stream, &error("unauthorized"), deadline, stop)?;
+        wire.send(&mut stream, &error("unauthorized"), deadline, stop)?;
         return Ok(());
     }
-    send(
+    wire.send(
         &mut stream,
         &json!({"ok":true,"protocol":1}),
         deadline,
@@ -418,21 +448,21 @@ fn connection(
         if let Some(expiry) = expires {
             deadline = deadline.min(expiry);
         }
-        let request = receive(&mut stream, deadline, stop)?;
+        let request = wire.receive(&mut stream, deadline, stop)?;
         if Instant::now() >= deadline || stop.load(Ordering::Acquire) {
             break;
         }
         #[cfg(feature = "lock-timing")]
         {
             if buffered && request.get("op").and_then(Value::as_str) == Some("diagnostic_drain") {
-                send(&mut stream, &tail_buffer.drain(), deadline, stop)?;
+                wire.send(&mut stream, &tail_buffer.drain(), deadline, stop)?;
                 continue;
             }
             if pull_diagnostic
                 && request.get("op").and_then(Value::as_str) == Some("diagnostic_last")
             {
                 let response = json!({"ok": true, "diagnostic": last_diagnostic.as_ref().map(CommitDiagnostic::json)});
-                send(&mut stream, &response, deadline, stop)?;
+                wire.send(&mut stream, &response, deadline, stop)?;
                 continue;
             }
             request_index = request_index.wrapping_add(1);
@@ -511,7 +541,7 @@ fn connection(
         } else {
             response
         };
-        send(
+        wire.send(
             &mut stream,
             &response,
             Instant::now() + config.request_timeout,
@@ -1224,11 +1254,73 @@ fn benchmark_thread_name(requested: Option<&str>) -> String {
 mod observer_name_tests {
     #[test]
     fn bv_observer_name_respects_kernel_length_and_rejects_unsafe_filters() {
-        for value in [None, Some(""), Some("abcdefghijklmnop"), Some("x\"||"), Some("日本語")] {
+        for value in [
+            None,
+            Some(""),
+            Some("abcdefghijklmnop"),
+            Some("x\"||"),
+            Some("日本語"),
+        ] {
             assert_eq!(super::benchmark_thread_name(value), "catdb-client");
         }
         for value in ["a", "as-123456789abc", "abcdefghijklmno"] {
             assert_eq!(super::benchmark_thread_name(Some(value)), value);
         }
     }
+}
+
+#[cfg(feature = "wire-metrics")]
+#[doc(hidden)]
+pub fn wire_probe(
+    iterations: usize,
+    begin: impl FnOnce(),
+    end: impl FnOnce(),
+) -> io::Result<(usize, usize)> {
+    struct Reader {
+        input: std::io::Cursor<Vec<u8>>,
+        calls: usize,
+    }
+    impl Read for Reader {
+        fn read(&mut self, bytes: &mut [u8]) -> io::Result<usize> {
+            self.calls += 1;
+            self.input.read(bytes)
+        }
+    }
+    struct Writer {
+        calls: usize,
+    }
+    impl Write for Writer {
+        fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
+            self.calls += 1;
+            Ok(bytes.len())
+        }
+        fn flush(&mut self) -> io::Result<()> {
+            Ok(())
+        }
+    }
+    let body = serde_json::to_vec(&json!({"op":"get_latest","key":"0000000000000001"}))?;
+    let mut frame = (body.len() as u32).to_be_bytes().to_vec();
+    frame.extend(body);
+    let mut input = Reader {
+        input: std::io::Cursor::new(frame),
+        calls: 0,
+    };
+    let mut output = Writer { calls: 0 };
+    let mut wire = Wire::default();
+    let response = json!({"ok":true,"value":"ab".repeat(256)});
+    let stop = AtomicBool::new(false);
+    let deadline = Instant::now() + Duration::from_secs(60);
+    wire.receive(&mut input, deadline, &stop)?;
+    wire.send(&mut output, &response, deadline, &stop)?;
+    input.calls = 0;
+    output.calls = 0;
+    begin();
+    for _ in 0..iterations {
+        input.input.set_position(0);
+        let request = wire.receive(&mut input, deadline, &stop)?;
+        wire.send(&mut output, &response, deadline, &stop)?;
+        drop(request);
+    }
+    end();
+    Ok((input.calls, output.calls))
 }

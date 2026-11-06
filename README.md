@@ -6,6 +6,17 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Optional JSON frame buffering experiment
+
+At aged 1M rows /1 CPU /512MiB /1,000 requests/s, bounded connection-local
+buffers reduced median server CPU **9.686% → 8.056% (-16.8%)** across three pairs.
+However, mixed read p99 was **0.329 → 0.354ms** and write p99 **5.178 → 5.442ms**.
+RSS stayed near 420MiB. This saves CPU work, but is not a demonstrated latency or
+capacity improvement; `wire-buffer` remains opt-in and defaults are unchanged.
+[Every trial, ramp, allocation diagnostics and safety checks](docs/benchmarks/wire-buffer-2026-11-07/README.md).
+
+![Wire buffering comparison](docs/benchmarks/wire-buffer-2026-11-07/comparison.svg)
+
 ## Optional short-key storage experiment
 
 At 1M rows /1 CPU /512MiB, storing short index keys inline reduced median RSS

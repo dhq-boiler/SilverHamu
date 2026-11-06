@@ -1,0 +1,18 @@
+{
+  "baseline": {
+    "allocation_calls": 90000,
+    "read_calls": 20000,
+    "requested_bytes": 24310000,
+    "requests": 10000,
+    "wire_buffer": false,
+    "write_calls": 20000
+  },
+  "buffered": {
+    "allocation_calls": 50000,
+    "read_calls": 20000,
+    "requested_bytes": 6630000,
+    "requests": 10000,
+    "wire_buffer": true,
+    "write_calls": 10000
+  }
+}

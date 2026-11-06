@@ -37,6 +37,8 @@ sync-stall = []
 history-metrics = []
 inline-latest = []
 inline-key = []
+wire-buffer = []
+wire-metrics = []
 skip-unneeded-history = ["inline-latest"]
 retirement-timing = ["skip-unneeded-history", "lock-timing"]
 allocation-metrics = []
@@ -69,3 +71,8 @@ required-features = ["service", "history-metrics"]
 name = "key-allocation-bench"
 path = "src/bin/key-allocation-bench.rs"
 required-features = ["service", "history-metrics", "allocation-metrics"]
+
+[[bin]]
+name = "wire-probe"
+path = "src/bin/wire-probe.rs"
+required-features = ["service", "wire-metrics"]

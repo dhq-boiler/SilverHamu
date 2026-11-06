@@ -1,0 +1,33 @@
+{
+  "commit": "36e1d6d84828361b5f12156dc0f0f608e6fd014d",
+  "image": "sha256:cb1d1c787f02929ebcbf45348faddb57767f5e8cdc7d0557b04cf171a09a73f1",
+  "utc": "2026-11-06T05:16:57.234477+00:00",
+  "arguments": {
+    "out": "C:\\Git\\catdb\\docs\\benchmarks\\inline-latest-2026-11-06\\raw\\service-before-3",
+    "rows": [
+      1000000
+    ],
+    "cpus": [
+      1
+    ],
+    "memory": [
+      1024
+    ],
+    "reps": 1,
+    "ops": 8000,
+    "sample": 1,
+    "rate": 1000,
+    "recover_memory": null,
+    "retained_bytes": 671088640,
+    "image": "catdb-inline-service-before:local"
+  },
+  "docker": {
+    "ServerVersion": "29.9.2",
+    "NCPU": 32,
+    "MemTotal": 67380625408,
+    "Driver": "overlay2",
+    "OSType": "linux",
+    "Architecture": "x86_64",
+    "KernelVersion": "6.18.54.1-microsoft-standard-WSL2"
+  }
+}

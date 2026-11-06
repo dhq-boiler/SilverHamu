@@ -1,9 +1,9 @@
 """Bounded history-aging diagnostics; only uniquely owned Docker resources."""
 import argparse,datetime,hashlib,json,pathlib,subprocess,uuid
 ROOT=pathlib.Path(__file__).resolve().parents[2]
-p=argparse.ArgumentParser();p.add_argument('--out',type=pathlib.Path,required=True);p.add_argument('--rows',type=int,default=100000);p.add_argument('--reps',type=int,default=1);p.add_argument('--observer',choices=['both','counted'],default='both');p.add_argument('--check512',action='store_true');a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--out',type=pathlib.Path,required=True);p.add_argument('--rows',type=int,default=100000);p.add_argument('--reps',type=int,default=1);p.add_argument('--observer',choices=['both','counted'],default='both');p.add_argument('--check512',action='store_true');p.add_argument('--image',default='catdb-history-capacity:local');a=p.parse_args()
 assert 100<=a.rows<=1000000 and a.rows%100==0 and 1<=a.reps<=3
-a.out.mkdir(parents=True,exist_ok=False);image='catdb-history-capacity:local'
+a.out.mkdir(parents=True,exist_ok=False);image=a.image
 def run(args,check=True,timeout=240):
     r=subprocess.run(list(map(str,args)),capture_output=True,text=True,encoding='utf8',errors='replace',timeout=timeout)
     if check and r.returncode:raise RuntimeError(r.stderr[-2500:]+r.stdout[-1000:])

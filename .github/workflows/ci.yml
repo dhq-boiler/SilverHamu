@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        features: [service, "service,history-metrics,allocation-metrics", "service,fixed-log", "service,wal-direct", "service,wal-prepare", "service,fixed-log,wal-prepare", "service,single-client-commit,lock-timing,benchmark-metrics", "service,backlog-batch,benchmark-metrics,sync-stall,lock-timing"]
+        features: [service, "service,history-metrics,allocation-metrics,inline-latest", "service,fixed-log,inline-latest", "service,history-metrics,allocation-metrics", "service,fixed-log", "service,wal-direct", "service,wal-prepare", "service,fixed-log,wal-prepare", "service,single-client-commit,lock-timing,benchmark-metrics", "service,backlog-batch,benchmark-metrics,sync-stall,lock-timing"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4

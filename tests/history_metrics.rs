@@ -6,16 +6,14 @@ impl Fixture {
     fn new() -> Self {
         let p = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("artifacts");
         std::fs::create_dir_all(&p).unwrap();
-        Self(
-            p.join(format!(
+        Self(p.join(format!(
                 "history-metrics-{}-{}.wal",
                 std::process::id(),
                 std::time::SystemTime::now()
                     .duration_since(std::time::UNIX_EPOCH)
                     .unwrap()
                     .as_nanos()
-            )),
-        )
+            )))
     }
 }
 impl Drop for Fixture {
@@ -97,4 +95,41 @@ fn bv_er_refused_update_keeps_metrics_and_data_and_release_restores_admission() 
         db.begin_read().unwrap().get(&key).unwrap(),
         Some(vec![3; 256])
     );
+}
+
+#[cfg(feature = "inline-latest")]
+#[test]
+fn st_repeated_history_growth_and_release_returns_to_inline_storage() {
+    let f = Fixture::new();
+    let db = Database::create(&f.0, [85; 16]).unwrap();
+    for cycle in 0..8u8 {
+        let mut tx = db.begin().unwrap();
+        tx.put(b"k", &[cycle; 256]).unwrap();
+        tx.commit().unwrap();
+        let mut old = db.begin_read().unwrap();
+        for step in 0..17u8 {
+            let mut tx = db.begin().unwrap();
+            tx.put(b"k", &[step; 256]).unwrap();
+            tx.commit().unwrap();
+        }
+        assert!(db.history_metrics().unwrap().heap_history_bytes > 0);
+        assert_eq!(old.get(b"k").unwrap(), Some(vec![cycle; 256]));
+        drop(old);
+        while db.collect_garbage().unwrap() {}
+        let m = db.history_metrics().unwrap();
+        assert_eq!(m.versions, 1);
+        assert_eq!(m.inline_versions, 1);
+        assert_eq!(m.heap_history_bytes, 0);
+    }
+    let mut old = db.begin_read().unwrap();
+    let mut tx = db.begin().unwrap();
+    tx.delete(b"k").unwrap();
+    tx.commit().unwrap();
+    assert_eq!(old.get(b"k").unwrap(), Some(vec![16; 256]));
+    drop(old);
+    while db.collect_garbage().unwrap() {}
+    let m = db.history_metrics().unwrap();
+    assert_eq!(m.records, 0);
+    assert_eq!(m.inline_versions, 0);
+    assert_eq!(m.heap_history_bytes, 0);
 }

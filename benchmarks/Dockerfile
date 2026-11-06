@@ -2,7 +2,8 @@ FROM rust:1.89-bookworm AS build
 WORKDIR /build
 COPY Cargo.toml Cargo.lock ./
 COPY src ./src
-RUN cargo build --locked --release --features service --lib --bin catdb-server
+ARG EXTRA_FEATURES=""
+RUN cargo build --locked --release --features service${EXTRA_FEATURES} --lib --bin catdb-server
 FROM python:3.12-slim-bookworm
 RUN pip install --no-cache-dir psycopg[binary]==3.2.10 PyMySQL==1.1.2 cryptography==46.0.3 oracledb==3.4.1 matplotlib==3.10.7
 COPY --from=build /build/target/release/libnewdbms.so /usr/local/lib/

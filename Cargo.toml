@@ -34,6 +34,7 @@ commit-window = ["group-handoff"]
 adaptive-window = ["commit-window"]
 sync-stall = []
 history-metrics = []
+inline-latest = []
 allocation-metrics = []
 
 [[bin]]

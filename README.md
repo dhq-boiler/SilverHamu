@@ -769,3 +769,22 @@ and checkpointing at 1 GiB. The study passed 142 full-content checks, but
 timing observation caused or coincided with large, inconsistent p99 differences;
 no latency improvement or negligible observer cost is claimed. Production GC and
 defaults remain unchanged. See [all stages, observer results, recovery and limits](docs/benchmarks/history-capacity-2026-11-06/README.md).
+
+## Follow-up: inline latest version reduces aged memory (opt-in)
+
+Keeping the latest version in the tree and allocating history only when needed
+reduced full-spread **1M-record RSS from 537.137 to 418.758 MiB (22.0%)**.
+Fully aged WAL reopens at 512 MiB changed from **0/3 to 3/3 successful**.
+
+![Inline latest memory comparison](docs/benchmarks/inline-latest-2026-11-06/memory.svg)
+
+The tradeoff is explicit: hot-history release + GC rose **15.921 to
+20.674 ms**. Separately, uninstrumented service mixed-write p99 changed
+**6.174 to 6.309 ms**; no uniform latency improvement is claimed.
+The feature remains opt-in (`inline-latest`), with the default unchanged.
+
+![Inline latest service comparison](docs/benchmarks/inline-latest-2026-11-06/service.svg)
+
+96,000 service requests completed without refusal/error and
+141 full-content checks passed. See the
+[decision, all trials, recovery and reproduction](docs/benchmarks/inline-latest-2026-11-06/README.md).

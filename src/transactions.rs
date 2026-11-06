@@ -214,7 +214,7 @@ struct State {
     wal_bytes: u64,
     reservation_enabled: bool,
     reserved_bytes: u64,
-    rows: BTreeMap<Vec<u8>, VecDeque<Version>>,
+    rows: BTreeMap<Vec<u8>, VersionChain>,
     active: BTreeMap<u64, usize>,
     history_keys: BTreeSet<Vec<u8>>,
     gc_floor: u64,
@@ -226,12 +226,18 @@ struct State {
 
 struct RetiredVersions {
     values: Vec<Version>,
+    // Unboxing here would free the deque header while the state lock is held.
+    #[cfg(feature = "inline-latest")]
+    #[allow(clippy::vec_box, clippy::box_collection)]
+    buffers: Vec<Box<VecDeque<Version>>>,
     charge: usize,
     budget: Arc<Budget>,
 }
 impl Drop for RetiredVersions {
     fn drop(&mut self) {
         drop(std::mem::take(&mut self.values));
+        #[cfg(feature = "inline-latest")]
+        drop(std::mem::take(&mut self.buffers));
         self.budget.release(RETAINED, self.charge);
     }
 }
@@ -303,6 +309,72 @@ struct Version {
     value: Option<Arc<[u8]>>,
 }
 
+#[cfg(not(feature = "inline-latest"))]
+type VersionChain = VecDeque<Version>;
+
+#[cfg(feature = "inline-latest")]
+struct VersionChain {
+    latest: Version,
+    // An inline deque header would enlarge every tree entry, even without old readers.
+    #[allow(clippy::box_collection)]
+    older: Option<Box<VecDeque<Version>>>,
+}
+#[cfg(feature = "inline-latest")]
+impl VersionChain {
+    fn len(&self) -> usize {
+        1 + self.older.as_ref().map_or(0, |v| v.len())
+    }
+    fn back(&self) -> Option<&Version> {
+        Some(&self.latest)
+    }
+    fn push_back(&mut self, version: Version) {
+        self.older
+            .get_or_insert_with(|| Box::new(VecDeque::with_capacity(1)))
+            .push_back(std::mem::replace(&mut self.latest, version));
+    }
+    fn pop_front(&mut self) -> Option<Version> {
+        self.older.as_mut().and_then(|v| v.pop_front())
+    }
+    #[cfg(feature = "history-metrics")]
+    fn capacity(&self) -> usize {
+        1 + self.older.as_ref().map_or(0, |v| v.capacity())
+    }
+    #[cfg(feature = "history-metrics")]
+    fn iter(&self) -> impl Iterator<Item = &Version> {
+        self.older
+            .iter()
+            .flat_map(|v| v.iter())
+            .chain(std::iter::once(&self.latest))
+    }
+}
+#[cfg(feature = "inline-latest")]
+impl std::ops::Index<usize> for VersionChain {
+    type Output = Version;
+    fn index(&self, i: usize) -> &Version {
+        let old_len = self.len() - 1;
+        if i == old_len {
+            &self.latest
+        } else {
+            &self.older.as_ref().unwrap()[i]
+        }
+    }
+}
+fn single_version(version: Version) -> VersionChain {
+    #[cfg(feature = "inline-latest")]
+    {
+        VersionChain {
+            latest: version,
+            older: None,
+        }
+    }
+    #[cfg(not(feature = "inline-latest"))]
+    {
+        let mut v = VecDeque::with_capacity(1);
+        v.push_back(version);
+        v
+    }
+}
+
 #[derive(Clone, PartialEq, Eq)]
 struct KeyRange {
     start: Vec<u8>,
@@ -364,6 +436,9 @@ pub struct HistoryMetrics {
     pub key_capacity_bytes: usize,
     pub value_bytes: usize,
     pub history_keys: usize,
+    pub row_size: usize,
+    pub heap_history_bytes: usize,
+    pub inline_versions: usize,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1094,7 +1169,7 @@ impl Database {
                 .values()
                 .filter(|v| v.back().unwrap().value.is_some())
                 .count(),
-            retained_versions: state.rows.values().map(VecDeque::len).sum(),
+            retained_versions: state.rows.values().map(|v| v.len()).sum(),
             active_transactions: state.active.values().sum(),
             wal_bytes: state.wal_bytes,
         })
@@ -1111,11 +1186,29 @@ impl Database {
             key_capacity_bytes: 0,
             value_bytes: 0,
             history_keys: state.history_keys.len(),
+            row_size: std::mem::size_of::<VersionChain>(),
+            heap_history_bytes: 0,
+            inline_versions: if cfg!(feature = "inline-latest") {
+                state.rows.len()
+            } else {
+                0
+            },
         };
         for (key, versions) in &state.rows {
             result.key_capacity_bytes += key.capacity();
             result.versions += versions.len();
             result.capacity_slots += versions.capacity();
+            #[cfg(not(feature = "inline-latest"))]
+            {
+                result.heap_history_bytes += versions.capacity() * std::mem::size_of::<Version>();
+            }
+            #[cfg(feature = "inline-latest")]
+            {
+                result.heap_history_bytes += versions.older.as_ref().map_or(0, |v| {
+                    std::mem::size_of::<VecDeque<Version>>()
+                        + v.capacity() * std::mem::size_of::<Version>()
+                });
+            }
             result.value_bytes += versions
                 .iter()
                 .filter_map(|v| v.value.as_ref())
@@ -1828,17 +1921,23 @@ impl State {
         self.budget
             .replace(RETAINED, 0, self.retained_growth(&writes))?;
         for (key, value) in writes {
-            let versions = self
-                .rows
-                .entry(key.clone())
-                .or_insert_with(|| VecDeque::with_capacity(1));
-            if !versions.is_empty() || value.is_none() {
-                self.history_keys.insert(key);
-            }
-            versions.push_back(Version {
+            let deleted = value.is_none();
+            let version = Version {
                 sequence,
                 value: value.map(Arc::from),
-            });
+            };
+            match self.rows.entry(key.clone()) {
+                std::collections::btree_map::Entry::Occupied(mut entry) => {
+                    self.history_keys.insert(key);
+                    entry.get_mut().push_back(version);
+                }
+                std::collections::btree_map::Entry::Vacant(entry) => {
+                    if deleted {
+                        self.history_keys.insert(key);
+                    }
+                    entry.insert(single_version(version));
+                }
+            }
         }
         self.sequence = sequence;
         Ok(())
@@ -1851,6 +1950,8 @@ impl State {
     fn collect(&mut self) -> RetiredVersions {
         let mut retired = RetiredVersions {
             values: Vec::new(),
+            #[cfg(feature = "inline-latest")]
+            buffers: Vec::new(),
             charge: 0,
             budget: self.budget.clone(),
         };
@@ -1891,6 +1992,12 @@ impl State {
                 retired.charge += charge;
                 retired.values.push(versions.pop_front().unwrap());
             }
+            #[cfg(feature = "inline-latest")]
+            if versions.len() == 1
+                && let Some(buffer) = versions.older.take()
+            {
+                retired.buffers.push(buffer);
+            }
             let tombstone = versions.len() == 1
                 && versions[0].sequence <= self.gc_target
                 && versions[0].value.is_none();
@@ -1914,9 +2021,20 @@ fn validate_key(key: &[u8]) -> Result<()> {
     Ok(())
 }
 
-fn visible(versions: &VecDeque<Version>, snapshot: u64) -> Option<&Version> {
+#[cfg(not(feature = "inline-latest"))]
+fn visible(versions: &VersionChain, snapshot: u64) -> Option<&Version> {
     let position = versions.partition_point(|v| v.sequence <= snapshot);
     position.checked_sub(1).map(|i| &versions[i])
+}
+
+#[cfg(feature = "inline-latest")]
+fn visible(versions: &VersionChain, snapshot: u64) -> Option<&Version> {
+    if versions.latest.sequence <= snapshot {
+        return Some(&versions.latest);
+    }
+    let older = versions.older.as_ref()?;
+    let position = older.partition_point(|v| v.sequence <= snapshot);
+    position.checked_sub(1).map(|i| &older[i])
 }
 
 fn operation_size(key: &[u8], value: Option<&[u8]>) -> usize {
@@ -2064,6 +2182,12 @@ impl<'a> Decoder<'a> {
 
 #[cfg(test)]
 mod tests {
+    #[cfg(all(feature = "inline-latest", target_pointer_width = "64"))]
+    #[test]
+    fn bv_inline_latest_does_not_enlarge_the_tree_value() {
+        assert!(std::mem::size_of::<VersionChain>() <= std::mem::size_of::<VecDeque<Version>>());
+    }
+
     #[test]
     fn wal_preparation_eq_encoding_matches_legacy_bytes_and_decoding() {
         for n in [0u64, 1, 2, 17, 100] {
@@ -3922,6 +4046,13 @@ mod read_copy_tests {
         state.active.remove(&old.snapshot);
         let retired = state.collect();
         assert_eq!(retired.charge, 1088);
+        #[cfg(feature = "inline-latest")]
+        {
+            assert_eq!(retired.buffers.len(), 1);
+            assert!(retired.buffers[0].is_empty());
+            assert!(retired.buffers[0].capacity() > 0);
+            assert!(state.rows.get(b"k".as_slice()).unwrap().older.is_none());
+        }
         assert_eq!(state.budget.snapshot().unwrap().current[RETAINED], before);
         drop(state);
         drop(retired);

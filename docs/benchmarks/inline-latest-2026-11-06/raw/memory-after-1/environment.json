@@ -1,0 +1,21 @@
+{
+  "utc": "2026-11-06T05:06:02.079460+00:00",
+  "image": "sha256:622638233281db194c408a76dab150ee0be2f49968b5bb976e7de6db26af8972",
+  "base_commit": "36e1d6d84828361b5f12156dc0f0f608e6fd014d",
+  "args": {
+    "out": "C:\\Git\\catdb\\docs\\benchmarks\\inline-latest-2026-11-06\\raw\\memory-after-1",
+    "rows": 1000000,
+    "reps": 1,
+    "observer": "counted",
+    "check512": true,
+    "image": "catdb-inline-after:local"
+  },
+  "source_sha256": {
+    "Cargo.toml": "3044faed038720f8b14d653deeae2ad8d8ec6c564ff6d18138fab034b76f07e7",
+    "src/transactions.rs": "2462e9499dd613d6eeb6f5c97c13e87170396156ece9349b5e3a6710550f112e",
+    "src/bin/history-capacity-bench.rs": "22da435699f90ba883eda15e91e825b7663a19e6586e3c758dadd19123254a61",
+    "benchmarks/resource-envelope/history_capacity_run.py": "f82cece0521d3aacc62506416bbb062649ce0110447fa2267370c539d618ba01",
+    "benchmarks/resource-envelope/history_capacity_observer.py": "88cbb096526e3457fad8da33a686ba4f02e9e2f2cdf300e68285da9eeeeab789",
+    "benchmarks/resource-envelope/history-capacity.Dockerfile": "002d6be1912cabac38bdcf315def6b3c434ec4242f3011e6c5a64eea9d51b8d7"
+  }
+}

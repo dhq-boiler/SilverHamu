@@ -1,0 +1,55 @@
+{
+  "utc": "2026-11-06T18:49:40.529921+00:00",
+  "rows": 100000,
+  "ops": 300,
+  "reps": 1,
+  "cpus": 2,
+  "memory": "4g",
+  "swap": "disabled",
+  "image": "sha256:ef573746ddf287236e8a8766f304e920950d02cf5d7f13927a24986a2fbce18e",
+  "source_sha256": {
+    "analyze.py": "c5f02624a91d45a5a8dcea030f633e32ec3bdd93bdb75d7512db9331e5285b39",
+    "client.py": "b6afcaabe2882bc1ced791729ce37a5bbe01dbd8ee5e895f26c28659bf10179b",
+    "Dockerfile": "59f6d9176b2a1fe1a01f3919620a3373153ce1da1cd4cd0fc3955f6ec96f31f6",
+    "run.py": "d801de9757b56802bccde629219365e18879c577eaffcab8b5111af3b29846d8",
+    "trace.c": "1ed11a2b3639d7dc6e6a87b40fa93b87bdf3f411efa34c15524ecb6f950c2cf9"
+  },
+  "runs": [
+    {
+      "rep": 1,
+      "variant": "catdb-plain",
+      "file": "r1-catdb-plain.json.gz",
+      "status": "passed"
+    },
+    {
+      "rep": 1,
+      "variant": "catdb-trace",
+      "file": "r1-catdb-trace.json.gz",
+      "status": "passed"
+    },
+    {
+      "rep": 1,
+      "variant": "sqlite-plain",
+      "file": "r1-sqlite-plain.json.gz",
+      "status": "passed"
+    },
+    {
+      "rep": 1,
+      "variant": "sqlite-trace",
+      "file": "r1-sqlite-trace.json.gz",
+      "status": "passed"
+    },
+    {
+      "rep": 1,
+      "variant": "sqlite-pinned-plain",
+      "file": "r1-sqlite-pinned-plain.json.gz",
+      "status": "passed"
+    },
+    {
+      "rep": 1,
+      "variant": "sqlite-pinned-trace",
+      "file": "r1-sqlite-pinned-trace.json.gz",
+      "status": "passed"
+    }
+  ]
+}

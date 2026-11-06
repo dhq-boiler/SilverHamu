@@ -1,0 +1,176 @@
+[
+  {
+    "file": "r1-catdb-trace.json.gz",
+    "calls": {
+      "3": 8000,
+      "1": 8000
+    },
+    "classes": {
+      "growing": {
+        "requests": 8000,
+        "mean_sync_ms": 3.2647318139999997,
+        "mean_request_ms": 3.58261809075,
+        "sync_calls": 8000
+      }
+    }
+  },
+  {
+    "file": "r1-sqlite-pinned-trace.json.gz",
+    "calls": {
+      "4": 16009,
+      "2": 8001
+    },
+    "classes": {
+      "growing": {
+        "requests": 8000,
+        "mean_sync_ms": 6.616664355375001,
+        "mean_request_ms": 6.939225354,
+        "sync_calls": 8001
+      }
+    }
+  },
+  {
+    "file": "r1-sqlite-trace.json.gz",
+    "calls": {
+      "4": 23470,
+      "2": 8024,
+      "5": 8
+    },
+    "classes": {
+      "growing": {
+        "requests": 999,
+        "mean_sync_ms": 3.2318715635635633,
+        "mean_request_ms": 3.300892761761762,
+        "sync_calls": 1000
+      },
+      "reuse": {
+        "requests": 6993,
+        "mean_sync_ms": 1.5240300167310168,
+        "mean_request_ms": 1.573098682825683,
+        "sync_calls": 7000
+      },
+      "db_write": {
+        "requests": 8,
+        "mean_sync_ms": 12.887261375,
+        "mean_request_ms": 15.939918,
+        "sync_calls": 24
+      }
+    }
+  },
+  {
+    "file": "r2-catdb-trace.json.gz",
+    "calls": {
+      "3": 8000,
+      "1": 8000
+    },
+    "classes": {
+      "growing": {
+        "requests": 8000,
+        "mean_sync_ms": 3.1883367853749998,
+        "mean_request_ms": 3.500553898875,
+        "sync_calls": 8000
+      }
+    }
+  },
+  {
+    "file": "r2-sqlite-pinned-trace.json.gz",
+    "calls": {
+      "4": 16009,
+      "2": 8001
+    },
+    "classes": {
+      "growing": {
+        "requests": 8000,
+        "mean_sync_ms": 6.67074177575,
+        "mean_request_ms": 7.0700904446249995,
+        "sync_calls": 8001
+      }
+    }
+  },
+  {
+    "file": "r2-sqlite-trace.json.gz",
+    "calls": {
+      "4": 23467,
+      "2": 8024,
+      "5": 8
+    },
+    "classes": {
+      "growing": {
+        "requests": 999,
+        "mean_sync_ms": 3.375117001001001,
+        "mean_request_ms": 3.4452833483483483,
+        "sync_calls": 1000
+      },
+      "reuse": {
+        "requests": 6993,
+        "mean_sync_ms": 1.5735849835549836,
+        "mean_request_ms": 1.623211872157872,
+        "sync_calls": 7000
+      },
+      "db_write": {
+        "requests": 8,
+        "mean_sync_ms": 12.921398625,
+        "mean_request_ms": 16.07724325,
+        "sync_calls": 24
+      }
+    }
+  },
+  {
+    "file": "r3-catdb-trace.json.gz",
+    "calls": {
+      "3": 8000,
+      "1": 8000
+    },
+    "classes": {
+      "growing": {
+        "requests": 8000,
+        "mean_sync_ms": 3.199493278,
+        "mean_request_ms": 3.511963492125,
+        "sync_calls": 8000
+      }
+    }
+  },
+  {
+    "file": "r3-sqlite-pinned-trace.json.gz",
+    "calls": {
+      "4": 16009,
+      "2": 8001
+    },
+    "classes": {
+      "growing": {
+        "requests": 8000,
+        "mean_sync_ms": 3.224631997625,
+        "mean_request_ms": 3.519407698125,
+        "sync_calls": 8001
+      }
+    }
+  },
+  {
+    "file": "r3-sqlite-trace.json.gz",
+    "calls": {
+      "4": 23478,
+      "2": 8024,
+      "5": 8
+    },
+    "classes": {
+      "growing": {
+        "requests": 999,
+        "mean_sync_ms": 3.2402183843843844,
+        "mean_request_ms": 3.3026954214214213,
+        "sync_calls": 1000
+      },
+      "reuse": {
+        "requests": 6993,
+        "mean_sync_ms": 1.554069752180752,
+        "mean_request_ms": 1.6251107780637781,
+        "sync_calls": 7000
+      },
+      "db_write": {
+        "requests": 8,
+        "mean_sync_ms": 13.05405275,
+        "mean_request_ms": 19.740861,
+        "sync_calls": 24
+      }
+    }
+  }
+]

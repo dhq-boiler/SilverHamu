@@ -1,0 +1,155 @@
+[
+  {
+    "rep": 1,
+    "variant": "catdb-plain",
+    "file": "r1-catdb-plain.json.gz",
+    "status": "passed",
+    "files": {},
+    "extension_bytes": 0,
+    "wal_rewind_observations": 0,
+    "db_write_requests": 0,
+    "mean_phases_ns": {
+      "prepare_ns": 11688.72,
+      "commit_ns": 3502900.1533333333,
+      "sync_ns": 0,
+      "write_ns": 0,
+      "truncate_ns": 0,
+      "residual_ns": 3514588.8733333335
+    },
+    "updates_s": 284.28072623923555,
+    "p99_ms": 5.717833,
+    "max_ms": 13.474082
+  },
+  {
+    "rep": 1,
+    "variant": "catdb-trace",
+    "file": "r1-catdb-trace.json.gz",
+    "status": "passed",
+    "files": {
+      "catdb.wal": {
+        "sync_count": 300,
+        "sync_ns": 933669175,
+        "write_count": 300,
+        "write_bytes": 95100,
+        "write_ns": 2802946,
+        "truncate_count": 0
+      }
+    },
+    "extension_bytes": 95100,
+    "wal_rewind_observations": 0,
+    "db_write_requests": 0,
+    "mean_phases_ns": {
+      "prepare_ns": 9074.603333333333,
+      "commit_ns": 3413476.8433333333,
+      "sync_ns": 3112230.5833333335,
+      "write_ns": 9343.153333333334,
+      "truncate_ns": 0,
+      "residual_ns": 300977.71
+    },
+    "updates_s": 291.70326574358967,
+    "p99_ms": 4.782485,
+    "max_ms": 5.322356
+  },
+  {
+    "rep": 1,
+    "variant": "sqlite-plain",
+    "file": "r1-sqlite-plain.json.gz",
+    "status": "passed",
+    "files": {},
+    "extension_bytes": 0,
+    "wal_rewind_observations": 0,
+    "db_write_requests": 0,
+    "mean_phases_ns": {
+      "prepare_ns": 32460.183333333334,
+      "commit_ns": 3265874.5,
+      "sync_ns": 0,
+      "write_ns": 0,
+      "truncate_ns": 0,
+      "residual_ns": 3298334.683333333
+    },
+    "updates_s": 302.9093195182424,
+    "p99_ms": 5.881081,
+    "max_ms": 7.705978
+  },
+  {
+    "rep": 1,
+    "variant": "sqlite-trace",
+    "file": "r1-sqlite-trace.json.gz",
+    "status": "passed",
+    "files": {
+      "sqlite.db-wal": {
+        "sync_count": 301,
+        "sync_ns": 955618585,
+        "write_count": 601,
+        "write_bytes": 1236032,
+        "write_ns": 4563496,
+        "truncate_count": 0
+      }
+    },
+    "extension_bytes": 1236032,
+    "wal_rewind_observations": 0,
+    "db_write_requests": 0,
+    "mean_phases_ns": {
+      "prepare_ns": 30765.12,
+      "commit_ns": 3217957.45,
+      "sync_ns": 3185395.283333333,
+      "write_ns": 15211.653333333334,
+      "truncate_ns": 0,
+      "residual_ns": 48115.63333333333
+    },
+    "updates_s": 307.19848596857554,
+    "p99_ms": 4.738346,
+    "max_ms": 6.73227
+  },
+  {
+    "rep": 1,
+    "variant": "sqlite-pinned-plain",
+    "file": "r1-sqlite-pinned-plain.json.gz",
+    "status": "passed",
+    "files": {},
+    "extension_bytes": 0,
+    "wal_rewind_observations": 0,
+    "db_write_requests": 0,
+    "mean_phases_ns": {
+      "prepare_ns": 29479.006666666668,
+      "commit_ns": 3187199.7266666666,
+      "sync_ns": 0,
+      "write_ns": 0,
+      "truncate_ns": 0,
+      "residual_ns": 3216678.7333333334
+    },
+    "updates_s": 310.65572465822635,
+    "p99_ms": 4.285621,
+    "max_ms": 7.445879
+  },
+  {
+    "rep": 1,
+    "variant": "sqlite-pinned-trace",
+    "file": "r1-sqlite-pinned-trace.json.gz",
+    "status": "passed",
+    "files": {
+      "sqlite.db-wal": {
+        "sync_count": 301,
+        "sync_ns": 975014322,
+        "write_count": 601,
+        "write_bytes": 1236032,
+        "write_ns": 5056219,
+        "truncate_count": 0
+      }
+    },
+    "extension_bytes": 1236032,
+    "wal_rewind_observations": 0,
+    "db_write_requests": 0,
+    "mean_phases_ns": {
+      "prepare_ns": 33748.45,
+      "commit_ns": 3285592.81,
+      "sync_ns": 3250047.74,
+      "write_ns": 16854.06333333333,
+      "truncate_ns": 0,
+      "residual_ns": 52439.456666666665
+    },
+    "updates_s": 300.582090142591,
+    "p99_ms": 5.496004,
+    "max_ms": 8.571616
+  }
+]

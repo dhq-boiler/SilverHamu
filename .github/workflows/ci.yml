@@ -51,6 +51,7 @@ jobs:
       - run: python benchmarks/default-tail/test_analysis.py
       - run: python benchmarks/aged-sync/test_analysis.py
       - run: python benchmarks/aged-sync/test_identity.py
+      - run: python benchmarks/storage-path/test_paths.py
       - if: contains(matrix.features, 'backlog-batch')
         run: python benchmarks/backlog-tail/test_protocol.py
       - run: python benchmarks/backlog/test_schedule.py

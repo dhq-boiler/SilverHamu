@@ -10,10 +10,13 @@ def run(*args,timeout=600,env=None):
     return p.stdout.strip()
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--out',type=pathlib.Path,required=True);p.add_argument('--rows',nargs='+',type=int,default=[100000,1000000]);p.add_argument('--cpus',nargs='+',type=int,default=[1,2]);p.add_argument('--memory',nargs='+',type=int,default=[512,1024,2048]);p.add_argument('--reps',type=int,default=3);p.add_argument('--ops',type=int,default=8000);p.add_argument('--sample',type=int,choices=[0,1],default=1);p.add_argument('--rate',type=float,default=1000);p.add_argument('--recover-memory',type=int);p.add_argument('--retained-bytes',type=int);p.add_argument('--image',default=IMAGE);p.add_argument('--age-seed',action='store_true');p.add_argument('--safety-probe',action='store_true');p.add_argument('--staged-bytes',type=int);p.add_argument('--diagnostics',action='store_true');p.add_argument('--pin-reader',type=int,choices=[0,1],default=1);p.add_argument('--kernel-mode',choices=['off','trace']);a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--out',type=pathlib.Path,required=True);p.add_argument('--rows',nargs='+',type=int,default=[100000,1000000]);p.add_argument('--cpus',nargs='+',type=int,default=[1,2]);p.add_argument('--memory',nargs='+',type=int,default=[512,1024,2048]);p.add_argument('--reps',type=int,default=3);p.add_argument('--ops',type=int,default=8000);p.add_argument('--sample',type=int,choices=[0,1],default=1);p.add_argument('--rate',type=float,default=1000);p.add_argument('--recover-memory',type=int);p.add_argument('--retained-bytes',type=int);p.add_argument('--image',default=IMAGE);p.add_argument('--age-seed',action='store_true');p.add_argument('--safety-probe',action='store_true');p.add_argument('--staged-bytes',type=int);p.add_argument('--diagnostics',action='store_true');p.add_argument('--pin-reader',type=int,choices=[0,1],default=1);p.add_argument('--kernel-mode',choices=['off','trace']);p.add_argument('--storage-mode',choices=['volume','bind']);p.add_argument('--bind-root',type=pathlib.Path);a=p.parse_args()
     if a.retained_bytes is not None and a.retained_bytes<=0: p.error('--retained-bytes must be positive')
     if a.staged_bytes is not None and a.staged_bytes<=0:p.error('--staged-bytes must be positive')
     if a.safety_probe and a.staged_bytes!=4096:p.error('--safety-probe requires --staged-bytes 4096')
+    if (a.storage_mode=='bind') != (a.bind_root is not None):p.error('--bind-root is required only for bind storage')
+    if a.bind_root is not None:
+        a.bind_root=a.bind_root.resolve();a.bind_root.mkdir(parents=True,exist_ok=False)
     out=a.out.resolve();out.mkdir(parents=True,exist_ok=False)
     token=secrets.token_hex(24);env=dict(os.environ,BENCH_PASSWORD=secrets.token_hex(16),BENCH_TOKEN=token)
     thread_tag='as-'+uuid.uuid4().hex[:10];uid='catdb-resource-'+uuid.uuid4().hex[:10];network=uid+'-net';seeds={};created=[];results=[]
@@ -43,24 +46,34 @@ def main():
                 print(name,'start',flush=True)
                 local=[]
                 try:
-                    run('docker','volume','create',vol);local.append(('volume',vol))
-                    run('docker','run','--rm','--network',network,'-v',seeds[rows]+':/seed:ro','-v',vol+':/data',a.image,'python','-c',"import pathlib,shutil;[shutil.copy2(p,pathlib.Path('/data')/p.name) for p in pathlib.Path('/seed').iterdir()]")
-                    run('docker','run','-d','--name',client,'--network',network,'--cpus','2','--memory','2g','--memory-swap','2g',*mount,'-e',f'BENCH_ROWS={rows}','-v',vol+':/data',*(['-v',str(caseout)+':/host-results'] if a.kernel_mode else []),a.image,env=env);local.append(('container',client))
-                    run('docker','exec',client,'python','-c',"import os,pathlib;p=pathlib.Path('/data/token');p.write_text(os.environ['BENCH_TOKEN']);p.chmod(0o400)")
+                    data_source=vol;control='/data';case_mount=mount
+                    if a.storage_mode=='bind':
+                        data_source=str(a.bind_root/name);pathlib.Path(data_source).mkdir(exist_ok=False)
+                    else:
+                        run('docker','volume','create',vol);local.append(('volume',vol))
+                    if a.storage_mode:
+                        control='/control';cv=vol+'-control';run('docker','volume','create',cv);local.append(('volume',cv))
+                        case_mount=mount+['-v',cv+':/control','-e','CATDB_BENCH_CONTROL=/control']
+                    run('docker','run','--rm','--network',network,'-v',seeds[rows]+':/seed:ro','-v',data_source+':/data',*case_mount,a.image,'python','-c',"import os,pathlib,shutil; control=pathlib.Path(os.environ.get('CATDB_BENCH_CONTROL','/data'));[shutil.copy2(p,(pathlib.Path('/data') if p.suffix in ['.wal','.ndb'] else control)/p.name) for p in pathlib.Path('/seed').iterdir()]")
+                    run('docker','run','-d','--name',client,'--network',network,'--cpus','2','--memory','2g','--memory-swap','2g',*case_mount,'-e',f'BENCH_ROWS={rows}','-v',data_source+':/data',*(['-v',str(caseout)+':/host-results'] if a.kernel_mode else []),a.image,env=env);local.append(('container',client))
+                    run('docker','exec',client,'python','-c',"import os,pathlib;p=pathlib.Path(os.environ.get('CATDB_BENCH_CONTROL','/data'))/'token';p.write_text(os.environ['BENCH_TOKEN']);p.chmod(0o400)")
                     def execute(action,*extra,timeout=600):
                         return json.loads(run('docker','exec',client,'python',('/bench-src/aged-sync/client.py' if a.kernel_mode else '/bench-src/resource-envelope/client.py'),action,*extra,timeout=timeout))
                     def boot(phase):
                         start=time.monotonic()
-                        run('docker','run','-d','--name',server,'--network',network,'--network-alias','database','--cpus',cpus,'--memory',f'{memory}m','--memory-swap',f'{memory}m','--pids-limit','128',*mount,*(['-e','CATDB_BENCH_THREAD_NAME='+thread_tag] if a.kernel_mode else []),*(['-e','CATDB_DIAGNOSTICS=1'] if a.diagnostics else []),'-e',f'SAMPLE={a.sample}','-e',f'PHASE={phase}','-e',f'RETAINED_BYTES={a.retained_bytes or ""}','-e',f'STAGED_BYTES={a.staged_bytes or ""}','-v',vol+':/data',a.image,'python','/bench-src/resource-envelope/supervisor.py',env=env)
+                        run('docker','run','-d','--name',server,'--network',network,'--network-alias','database','--cpus',cpus,'--memory',f'{memory}m','--memory-swap',f'{memory}m','--pids-limit','128',*case_mount,*(['-e','CATDB_BENCH_THREAD_NAME='+thread_tag] if a.kernel_mode else []),*(['-e','CATDB_DIAGNOSTICS=1'] if a.diagnostics else []),'-e',f'SAMPLE={a.sample}','-e',f'PHASE={phase}','-e',f'RETAINED_BYTES={a.retained_bytes or ""}','-e',f'STAGED_BYTES={a.staged_bytes or ""}','-v',data_source+':/data',a.image,'python','/bench-src/resource-envelope/supervisor.py',env=env)
                         local.append(('container',server))
                         ready=execute('ready',timeout=75);ready['launch_to_ready_ms']=(time.monotonic()-start)*1000
-                        limits=json.loads(run('docker','exec',client,'cat',f'/data/{phase}-limits.json'))
+                        limits=json.loads(run('docker','exec',client,'cat',f'{control}/{phase}-limits.json'))
                         assert int(limits['memory.max'])==memory*1024*1024 and limits['memory.swap.max']=='0'
                         quota,period=map(int,limits['cpu.max'].split());assert quota/period==cpus
                         entry[phase]={'timing':ready,'limits':limits}
-                        try:entry[phase]['process_ready']=json.loads(run('docker','exec',client,'cat',f'/data/{phase}-ready.json'))
+                        try:entry[phase]['process_ready']=json.loads(run('docker','exec',client,'cat',f'{control}/{phase}-ready.json'))
                         except RuntimeError:pass
                     boot('boot')
+                    if a.storage_mode:
+                        entry['storage_probe']=json.loads(run('docker','exec',client,'python','/bench-src/storage-path/probe.py'))
+                        entry['mounts']=json.loads(run('docker','inspect',server,'--format','{{json .Mounts}}'));save()
                     entry['verification'].append({'phase':'initial',**execute('verify')})
                     workloads=['read','mixed'] if rep%2 else ['mixed','read']
                     for work in workloads:
@@ -98,7 +111,7 @@ def main():
                         try:run('docker','stop','--time','10',server,timeout=20)
                         except Exception:pass
                     for pattern in ['boot-command.json','reopen-command.json','rescue-command.json','boot-resources.jsonl','reopen-resources.jsonl','rescue-resources.jsonl','boot-exit.json','reopen-exit.json','rescue-exit.json','boot-server.log','reopen-server.log','rescue-server.log','read-raw.json','mixed-raw.json']:
-                        try:run('docker','cp',client+':/data/'+pattern,caseout/pattern)
+                        try:run('docker','cp',client+':'+control+'/'+pattern,caseout/pattern)
                         except Exception:pass
                     for kind,n in reversed(local):remove(kind,n)
                     save()

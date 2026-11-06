@@ -2,7 +2,7 @@
 import json, os, pathlib, signal, subprocess, time
 
 ROOT = pathlib.Path('/sys/fs/cgroup')
-OUT = pathlib.Path('/data')
+OUT = pathlib.Path(os.environ.get('CATDB_BENCH_CONTROL', '/data'))
 
 def read(name):
     return (ROOT / name).read_text().strip()
@@ -25,7 +25,7 @@ def main():
     (OUT / f'{tag}-limits.json').write_text(json.dumps(limits))
     with (OUT / f'{tag}-server.log').open('w') as log:
         command = ['catdb-server','--db','/data/catdb.wal','--bind','0.0.0.0:7400',
-            '--allow-remote','--token-file','/data/token','--transaction-timeout-secs','3600']
+            '--allow-remote','--token-file',str(OUT/'token'),'--transaction-timeout-secs','3600']
         retained=os.environ.get('RETAINED_BYTES')
         if retained: command += ['--max-retained-bytes',retained]
         staged=os.environ.get('STAGED_BYTES')

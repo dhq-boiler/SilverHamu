@@ -1,0 +1,200 @@
+[
+  {
+    "name": "r1-n1000000-c1-m512",
+    "rows": 1000000,
+    "cpus": 1,
+    "memory_mib": 512,
+    "rep": 1,
+    "sample": 1,
+    "retained_bytes": 671088640,
+    "status": "passed",
+    "verification": [
+      {
+        "phase": "initial",
+        "rows": 1000000,
+        "sha256": "67b0f400a60fe58495e9146efd785d8533e93ee47882703caaee58add471aa90",
+        "updated": 1000000,
+        "passed": true
+      },
+      {
+        "phase": "read",
+        "rows": 1000000,
+        "sha256": "67b0f400a60fe58495e9146efd785d8533e93ee47882703caaee58add471aa90",
+        "updated": 1000000,
+        "passed": true
+      },
+      {
+        "phase": "mixed",
+        "rows": 1000000,
+        "sha256": "440a30e05b36a106f42ef3a1fe56ad10217b665cdbd6258f00e9174ef17794f2",
+        "updated": 1000000,
+        "passed": true
+      },
+      {
+        "phase": "safety",
+        "rows": 1000000,
+        "sha256": "5aeaac8760cd903c9d7d6659b6dd19e06c49ac5c2081d07160b0f7030c6caeb1",
+        "updated": 1000000,
+        "passed": true
+      },
+      {
+        "phase": "reopen",
+        "rows": 1000000,
+        "sha256": "5aeaac8760cd903c9d7d6659b6dd19e06c49ac5c2081d07160b0f7030c6caeb1",
+        "updated": 1000000,
+        "passed": true
+      }
+    ],
+    "measurements": [
+      {
+        "work": "read",
+        "ops": 8000,
+        "rate": 1000.0,
+        "capacity_per_kind": 64,
+        "elapsed_s": 7.999565676,
+        "start_ns": 163220930082212,
+        "finish_ns": 163228929647888,
+        "completed": 8000,
+        "ops_s": 1000.0542934476184,
+        "pin_reader": true,
+        "old_snapshot_checked_keys": 0,
+        "p99_ms": 0.376145,
+        "max_ms": 1.73379,
+        "queue_rejected": 0,
+        "errors": [],
+        "by_kind": {
+          "read": {
+            "completed": 8000,
+            "p99_ms": 0.376145
+          }
+        },
+        "sync_before": 0,
+        "sync_after": 0,
+        "sync_attempts": 0,
+        "host_begin_ns": 1200293828000000,
+        "host_end_ns": 1200307343000000
+      },
+      {
+        "work": "mixed",
+        "ops": 8000,
+        "rate": 1000.0,
+        "capacity_per_kind": 64,
+        "elapsed_s": 7.999726072,
+        "start_ns": 163239388570616,
+        "finish_ns": 163247388296688,
+        "completed": 8000,
+        "ops_s": 1000.0342421724863,
+        "pin_reader": true,
+        "old_snapshot_checked_keys": 1600,
+        "p99_ms": 4.692607,
+        "max_ms": 24.534836,
+        "queue_rejected": 0,
+        "errors": [],
+        "by_kind": {
+          "read": {
+            "completed": 6400,
+            "p99_ms": 0.379964
+          },
+          "write": {
+            "completed": 1600,
+            "p99_ms": 18.922553
+          }
+        },
+        "sync_before": 0,
+        "sync_after": 1579,
+        "sync_attempts": 1579,
+        "host_begin_ns": 1200314062000000,
+        "host_end_ns": 1200327578000000
+      }
+    ],
+    "boot": {
+      "timing": {
+        "ready_wait_ms": 2035.102049,
+        "launch_to_ready_ms": 3344.000000040978
+      },
+      "limits": {
+        "cpu.max": "100000 100000",
+        "memory.max": "536870912",
+        "memory.swap.max": "0"
+      },
+      "process_ready": {
+        "process_ready_ms": 2524.6566129790153,
+        "poll_resolution_ms": 100
+      }
+    },
+    "storage_probe": {
+      "sync_readback_sha256": "c8f5d0341d54d951a71b136e6e2afcb14d11ed8489a7ae126a8fee0df6ecf193",
+      "exclusive_lock_refused": true,
+      "lock_error": "catdb-server: database ownership lock unavailable: lock acquisition failed because the operation would block",
+      "mountinfo": [
+        "1428 1418 8:64 /data/docker/volumes/catdb-resource-e7165d2b07-v-1-0-control/_data /control rw,relatime master:135 - ext4 /dev/sde rw",
+        "1429 1418 8:64 /data/docker/volumes/catdb-resource-e7165d2b07-v-1-0/_data /data rw,relatime master:135 - ext4 /dev/sde rw"
+      ],
+      "free_bytes": 947516727296
+    },
+    "mounts": [
+      {
+        "Type": "bind",
+        "Source": "C:\\Git\\catdb\\benchmarks",
+        "Destination": "/bench-src",
+        "Mode": "ro",
+        "RW": false,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "volume",
+        "Name": "catdb-resource-e7165d2b07-v-1-0-control",
+        "Source": "/var/lib/docker/volumes/catdb-resource-e7165d2b07-v-1-0-control/_data",
+        "Destination": "/control",
+        "Driver": "local",
+        "Mode": "z",
+        "RW": true,
+        "Propagation": ""
+      },
+      {
+        "Type": "volume",
+        "Name": "catdb-resource-e7165d2b07-v-1-0",
+        "Source": "/var/lib/docker/volumes/catdb-resource-e7165d2b07-v-1-0/_data",
+        "Destination": "/data",
+        "Driver": "local",
+        "Mode": "z",
+        "RW": true,
+        "Propagation": ""
+      }
+    ],
+    "safety_probe": {
+      "old_generation_updates_checked": 8,
+      "staged_refusal": "resource_exhausted",
+      "prior_staged_value_preserved": true,
+      "commit_after_rollback": true
+    },
+    "stop_state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 1,
+      "Error": "",
+      "StartedAt": "2026-11-06T14:44:21.090574585Z",
+      "FinishedAt": "2026-11-06T14:45:21.504255547Z"
+    },
+    "reopen": {
+      "timing": {
+        "ready_wait_ms": 2235.863238,
+        "launch_to_ready_ms": 3405.999999959022
+      },
+      "limits": {
+        "cpu.max": "100000 100000",
+        "memory.max": "536870912",
+        "memory.swap.max": "0"
+      },
+      "process_ready": {
+        "process_ready_ms": 2624.929379002424,
+        "poll_resolution_ms": 100
+      }
+    }
+  }
+]

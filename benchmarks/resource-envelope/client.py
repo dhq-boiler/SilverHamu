@@ -3,7 +3,7 @@ import argparse, hashlib, json, math, os, pathlib, queue, random, threading, tim
 from catdb_client import Client
 from runner import key, value, ROWS, TOKEN
 
-DATA = pathlib.Path('/data')
+DATA = pathlib.Path(os.environ.get('CATDB_BENCH_CONTROL', '/data'))
 
 def connect(): return Client('database',7400,TOKEN,timeout=30)
 

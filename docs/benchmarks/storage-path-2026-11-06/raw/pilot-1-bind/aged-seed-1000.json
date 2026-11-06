@@ -1,0 +1,16 @@
+{
+  "rows": 1000,
+  "updated_rows": 1000,
+  "batch_rows": 1000,
+  "checkpoint_after_aging": false,
+  "elapsed_s": 0.008546553988708183,
+  "verification": {
+    "rows": 1000,
+    "sha256": "5c45a92eaed4e35debe5c79427fd9ac06b6b0dcc207dc4e4cca345b02eacbb39",
+    "expected_sha256": "5c45a92eaed4e35debe5c79427fd9ac06b6b0dcc207dc4e4cca345b02eacbb39",
+    "updated_keys": 1000,
+    "empty_and_last": true
+  },
+  "wal_bytes": 546268,
+  "wal_sha256": "a7831d8708b9fb783e183f05b030ed3c51bc7abfb6e0d7e2a7ddfa1e3f572f5b"
+}

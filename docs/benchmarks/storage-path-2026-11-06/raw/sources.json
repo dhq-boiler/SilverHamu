@@ -1,0 +1,8 @@
+{
+  "benchmarks/resource-envelope/run.py": "1b9e00f99a5275be5932d1a5e090f28f4b3d3c685125469c11e52e3c813cc7d9",
+  "benchmarks/resource-envelope/client.py": "8d7a2d9a6724f671c825a5557de61e0c8cbe1e551be8383376c8ed150db253a0",
+  "benchmarks/resource-envelope/supervisor.py": "ea944c926040e840642571a7a5bc7c32babb3b4fa93268be759f51e4fee03e24",
+  "benchmarks/storage-path/probe.py": "229eeb095d91d315214bfc09da4399bcb001824dd07c4238ee2b44d5d55dc917",
+  "benchmarks/storage-path/run.py": "793f458fd65ce06544056a2e5858c67948e475346a648e5061da09fb43bed6e7",
+  "benchmarks/storage-path/test_paths.py": "7c8cd043a33221672f05887bc70d40bf3563cb8abd9955c46aeaceb6b52535ca"
+}

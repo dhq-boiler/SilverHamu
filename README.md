@@ -53,6 +53,17 @@ change is claimed. All **96,000 requests** and recovery checks passed.
 
 ![Same-binary kernel observer comparison](docs/benchmarks/aged-sync-2026-11-06/latency.svg)
 
+A [storage-path follow-up](docs/benchmarks/storage-path-2026-11-06/README.md)
+compared the same 1M-row binary on Docker ext4 volumes and C: folders shared via
+9p/DrvFs. Write p99 medians were **6.242 / 4.597 ms**;
+the worst write responses were **32.687 / 24.335 ms**.
+Median reopen time increased **2.616 → 7.043 seconds** on the shared path.
+All trials and recovery checks are published. These are storage-path observations,
+**not proof of equal physical power-loss durability**; no engine or storage default
+changed.
+
+![Storage-path comparison](docs/benchmarks/storage-path-2026-11-06/latency.svg)
+
 ## What is not promised
 
 - No SQL parser, relational query optimizer, replication, or automatic failover.

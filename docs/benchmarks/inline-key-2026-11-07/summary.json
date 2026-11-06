@@ -1,0 +1,639 @@
+{
+  "trials": [
+    {
+      "label": "main-1-baseline",
+      "stage": "main",
+      "rep": 1,
+      "variant": "baseline",
+      "memory_mib": 512,
+      "status": "passed",
+      "oom_kills": 0,
+      "whole_boot_rss_peak_mib": 420.1484375,
+      "whole_boot_cgroup_peak_mib": 439.34765625,
+      "verification_count": 5,
+      "workloads": {
+        "read": {
+          "ops": 8000,
+          "completed": 8000,
+          "queue_rejected": 0,
+          "ops_s": 1000.0568769848073,
+          "by_kind": {
+            "read": {
+              "response_ms": {
+                "count": 8000,
+                "median": 0.207629,
+                "p99": 0.322323,
+                "max": 0.834926
+              },
+              "client_queue_ms": {
+                "count": 8000,
+                "median": 0.088907,
+                "p99": 0.123051,
+                "max": 0.319859
+              },
+              "rejected": 0
+            }
+          },
+          "resources": {
+            "sample_count": 79,
+            "sampled_span_s": 7.844852329,
+            "rss_peak_mib": 419.1875,
+            "cgroup_peak_mib": 428.08203125,
+            "file_cache_peak_mib": 0.26171875,
+            "anon_peak_mib": 422.79296875,
+            "swap_peak_mib": 0.0,
+            "cpu_core_percent": 8.042152656816441,
+            "throttled_usec": 0
+          }
+        },
+        "mixed": {
+          "ops": 8000,
+          "completed": 8000,
+          "queue_rejected": 0,
+          "ops_s": 1000.0391414069899,
+          "by_kind": {
+            "read": {
+              "response_ms": {
+                "count": 6400,
+                "median": 0.2117395,
+                "p99": 0.312517,
+                "max": 0.909639
+              },
+              "client_queue_ms": {
+                "count": 6400,
+                "median": 0.0929295,
+                "p99": 0.155055,
+                "max": 0.324956
+              },
+              "rejected": 0
+            },
+            "write": {
+              "response_ms": {
+                "count": 1600,
+                "median": 3.628241,
+                "p99": 5.25263,
+                "max": 31.949025
+              },
+              "client_queue_ms": {
+                "count": 1600,
+                "median": 0.097178,
+                "p99": 0.16323,
+                "max": 11.953561
+              },
+              "rejected": 0
+            }
+          },
+          "resources": {
+            "sample_count": 80,
+            "sampled_span_s": 7.943813858,
+            "rss_peak_mib": 420.12109375,
+            "cgroup_peak_mib": 429.68359375,
+            "file_cache_peak_mib": 0.9453125,
+            "anon_peak_mib": 423.6953125,
+            "swap_peak_mib": 0.0,
+            "cpu_core_percent": 9.687563351260993,
+            "throttled_usec": 0
+          }
+        }
+      },
+      "boot_ready_ms": 2527.63030200731,
+      "reopen_ready_ms": 2415.3472729958594,
+      "safety_probe": {
+        "old_generation_updates_checked": 8,
+        "staged_refusal": "resource_exhausted",
+        "prior_staged_value_preserved": true,
+        "commit_after_rollback": true
+      }
+    },
+    {
+      "label": "main-1-inline",
+      "stage": "main",
+      "rep": 1,
+      "variant": "inline",
+      "memory_mib": 512,
+      "status": "passed",
+      "oom_kills": 0,
+      "whole_boot_rss_peak_mib": 390.5625,
+      "whole_boot_cgroup_peak_mib": 407.75,
+      "verification_count": 5,
+      "workloads": {
+        "read": {
+          "ops": 8000,
+          "completed": 8000,
+          "queue_rejected": 0,
+          "ops_s": 1000.0487039969638,
+          "by_kind": {
+            "read": {
+              "response_ms": {
+                "count": 8000,
+                "median": 0.200489,
+                "p99": 0.317716,
+                "max": 0.84599
+              },
+              "client_queue_ms": {
+                "count": 8000,
+                "median": 0.07623450000000001,
+                "p99": 0.15271,
+                "max": 0.452187
+              },
+              "rejected": 0
+            }
+          },
+          "resources": {
+            "sample_count": 80,
+            "sampled_span_s": 7.944918729,
+            "rss_peak_mib": 389.58203125,
+            "cgroup_peak_mib": 398.5078125,
+            "file_cache_peak_mib": 0.27734375,
+            "anon_peak_mib": 393.19921875,
+            "swap_peak_mib": 0.0,
+            "cpu_core_percent": 7.902749183678905,
+            "throttled_usec": 0
+          }
+        },
+        "mixed": {
+          "ops": 8000,
+          "completed": 8000,
+          "queue_rejected": 0,
+          "ops_s": 1000.046162380867,
+          "by_kind": {
+            "read": {
+              "response_ms": {
+                "count": 6400,
+                "median": 0.2156495,
+                "p99": 0.362806,
+                "max": 0.940864
+              },
+              "client_queue_ms": {
+                "count": 6400,
+                "median": 0.0945365,
+                "p99": 0.185546,
+                "max": 0.404714
+              },
+              "rejected": 0
+            },
+            "write": {
+              "response_ms": {
+                "count": 1600,
+                "median": 3.6160430000000003,
+                "p99": 5.17999,
+                "max": 12.308737
+              },
+              "client_queue_ms": {
+                "count": 1600,
+                "median": 0.1000355,
+                "p99": 0.173511,
+                "max": 0.24106
+              },
+              "rejected": 0
+            }
+          },
+          "resources": {
+            "sample_count": 80,
+            "sampled_span_s": 7.943956385,
+            "rss_peak_mib": 390.5078125,
+            "cgroup_peak_mib": 400.04296875,
+            "file_cache_peak_mib": 0.97265625,
+            "anon_peak_mib": 394.12890625,
+            "swap_peak_mib": 0.0,
+            "cpu_core_percent": 9.460185373361664,
+            "throttled_usec": 0
+          }
+        }
+      },
+      "boot_ready_ms": 2415.730104985414,
+      "reopen_ready_ms": 2516.045368014602,
+      "safety_probe": {
+        "old_generation_updates_checked": 8,
+        "staged_refusal": "resource_exhausted",
+        "prior_staged_value_preserved": true,
+        "commit_after_rollback": true
+      }
+    },
+    {
+      "label": "main-2-inline",
+      "stage": "main",
+      "rep": 2,
+      "variant": "inline",
+      "memory_mib": 512,
+      "status": "passed",
+      "oom_kills": 0,
+      "whole_boot_rss_peak_mib": 390.4921875,
+      "whole_boot_cgroup_peak_mib": 401.58984375,
+      "verification_count": 5,
+      "workloads": {
+        "read": {
+          "ops": 8000,
+          "completed": 8000,
+          "queue_rejected": 0,
+          "ops_s": 1000.0576069433687,
+          "by_kind": {
+            "read": {
+              "response_ms": {
+                "count": 8000,
+                "median": 0.22894150000000002,
+                "p99": 0.359665,
+                "max": 0.85791
+              },
+              "client_queue_ms": {
+                "count": 8000,
+                "median": 0.0988535,
+                "p99": 0.173777,
+                "max": 0.399383
+              },
+              "rejected": 0
+            }
+          },
+          "resources": {
+            "sample_count": 79,
+            "sampled_span_s": 7.842377563,
+            "rss_peak_mib": 389.5078125,
+            "cgroup_peak_mib": 398.98828125,
+            "file_cache_peak_mib": 0.26953125,
+            "anon_peak_mib": 393.21484375,
+            "swap_peak_mib": 0.0,
+            "cpu_core_percent": 8.28757599055678,
+            "throttled_usec": 0
+          }
+        },
+        "mixed": {
+          "ops": 8000,
+          "completed": 8000,
+          "queue_rejected": 0,
+          "ops_s": 1000.0434888912014,
+          "by_kind": {
+            "read": {
+              "response_ms": {
+                "count": 6400,
+                "median": 0.2149915,
+                "p99": 0.355599,
+                "max": 0.920801
+              },
+              "client_queue_ms": {
+                "count": 6400,
+                "median": 0.0941095,
+                "p99": 0.155695,
+                "max": 0.361478
+              },
+              "rejected": 0
+            },
+            "write": {
+              "response_ms": {
+                "count": 1600,
+                "median": 3.6852235,
+                "p99": 6.293502,
+                "max": 12.424757
+              },
+              "client_queue_ms": {
+                "count": 1600,
+                "median": 0.09601599999999999,
+                "p99": 0.149622,
+                "max": 0.386417
+              },
+              "rejected": 0
+            }
+          },
+          "resources": {
+            "sample_count": 79,
+            "sampled_span_s": 7.843178907,
+            "rss_peak_mib": 390.4375,
+            "cgroup_peak_mib": 401.015625,
+            "file_cache_peak_mib": 0.9453125,
+            "anon_peak_mib": 394.11328125,
+            "swap_peak_mib": 0.0,
+            "cpu_core_percent": 9.646229022326189,
+            "throttled_usec": 0
+          }
+        }
+      },
+      "boot_ready_ms": 2515.958864009008,
+      "reopen_ready_ms": 2416.2334669963457,
+      "safety_probe": {
+        "old_generation_updates_checked": 8,
+        "staged_refusal": "resource_exhausted",
+        "prior_staged_value_preserved": true,
+        "commit_after_rollback": true
+      }
+    },
+    {
+      "label": "main-2-baseline",
+      "stage": "main",
+      "rep": 2,
+      "variant": "baseline",
+      "memory_mib": 512,
+      "status": "passed",
+      "oom_kills": 0,
+      "whole_boot_rss_peak_mib": 420.2578125,
+      "whole_boot_cgroup_peak_mib": 430.37890625,
+      "verification_count": 5,
+      "workloads": {
+        "read": {
+          "ops": 8000,
+          "completed": 8000,
+          "queue_rejected": 0,
+          "ops_s": 1000.0343480547484,
+          "by_kind": {
+            "read": {
+              "response_ms": {
+                "count": 8000,
+                "median": 0.226264,
+                "p99": 0.386378,
+                "max": 2.085947
+              },
+              "client_queue_ms": {
+                "count": 8000,
+                "median": 0.098082,
+                "p99": 0.14937,
+                "max": 1.899593
+              },
+              "rejected": 0
+            }
+          },
+          "resources": {
+            "sample_count": 79,
+            "sampled_span_s": 7.844441608,
+            "rss_peak_mib": 419.17578125,
+            "cgroup_peak_mib": 428.4296875,
+            "file_cache_peak_mib": 0.26953125,
+            "anon_peak_mib": 422.7890625,
+            "swap_peak_mib": 0.0,
+            "cpu_core_percent": 8.73056406336883,
+            "throttled_usec": 0
+          }
+        },
+        "mixed": {
+          "ops": 8000,
+          "completed": 8000,
+          "queue_rejected": 0,
+          "ops_s": 1000.0115120075249,
+          "by_kind": {
+            "read": {
+              "response_ms": {
+                "count": 6400,
+                "median": 0.23835099999999998,
+                "p99": 0.418803,
+                "max": 0.941344
+              },
+              "client_queue_ms": {
+                "count": 6400,
+                "median": 0.103643,
+                "p99": 0.176052,
+                "max": 0.448583
+              },
+              "rejected": 0
+            },
+            "write": {
+              "response_ms": {
+                "count": 1600,
+                "median": 3.6770345,
+                "p99": 7.568715,
+                "max": 53.893378
+              },
+              "client_queue_ms": {
+                "count": 1600,
+                "median": 0.109693,
+                "p99": 0.190316,
+                "max": 33.897716
+              },
+              "rejected": 0
+            }
+          },
+          "resources": {
+            "sample_count": 79,
+            "sampled_span_s": 7.848388559,
+            "rss_peak_mib": 420.10546875,
+            "cgroup_peak_mib": 430.37890625,
+            "file_cache_peak_mib": 0.94921875,
+            "anon_peak_mib": 423.6875,
+            "swap_peak_mib": 0.0,
+            "cpu_core_percent": 11.16906984676216,
+            "throttled_usec": 0
+          }
+        }
+      },
+      "boot_ready_ms": 2618.536205001874,
+      "reopen_ready_ms": 2919.4865399913397,
+      "safety_probe": {
+        "old_generation_updates_checked": 8,
+        "staged_refusal": "resource_exhausted",
+        "prior_staged_value_preserved": true,
+        "commit_after_rollback": true
+      }
+    },
+    {
+      "label": "main-3-baseline",
+      "stage": "main",
+      "rep": 3,
+      "variant": "baseline",
+      "memory_mib": 512,
+      "status": "passed",
+      "oom_kills": 0,
+      "whole_boot_rss_peak_mib": 420.29296875,
+      "whole_boot_cgroup_peak_mib": 429.9609375,
+      "verification_count": 5,
+      "workloads": {
+        "read": {
+          "ops": 8000,
+          "completed": 8000,
+          "queue_rejected": 0,
+          "ops_s": 1000.043841421986,
+          "by_kind": {
+            "read": {
+              "response_ms": {
+                "count": 8000,
+                "median": 0.23326049999999998,
+                "p99": 0.389501,
+                "max": 1.299061
+              },
+              "client_queue_ms": {
+                "count": 8000,
+                "median": 0.098255,
+                "p99": 0.182011,
+                "max": 0.496127
+              },
+              "rejected": 0
+            }
+          },
+          "resources": {
+            "sample_count": 80,
+            "sampled_span_s": 7.946241088,
+            "rss_peak_mib": 419.0859375,
+            "cgroup_peak_mib": 428.9375,
+            "file_cache_peak_mib": 0.26953125,
+            "anon_peak_mib": 422.796875,
+            "swap_peak_mib": 0.0,
+            "cpu_core_percent": 9.161186930249857,
+            "throttled_usec": 0
+          }
+        },
+        "mixed": {
+          "ops": 8000,
+          "completed": 8000,
+          "queue_rejected": 0,
+          "ops_s": 1000.0342052949621,
+          "by_kind": {
+            "read": {
+              "response_ms": {
+                "count": 6400,
+                "median": 0.220547,
+                "p99": 0.349147,
+                "max": 0.844827
+              },
+              "client_queue_ms": {
+                "count": 6400,
+                "median": 0.0979505,
+                "p99": 0.150264,
+                "max": 0.475394
+              },
+              "rejected": 0
+            },
+            "write": {
+              "response_ms": {
+                "count": 1600,
+                "median": 3.6241715,
+                "p99": 5.320997,
+                "max": 7.403546
+              },
+              "client_queue_ms": {
+                "count": 1600,
+                "median": 0.1023255,
+                "p99": 0.141918,
+                "max": 0.387624
+              },
+              "rejected": 0
+            }
+          },
+          "resources": {
+            "sample_count": 79,
+            "sampled_span_s": 7.843619516,
+            "rss_peak_mib": 420.0,
+            "cgroup_peak_mib": 428.9921875,
+            "file_cache_peak_mib": 0.9453125,
+            "anon_peak_mib": 423.68359375,
+            "swap_peak_mib": 0.0,
+            "cpu_core_percent": 9.929471953748962,
+            "throttled_usec": 0
+          }
+        }
+      },
+      "boot_ready_ms": 2819.7942349943332,
+      "reopen_ready_ms": 2724.9028150108643,
+      "safety_probe": {
+        "old_generation_updates_checked": 8,
+        "staged_refusal": "resource_exhausted",
+        "prior_staged_value_preserved": true,
+        "commit_after_rollback": true
+      }
+    },
+    {
+      "label": "main-3-inline",
+      "stage": "main",
+      "rep": 3,
+      "variant": "inline",
+      "memory_mib": 512,
+      "status": "passed",
+      "oom_kills": 0,
+      "whole_boot_rss_peak_mib": 390.5625,
+      "whole_boot_cgroup_peak_mib": 409.3671875,
+      "verification_count": 5,
+      "workloads": {
+        "read": {
+          "ops": 8000,
+          "completed": 8000,
+          "queue_rejected": 0,
+          "ops_s": 1000.0254921498331,
+          "by_kind": {
+            "read": {
+              "response_ms": {
+                "count": 8000,
+                "median": 0.2349835,
+                "p99": 0.364397,
+                "max": 0.900038
+              },
+              "client_queue_ms": {
+                "count": 8000,
+                "median": 0.100339,
+                "p99": 0.143204,
+                "max": 0.554423
+              },
+              "rejected": 0
+            }
+          },
+          "resources": {
+            "sample_count": 80,
+            "sampled_span_s": 7.945325875,
+            "rss_peak_mib": 389.59765625,
+            "cgroup_peak_mib": 398.71484375,
+            "file_cache_peak_mib": 0.26953125,
+            "anon_peak_mib": 393.1953125,
+            "swap_peak_mib": 0.0,
+            "cpu_core_percent": 9.0605975302429,
+            "throttled_usec": 0
+          }
+        },
+        "mixed": {
+          "ops": 8000,
+          "completed": 8000,
+          "queue_rejected": 0,
+          "ops_s": 1000.0402768721611,
+          "by_kind": {
+            "read": {
+              "response_ms": {
+                "count": 6400,
+                "median": 0.2205805,
+                "p99": 0.378794,
+                "max": 0.991224
+              },
+              "client_queue_ms": {
+                "count": 6400,
+                "median": 0.099027,
+                "p99": 0.204269,
+                "max": 0.48724
+              },
+              "rejected": 0
+            },
+            "write": {
+              "response_ms": {
+                "count": 1600,
+                "median": 3.6372445,
+                "p99": 5.507104,
+                "max": 14.18238
+              },
+              "client_queue_ms": {
+                "count": 1600,
+                "median": 0.103409,
+                "p99": 0.186987,
+                "max": 0.490666
+              },
+              "rejected": 0
+            }
+          },
+          "resources": {
+            "sample_count": 80,
+            "sampled_span_s": 7.943116887,
+            "rss_peak_mib": 390.53125,
+            "cgroup_peak_mib": 400.6171875,
+            "file_cache_peak_mib": 0.94140625,
+            "anon_peak_mib": 394.09375,
+            "swap_peak_mib": 0.0,
+            "cpu_core_percent": 9.325860497059558,
+            "throttled_usec": 0
+          }
+        }
+      },
+      "boot_ready_ms": 2617.8041269886307,
+      "reopen_ready_ms": 2516.147809976246,
+      "safety_probe": {
+        "old_generation_updates_checked": 8,
+        "staged_refusal": "resource_exhausted",
+        "prior_staged_value_preserved": true,
+        "commit_after_rollback": true
+      }
+    }
+  ],
+  "seed_wal_sha256": "47a87937e35a91c55f44b7070bf898b6c70a179df42254e84243509b6ce3d78d",
+  "failed_conditions": [],
+  "requests": 96000,
+  "full_checks": 30,
+  "seed_full_checks": 6
+}

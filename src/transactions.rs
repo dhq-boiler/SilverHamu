@@ -4,6 +4,10 @@
 //! predicates, syncs one complete WAL frame, and then publishes its version atomically.
 //! A database has one process owner; cloned handles share that owner across threads.
 
+#[cfg(feature = "inline-key")]
+use crate::inline_key::Key as StoredKey;
+#[cfg(not(feature = "inline-key"))]
+type StoredKey = Vec<u8>;
 use crate::resources::{ACTIVE, Budget, BufferPermit, DEPENDENCIES, RETAINED, STAGED};
 pub use crate::resources::{ResourceLimits, ResourceUsage};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -207,6 +211,17 @@ fn wrap_state(guard: MutexGuard<'_, State>) -> StateGuard<'_> {
     }
 }
 
+fn stored_key(key: &[u8]) -> StoredKey {
+    #[cfg(feature = "inline-key")]
+    {
+        StoredKey::from_slice(key)
+    }
+    #[cfg(not(feature = "inline-key"))]
+    {
+        key.to_vec()
+    }
+}
+
 struct State {
     file: Option<WalFile>,
     path: PathBuf,
@@ -214,7 +229,7 @@ struct State {
     wal_bytes: u64,
     reservation_enabled: bool,
     reserved_bytes: u64,
-    rows: BTreeMap<Vec<u8>, VersionChain>,
+    rows: BTreeMap<StoredKey, VersionChain>,
     active: BTreeMap<u64, usize>,
     #[cfg(feature = "history-metrics")]
     skipped_history_versions: usize,
@@ -880,7 +895,7 @@ impl Database {
         #[cfg(feature = "fixed-log")]
         let fixed_capacity =
             _fixed_capacity.or_else(|| state.file.as_ref().and_then(|f| f.capacity()));
-        let last_key = state.rows.last_key_value().map(|(key, _)| key.clone());
+        let last_key = state.rows.last_key_value().map(|(key, _)| key.to_vec());
         let path = state.path.clone();
         let mut buffer = state.budget.buffer();
         drop(state);
@@ -913,7 +928,11 @@ impl Database {
                     for (key, versions) in state
                         .rows
                         .range::<[u8], _>((lower, Unbounded))
-                        .take_while(|(key, _)| last_key.as_ref().is_some_and(|last| *key <= last))
+                        .take_while(|(key, _)| {
+                            last_key
+                                .as_ref()
+                                .is_some_and(|last| key.as_slice() <= last.as_slice())
+                        })
                         .take(256)
                     {
                         if let Some(value) =
@@ -930,10 +949,10 @@ impl Database {
                                 buffer.add(24 + PREFIX_BYTES + TRAILER_BYTES)?;
                             }
                             buffer.add(128 + key.len() + value.len() + 2 * size)?;
-                            pending.insert(key.clone(), Some(value.to_vec()));
+                            pending.insert(key.to_vec(), Some(value.to_vec()));
                             bytes += size;
                         }
-                        next = Some(key.clone());
+                        next = Some(key.to_vec());
                         visited += 1;
                     }
                     after_key = next;
@@ -1401,8 +1420,16 @@ impl Transaction {
         let state = self.database.state()?;
         let mut permit = state.budget.buffer();
         let mut result = Vec::new();
-        let mut stored = state.rows.range::<[u8], _>(range.bounds()).peekable();
-        let mut staged = self.writes.range::<[u8], _>(range.bounds()).peekable();
+        let mut stored = state
+            .rows
+            .range::<[u8], _>(range.bounds())
+            .map(|(key, value)| (key.as_slice(), value))
+            .peekable();
+        let mut staged = self
+            .writes
+            .range::<[u8], _>(range.bounds())
+            .map(|(key, value)| (key.as_slice(), value))
+            .peekable();
         loop {
             let (key, value) = match (stored.peek(), staged.peek()) {
                 (Some((stored_key, _)), Some((staged_key, _))) if stored_key == staged_key => {
@@ -1433,7 +1460,7 @@ impl Transaction {
                     // A one-row initial capacity keeps growth within the per-row reservation.
                     result.reserve_exact(result.capacity().max(1));
                 }
-                result.push((key.clone(), value));
+                result.push((key.to_vec(), value));
             }
         }
         permit.add(result.len() * 64)?;
@@ -1460,8 +1487,16 @@ impl Transaction {
         let mut permit = state.budget.buffer();
         let mut keys = Vec::new();
         let mut result = Vec::new();
-        let mut stored = state.rows.range::<[u8], _>(range.bounds()).peekable();
-        let mut staged = self.writes.range::<[u8], _>(range.bounds()).peekable();
+        let mut stored = state
+            .rows
+            .range::<[u8], _>(range.bounds())
+            .map(|(key, value)| (key.as_slice(), value))
+            .peekable();
+        let mut staged = self
+            .writes
+            .range::<[u8], _>(range.bounds())
+            .map(|(key, value)| (key.as_slice(), value))
+            .peekable();
         loop {
             let (key, value) = match (stored.peek(), staged.peek()) {
                 (Some((stored_key, _)), Some((staged_key, _))) if stored_key == staged_key => {
@@ -1551,13 +1586,21 @@ impl Transaction {
         let mut permit = state.budget.buffer();
         let lower = after.map_or(Included(start), Excluded);
         let upper = end.map_or(Unbounded, Excluded);
-        let mut stored = state.rows.range::<[u8], _>((lower, upper)).peekable();
-        let mut staged = self.writes.range::<[u8], _>((lower, upper)).peekable();
+        let mut stored = state
+            .rows
+            .range::<[u8], _>((lower, upper))
+            .map(|(key, value)| (key.as_slice(), value))
+            .peekable();
+        let mut staged = self
+            .writes
+            .range::<[u8], _>((lower, upper))
+            .map(|(key, value)| (key.as_slice(), value))
+            .peekable();
         let mut rows = Vec::new();
         let mut sources = Vec::new();
         let mut payload_bytes = 0;
         let mut visited_entries = 0;
-        let mut last_consumed: Option<&Vec<u8>> = None;
+        let mut last_consumed: Option<&[u8]> = None;
         let mut deferred = false;
 
         while rows.len() < limits.max_rows && visited_entries < limits.max_visits {
@@ -1598,7 +1641,7 @@ impl Transaction {
                     break;
                 }
                 permit.add(size + 96)?;
-                rows.push((key.clone(), Vec::new()));
+                rows.push((key.to_vec(), Vec::new()));
                 sources.push(value);
                 payload_bytes += size;
             }
@@ -1606,9 +1649,13 @@ impl Transaction {
         }
         let more = deferred || stored.peek().is_some() || staged.peek().is_some();
         if more {
-            permit.add(last_consumed.map_or(0, Vec::len))?;
+            permit.add(last_consumed.map_or(0, <[u8]>::len))?;
         }
-        let next_after = if more { last_consumed.cloned() } else { None };
+        let next_after = if more {
+            last_consumed.map(<[u8]>::to_vec)
+        } else {
+            None
+        };
         drop(state);
         read_copy_hook();
         for (row, value) in rows.iter_mut().zip(sources) {
@@ -2013,7 +2060,7 @@ impl State {
         writes
             .iter()
             .map(|(key, value)| {
-                let key_charge = if self.rows.contains_key(key) {
+                let key_charge = if self.rows.contains_key(key.as_slice()) {
                     0
                 } else {
                     192 + 2 * key.len()
@@ -2061,7 +2108,7 @@ impl State {
                 sequence,
                 value: value.map(Arc::from),
             };
-            match self.rows.entry(key.clone()) {
+            match self.rows.entry(stored_key(&key)) {
                 std::collections::btree_map::Entry::Occupied(mut entry) => {
                     #[cfg(feature = "skip-unneeded-history")]
                     {
@@ -2142,7 +2189,7 @@ impl State {
                 self.gc_cursor = None;
                 break;
             };
-            let versions = self.rows.get_mut(&key).unwrap();
+            let versions = self.rows.get_mut(key.as_slice()).unwrap();
             while versions.len() > 1 && versions[1].sequence <= self.gc_target {
                 let charge = 64 + versions[0].value.as_ref().map_or(0, |v| v.len());
                 // One oversized value must make progress; it still counts until freed.
@@ -2164,7 +2211,7 @@ impl State {
                 && versions[0].sequence <= self.gc_target
                 && versions[0].value.is_none();
             if tombstone {
-                self.rows.remove(&key);
+                self.rows.remove(key.as_slice());
                 self.budget.release(RETAINED, 192 + 2 * key.len() + 64);
                 self.history_keys.remove(&key);
             } else if versions.len() == 1 && versions[0].value.is_some() {
@@ -2344,6 +2391,87 @@ impl<'a> Decoder<'a> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn inline_key_st_point_and_prefix_range_conflicts_cross_storage_boundary() {
+        for len in [14, 15, 16, 17, MAX_KEY_BYTES] {
+            let f = Fixture::new();
+            let db = Database::create(&f.0, [97; 16]).unwrap();
+            let key = vec![1; len];
+            let mut initial = db.begin().unwrap();
+            initial.put(&key, b"initial").unwrap();
+            initial.commit().unwrap();
+            let mut reader = db.begin().unwrap();
+            assert_eq!(reader.get(&key).unwrap(), Some(b"initial".to_vec()));
+            reader.put(b"other", b"staged").unwrap();
+            let mut writer = db.begin().unwrap();
+            writer.put(&key, b"new").unwrap();
+            writer.commit().unwrap();
+            assert!(matches!(
+                reader.commit(),
+                Err(Error::Conflict(ConflictKind::Read))
+            ));
+            let mut range = db.begin().unwrap();
+            range.scan(&[1], Some(&[2])).unwrap();
+            range.put(b"other", b"staged").unwrap();
+            let mut writer = db.begin().unwrap();
+            writer.delete(&key).unwrap();
+            writer.commit().unwrap();
+            assert!(matches!(
+                range.commit(),
+                Err(Error::Conflict(ConflictKind::Range))
+            ));
+        }
+    }
+
+    #[test]
+    fn inline_key_eq_st_boundaries_snapshots_checkpoint_and_reopen() {
+        let f = Fixture::new();
+        let keys = vec![
+            vec![],
+            vec![0],
+            vec![0, 0],
+            vec![1; 14],
+            vec![1; 15],
+            vec![1; 16],
+            vec![1; 17],
+            vec![255; MAX_KEY_BYTES],
+        ];
+        {
+            let db = Database::create(&f.0, [99; 16]).unwrap();
+            let mut tx = db.begin().unwrap();
+            for key in &keys {
+                tx.put(key, b"old").unwrap();
+            }
+            tx.commit().unwrap();
+            let mut old = db.begin_read().unwrap();
+            let mut tx = db.begin().unwrap();
+            for key in &keys {
+                tx.delete(key).unwrap();
+            }
+            tx.commit().unwrap();
+            let mut tx = db.begin().unwrap();
+            for key in &keys {
+                tx.put(key, b"new").unwrap();
+            }
+            tx.commit().unwrap();
+            assert_eq!(
+                old.scan(&[], None).unwrap(),
+                keys.iter()
+                    .map(|k| (k.clone(), b"old".to_vec()))
+                    .collect::<Rows>()
+            );
+            db.checkpoint().unwrap();
+            assert_eq!(old.get(&keys[5]).unwrap(), Some(b"old".to_vec()));
+        }
+        let db = Database::open(&f.0).unwrap();
+        assert_eq!(
+            db.begin_read().unwrap().scan(&[], None).unwrap(),
+            keys.iter()
+                .map(|k| (k.clone(), b"new".to_vec()))
+                .collect::<Rows>()
+        );
+    }
+
     #[cfg(all(feature = "inline-latest", target_pointer_width = "64"))]
     #[test]
     fn bv_inline_latest_does_not_enlarge_the_tree_value() {

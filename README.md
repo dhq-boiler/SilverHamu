@@ -6,6 +6,18 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Optional short-key storage experiment
+
+At 1M rows /1 CPU /512MiB, storing short index keys inline reduced median RSS
+**420.11 → 390.51 MiB (-7.0%)**. Separate diagnostics eliminated 2M open-time
+allocation calls and 8MB of retained requested memory. However, mixed read p99
+was 0.349 → 0.363ms and update p99 5.321 → 5.507ms; this is not a universal speedup.
+The `inline-key` feature remains optional; defaults and persistence are unchanged.
+[All trials, long-key comparison, safety and limitations](docs/benchmarks/inline-key-2026-11-07/README.md).
+
+![Inline-key comparison](docs/benchmarks/inline-key-2026-11-07/comparison.svg)
+![Allocations and reopening](docs/benchmarks/inline-key-2026-11-07/allocation.svg)
+
 ## Budget-partitioned preparation pilot
 
 With 1M rows / 1 CPU / 512 MiB, dividing a 4 KiB staged-write test budget across four

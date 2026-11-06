@@ -36,6 +36,7 @@ adaptive-window = ["commit-window"]
 sync-stall = []
 history-metrics = []
 inline-latest = []
+inline-key = []
 skip-unneeded-history = ["inline-latest"]
 retirement-timing = ["skip-unneeded-history", "lock-timing"]
 allocation-metrics = []
@@ -63,3 +64,8 @@ required-features = ["service"]
 name = "history-capacity-bench"
 path = "src/bin/history-capacity-bench.rs"
 required-features = ["service", "history-metrics"]
+
+[[bin]]
+name = "key-allocation-bench"
+path = "src/bin/key-allocation-bench.rs"
+required-features = ["service", "history-metrics", "allocation-metrics"]

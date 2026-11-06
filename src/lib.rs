@@ -3,6 +3,8 @@ use std::io::{self, BufWriter, Read, Seek, SeekFrom, Write};
 use std::path::Path;
 
 mod ffi;
+#[cfg(feature = "inline-key")]
+mod inline_key;
 mod resources;
 #[cfg(feature = "service")]
 pub mod service;

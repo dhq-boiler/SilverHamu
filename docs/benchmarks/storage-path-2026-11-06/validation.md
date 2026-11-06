@@ -1,11 +1,11 @@
 # Validation
 
-- Storage-path guards: 2 passed. Existing directory contents survive rejection;
+- Storage-path guards: 4 passed. Existing directory contents survive rejection;
   bind-root/mode mismatch is rejected before creating the output folder.
 - Existing resource client: 9 passed, including bounded queues, old values,
   readiness gate and budget-refusal recovery.
 - Shared timing/identity regression checks: 10 passed (7 + 3).
-- [Local test output](tests.log.gz): 21 tests passed, zero failures.
+- [Local test output](tests.log.gz): 23 tests passed, zero failures.
 - Two 1,000-row pilots: sync/readback, exclusive DB ownership, full values,
   old versions, budget refusal/rollback recovery and kill/reopen passed.
 - Six 1M-row main trials: 96,000 requests, zero refusals/errors, 30 full-data
@@ -21,3 +21,7 @@
 
 The C: bind fixtures remain only in the new synthetic-data working directory
 `C:/Git/NewDBMS/artifacts/storage-path-data-2026-11-06`; they were not committed.
+
+A post-measurement cleanup fix preserves a pre-existing probe filename if exclusive
+creation fails. Two extra tests cover collision and sync failure; this changes no
+DB/workload timing path. The measured source hashes remain unmodified as evidence.

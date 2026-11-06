@@ -125,6 +125,8 @@ See [validation details](validation.md) and the retained raw results.
 ## Reproduction
 
 The base repository commit was `998b888e9d89b8a9eb929e3dc1119181c922f2ac`.
+A post-measurement probe-cleanup guard adds protection against a random filename
+collision; the recorded measured-source hashes remain unchanged.
 Only the benchmark harness changed; binary/toolchain provenance remains in the
 [preceding build record](../aged-sync-2026-11-06/build-record/binaries.sha256).
 See [source hashes](raw/sources.json), [image identity](raw/image.json),

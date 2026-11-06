@@ -6,6 +6,15 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Repair and generation transition gate
+
+The bounded standalone probe now keeps the old selector pair while preparing a
+new pair. Thirteen tests pass, including 8,450 selector-persistence combinations
+and 37 external child-process kills across repair, switching and reclamation.
+Normal append uses one sync; a complete transition uses three, and repairs add
+their own syncs. This is not a production integration or a measured speedup.
+[Protocol, costs, negative controls and remaining work](docs/benchmarks/generation-gate-2026-11-07/README.md).
+
 ## Bounded dual-copy recovery probe
 
 A separate prototype writes two log copies before one ordinary commit sync.

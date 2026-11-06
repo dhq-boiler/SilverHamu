@@ -1,0 +1,37 @@
+{
+  "recorded_utc": "2026-11-06T23:08:20.914963+00:00",
+  "image": "sha256:096b9dd60acf6140d936a45412498b7b18338cdf1604f0efa8dcc215a36161cc",
+  "image_tag": "rust:1.89-bookworm",
+  "cpu_limit": 2,
+  "memory_limit": "1g",
+  "source_sha256_lf": "74df4dd158eae20155b30e8fb64ec8ae3f54310a959c967435a473d8e27eba97",
+  "passed_tests": 13,
+  "ignored_child_entrypoint": 1,
+  "external_child_kills": 37,
+  "selector_prefix_combinations": 8450,
+  "fault_scope": "at most one damaged copy of each acknowledged data/control record before repair; correlated loss is not covered",
+  "production_changes": false,
+  "performance_measured": false,
+  "counts_per_operation": {
+    "initialization": {
+      "bytes": 98304,
+      "sync_calls": 2
+    },
+    "append": {
+      "bytes": 128,
+      "sync_calls": 1
+    },
+    "generation_transition_including_reclaim": {
+      "bytes": 1536,
+      "sync_calls": 3
+    },
+    "one_data_copy_repair": {
+      "bytes": 64,
+      "sync_calls": 1
+    },
+    "one_selector_copy_repair": {
+      "bytes": 64,
+      "sync_calls": 1
+    }
+  }
+}

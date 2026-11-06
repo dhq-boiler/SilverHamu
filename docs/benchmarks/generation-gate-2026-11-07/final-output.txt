@@ -1,0 +1,61 @@
+
+running 14 tests
+test tests::child_phase ... ignored
+test tests::file_external_kills_at_repair_and_switch_boundaries ... external kill recovered and resumed: repair/cycle-0/repair-data-7.half
+external kill recovered and resumed: repair/cycle-0/repair-data-7.written
+external kill recovered and resumed: repair/cycle-0/repair-data.before-sync
+external kill recovered and resumed: repair/cycle-0/repair-data.synced
+external kill recovered and resumed: repair/cycle-0/repair-selector-3.half
+external kill recovered and resumed: repair/cycle-0/repair-selector-3.written
+external kill recovered and resumed: repair/cycle-0/repair-selector.before-sync
+external kill recovered and resumed: repair/cycle-0/repair-selector.synced
+external kill recovered and resumed: repair/cycle-0/open-ready
+external kill recovered and resumed: switch/cycle-0/switch-clear.half
+external kill recovered and resumed: switch/cycle-1/switch-clear.half
+external kill recovered and resumed: switch/cycle-0/switch-data-0.half
+external kill recovered and resumed: switch/cycle-1/switch-data-0.half
+external kill recovered and resumed: switch/cycle-0/switch-data-1.written
+external kill recovered and resumed: switch/cycle-1/switch-data-1.written
+external kill recovered and resumed: switch/cycle-0/switch-data.before-sync
+external kill recovered and resumed: switch/cycle-1/switch-data.before-sync
+external kill recovered and resumed: switch/cycle-0/switch-data.synced
+external kill recovered and resumed: switch/cycle-1/switch-data.synced
+external kill recovered and resumed: switch/cycle-0/switch-selector-0.half
+external kill recovered and resumed: switch/cycle-1/switch-selector-0.half
+external kill recovered and resumed: switch/cycle-0/switch-selector-0.written
+external kill recovered and resumed: switch/cycle-1/switch-selector-0.written
+external kill recovered and resumed: switch/cycle-0/switch-selector-1.half
+external kill recovered and resumed: switch/cycle-1/switch-selector-1.half
+external kill recovered and resumed: switch/cycle-0/switch-selector.before-sync
+external kill recovered and resumed: switch/cycle-1/switch-selector.before-sync
+external kill recovered and resumed: switch/cycle-0/switch-selector.synced
+external kill recovered and resumed: switch/cycle-1/switch-selector.synced
+external kill recovered and resumed: switch/cycle-0/switch.published
+external kill recovered and resumed: switch/cycle-1/switch.published
+external kill recovered and resumed: switch/cycle-0/reclaim.half
+external kill recovered and resumed: switch/cycle-1/reclaim.half
+external kill recovered and resumed: switch/cycle-0/reclaim.before-sync
+external kill recovered and resumed: switch/cycle-1/reclaim.before-sync
+external kill recovered and resumed: switch/cycle-0/reclaim.synced
+external kill recovered and resumed: switch/cycle-1/reclaim.synced
+ok
+test tests::file_repair_costs_and_clean_reopen ... repair costs (write bytes, sync attempts): {"repair-data": (64, 1), "repair-selector": (64, 1)}
+ok
+test tests::file_repair_errors_block_writable_open_and_preserve_good_data ... ok
+test tests::file_repeated_switches_capacity_overflow_old_snapshot_and_costs ... code-path costs (write bytes, sync attempts): {"append": (1664, 13), "initialization": (98304, 2), "reclaim": (1920, 3), "switch-data": (2304, 3), "switch-selector": (384, 3)}
+ok
+test tests::file_switch_failures_poison_writer_and_reopen_preserves_values ... ok
+test tests::model_all_selector_prefix_pairs_recover_same_acknowledged_values ... 4225 selector persistence combinations checked; old selector pair remains readable even if both new selectors are partial
+ok
+test tests::model_both_copy_damage_is_retained_as_negative_control ... NEGATIVE CONTROL: both-copy damage can lose acknowledged update, outside contract
+ok
+test tests::model_old_bank_partial_reclaim_and_stale_records_do_not_change_current_state ... ok
+test tests::model_overwriting_only_two_selectors_can_lose_both_on_interruption ... NEGATIVE CONTROL: overwriting the only selector pair can leave no restart selector
+ok
+test tests::model_repair_interruption_preserves_good_copy_and_detects_conflict ... ok
+test tests::model_second_generation_selector_reuse_preserves_current_checkpoint ... 4225 selector reuse combinations over stale generation-1 selectors passed
+ok
+test tests::model_selected_missing_checkpoint_is_not_silently_rolled_back ... ok
+test tests::model_single_current_selector_damage_does_not_choose_reclaimed_old_bank ... ok
+
+test result: ok. 13 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 1.23s

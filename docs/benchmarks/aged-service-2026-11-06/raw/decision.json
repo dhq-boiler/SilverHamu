@@ -1,0 +1,23 @@
+{
+  "pilot_eligible": [
+    [
+      "inline",
+      512
+    ],
+    [
+      "deque",
+      1024
+    ],
+    [
+      "inline",
+      1024
+    ]
+  ],
+  "blocked_conditions": [
+    [
+      "deque",
+      512
+    ]
+  ],
+  "no_automatic_extension": true
+}

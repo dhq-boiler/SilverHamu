@@ -99,8 +99,31 @@ def measure(work,ops,rate,capacity,pin_reader=True):
             'by_kind':{k:{'completed':sum(r['kind']==k for r in ok),'p99_ms':quantile([r['ended']-r['planned'] for r in ok if r['kind']==k],.99)} for k in set(kinds)},
             'records':records}
 
+
+def safety_probe():
+    changes=json.loads((DATA/'updated.json').read_text());k=ROWS-1;previous=changes.get(str(k),0)
+    with connect() as old, connect() as writer:
+        require(old.request(op='begin_read'))
+        for generation in range(8):
+            stamp=1000000000000+generation
+            require(writer.request(op='put_commit',key=key(k).hex(),value=value(k,stamp).hex()))
+            changes[str(k)]=stamp
+            assert require(old.request(op='get',key=key(k).hex()))['value']==value(k,previous).hex()
+            assert require(writer.request(op='get_latest',key=key(k).hex()))['value']==value(k,stamp).hex()
+        require(old.request(op='rollback'))
+        require(writer.request(op='begin'))
+        require(writer.request(op='put',key=key(k).hex(),value=value(k,stamp).hex()))
+        refused=writer.request(op='put',key=key(k).hex(),value='ab'*8192)
+        assert refused=={'ok':False,'error':'resource_exhausted'},refused
+        assert require(writer.request(op='get',key=key(k).hex()))['value']==value(k,stamp).hex()
+        require(writer.request(op='rollback'))
+        require(writer.request(op='put_commit',key=key(k).hex(),value=value(k,stamp).hex()))
+    (DATA/'updated.json').write_text(json.dumps(changes))
+    return {'old_generation_updates_checked':8,'staged_refusal':'resource_exhausted',
+            'prior_staged_value_preserved':True,'commit_after_rollback':True}
+
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('action',choices=['ready','verify','measure']);p.add_argument('--work',default='read');p.add_argument('--ops',type=int,default=8000);p.add_argument('--rate',type=float,default=1000);p.add_argument('--capacity',type=int,default=64);p.add_argument('--pin-reader',type=int,choices=[0,1],default=1);a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('action',choices=['ready','verify','measure','safety']);p.add_argument('--work',default='read');p.add_argument('--ops',type=int,default=8000);p.add_argument('--rate',type=float,default=1000);p.add_argument('--capacity',type=int,default=64);p.add_argument('--pin-reader',type=int,choices=[0,1],default=1);a=p.parse_args()
     if a.action=='ready':
         start=time.monotonic_ns();last=None
         for _ in range(600):
@@ -117,7 +140,7 @@ if __name__=='__main__':
                 time.sleep(.1)
         else:raise RuntimeError('not ready: '+str(last))
     else:
-        result=verify() if a.action=='verify' else measure(a.work,a.ops,a.rate,a.capacity,bool(a.pin_reader))
+        result=safety_probe() if a.action=='safety' else verify() if a.action=='verify' else measure(a.work,a.ops,a.rate,a.capacity,bool(a.pin_reader))
         if a.action=='measure':
             (DATA/f'{a.work}-raw.json').write_text(json.dumps(result))
             result.pop('records')

@@ -1,0 +1,397 @@
+{
+  "rows": 1000,
+  "schedule": [
+    {
+      "label": "pilot-1-deque-512",
+      "stage": "pilot",
+      "rep": 1,
+      "variant": "deque",
+      "memory_mib": 512,
+      "start": "2026-11-06T07:17:24.014810+00:00",
+      "command": [
+        "C:\\Users\\boiler\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-X",
+        "utf8",
+        "C:\\Git\\catdb\\benchmarks\\resource-envelope\\run.py",
+        "--out",
+        "C:\\Git\\catdb\\artifacts\\aged-service-smoke\\pilot-1-deque-512",
+        "--rows",
+        "1000",
+        "--cpus",
+        "1",
+        "--memory",
+        "512",
+        "--reps",
+        "1",
+        "--ops",
+        "200",
+        "--rate",
+        "1000",
+        "--retained-bytes",
+        "671088640",
+        "--staged-bytes",
+        "4096",
+        "--pin-reader",
+        "0",
+        "--age-seed",
+        "--safety-probe",
+        "--image",
+        "catdb-aged:deque"
+      ],
+      "status": "passed",
+      "end": "2026-11-06T07:17:41.457457+00:00",
+      "oom_kills": 0
+    },
+    {
+      "label": "pilot-1-inline-512",
+      "stage": "pilot",
+      "rep": 1,
+      "variant": "inline",
+      "memory_mib": 512,
+      "start": "2026-11-06T07:17:41.468468+00:00",
+      "command": [
+        "C:\\Users\\boiler\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-X",
+        "utf8",
+        "C:\\Git\\catdb\\benchmarks\\resource-envelope\\run.py",
+        "--out",
+        "C:\\Git\\catdb\\artifacts\\aged-service-smoke\\pilot-1-inline-512",
+        "--rows",
+        "1000",
+        "--cpus",
+        "1",
+        "--memory",
+        "512",
+        "--reps",
+        "1",
+        "--ops",
+        "200",
+        "--rate",
+        "1000",
+        "--retained-bytes",
+        "671088640",
+        "--staged-bytes",
+        "4096",
+        "--pin-reader",
+        "0",
+        "--age-seed",
+        "--safety-probe",
+        "--image",
+        "catdb-aged:inline"
+      ],
+      "status": "passed",
+      "end": "2026-11-06T07:17:58.809622+00:00",
+      "oom_kills": 0
+    }
+  ],
+  "results": {
+    "pilot-1-deque-512": [
+      {
+        "name": "r1-n1000-c1-m512",
+        "rows": 1000,
+        "cpus": 1,
+        "memory_mib": 512,
+        "rep": 1,
+        "sample": 1,
+        "retained_bytes": 671088640,
+        "status": "passed",
+        "verification": [
+          {
+            "phase": "initial",
+            "rows": 1000,
+            "sha256": "5c45a92eaed4e35debe5c79427fd9ac06b6b0dcc207dc4e4cca345b02eacbb39",
+            "updated": 1000,
+            "passed": true
+          },
+          {
+            "phase": "read",
+            "rows": 1000,
+            "sha256": "5c45a92eaed4e35debe5c79427fd9ac06b6b0dcc207dc4e4cca345b02eacbb39",
+            "updated": 1000,
+            "passed": true
+          },
+          {
+            "phase": "mixed",
+            "rows": 1000,
+            "sha256": "6972e87068a84dce8801218edec6b1a7734269067e0740c38ed8add7f3a8d73b",
+            "updated": 1000,
+            "passed": true
+          },
+          {
+            "phase": "safety",
+            "rows": 1000,
+            "sha256": "63b7bf34e2a61a5a82db3be06f42dd9cc386b7e0b0f31ef1522b11f7e9617ce0",
+            "updated": 1000,
+            "passed": true
+          },
+          {
+            "phase": "reopen",
+            "rows": 1000,
+            "sha256": "63b7bf34e2a61a5a82db3be06f42dd9cc386b7e0b0f31ef1522b11f7e9617ce0",
+            "updated": 1000,
+            "passed": true
+          }
+        ],
+        "measurements": [
+          {
+            "work": "read",
+            "ops": 200,
+            "rate": 1000.0,
+            "capacity_per_kind": 64,
+            "elapsed_s": 0.199562981,
+            "start_ns": 138339299792177,
+            "finish_ns": 138339499355158,
+            "completed": 200,
+            "ops_s": 1002.1898800960485,
+            "pin_reader": false,
+            "old_snapshot_checked_keys": 0,
+            "p99_ms": 0.327721,
+            "max_ms": 0.426216,
+            "queue_rejected": 0,
+            "errors": [],
+            "by_kind": {
+              "read": {
+                "completed": 200,
+                "p99_ms": 0.327721
+              }
+            },
+            "host_begin_ns": 1173471609000000,
+            "host_end_ns": 1173472218000000
+          },
+          {
+            "work": "mixed",
+            "ops": 200,
+            "rate": 1000.0,
+            "capacity_per_kind": 64,
+            "elapsed_s": 0.199662851,
+            "start_ns": 138340263904791,
+            "finish_ns": 138340463567642,
+            "completed": 200,
+            "ops_s": 1001.6885915347367,
+            "pin_reader": false,
+            "old_snapshot_checked_keys": 0,
+            "p99_ms": 4.182186,
+            "max_ms": 4.378718,
+            "queue_rejected": 0,
+            "errors": [],
+            "by_kind": {
+              "read": {
+                "completed": 160,
+                "p99_ms": 0.380409
+              },
+              "write": {
+                "completed": 40,
+                "p99_ms": 4.378718
+              }
+            },
+            "host_begin_ns": 1173472625000000,
+            "host_end_ns": 1173473250000000
+          }
+        ],
+        "boot": {
+          "timing": {
+            "ready_wait_ms": 8.666786,
+            "launch_to_ready_ms": 891.0000000614673
+          },
+          "limits": {
+            "cpu.max": "100000 100000",
+            "memory.max": "536870912",
+            "memory.swap.max": "0"
+          },
+          "process_ready": {
+            "process_ready_ms": 100.73601600015536,
+            "poll_resolution_ms": 100
+          }
+        },
+        "safety_probe": {
+          "old_generation_updates_checked": 8,
+          "staged_refusal": "resource_exhausted",
+          "prior_staged_value_preserved": true,
+          "commit_after_rollback": true
+        },
+        "stop_state": {
+          "Status": "exited",
+          "Running": false,
+          "Paused": false,
+          "Restarting": false,
+          "OOMKilled": false,
+          "Dead": false,
+          "Pid": 0,
+          "ExitCode": 1,
+          "Error": "",
+          "StartedAt": "2026-11-06T07:17:28.300708784Z",
+          "FinishedAt": "2026-11-06T07:17:34.709187089Z"
+        },
+        "reopen": {
+          "timing": {
+            "ready_wait_ms": 8.56056,
+            "launch_to_ready_ms": 844.0000000409782
+          },
+          "limits": {
+            "cpu.max": "100000 100000",
+            "memory.max": "536870912",
+            "memory.swap.max": "0"
+          },
+          "process_ready": {
+            "process_ready_ms": 100.73198800091632,
+            "poll_resolution_ms": 100
+          }
+        }
+      }
+    ],
+    "pilot-1-inline-512": [
+      {
+        "name": "r1-n1000-c1-m512",
+        "rows": 1000,
+        "cpus": 1,
+        "memory_mib": 512,
+        "rep": 1,
+        "sample": 1,
+        "retained_bytes": 671088640,
+        "status": "passed",
+        "verification": [
+          {
+            "phase": "initial",
+            "rows": 1000,
+            "sha256": "5c45a92eaed4e35debe5c79427fd9ac06b6b0dcc207dc4e4cca345b02eacbb39",
+            "updated": 1000,
+            "passed": true
+          },
+          {
+            "phase": "read",
+            "rows": 1000,
+            "sha256": "5c45a92eaed4e35debe5c79427fd9ac06b6b0dcc207dc4e4cca345b02eacbb39",
+            "updated": 1000,
+            "passed": true
+          },
+          {
+            "phase": "mixed",
+            "rows": 1000,
+            "sha256": "6972e87068a84dce8801218edec6b1a7734269067e0740c38ed8add7f3a8d73b",
+            "updated": 1000,
+            "passed": true
+          },
+          {
+            "phase": "safety",
+            "rows": 1000,
+            "sha256": "63b7bf34e2a61a5a82db3be06f42dd9cc386b7e0b0f31ef1522b11f7e9617ce0",
+            "updated": 1000,
+            "passed": true
+          },
+          {
+            "phase": "reopen",
+            "rows": 1000,
+            "sha256": "63b7bf34e2a61a5a82db3be06f42dd9cc386b7e0b0f31ef1522b11f7e9617ce0",
+            "updated": 1000,
+            "passed": true
+          }
+        ],
+        "measurements": [
+          {
+            "work": "read",
+            "ops": 200,
+            "rate": 1000.0,
+            "capacity_per_kind": 64,
+            "elapsed_s": 0.199620827,
+            "start_ns": 138355718480429,
+            "finish_ns": 138355918101256,
+            "completed": 200,
+            "ops_s": 1001.8994661313571,
+            "pin_reader": false,
+            "old_snapshot_checked_keys": 0,
+            "p99_ms": 0.322449,
+            "max_ms": 0.449985,
+            "queue_rejected": 0,
+            "errors": [],
+            "by_kind": {
+              "read": {
+                "completed": 200,
+                "p99_ms": 0.322449
+              }
+            },
+            "host_begin_ns": 1173488953000000,
+            "host_end_ns": 1173489578000000
+          },
+          {
+            "work": "mixed",
+            "ops": 200,
+            "rate": 1000.0,
+            "capacity_per_kind": 64,
+            "elapsed_s": 0.199627268,
+            "start_ns": 138356678014748,
+            "finish_ns": 138356877642016,
+            "completed": 200,
+            "ops_s": 1001.8671397135987,
+            "pin_reader": false,
+            "old_snapshot_checked_keys": 0,
+            "p99_ms": 4.168396,
+            "max_ms": 4.379581,
+            "queue_rejected": 0,
+            "errors": [],
+            "by_kind": {
+              "write": {
+                "completed": 40,
+                "p99_ms": 4.379581
+              },
+              "read": {
+                "completed": 160,
+                "p99_ms": 0.38145
+              }
+            },
+            "host_begin_ns": 1173489984000000,
+            "host_end_ns": 1173490593000000
+          }
+        ],
+        "boot": {
+          "timing": {
+            "ready_wait_ms": 6.254759,
+            "launch_to_ready_ms": 891.0000000614673
+          },
+          "limits": {
+            "cpu.max": "100000 100000",
+            "memory.max": "536870912",
+            "memory.swap.max": "0"
+          },
+          "process_ready": {
+            "process_ready_ms": 100.7839699741453,
+            "poll_resolution_ms": 100
+          }
+        },
+        "safety_probe": {
+          "old_generation_updates_checked": 8,
+          "staged_refusal": "resource_exhausted",
+          "prior_staged_value_preserved": true,
+          "commit_after_rollback": true
+        },
+        "stop_state": {
+          "Status": "exited",
+          "Running": false,
+          "Paused": false,
+          "Restarting": false,
+          "OOMKilled": false,
+          "Dead": false,
+          "Pid": 0,
+          "ExitCode": 1,
+          "Error": "",
+          "StartedAt": "2026-11-06T07:17:46.654046017Z",
+          "FinishedAt": "2026-11-06T07:17:51.207151317Z"
+        },
+        "reopen": {
+          "timing": {
+            "ready_wait_ms": 5.721553,
+            "launch_to_ready_ms": 844.0000000409782
+          },
+          "limits": {
+            "cpu.max": "100000 100000",
+            "memory.max": "536870912",
+            "memory.swap.max": "0"
+          },
+          "process_ready": {
+            "process_ready_ms": 100.78454099129885,
+            "poll_resolution_ms": 100
+          }
+        }
+      }
+    ]
+  }
+}

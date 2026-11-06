@@ -826,3 +826,30 @@ observer cost from storage variability. This is not a speedup claim or an
 explanation of the prior p99 regression. All 16,000 requests and 16 full-content
 checks passed, including recovery after process termination.
 See [phase attribution, observer limitations, raw records and reproduction](docs/benchmarks/retirement-timing-2026-11-06/README.md).
+
+## Follow-up: using aged data within 512 MiB
+
+With one million rows already updated once, `inline-latest` completed a
+512-MiB pilot and **three subsequent read/write trials**, including old snapshots,
+budget refusal/recovery and process-crash recovery. Default deque was OOM-killed
+before ready in its 512-MiB pilot and was not retried.
+
+At the same 1-GiB limit, median sampled mixed-phase RSS peaks were
+**538.5 / 419.6 MiB** for deque / inline.
+Mixed write p99 was **5.405 / 5.215 ms**;
+inline at 512 MiB was **5.282 ms**. Memory capacity and speed
+are separate outcomes; the opt-in feature and default remain unchanged.
+One inline/1-GiB trial worsened to **19.482-ms write p99 / 33.417-ms maximum**,
+so the median is not evidence of a uniform speedup.
+
+![Aged-data memory comparison](docs/benchmarks/aged-service-2026-11-06/memory.svg)
+
+![Aged-data service latency comparison](docs/benchmarks/aged-service-2026-11-06/latency.svg)
+
+156,000 timed requests, 60 full-content service checks,
+plus 13 full seed checks. No timed-workload errors or queue
+rejections in runnable conditions. These are eight-second main phases at a fixed
+offered rate, not a long-run memory guarantee or maximum-throughput measurement.
+The limit applies to the service cgroup; preparation can leave shared filesystem
+cache charged elsewhere. This does not establish a 512-MiB total-machine budget.
+See [failed pilot, every trial, limits, raw records and reproduction](docs/benchmarks/aged-service-2026-11-06/README.md).

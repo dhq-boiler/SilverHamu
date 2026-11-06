@@ -46,6 +46,24 @@ class WorkloadTests(unittest.TestCase):
         with self.assertRaises(AssertionError):m.verify()
     def test_BV_invalid_capacity_rejected(self):
         with self.assertRaises(AssertionError):m.measure('read',10,100,0)
+
+    def test_ST_ER_safety_probe_preserves_old_and_staged_values_after_refusal(self):
+        class Staged(Fake):
+            def __init__(self):super().__init__();self.pending=None
+            def request(self,op,**args):
+                if op=='begin':self.pending={};return {'ok':True}
+                if op=='put':
+                    if len(bytes.fromhex(args['value']))>4096:return {'ok':False,'error':'resource_exhausted'}
+                    self.pending[args['key']]=args['value'];return {'ok':True}
+                if op=='get' and self.pending is not None and args['key'] in self.pending:return {'ok':True,'value':self.pending[args['key']]}
+                if op=='rollback':self.pending=None;self.snapshot=None;return {'ok':True}
+                return super().request(op,**args)
+        m.connect=Staged
+        result=m.safety_probe();self.assertEqual(result['old_generation_updates_checked'],8)
+        self.assertTrue(result['prior_staged_value_preserved']);self.assertTrue(m.verify()['passed'])
+    def test_ER_safety_probe_rejects_a_false_resource_failure(self):
+        with self.assertRaises(AssertionError):m.safety_probe()
+
     def test_BV_percentiles_include_empty_and_single_sample(self):
         self.assertIsNone(m.quantile([],.99));self.assertEqual(m.quantile([2000000],.99),2)
 

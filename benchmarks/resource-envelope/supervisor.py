@@ -28,7 +28,9 @@ def main():
             '--allow-remote','--token-file','/data/token','--transaction-timeout-secs','3600']
         retained=os.environ.get('RETAINED_BYTES')
         if retained: command += ['--max-retained-bytes',retained]
-        (OUT/f'{tag}-command.json').write_text(json.dumps({'retained_bytes':retained}))
+        staged=os.environ.get('STAGED_BYTES')
+        if staged: command += ['--max-staged-bytes',staged]
+        (OUT/f'{tag}-command.json').write_text(json.dumps({'retained_bytes':retained,'staged_bytes':staged}))
         p = subprocess.Popen(command, stdout=log, stderr=log)
         signal.signal(signal.SIGTERM, lambda *_: p.send_signal(signal.SIGTERM) if p.poll() is None else None)
         signal.signal(signal.SIGINT, lambda *_: p.send_signal(signal.SIGINT) if p.poll() is None else None)

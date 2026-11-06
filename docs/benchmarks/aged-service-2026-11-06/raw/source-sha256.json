@@ -1,0 +1,8 @@
+{
+  "Cargo.toml": "f28d938cb83c8f2e2722e95e7608209d4dbca9d165a3e93242d1f6f1dfd0c078",
+  "src/transactions.rs": "39bd870918e0b8e3951cf872f05f0c3550c2b35c8783a6f22490dca888c6a129",
+  "benchmarks/resource-envelope/run.py": "9608caf6111e1630cba6288d133cf2629e249c95abdb48ab8d063690b16e7076",
+  "benchmarks/resource-envelope/client.py": "33c92ac808a65436b851ce8fcb602a55736be9f8d68f57abf359d8b0983db671",
+  "benchmarks/resource-envelope/supervisor.py": "ebeb86bb83d390c739544a566ea91577669586eb79506ce3aac484c39fa25f49",
+  "benchmarks/aged-service/age_seed.py": "4ef57e91cab0ef3e4fdfcc897d14eafd1457cf898ca0e560fc4271403a6f12d2"
+}

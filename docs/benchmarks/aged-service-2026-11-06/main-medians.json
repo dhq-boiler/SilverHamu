@@ -1,0 +1,26 @@
+{
+  "Deque / 1024 MiB": {
+    "read_p99": 0.316855,
+    "mixed_read_p99": 0.327813,
+    "write_p99": 5.405157,
+    "max": 13.581533,
+    "rss_peak_mib": 538.49609375,
+    "file_cache_peak_mib": 0.9765625
+  },
+  "Inline latest / 1024 MiB": {
+    "read_p99": 0.317595,
+    "mixed_read_p99": 0.34019,
+    "write_p99": 5.21516,
+    "max": 6.11751,
+    "rss_peak_mib": 419.55078125,
+    "file_cache_peak_mib": 0.953125
+  },
+  "Inline latest / 512 MiB": {
+    "read_p99": 0.328307,
+    "mixed_read_p99": 0.312873,
+    "write_p99": 5.282228,
+    "max": 12.900259,
+    "rss_peak_mib": 419.296875,
+    "file_cache_peak_mib": 0.96484375
+  }
+}

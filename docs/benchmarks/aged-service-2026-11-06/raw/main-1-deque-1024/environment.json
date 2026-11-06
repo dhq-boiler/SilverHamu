@@ -1,0 +1,38 @@
+{
+  "commit": "4e549d0bba1366e8f0894556ec5c790132237fff",
+  "image": "sha256:9b0fb098743098954c07277ede3b2575e74e0f0b23a033d60597ccca6256e633",
+  "utc": "2026-11-06T07:24:44.303034+00:00",
+  "arguments": {
+    "out": "C:\\Git\\catdb\\docs\\benchmarks\\aged-service-2026-11-06\\raw\\main-1-deque-1024",
+    "rows": [
+      1000000
+    ],
+    "cpus": [
+      1
+    ],
+    "memory": [
+      1024
+    ],
+    "reps": 1,
+    "ops": 8000,
+    "sample": 1,
+    "rate": 1000.0,
+    "recover_memory": null,
+    "retained_bytes": 671088640,
+    "image": "catdb-aged:deque",
+    "age_seed": true,
+    "safety_probe": true,
+    "staged_bytes": 4096,
+    "diagnostics": false,
+    "pin_reader": 0
+  },
+  "docker": {
+    "ServerVersion": "29.9.2",
+    "NCPU": 32,
+    "MemTotal": 67380625408,
+    "Driver": "overlay2",
+    "OSType": "linux",
+    "Architecture": "x86_64",
+    "KernelVersion": "6.18.54.1-microsoft-standard-WSL2"
+  }
+}

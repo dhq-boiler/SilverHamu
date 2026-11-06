@@ -6,6 +6,16 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Bounded dual-copy recovery probe
+
+A separate prototype writes two log copies before one ordinary commit sync.
+Under the explicitly limited assumption of at most one damaged copy per record,
+10 model/file tests pass, including four external child-process kills. Reopen
+repairs require an additional sync. Correlated loss of both copies remains an
+explicit counterexample; generation recycling and production integration are not
+validated. No speedup, production safety pass or default change is claimed.
+[Results, assumptions and remaining gates](docs/benchmarks/dual-copy-gate-2026-11-07/README.md).
+
 ## Single-sync recovery safety gate
 
 A preliminary Rust recovery model rejected the simple self-validating-prefix

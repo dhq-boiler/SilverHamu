@@ -1,0 +1,22 @@
+
+running 11 tests
+test tests::child_phase ... ignored
+test tests::file_damaged_generation_anchor_is_rejected_without_repair ... ok
+test tests::file_one_copy_damage_restores_from_other_lane ... ok
+test tests::file_parent_kills_children_before_and_after_sync_and_publication ... external process kill at after-a: recovered [11, 22]
+external process kill at after-b: recovered [11, 22]
+external process kill at after-sync: recovered [11, 22]
+external process kill at after-publish: recovered [11, 22]
+ok
+test tests::file_sync_before_publication_old_values_capacity_and_reopen ... ok
+test tests::file_sync_error_injection_does_not_publish_and_poison_prevents_retry ... ok
+test tests::model_all_prefix_persistence_pairs_preserve_prior_acknowledgement ... 16641 prefix persistence combinations passed (not physical crash images)
+ok
+test tests::model_both_copy_damage_remains_an_undetectable_counterexample ... NEGATIVE CONTROL: damaging both acknowledged copies still loses sequence 2; outside bounded contract
+ok
+test tests::model_conflicting_valid_copies_wrong_order_and_holes_are_rejected ... ok
+test tests::model_reordered_fragments_and_stale_generation_are_bounded ... ok
+test tests::model_single_copy_suffix_damage_recovers_acknowledged_record ... 256 one-copy suffix damage cases restored
+ok
+
+test result: ok. 10 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.29s

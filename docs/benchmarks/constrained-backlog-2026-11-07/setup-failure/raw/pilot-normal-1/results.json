@@ -1,0 +1,28 @@
+[
+  {
+    "name": "r1-n1000000-c1-m512",
+    "rows": 1000000,
+    "cpus": 1,
+    "memory_mib": 512,
+    "rep": 1,
+    "sample": 1,
+    "retained_bytes": 671088640,
+    "status": "failed",
+    "verification": [],
+    "measurements": [],
+    "error": "Traceback (most recent call last):\n  File \"/bench-src/constrained-backlog/client.py\", line 4, in <module>\n    spec=importlib.util.spec_from_file_location('resource_base',ROOT/'benchmarks/resource-envelope/client.py');base=importlib.util.module_from_spec(spec);spec.loader.exec_module(base)\n                                                                                                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap_external>\", line 995, in exec_module\n  File \"<frozen importlib._bootstrap_external>\", line 1132, in get_code\n  File \"<frozen importlib._bootstrap_external>\", line 1190, in get_data\nFileNotFoundError: [Errno 2] No such file or directory: '/benchmarks/resource-envelope/client.py'\n",
+    "failure_state": {
+      "Status": "running",
+      "Running": true,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 31988,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-11-06T15:13:46.456544234Z",
+      "FinishedAt": "0001-01-01T00:00:00Z"
+    }
+  }
+]

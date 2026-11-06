@@ -1,0 +1,10 @@
+{
+  "benchmarks/resource-envelope/run.py": "815dbe1588ec329ff463f258311465619be5266134774f58a0d7a9c6bb1cc29c",
+  "benchmarks/resource-envelope/client.py": "8d7a2d9a6724f671c825a5557de61e0c8cbe1e551be8383376c8ed150db253a0",
+  "benchmarks/resource-envelope/supervisor.py": "ea944c926040e840642571a7a5bc7c32babb3b4fa93268be759f51e4fee03e24",
+  "benchmarks/constrained-backlog/analyze.py": "6ba9c39debfb2d63ed5288d6a381d68c5e88a9bd94ab77cb3047493aa89b14dd",
+  "benchmarks/constrained-backlog/client.py": "6398fb7353a5b3cd8a36a79763352056e8cccf7936f3fc44348002d008ee3750",
+  "benchmarks/constrained-backlog/run.py": "82958ba9f60fd45f6d2b163619841e8b96854339a1859da247950c9beb75c30c",
+  "benchmarks/constrained-backlog/test_analysis.py": "db836a11aca9ac3f2892976ecfddcc0256838ecaddf9d4a6ee0bc5e4ccbe22f1",
+  "benchmarks/constrained-backlog/test_client.py": "2f35d39aa5c69259fccb8535f024553e97a1e0d4bf783d98f68f464093574498"
+}

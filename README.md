@@ -64,6 +64,15 @@ changed.
 
 ![Storage-path comparison](docs/benchmarks/storage-path-2026-11-06/latency.svg)
 
+A [constrained-backlog pilot](docs/benchmarks/constrained-backlog-2026-11-07/README.md)
+reused the existing batch API with 1M rows, 1 CPU, 512 MiB and the harness's small
+**4-KiB staged-write override**. Under one slow sync, both policies made **381 syncs**,
+but batching resource-refused **5 of 400 updates**. The screen failed; the longer
+comparison was stopped and defaults remain unchanged. The product's staged-write
+default is 32 MiB, so this is not a general 512-MiB capacity limit.
+
+![Constrained backlog pilot including refusals](docs/benchmarks/constrained-backlog-2026-11-07/pilot.svg)
+
 ## What is not promised
 
 - No SQL parser, relational query optimizer, replication, or automatic failover.

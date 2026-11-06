@@ -344,4 +344,19 @@ mod tests {
         let(checkpoint,_,_)=pack(1,0,1,0,0,&w).unwrap();let mut invalid=checkpoint.encode();invalid[H..H+n].copy_from_slice(&future.payload[..n]);let mut image=initial();for lane in 0..2{image[at(0,0,lane)]=invalid;}assert!(recover(&image).is_err());
     }
 
+    #[test]
+    #[ignore = "explicit bounded persistence timing experiment"]
+    fn reuse_speed(){
+        let mode=std::env::var("REUSE_SPEED_MODE").unwrap();assert!(mode=="clear" || mode=="reuse");let clear=mode=="clear";let trial:usize=std::env::var("REUSE_SPEED_TRIAL").unwrap().parse().unwrap();
+        let root=PathBuf::from(std::env::var_os("REUSE_SPEED_ROOT").unwrap());let dir=root.join(format!("{}-{}-{}",mode,trial,std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()));fs::create_dir(&dir).unwrap();let p=dir.join("timed.log");let mut s=Store::create(&p).unwrap();s.append(&writes(),&mut noop).unwrap();s.append(&change(),&mut noop).unwrap();let old=s.visible.clone();let original=(*old).clone();
+        let mut updates=Vec::new();for i in 0..32{let mut w=change();w.get_mut(&vec![]).unwrap().as_mut().unwrap()[0]=i;updates.push(w);}
+        for i in 0..34{if s.state.used==CAP{s.switch_policy(clear,&mut noop).unwrap();}s.append(&updates[i%updates.len()],&mut noop).unwrap();}
+        assert_eq!(s.state.used,CAP);let mut expected=(*s.visible).clone();let mut rows=Vec::with_capacity(2000);let before_bytes:u64=s.costs.categories.values().map(|v|v.0).sum();let before_syncs:u64=s.costs.categories.values().map(|v|v.1).sum();
+        let phase=Instant::now();for i in 0..2000{let start=Instant::now();let mut switch_ns=0;if s.state.used==CAP{let t=Instant::now();s.switch_policy(clear,&mut noop).unwrap();switch_ns=t.elapsed().as_nanos();}let t=Instant::now();s.append(&updates[i%updates.len()],&mut noop).unwrap();let append_ns=t.elapsed().as_nanos();let total_ns=start.elapsed().as_nanos();rows.push((i,total_ns,append_ns,switch_ns));}let elapsed=phase.elapsed().as_nanos();
+        for i in 0..2000{apply(&mut expected,&updates[i%updates.len()]);}assert_eq!(*s.visible,expected);assert_eq!(*old,original);let bytes:u64=s.costs.categories.values().map(|v|v.0).sum::<u64>()-before_bytes;let syncs:u64=s.costs.categories.values().map(|v|v.1).sum::<u64>()-before_syncs;assert_eq!(rows.iter().filter(|r|r.3>0).count(),500);assert_eq!(syncs,if clear{3500}else{3000});drop(s);
+        let mut reopen=Vec::with_capacity(100);for i in 0..100{let t=Instant::now();let s=Store::open(&p,&mut noop).unwrap();let ns=t.elapsed().as_nanos();assert_eq!(*s.visible,expected);assert!(s.costs.categories.is_empty());drop(s);reopen.push((i,ns));}
+        println!("SPEED_SUMMARY,{mode},{trial},{elapsed},{bytes},{syncs},2000,500,100,true");
+        for(i,total,append,switch)in rows{println!("SPEED_UPDATE,{mode},{trial},{i},{total},{append},{switch}");}for(i,ns)in reopen{println!("SPEED_REOPEN,{mode},{trial},{i},{ns}");}
+    }
+
 }

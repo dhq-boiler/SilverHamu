@@ -6,6 +6,20 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Bounded epoch-reuse timing
+
+Three short single-writer trials per mode show median throughput including
+transitions **364.89 → 412.68 updates/s (+13.1%)** and request p99
+**7.271 → 5.632 ms (-22.5%)**. However, the worst request across all trials
+**worsens 15.070 → 18.214 ms**, and append-only p99 is not consistently better.
+These are small fixed-slot prototype results, not a production or large-data claim.
+
+![Epoch reuse timing, every trial](docs/benchmarks/reuse-speed-2026-11-07/comparison.svg)
+
+12,000 measured updates, retained old maps and 600 warm reopen checks pass.
+Real syncs are maintained; defaults remain unchanged.
+[All percentiles, raw requests, conditions and reproduction](docs/benchmarks/reuse-speed-2026-11-07/README.md).
+
 ## Bounded epoch-reuse experiment
 
 In the small variable-length fixture, retaining obsolete bank bytes reduces

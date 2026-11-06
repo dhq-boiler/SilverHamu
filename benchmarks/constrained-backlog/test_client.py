@@ -22,6 +22,23 @@ class Tests(unittest.TestCase):
         self.tmp=tempfile.TemporaryDirectory();m.base.DATA=pathlib.Path(self.tmp.name);(m.base.DATA/'updated.json').write_text('{}');m.base.connect=Fake
         fixtures.Fake.values={fixtures.key(i).hex():fixtures.value(i).hex() for i in range(1000)};fixtures.Fake.delay=0;Fake.version=Fake.syncs=0;Fake.latency=0;Fake.fail=False;Fake.refuse=False
     def tearDown(self):self.tmp.cleanup()
+    def test_BV_budget_edges_and_large_values(self):
+        for budget,expected in [(3135,1),(3136,2),(3137,2),(4096,2)]:
+            self.assertEqual(m.preparation_limit(budget,4,8,256,8),expected)
+        self.assertEqual(m.preparation_limit(4096,4,8,888,8),1)
+        with self.assertRaises(ValueError):m.preparation_limit(4096,4,8,889,8)
+        with self.assertRaises(ValueError):m.preparation_limit(0,4,8,256,8)
+    def test_EQ_ST_budget_partition_limits_preparation_without_losing_updates(self):
+        Fake.latency=.003;r=m.measure('mixed',200,100000,64,batch_limit=8,staged_budget=4096,setup_seconds=0)
+        self.assertEqual(r['effective_batch_limit'],2)
+        self.assertTrue(all(b['size']<=2 for b in r['batches']))
+        self.assertEqual(r['service_rejected'],0);self.assertFalse(r['errors'])
+        self.assertTrue(m.base.verify()['passed'])
+        self.assertEqual(r['old_snapshot_checked_keys'],r['by_kind']['write']['completed'])
+    def test_ER_budget_policy_disconnect_releases_outstanding_requests(self):
+        Fake.fail=True;r=m.measure('mixed',40,1000,64,batch_limit=8,staged_budget=4096,setup_seconds=0)
+        self.assertTrue(r['errors']);self.assertEqual(len(r['records']),40)
+        self.assertTrue(m.base.verify()['passed'])
     def test_EQ_ST_batched_mixed_values_and_old_generation_agree(self):
         Fake.latency=.003;r=m.measure('mixed',200,100000,64,batch_limit=8,setup_seconds=0)
         self.assertFalse(r['errors']);self.assertTrue(any(b['size']>1 for b in r['batches']));self.assertTrue(m.base.verify()['passed']);self.assertEqual(r['old_snapshot_checked_keys'],r['by_kind']['write']['completed'])

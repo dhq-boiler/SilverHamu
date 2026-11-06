@@ -40,7 +40,7 @@ def summarize(root):
                 active=0
                 for _,delta in sorted(events):active+=delta;assert 0<=active<=(64 if work['work']=='mixed' and w==0 else 16)
                 assert active==0
-        row={k:e[k] for k in ['label','scenario','limit']};row.update(mixed=timing.requests(m['records']),read=timing.requests(read['records']),resources=metrics.measured(samples,m['start_ns'],m['finish_ns']),syncs=m['sync_attempts'],updates_per_sync=m['by_kind']['write']['completed']/m['sync_attempts'],ops_s=m['ops_s'],requests=m['ops']+read['ops'],full_checks=5,reopen_ms=r['reopen']['process_ready']['process_ready_ms'],batch_sizes=[b['size'] for b in m['batches']],recovery=recovery(m['records'],m['arm_begin_ns']+500_000_000,m['arm_end_ns']+1_000_000_000))
+        row={k:e[k] for k in ['label','scenario','limit']};row.update(effective_limit=m.get('effective_batch_limit',m['batch_limit']),preparation_budget=m.get('preparation_budget'),mixed=timing.requests(m['records']),read=timing.requests(read['records']),resources=metrics.measured(samples,m['start_ns'],m['finish_ns']),syncs=m['sync_attempts'],updates_per_sync=m['by_kind']['write']['completed']/m['sync_attempts'],ops_s=m['ops_s'],requests=m['ops']+read['ops'],full_checks=5,reopen_ms=r['reopen']['process_ready']['process_ready_ms'],batch_sizes=[b['size'] for b in m['batches']],recovery=recovery(m['records'],m['arm_begin_ns']+500_000_000,m['arm_end_ns']+1_000_000_000))
         for k in row['mixed']:row['mixed'][k]['service_refused']=sum(x['kind']==k and x['status']=='resource_refused' for x in m['records'])
         out.append(row)
     assert len(hashes)==1

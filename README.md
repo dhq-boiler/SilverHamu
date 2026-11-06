@@ -6,6 +6,16 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Budget-partitioned preparation pilot
+
+With 1M rows / 1 CPU / 512 MiB, dividing a 4 KiB staged-write test budget across four
+writers capped preparation at two updates each and avoided all refusals. Under a
+100ms sync stall, both policies still used 382 syncs; update p99 was 86.88 → 89.58 ms
+and maximum 103.16 → 104.79 ms. Screening failed; no longer run or default change.
+[Conditions, safety checks, limitations and measurements](docs/benchmarks/budget-backlog-2026-11-07/README.md).
+
+![Budget-partitioned pilot](docs/benchmarks/budget-backlog-2026-11-07/pilot.svg)
+
 ## What is implemented
 
 - Ordered byte keys and opaque byte values.

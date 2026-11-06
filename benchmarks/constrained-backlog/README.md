@@ -30,3 +30,20 @@ inconclusive, not passed. Raw records retain all admitted/rejected requests.
 These are screening thresholds, not statistical proof. A failing/inconclusive
 pilot ends this experiment; do not extend the search or change the default.
 Only a passing gate permits the approved 8,000-request repeated comparison.
+
+## Budget-partitioned follow-up
+
+`python benchmarks/constrained-backlog/run.py --out artifacts/budget-pilot --budget-aware`
+reuses the same image, arrival schedule, credits, and screening gate. The requested
+batch ceiling stays eight; the effective ceiling is computed before starting:
+`min(requested, (staged_budget // 4) // (128 + key_bytes + value_bytes))`.
+For this fixed 8-byte key/256-byte value workload and 4096-byte budget it is two.
+Each writer keeps its quota until the synchronous response, so the four clients
+prepare at most eight writes (3136 charged bytes). No fill delay is introduced.
+An entry too large for one writer's quota is rejected during setup.
+
+This is client-side partitioning for four controlled writers, not an engine-wide
+reservation API. Other writers can still exhaust the budget. General variable-size
+batches and borrowing unused quotas are out of scope. The server still enforces its
+original limit; queued-but-unsent requests remain included in measured latency and
+outstanding-request credits. Fewer refusals alone do not count as a speedup.

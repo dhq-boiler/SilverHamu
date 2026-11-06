@@ -3,6 +3,16 @@ import argparse,importlib.util,json,os,pathlib,queue,random,runpy,threading,time
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('resource_base',ROOT/'resource-envelope/client.py');base=importlib.util.module_from_spec(spec);spec.loader.exec_module(base)
 
+def preparation_limit(budget, writers, key_bytes, value_bytes, requested):
+    if min(budget, writers, requested) <= 0 or min(key_bytes, value_bytes) < 0:
+        raise ValueError('invalid preparation budget')
+    charge = 128 + key_bytes + value_bytes
+    count = min(requested, (budget // writers) // charge)
+    if count == 0:
+        raise ValueError('one update exceeds per-writer preparation budget')
+    return count
+
+
 def drain(q,first,limit,identity):
     group=[first];keys={identity(first)};carry=None;ended=False
     while len(group)<limit:
@@ -13,8 +23,9 @@ def drain(q,first,limit,identity):
         keys.add(identity(item));group.append(item)
     return group,carry,ended
 
-def measure(work,ops,rate,capacity,pin_reader=True,before_start=None,batch_limit=1,scenario='normal',setup_seconds=3):
+def measure(work,ops,rate,capacity,pin_reader=True,before_start=None,batch_limit=1,scenario='normal',setup_seconds=3,staged_budget=None):
     assert ops>0 and rate>0 and capacity>=4 and capacity%4==0 and batch_limit in [1,8] and scenario in ['normal','single'] and (ops+4)//5<=base.ROWS
+    effective_limit=preparation_limit(staged_budget,4,8,256,batch_limit) if staged_budget is not None else batch_limit
     initial=json.loads((base.DATA/'updated.json').read_text());pin=base.connect() if pin_reader else None
     if pin:base.require(pin.request(op='begin_read'))
     kinds=['read']*4 if work=='read' else ['read']+['write']*4
@@ -30,7 +41,7 @@ def measure(work,ops,rate,capacity,pin_reader=True,before_start=None,batch_limit
             while not ended:
                 first=carry if carry is not None else queues[w].get();carry=None
                 if first is None:break
-                group,carry,ended=drain(queues[w],first,batch_limit if kind=='write' else 1,lambda x:x[1])
+                group,carry,ended=drain(queues[w],first,effective_limit if kind=='write' else 1,lambda x:x[1])
                 began=time.monotonic_ns();outcomes=[]
                 try:
                     if kind=='write':
@@ -89,7 +100,7 @@ def measure(work,ops,rate,capacity,pin_reader=True,before_start=None,batch_limit
         old=json.loads((base.DATA/'updated.json').read_text());old.update(changes);(base.DATA/'updated.json').write_text(json.dumps(old))
         ok=[r for r in records if r['status']=='ok'];lat=[r['ended']-r['planned'] for r in ok];assert len(records)==ops
         elapsed=(finish-t0)/1e9
-        return dict(work=work,ops=ops,rate=rate,capacity_per_kind=capacity,batch_limit=batch_limit,scenario=scenario,elapsed_s=elapsed,start_ns=t0,finish_ns=finish,arm_begin_ns=arm_begin,arm_end_ns=arm_end,completed=len(ok),ops_s=len(ok)/elapsed,pin_reader=pin_reader,old_snapshot_checked_keys=len(changes) if pin else 0,p99_ms=base.quantile(lat,.99),max_ms=max(lat)/1e6 if lat else None,queue_rejected=sum(r['status']=='queue_full' for r in records),service_rejected=sum(r['status']=='resource_refused' for r in records),errors=[r for r in records if r['status']=='error'],by_kind={k:dict(completed=sum(r['kind']==k for r in ok),p99_ms=base.quantile([r['ended']-r['planned'] for r in ok if r['kind']==k],.99)) for k in set(kinds)},sync_attempts=after['sync_attempts']-before['sync_attempts'],stall_counters=after,batches=batches,records=records)
+        return dict(work=work,ops=ops,rate=rate,capacity_per_kind=capacity,batch_limit=batch_limit,effective_batch_limit=effective_limit,preparation_budget=staged_budget,scenario=scenario,elapsed_s=elapsed,start_ns=t0,finish_ns=finish,arm_begin_ns=arm_begin,arm_end_ns=arm_end,completed=len(ok),ops_s=len(ok)/elapsed,pin_reader=pin_reader,old_snapshot_checked_keys=len(changes) if pin else 0,p99_ms=base.quantile(lat,.99),max_ms=max(lat)/1e6 if lat else None,queue_rejected=sum(r['status']=='queue_full' for r in records),service_rejected=sum(r['status']=='resource_refused' for r in records),errors=[r for r in records if r['status']=='error'],by_kind={k:dict(completed=sum(r['kind']==k for r in ok),p99_ms=base.quantile([r['ended']-r['planned'] for r in ok if r['kind']==k],.99)) for k in set(kinds)},sync_attempts=after['sync_attempts']-before['sync_attempts'],stall_counters=after,batches=batches,records=records)
     finally:
         if pin:pin.close()
 
@@ -97,6 +108,6 @@ def main():
     import sys
     if len(sys.argv)<2 or sys.argv[1]!='measure':runpy.run_path(str(ROOT/'resource-envelope/client.py'),run_name='__main__');return
     p=argparse.ArgumentParser();p.add_argument('action');p.add_argument('--work');p.add_argument('--ops',type=int);p.add_argument('--rate',type=float);p.add_argument('--pin-reader',type=int);a=p.parse_args()
-    result=measure(a.work,a.ops,a.rate,64,bool(a.pin_reader),batch_limit=int(os.environ['CATDB_BATCH_LIMIT']),scenario=os.environ['CATDB_STALL_SCENARIO'])
+    result=measure(a.work,a.ops,a.rate,64,bool(a.pin_reader),batch_limit=int(os.environ['CATDB_BATCH_LIMIT']),scenario=os.environ['CATDB_STALL_SCENARIO'],staged_budget=int(os.environ['CATDB_PREPARATION_BUDGET']) if os.environ.get('CATDB_PREPARATION_BUDGET') else None)
     (base.DATA/(a.work+'-raw.json')).write_text(json.dumps(result));result.pop('records');result.pop('batches');print(json.dumps(result))
 if __name__=='__main__':main()

@@ -39,6 +39,7 @@ jobs:
       - run: python benchmarks/retirement-timing/test_analysis.py
       - run: python benchmarks/resource-envelope/test_client.py
       - run: python benchmarks/aged-service/test_analysis.py
+      - run: python benchmarks/aged-tail/test_analysis.py
       - if: contains(matrix.features, 'backlog-batch')
         run: python benchmarks/backlog-tail/test_protocol.py
       - run: python benchmarks/backlog/test_schedule.py

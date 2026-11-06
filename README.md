@@ -853,3 +853,23 @@ offered rate, not a long-run memory guarantee or maximum-throughput measurement.
 The limit applies to the service cgroup; preparation can leave shared filesystem
 cache charged elsewhere. This does not establish a 512-MiB total-machine budget.
 See [failed pilot, every trial, limits, raw records and reproduction](docs/benchmarks/aged-service-2026-11-06/README.md).
+
+## Follow-up: rechecking the 19.48-ms inline-latest p99 event
+
+The aged 1M-row / 1-CPU / 1-GiB comparison was repeated in alternating order,
+three times per layout. Inline write p99 was **5.005–5.589 ms**, versus
+**5.052–5.918 ms** for deque. The earlier **19.482-ms** p99 did not recur;
+its original cause remains unresolved. Both layouts still had occasional >10-ms
+responses, so this is not a claim that tail latency was fixed.
+
+![Original event and every repeat](docs/benchmarks/aged-tail-2026-11-06/latency.svg)
+
+In the two short diagnostic trials, the slowest requests were **8.235 / 5.670 ms**,
+including **7.624 / 5.124 ms** around durable sync. Those samples cannot explain
+the uninstrumented original event. Measurement overhead remains uncertain.
+Inline RSS retained its approximately **22%** advantage (**419.48 vs 538.52 MiB**).
+112,000 requests, 50 full-content service checks and ten full seed checks passed,
+including old generations, budget-refusal recovery and process-crash recovery.
+No evidence-backed engine change was justified, so defaults remain unchanged
+and the conditional candidate/512-MiB follow-up was not run.
+See [time-window analysis, observer comparison, raw data and reproduction](docs/benchmarks/aged-tail-2026-11-06/README.md).

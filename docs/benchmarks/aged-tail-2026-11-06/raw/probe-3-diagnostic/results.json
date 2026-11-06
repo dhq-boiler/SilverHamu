@@ -1,0 +1,154 @@
+[
+  {
+    "name": "r1-n1000000-c1-m1024",
+    "rows": 1000000,
+    "cpus": 1,
+    "memory_mib": 1024,
+    "rep": 1,
+    "sample": 1,
+    "retained_bytes": 671088640,
+    "status": "passed",
+    "verification": [
+      {
+        "phase": "initial",
+        "rows": 1000000,
+        "sha256": "67b0f400a60fe58495e9146efd785d8533e93ee47882703caaee58add471aa90",
+        "updated": 1000000,
+        "passed": true
+      },
+      {
+        "phase": "read",
+        "rows": 1000000,
+        "sha256": "67b0f400a60fe58495e9146efd785d8533e93ee47882703caaee58add471aa90",
+        "updated": 1000000,
+        "passed": true
+      },
+      {
+        "phase": "mixed",
+        "rows": 1000000,
+        "sha256": "c3df2997eed5685372702cfc8e32acf0c873a8809f8db29e3a5240107e40dfdb",
+        "updated": 1000000,
+        "passed": true
+      },
+      {
+        "phase": "safety",
+        "rows": 1000000,
+        "sha256": "c2c6469ddbae3487a0e97fc38c31bb800fb1898499d1ab8b3dec45cc9ed0a964",
+        "updated": 1000000,
+        "passed": true
+      },
+      {
+        "phase": "reopen",
+        "rows": 1000000,
+        "sha256": "c2c6469ddbae3487a0e97fc38c31bb800fb1898499d1ab8b3dec45cc9ed0a964",
+        "updated": 1000000,
+        "passed": true
+      }
+    ],
+    "measurements": [
+      {
+        "work": "read",
+        "ops": 2000,
+        "rate": 1000.0,
+        "capacity_per_kind": 64,
+        "elapsed_s": 1.999747273,
+        "start_ns": 146062665912469,
+        "finish_ns": 146064665659742,
+        "completed": 2000,
+        "ops_s": 1000.1263794697521,
+        "pin_reader": false,
+        "old_snapshot_checked_keys": 0,
+        "p99_ms": 0.334438,
+        "max_ms": 1.180781,
+        "queue_rejected": 0,
+        "errors": [],
+        "by_kind": {
+          "read": {
+            "completed": 2000,
+            "p99_ms": 0.334438
+          }
+        },
+        "host_begin_ns": 1181721984000000,
+        "host_end_ns": 1181725562000000
+      },
+      {
+        "work": "mixed",
+        "ops": 2000,
+        "rate": 1000.0,
+        "capacity_per_kind": 64,
+        "elapsed_s": 1.999684449,
+        "start_ns": 146071911910222,
+        "finish_ns": 146073911594671,
+        "completed": 2000,
+        "ops_s": 1000.1578003970365,
+        "pin_reader": false,
+        "old_snapshot_checked_keys": 0,
+        "p99_ms": 3.985348,
+        "max_ms": 5.670071,
+        "queue_rejected": 0,
+        "errors": [],
+        "by_kind": {
+          "write": {
+            "completed": 400,
+            "p99_ms": 4.359523
+          },
+          "read": {
+            "completed": 1600,
+            "p99_ms": 0.304973
+          }
+        },
+        "host_begin_ns": 1181731984000000,
+        "host_end_ns": 1181735421000000
+      }
+    ],
+    "boot": {
+      "timing": {
+        "ready_wait_ms": 2066.46228,
+        "launch_to_ready_ms": 3030.999999959022
+      },
+      "limits": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0"
+      },
+      "process_ready": {
+        "process_ready_ms": 2416.214384982595,
+        "poll_resolution_ms": 100
+      }
+    },
+    "safety_probe": {
+      "old_generation_updates_checked": 8,
+      "staged_refusal": "resource_exhausted",
+      "prior_staged_value_preserved": true,
+      "commit_after_rollback": true
+    },
+    "stop_state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 1,
+      "Error": "",
+      "StartedAt": "2026-11-06T09:34:52.554737146Z",
+      "FinishedAt": "2026-11-06T09:35:28.981806794Z"
+    },
+    "reopen": {
+      "timing": {
+        "ready_wait_ms": 2122.193769,
+        "launch_to_ready_ms": 3061.9999999180436
+      },
+      "limits": {
+        "cpu.max": "100000 100000",
+        "memory.max": "1073741824",
+        "memory.swap.max": "0"
+      },
+      "process_ready": {
+        "process_ready_ms": 2415.670913993381,
+        "poll_resolution_ms": 100
+      }
+    }
+  }
+]

@@ -35,6 +35,7 @@ adaptive-window = ["commit-window"]
 sync-stall = []
 history-metrics = []
 inline-latest = []
+skip-unneeded-history = ["inline-latest"]
 allocation-metrics = []
 
 [[bin]]

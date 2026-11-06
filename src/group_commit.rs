@@ -693,12 +693,20 @@ fn persist_group(
             return results;
         }
     };
+    #[cfg(feature = "skip-unneeded-history")]
+    for &(index, _) in &accepted {
+        requests[index].transaction.unregister_snapshot(&mut state);
+    }
+    #[cfg(feature = "skip-unneeded-history")]
+    let mut retired = state.empty_retirement();
     let outcome = (|| {
         for &(index, version) in &accepted {
             state
-                .apply(
+                .apply_inner(
                     version,
                     std::mem::take(&mut requests[index].transaction.writes),
+                    #[cfg(feature = "skip-unneeded-history")]
+                    &mut retired,
                 )
                 .map_err(io::Error::other)?;
         }
@@ -716,6 +724,11 @@ fn persist_group(
     }
     #[cfg(feature = "lock-timing")]
     trace_mark(7);
+    #[cfg(feature = "skip-unneeded-history")]
+    {
+        drop(state);
+        drop(retired);
+    }
     results
 }
 
@@ -898,6 +911,63 @@ mod tests {
         fn drop(&mut self) {
             let _ = std::fs::remove_file(&self.0);
             let _ = std::fs::remove_file(with_suffix(&self.0, ".owner"));
+        }
+    }
+
+    #[cfg(all(feature = "skip-unneeded-history", feature = "history-metrics"))]
+    #[test]
+    fn st_skip_history_group_unpins_only_consumed_writers_after_sync() {
+        let fixture = Fixture::new();
+        let db = Database::create(&fixture.0, [95; 16]).unwrap();
+        let mut seed = db.begin().unwrap();
+        seed.put(b"a", b"old").unwrap();
+        seed.put(b"b", b"old").unwrap();
+        seed.commit().unwrap();
+        let mut requests = [request(write(&db, b"a")), request(write(&db, b"b"))];
+        let mut late = None;
+        let results = persist_group(&db, &mut requests, |file, frames| {
+            late = Some(db.begin_read().unwrap());
+            assert_eq!(db.stats().unwrap().active_transactions, 3);
+            for frame in frames {
+                file.write_all(frame)?;
+            }
+            file.sync_all()
+        });
+        assert!(results.iter().all(Result::is_ok));
+        assert_eq!(db.stats().unwrap().active_transactions, 1);
+        assert_eq!(db.history_metrics().unwrap().skipped_history_versions, 0);
+        drop(requests);
+        assert_eq!(db.stats().unwrap().active_transactions, 1);
+        for key in [b"a", b"b"] {
+            assert_eq!(
+                late.as_mut().unwrap().get(key).unwrap(),
+                Some(b"old".to_vec())
+            );
+        }
+        drop(late);
+        while db.collect_garbage().unwrap() {}
+        let mut requests = [request(write(&db, b"a")), request(write(&db, b"b"))];
+        let results = persist_group(&db, &mut requests, |file, frames| {
+            assert_eq!(db.stats().unwrap().active_transactions, 2);
+            for frame in frames {
+                file.write_all(frame)?;
+            }
+            file.sync_all()
+        });
+        assert!(results.iter().all(Result::is_ok));
+        assert_eq!(db.history_metrics().unwrap().skipped_history_versions, 2);
+        assert_eq!(db.history_metrics().unwrap().heap_history_bytes, 0);
+        let reader = db.begin_read().unwrap();
+        drop(requests);
+        assert_eq!(db.stats().unwrap().active_transactions, 1);
+        drop(reader);
+        drop(db);
+        let db = Database::open(&fixture.0).unwrap();
+        for key in [b"a", b"b"] {
+            assert_eq!(
+                db.begin_read().unwrap().get(key).unwrap(),
+                Some(b"value".to_vec())
+            );
         }
     }
 

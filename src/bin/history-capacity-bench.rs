@@ -76,7 +76,7 @@ fn capture(db: &Database, phase: &str, observe: bool) {
     let live = cfg!(feature = "allocation-metrics").then(|| LIVE.load(Ordering::Relaxed));
     println!(
         "{}",
-        json!({"event":"snapshot","phase":phase,"live_requested_bytes":live,"rss_bytes":rss(),"metric_scan_ns":ns,"logical_retained_bytes":db.resource_usage().unwrap().current[3],"metrics":m.map(|m|json!({"records":m.records,"versions":m.versions,"capacity_slots":m.capacity_slots,"version_size":m.version_size,"version_capacity_bytes":m.capacity_slots*m.version_size,"unused_version_bytes":(m.capacity_slots-m.versions)*m.version_size,"key_capacity_bytes":m.key_capacity_bytes,"value_bytes":m.value_bytes,"history_keys":m.history_keys,"row_size":m.row_size,"heap_history_bytes":m.heap_history_bytes,"inline_versions":m.inline_versions}))})
+        json!({"event":"snapshot","phase":phase,"live_requested_bytes":live,"rss_bytes":rss(),"metric_scan_ns":ns,"logical_retained_bytes":db.resource_usage().unwrap().current[3],"metrics":m.map(|m|json!({"records":m.records,"versions":m.versions,"capacity_slots":m.capacity_slots,"version_size":m.version_size,"version_capacity_bytes":m.capacity_slots*m.version_size,"unused_version_bytes":(m.capacity_slots-m.versions)*m.version_size,"key_capacity_bytes":m.key_capacity_bytes,"value_bytes":m.value_bytes,"history_keys":m.history_keys,"row_size":m.row_size,"heap_history_bytes":m.heap_history_bytes,"inline_versions":m.inline_versions,"skipped_history_versions":m.skipped_history_versions}))})
     );
 }
 fn drain(db: &Database) {

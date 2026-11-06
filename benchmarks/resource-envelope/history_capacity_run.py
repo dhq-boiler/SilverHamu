@@ -9,7 +9,7 @@ def run(args,check=True,timeout=240):
     if check and r.returncode:raise RuntimeError(r.stderr[-2500:]+r.stdout[-1000:])
     return r
 def command(*args):return run(args).stdout.strip()
-sources=['Cargo.toml','src/transactions.rs','src/bin/history-capacity-bench.rs','benchmarks/resource-envelope/history_capacity_run.py','benchmarks/resource-envelope/history_capacity_observer.py','benchmarks/resource-envelope/history-capacity.Dockerfile']
+sources=['Cargo.toml','src/transactions.rs','src/group_commit.rs','src/bin/history-capacity-bench.rs','benchmarks/resource-envelope/history_capacity_run.py','benchmarks/resource-envelope/history_capacity_observer.py','benchmarks/resource-envelope/history-capacity.Dockerfile']
 meta={'utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'image':command('docker','image','inspect',image,'--format','{{.Id}}'),'base_commit':command('git','-C',ROOT,'rev-parse','HEAD'),'args':{k:str(v) if isinstance(v,pathlib.Path) else v for k,v in vars(a).items()},'source_sha256':{n:hashlib.sha256((ROOT/n).read_bytes().replace(b'\r\n',b'\n')).hexdigest() for n in sources}}
 (a.out/'environment.json').write_text(json.dumps(meta,indent=2));results=[]
 def save():(a.out/'results.json').write_text(json.dumps(results,indent=2))

@@ -788,3 +788,25 @@ The feature remains opt-in (`inline-latest`), with the default unchanged.
 96,000 service requests completed without refusal/error and
 141 full-content checks passed. See the
 [decision, all trials, recovery and reproduction](docs/benchmarks/inline-latest-2026-11-06/README.md).
+
+## Follow-up: avoid history creation only when no snapshots need it (opt-in)
+
+The new `skip-unneeded-history` prototype removes consumed writers' snapshot
+pins after successful sync, then skips history creation only when no other
+transaction remains. Old values stay charged until freed outside the state lock.
+The spread workload skipped **128,117 histories** at full coverage;
+post-GC RSS is **419.262 MiB**, versus
+**418.629 MiB** for inline latest.
+
+The existing service benchmark holds an old reader throughout, which prevents
+this optimization. A separate unpinned control was therefore added. Its write
+p99 medians are **5.901 / 6.168 / 6.606 ms**
+for deque / inline latest / skip history. The skip candidate was worse in this
+comparison, so default adoption is deferred. No latency or capacity improvement
+is claimed.
+
+![Skip-history unpinned service comparison](docs/benchmarks/skip-history-2026-11-06/service-unpinned.svg)
+
+288,000 requests, 0 queue refusals,
+0 errors and 249 successful full-content checks.
+See [all three variants, pinned control, memory, bounds, recovery and raw data](docs/benchmarks/skip-history-2026-11-06/README.md).

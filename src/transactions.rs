@@ -216,6 +216,8 @@ struct State {
     reserved_bytes: u64,
     rows: BTreeMap<Vec<u8>, VersionChain>,
     active: BTreeMap<u64, usize>,
+    #[cfg(feature = "history-metrics")]
+    skipped_history_versions: usize,
     history_keys: BTreeSet<Vec<u8>>,
     gc_floor: u64,
     gc_target: u64,
@@ -404,6 +406,8 @@ impl KeyRange {
 }
 
 pub struct Transaction {
+    #[cfg(feature = "skip-unneeded-history")]
+    snapshot_registered: bool,
     #[cfg(feature = "wal-prepare")]
     prepared: Option<PreparedFrame>,
     database: Database,
@@ -439,6 +443,7 @@ pub struct HistoryMetrics {
     pub row_size: usize,
     pub heap_history_bytes: usize,
     pub inline_versions: usize,
+    pub skipped_history_versions: usize,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1138,6 +1143,8 @@ impl Database {
             let snapshot = state.sequence;
             *state.active.entry(snapshot).or_default() += 1;
             Ok(Transaction {
+                #[cfg(feature = "skip-unneeded-history")]
+                snapshot_registered: true,
                 #[cfg(feature = "wal-prepare")]
                 prepared: None,
                 database: self.clone(),
@@ -1186,6 +1193,7 @@ impl Database {
             key_capacity_bytes: 0,
             value_bytes: 0,
             history_keys: state.history_keys.len(),
+            skipped_history_versions: state.skipped_history_versions,
             row_size: std::mem::size_of::<VersionChain>(),
             heap_history_bytes: 0,
             inline_versions: if cfg!(feature = "inline-latest") {
@@ -1719,14 +1727,52 @@ impl Transaction {
         state = database
             .persist_wal(state, |file| persist(file, &frame))
             .map_err(Error::CommitUncertain)?;
-        if let Err(error) = state.apply(sequence, std::mem::take(&mut self.writes)) {
-            state.poisoned = true;
-            return Err(Error::CommitUncertain(io::Error::other(error)));
+        #[cfg(feature = "skip-unneeded-history")]
+        self.unregister_snapshot(&mut state);
+        #[cfg(feature = "skip-unneeded-history")]
+        let mut retired = state.empty_retirement();
+        if let Err(error) = state.apply_inner(
+            sequence,
+            std::mem::take(&mut self.writes),
+            #[cfg(feature = "skip-unneeded-history")]
+            &mut retired,
+        ) {
+            #[cfg(feature = "skip-unneeded-history")]
+            {
+                state.poisoned = true;
+                drop(state);
+                drop(retired);
+                return Err(Error::CommitUncertain(io::Error::other(error)));
+            }
+            #[cfg(not(feature = "skip-unneeded-history"))]
+            {
+                state.poisoned = true;
+                return Err(Error::CommitUncertain(io::Error::other(error)));
+            }
         }
         state.wal_bytes = bytes;
         #[cfg(feature = "lock-timing")]
         trace_mark(7);
+        #[cfg(feature = "skip-unneeded-history")]
+        {
+            drop(state);
+            drop(retired);
+        }
         Ok(sequence)
+    }
+
+    #[cfg(feature = "skip-unneeded-history")]
+    fn unregister_snapshot(&mut self, state: &mut State) {
+        if !self.snapshot_registered {
+            return;
+        }
+        if let Some(count) = state.active.get_mut(&self.snapshot) {
+            *count -= 1;
+            if *count == 0 {
+                state.active.remove(&self.snapshot);
+            }
+        }
+        self.snapshot_registered = false;
     }
 
     pub fn rollback(self) {}
@@ -1743,8 +1789,15 @@ impl Drop for Transaction {
             .inner
             .budget
             .release(DEPENDENCIES, self.dependency_charge);
-        if let Ok(state) = self.database.inner.state.lock() {
+        #[cfg(feature = "skip-unneeded-history")]
+        let database = self.database.clone();
+        #[cfg(not(feature = "skip-unneeded-history"))]
+        let database = &self.database;
+        if let Ok(state) = database.inner.state.lock() {
             let mut state = wrap_state(state);
+            #[cfg(feature = "skip-unneeded-history")]
+            self.unregister_snapshot(&mut state);
+            #[cfg(not(feature = "skip-unneeded-history"))]
             if let Some(count) = state.active.get_mut(&self.snapshot) {
                 *count -= 1;
                 if *count == 0 {
@@ -1854,6 +1907,8 @@ impl State {
             reserved_bytes: 0,
             rows: BTreeMap::new(),
             active: BTreeMap::new(),
+            #[cfg(feature = "history-metrics")]
+            skipped_history_versions: 0,
             history_keys: BTreeSet::new(),
             gc_floor: 0,
             gc_target: 0,
@@ -1918,6 +1973,32 @@ impl State {
             .check_add(RETAINED, self.retained_growth(writes))
     }
     fn apply(&mut self, sequence: u64, writes: BTreeMap<Vec<u8>, Option<Vec<u8>>>) -> Result<()> {
+        #[cfg(feature = "skip-unneeded-history")]
+        let mut retired = self.empty_retirement();
+        self.apply_inner(
+            sequence,
+            writes,
+            #[cfg(feature = "skip-unneeded-history")]
+            &mut retired,
+        )
+    }
+
+    #[cfg(feature = "skip-unneeded-history")]
+    fn empty_retirement(&self) -> RetiredVersions {
+        RetiredVersions {
+            values: Vec::new(),
+            buffers: Vec::new(),
+            charge: 0,
+            budget: self.budget.clone(),
+        }
+    }
+
+    fn apply_inner(
+        &mut self,
+        sequence: u64,
+        writes: BTreeMap<Vec<u8>, Option<Vec<u8>>>,
+        #[cfg(feature = "skip-unneeded-history")] retired: &mut RetiredVersions,
+    ) -> Result<()> {
         self.budget
             .replace(RETAINED, 0, self.retained_growth(&writes))?;
         for (key, value) in writes {
@@ -1928,6 +2009,33 @@ impl State {
             };
             match self.rows.entry(key.clone()) {
                 std::collections::btree_map::Entry::Occupied(mut entry) => {
+                    #[cfg(feature = "skip-unneeded-history")]
+                    {
+                        let chain = entry.get_mut();
+                        let charge = 64 + chain.latest.value.as_ref().map_or(0, |v| v.len());
+                        // Readers can start during sync, so only the publication-time pin set is safe.
+                        // Existing histories and excess retirements use bounded cooperative GC.
+                        if self.active.is_empty()
+                            && chain.older.is_none()
+                            && retired.values.len() < 128
+                            && (retired.values.is_empty() || retired.charge + charge <= 1024 * 1024)
+                        {
+                            retired
+                                .values
+                                .push(std::mem::replace(&mut chain.latest, version));
+                            retired.charge += charge;
+                            if deleted {
+                                self.history_keys.insert(key);
+                            } else {
+                                self.history_keys.remove(&key);
+                            }
+                            #[cfg(feature = "history-metrics")]
+                            {
+                                self.skipped_history_versions += 1;
+                            }
+                            continue;
+                        }
+                    }
                     self.history_keys.insert(key);
                     entry.get_mut().push_back(version);
                 }
@@ -2836,6 +2944,125 @@ mod tests {
         drop(db);
         let db = Database::open_with_limits(&path.0, ResourceLimits::default()).unwrap();
         assert_eq!(db.begin().unwrap().get(b"a").unwrap(), None);
+    }
+
+    #[cfg(all(feature = "skip-unneeded-history", feature = "history-metrics"))]
+    #[test]
+    fn st_skip_history_rechecks_readers_started_during_sync() {
+        let path = Fixture::new();
+        let db = Database::create(&path.0, [92; 16]).unwrap();
+        let mut seed = db.begin().unwrap();
+        seed.put(b"k", b"old").unwrap();
+        seed.commit().unwrap();
+        let mut tx = db.begin().unwrap();
+        tx.put(b"k", b"new").unwrap();
+        let mut late = None;
+        tx.commit_with(|file, frame| {
+            let mut reader = db.begin_read().unwrap();
+            assert_eq!(reader.get(b"k").unwrap(), Some(b"old".to_vec()));
+            late = Some(reader);
+            file.write_all(frame)?;
+            file.sync_all()
+        })
+        .unwrap();
+        assert_eq!(db.history_metrics().unwrap().skipped_history_versions, 0);
+        assert_eq!(
+            late.as_mut().unwrap().get(b"k").unwrap(),
+            Some(b"old".to_vec())
+        );
+        assert_eq!(db.stats().unwrap().active_transactions, 1);
+        drop(late);
+        let mut tx = db.begin().unwrap();
+        tx.put(b"k", b"last").unwrap();
+        tx.commit().unwrap();
+        assert_eq!(db.history_metrics().unwrap().skipped_history_versions, 1);
+        assert_eq!(db.stats().unwrap().active_transactions, 0);
+    }
+
+    #[cfg(feature = "skip-unneeded-history")]
+    #[test]
+    fn bv_er_skip_history_retirement_is_bounded_and_charged_until_drop() {
+        for (count, size, expected) in [
+            (129, 256, 128),
+            (3, 512 * 1024 - 64, 2),
+            (3, 512 * 1024 - 63, 1),
+            (2, 1024 * 1024 + 1, 1),
+        ] {
+            let path = Fixture::new();
+            let db = Database::create(&path.0, [93; 16]).unwrap();
+            let mut tx = db.begin().unwrap();
+            for i in 0..count {
+                tx.put(&(i as u64).to_be_bytes(), &vec![1; size]).unwrap();
+            }
+            tx.commit().unwrap();
+            let before = db.resource_usage().unwrap().current[RETAINED];
+            let mut state = db.state().unwrap();
+            let mut retired = state.empty_retirement();
+            let writes = (0..count)
+                .map(|i| ((i as u64).to_be_bytes().to_vec(), Some(vec![2; size])))
+                .collect();
+            state.apply_inner(2, writes, &mut retired).unwrap();
+            assert_eq!(retired.values.len(), expected);
+            assert_eq!(retired.charge, expected * (64 + size));
+            assert_eq!(
+                state.rows.values().filter(|v| v.older.is_some()).count(),
+                count - expected
+            );
+            assert_eq!(
+                state.budget.snapshot().unwrap().current[RETAINED],
+                before + count * (64 + size)
+            );
+            drop(state);
+            assert!(db.inner.state.try_lock().is_ok());
+            drop(retired);
+            assert_eq!(
+                db.resource_usage().unwrap().current[RETAINED],
+                before + (count - expected) * (64 + size)
+            );
+            while db.collect_garbage().unwrap() {}
+            assert_eq!(db.resource_usage().unwrap().current[RETAINED], before);
+            let mut reader = db.begin_read().unwrap();
+            for i in 0..count {
+                assert_eq!(
+                    reader.get(&(i as u64).to_be_bytes()).unwrap(),
+                    Some(vec![2; size])
+                );
+            }
+        }
+    }
+
+    #[cfg(feature = "skip-unneeded-history")]
+    #[test]
+    fn st_skip_history_falls_back_for_existing_histories() {
+        let path = Fixture::new();
+        let db = Database::create(&path.0, [94; 16]).unwrap();
+        let mut tx = db.begin().unwrap();
+        tx.put(b"k", b"a").unwrap();
+        tx.commit().unwrap();
+        let mut old = db.begin_read().unwrap();
+        let mut tx = db.begin().unwrap();
+        tx.put(b"k", b"b").unwrap();
+        tx.commit().unwrap();
+        let mut state = db.state().unwrap();
+        old.unregister_snapshot(&mut state);
+        assert!(state.active.is_empty());
+        let mut retired = state.empty_retirement();
+        state
+            .apply_inner(
+                3,
+                BTreeMap::from([(b"k".to_vec(), Some(b"c".to_vec()))]),
+                &mut retired,
+            )
+            .unwrap();
+        assert!(retired.values.is_empty());
+        assert_eq!(state.rows.get(b"k".as_slice()).unwrap().len(), 3);
+        drop(state);
+        drop(retired);
+        drop(old);
+        assert_eq!(
+            db.begin_read().unwrap().get(b"k").unwrap(),
+            Some(b"c".to_vec())
+        );
     }
 
     struct Fixture(std::path::PathBuf);

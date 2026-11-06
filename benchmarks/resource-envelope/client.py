@@ -30,10 +30,11 @@ def quantile(samples,p):
     a=sorted(samples)
     return a[max(0,math.ceil(p*len(a))-1)]/1e6 if a else None
 
-def measure(work,ops,rate,capacity):
+def measure(work,ops,rate,capacity,pin_reader=True):
     assert ops>0 and rate>0 and capacity>0 and (ops+4)//5<=ROWS
     initial=json.loads((DATA/'updated.json').read_text())
-    pin=connect();require(pin.request(op='begin_read'))
+    pin=connect() if pin_reader else None
+    if pin is not None: require(pin.request(op='begin_read'))
     # Separate queues prevent writes from consuming every reader slot.
     qs={'read':queue.Queue(capacity),'write':queue.Queue(capacity)}
     records=[]; changes={}; lock=threading.Lock(); ready=threading.Barrier(6 if work=='mixed' else 5)
@@ -84,20 +85,21 @@ def measure(work,ops,rate,capacity):
     for t in threads:t.join(timeout=90)
     assert not any(t.is_alive() for t in threads), 'workers stranded'
     elapsed=(time.monotonic_ns()-t0)/1e9
-    for k in changes:
-        assert require(pin.request(op='get',key=key(int(k)).hex()))['value']==value(int(k),initial.get(k,0)).hex()
-    require(pin.request(op='rollback'));pin.close()
+    if pin is not None:
+        for k in changes:
+            assert require(pin.request(op='get',key=key(int(k)).hex()))['value']==value(int(k),initial.get(k,0)).hex()
+        require(pin.request(op='rollback'));pin.close()
     old=json.loads((DATA/'updated.json').read_text());old.update(changes);(DATA/'updated.json').write_text(json.dumps(old))
     ok=[r for r in records if r['status']=='ok']; lat=[r['ended']-r['planned'] for r in ok]
     assert len(records)==ops
     return {'work':work,'ops':ops,'rate':rate,'capacity_per_kind':capacity,'elapsed_s':elapsed,'start_ns':t0,'finish_ns':t0+int(elapsed*1e9),
-            'completed':len(ok),'ops_s':len(ok)/elapsed,'old_snapshot_checked_keys':len(changes),'p99_ms':quantile(lat,.99),'max_ms':max(lat)/1e6 if lat else None,
+            'completed':len(ok),'ops_s':len(ok)/elapsed,'pin_reader':pin_reader,'old_snapshot_checked_keys':len(changes) if pin_reader else 0,'p99_ms':quantile(lat,.99),'max_ms':max(lat)/1e6 if lat else None,
             'queue_rejected':sum(r['status']=='queue_full' for r in records),'errors':[r for r in records if r['status']=='error'],
             'by_kind':{k:{'completed':sum(r['kind']==k for r in ok),'p99_ms':quantile([r['ended']-r['planned'] for r in ok if r['kind']==k],.99)} for k in set(kinds)},
             'records':records}
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('action',choices=['ready','verify','measure']);p.add_argument('--work',default='read');p.add_argument('--ops',type=int,default=8000);p.add_argument('--rate',type=float,default=1000);p.add_argument('--capacity',type=int,default=64);a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('action',choices=['ready','verify','measure']);p.add_argument('--work',default='read');p.add_argument('--ops',type=int,default=8000);p.add_argument('--rate',type=float,default=1000);p.add_argument('--capacity',type=int,default=64);p.add_argument('--pin-reader',type=int,choices=[0,1],default=1);a=p.parse_args()
     if a.action=='ready':
         start=time.monotonic_ns();last=None
         for _ in range(600):
@@ -114,7 +116,7 @@ if __name__=='__main__':
                 time.sleep(.1)
         else:raise RuntimeError('not ready: '+str(last))
     else:
-        result=verify() if a.action=='verify' else measure(a.work,a.ops,a.rate,a.capacity)
+        result=verify() if a.action=='verify' else measure(a.work,a.ops,a.rate,a.capacity,bool(a.pin_reader))
         if a.action=='measure':
             (DATA/f'{a.work}-raw.json').write_text(json.dumps(result))
             result.pop('records')

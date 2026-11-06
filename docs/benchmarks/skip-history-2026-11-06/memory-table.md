@@ -1,0 +1,32 @@
+| Pattern / phase | Mode | Live requested MiB | RSS MiB | History heap MiB | Skipped history versions |
+|:--|:--|--:|--:|--:|--:|
+| spread/initial | before | 392.551 | 445.098 | 22.888 | 0 |
+| spread/initial | after | 369.663 | 413.188 | 0.000 | 0 |
+| spread/initial | skip | 369.663 | 413.184 | 0.000 | 0 |
+| spread/spread-25 | before | 409.718 | 468.273 | 40.054 | 0 |
+| spread/spread-25 | after | 369.663 | 415.203 | 0.000 | 0 |
+| spread/spread-25 | skip | 369.663 | 415.320 | 0.000 | 32000 |
+| spread/spread-50 | before | 426.893 | 491.434 | 57.230 | 0 |
+| spread/spread-50 | after | 369.663 | 416.484 | 0.000 | 0 |
+| spread/spread-50 | skip | 369.663 | 416.832 | 0.000 | 64099 |
+| spread/spread-100 | before | 461.228 | 537.121 | 91.564 | 0 |
+| spread/spread-100 | after | 369.663 | 418.629 | 0.000 | 0 |
+| spread/spread-100 | skip | 369.663 | 419.262 | 0.000 | 128117 |
+| spread/after-trim | before | 461.228 | 536.914 | 91.564 | 0 |
+| spread/after-trim | after | 369.663 | 418.387 | 0.000 | 0 |
+| spread/after-trim | skip | 369.663 | 419.066 | 0.000 | 128210 |
+| hot/initial | before | 392.551 | 445.027 | 22.888 | 0 |
+| hot/initial | after | 369.663 | 413.211 | 0.000 | 0 |
+| hot/initial | skip | 369.663 | 413.227 | 0.000 | 0 |
+| hot/hot-held | before | 441.694 | 500.891 | 29.984 | 0 |
+| hot/hot-held | after | 415.677 | 464.648 | 3.967 | 0 |
+| hot/hot-held | skip | 415.677 | 464.664 | 3.967 | 0 |
+| hot/hot-drained | before | 399.647 | 500.891 | 29.984 | 0 |
+| hot/hot-drained | after | 369.663 | 464.656 | 0.000 | 0 |
+| hot/hot-drained | skip | 369.663 | 464.672 | 0.000 | 0 |
+| hot/before-trim | before | 399.654 | 501.285 | 29.990 | 0 |
+| hot/before-trim | after | 369.663 | 464.953 | 0.000 | 0 |
+| hot/before-trim | skip | 369.663 | 465.012 | 0.000 | 100 |
+| hot/after-trim | before | 399.654 | 459.754 | 29.990 | 0 |
+| hot/after-trim | after | 369.663 | 416.301 | 0.000 | 0 |
+| hot/after-trim | skip | 369.663 | 416.363 | 0.000 | 100 |

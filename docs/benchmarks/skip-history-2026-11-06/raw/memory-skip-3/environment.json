@@ -1,0 +1,22 @@
+{
+  "utc": "2026-11-06T05:44:55.316420+00:00",
+  "image": "sha256:79d7cb260ff64d2287ddbd57c76052e00bc26d42ed7ed7576aa13e2a9fa3925e",
+  "base_commit": "f59bfdabf7053458b4de73e42f41d4b04f75a861",
+  "args": {
+    "out": "C:\\Git\\catdb\\docs\\benchmarks\\skip-history-2026-11-06\\raw\\memory-skip-3",
+    "rows": 1000000,
+    "reps": 1,
+    "observer": "counted",
+    "check512": true,
+    "image": "catdb-skip-skip:local"
+  },
+  "source_sha256": {
+    "Cargo.toml": "b6adcb0ad32e6bc8cf9cc2eb309e0b018cc512a3904c09918a7dd5e9df000f50",
+    "src/transactions.rs": "c9ba71344e47416db628dc9eab2e957903ca17dcaf56e5684c216582f85ff4e2",
+    "src/group_commit.rs": "c19c30e9ccb9d2315c78fa4c57fd0f0fe290130bd2af1f4b203ad469077f4741",
+    "src/bin/history-capacity-bench.rs": "470a937fc5a283042584554983cbe00d4c036865acd1d8b400abf4d457e6ab2a",
+    "benchmarks/resource-envelope/history_capacity_run.py": "9472e2598ca178b2fb3addcdd4bc6853a2fefc0876e29144ac260ec80293c094",
+    "benchmarks/resource-envelope/history_capacity_observer.py": "88cbb096526e3457fad8da33a686ba4f02e9e2f2cdf300e68285da9eeeeab789",
+    "benchmarks/resource-envelope/history-capacity.Dockerfile": "002d6be1912cabac38bdcf315def6b3c434ec4242f3011e6c5a64eea9d51b8d7"
+  }
+}

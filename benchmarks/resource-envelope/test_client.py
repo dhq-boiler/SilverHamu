@@ -31,6 +31,12 @@ class WorkloadTests(unittest.TestCase):
     def test_EQ_ST_mixed_then_reads_preserve_acknowledged_values_and_old_snapshot(self):
         r=m.measure('mixed',100,5000,64);self.assertFalse(r['errors']);self.assertEqual(r['old_snapshot_checked_keys'],20);self.assertTrue(m.verify()['passed'])
         r=m.measure('read',100,5000,64);self.assertFalse(r['errors']);self.assertTrue(m.verify()['passed'])
+    def test_EQ_ST_unpinned_workload_still_verifies_updates_and_rejects_bad_values(self):
+        r=m.measure('mixed',100,5000,64,pin_reader=False)
+        self.assertFalse(r['pin_reader']);self.assertEqual(r['old_snapshot_checked_keys'],0)
+        self.assertFalse(r['errors']);self.assertTrue(m.verify()['passed'])
+        Fake.values[key(0).hex()]='00'
+        with self.assertRaises(AssertionError):m.verify()
     def test_BV_ER_bounded_queue_rejects_and_drains_without_stranding(self):
         Fake.delay=.002;r=m.measure('mixed',200,100000,1)
         self.assertGreater(r['queue_rejected'],0);self.assertFalse(r['errors']);self.assertEqual(r['completed']+r['queue_rejected'],200)

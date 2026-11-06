@@ -1,0 +1,34 @@
+{
+  "commit": "f59bfdabf7053458b4de73e42f41d4b04f75a861",
+  "image": "sha256:156f1203fdaa79fde25b96ee285368c9d0667a6f5b0b1790a0402ca94e2a01f7",
+  "utc": "2026-11-06T06:02:14.177969+00:00",
+  "arguments": {
+    "out": "C:\\Git\\catdb\\docs\\benchmarks\\skip-history-2026-11-06\\raw\\service-unpinned-after-2",
+    "rows": [
+      1000000
+    ],
+    "cpus": [
+      1
+    ],
+    "memory": [
+      1024
+    ],
+    "reps": 1,
+    "ops": 8000,
+    "sample": 1,
+    "rate": 1000,
+    "recover_memory": null,
+    "retained_bytes": 671088640,
+    "image": "catdb-skip-service-after:local",
+    "pin_reader": 0
+  },
+  "docker": {
+    "ServerVersion": "29.9.2",
+    "NCPU": 32,
+    "MemTotal": 67380625408,
+    "Driver": "overlay2",
+    "OSType": "linux",
+    "Architecture": "x86_64",
+    "KernelVersion": "6.18.54.1-microsoft-standard-WSL2"
+  }
+}

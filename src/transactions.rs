@@ -4625,3 +4625,7 @@ mod scan_copy_bench;
 #[cfg(all(test, feature = "lock-timing"))]
 #[path = "../benchmarks/wal-preparation/engine_bench.rs"]
 mod wal_preparation_bench;
+
+#[cfg(all(test, target_os = "linux"))]
+#[path = "../benchmarks/variable-gate/probe.rs"]
+mod variable_gate;

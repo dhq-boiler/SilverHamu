@@ -6,6 +6,20 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Variable-length production-codec gate
+
+A test-only dual-copy store now reuses the production WAL encoder/decoder.
+Eleven tests pass, including 30 external process kills, 8,450 selector-prefix
+combinations and 4,269 single-copy byte-corruption cases. Multi-key updates recover
+atomically within the explicit one-damaged-copy assumption; both-copy loss remains
+a counterexample. Existing library tests also pass in two feature configurations.
+
+Ordinary append still uses one sync, but this bounded fixture writes **336,550 bytes
+and uses three syncs per generation transition**. Its whole checkpoint must fit one
+16-KiB slot. This is a codec/recovery gate, not a scalable implementation or a speedup
+claim. Production APIs, persistence formats and defaults remain unchanged.
+[Protocol, byte/buffer accounting, raw results and remaining gates](docs/benchmarks/variable-gate-2026-11-07/README.md).
+
 ## Repair and generation transition gate
 
 The bounded standalone probe now keeps the old selector pair while preparing a

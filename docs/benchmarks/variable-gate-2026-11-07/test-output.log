@@ -1,0 +1,323 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 389B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/rust:1.89-bookworm
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/8] FROM docker.io/library/rust:1.89-bookworm
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 206.18kB 0.0s done
+#5 DONE 0.0s
+
+#6 [2/8] WORKDIR /build
+#6 CACHED
+
+#7 [3/8] COPY Cargo.toml Cargo.lock ./
+#7 CACHED
+
+#8 [4/8] COPY src ./src
+#8 DONE 0.1s
+
+#9 [5/8] COPY benchmarks ./benchmarks
+#9 DONE 0.1s
+
+#10 [6/8] RUN cargo test --locked --release --lib variable_gate -- --nocapture --test-threads=1
+#10 0.271     Updating crates.io index
+#10 0.833    Compiling catdb v0.1.0 (/build)
+#10 1.399 warning: method `hold_test_sync` is never used
+#10 1.399    --> src/group_commit.rs:130:19
+#10 1.399     |
+#10 1.399 123 | impl Database {
+#10 1.399     | ------------- method in this implementation
+#10 1.399 ...
+#10 1.399 130 |     pub(crate) fn hold_test_sync(&self, gate: Arc<[std::sync::Barrier; 2]>) {
+#10 1.399     |                   ^^^^^^^^^^^^^^
+#10 1.399     |
+#10 1.399     = note: `#[warn(dead_code)]` on by default
+#10 1.399
+#10 4.238 warning: `catdb` (lib test) generated 1 warning
+#10 4.238     Finished `release` profile [optimized] target(s) in 3.99s
+#10 4.243      Running unittests src/lib.rs (target/release/deps/newdbms-476c349154e50b45)
+#10 4.244
+#10 4.244 running 12 tests
+#10 4.244 test transactions::variable_gate::tests::bv_checkpoint_capacity_and_log_capacity_reject_before_writes ... ok
+#10 4.267 test transactions::variable_gate::tests::bv_page_and_exact_slot_boundaries_preserve_rejected_state ... ok
+#10 4.298 test transactions::variable_gate::tests::bv_production_total_bytes_and_sequence_limits ... ok
+#10 4.313 test transactions::variable_gate::tests::child_phase ... ignored
+#10 4.313 test transactions::variable_gate::tests::eq_atomic_changes_empty_noop_old_read_repeated_switch_and_costs ... variable costs: Costs { categories: {"append": (43490, 5), "initialization": (393216, 2), "reclaim": (491520, 3), "switch-data": (517746, 3), "switch-selector": (384, 3)}, frame_capacity_peak: 4307, frame_length_peak: 4307, checkpoint_clone_bytes: 4236 }
+#10 4.343 ok
+#10 4.343 test transactions::variable_gate::tests::er_external_kills_preserve_acknowledged_and_atomic_pending_changes ... external kill recovered: append/append-0.half
+#10 4.372 external kill recovered: append/append-0.written
+#10 4.387 external kill recovered: append/append-1.half
+#10 4.401 external kill recovered: append/append-1.written
+#10 4.415 external kill recovered: append/append.before-sync
+#10 4.429 external kill recovered: append/append.synced
+#10 4.441 external kill recovered: append/append.published
+#10 4.460 external kill recovered: repair/repair-data-7.half
+#10 4.479 external kill recovered: repair/repair-data-7.written
+#10 4.497 external kill recovered: repair/repair-data.before-sync
+#10 4.516 external kill recovered: repair/repair-data.synced
+#10 4.538 external kill recovered: repair/repair-selector-3.half
+#10 4.556 external kill recovered: repair/repair-selector-3.written
+#10 4.573 external kill recovered: repair/repair-selector.before-sync
+#10 4.592 external kill recovered: repair/repair-selector.synced
+#10 4.617 external kill recovered: repair/open-ready
+#10 4.631 external kill recovered: switch/switch-clear.half
+#10 4.646 external kill recovered: switch/switch-data-0.half
+#10 4.661 external kill recovered: switch/switch-data-1.written
+#10 4.677 external kill recovered: switch/switch-data.before-sync
+#10 4.692 external kill recovered: switch/switch-data.synced
+#10 4.707 external kill recovered: switch/switch-selector-0.half
+#10 4.723 external kill recovered: switch/switch-selector-0.written
+#10 4.739 external kill recovered: switch/switch-selector-1.half
+#10 4.754 external kill recovered: switch/switch-selector.before-sync
+#10 4.771 external kill recovered: switch/switch-selector.synced
+#10 4.790 external kill recovered: switch/switch.published
+#10 4.805 external kill recovered: switch/reclaim.half
+#10 4.823 external kill recovered: switch/reclaim.before-sync
+#10 4.842 external kill recovered: switch/reclaim.synced
+#10 4.843 ok
+#10 4.843 test transactions::variable_gate::tests::er_one_copy_damage_each_meaningful_byte_and_sync_before_publish ... fresh single-copy repair costs: Costs { categories: {"repair-data": (4369, 1)}, frame_capacity_peak: 0, frame_length_peak: 0, checkpoint_clone_bytes: 0 }
+#10 5.593 4269 meaningful byte single-bit corruptions restored from peer
+#10 5.593 ok
+#10 5.593 test transactions::variable_gate::tests::er_partial_copies_and_repair_keep_whole_transaction ... negative control: both copies lost can discard acknowledged transaction
+#10 5.609 ok
+#10 5.609 test transactions::variable_gate::tests::er_phase_failures_poison_writer_and_repair_before_writable ... repair costs: Costs { categories: {"repair-selector": (64, 1)}, frame_capacity_peak: 0, frame_length_peak: 0, checkpoint_clone_bytes: 0 }
+#10 5.662 ok
+#10 5.662 test transactions::variable_gate::tests::er_untrusted_lengths_inner_corruption_and_padding ... ok
+#10 5.663 test transactions::variable_gate::tests::er_valid_outer_checksums_do_not_hide_invalid_inner_operations ... ok
+#10 5.664 test transactions::variable_gate::tests::st_selector_prefixes_keep_variable_checkpoint_across_reuse ... 8450 selector prefix combinations passed
+#10 7.088 ok
+#10 7.088
+#10 7.088 test result: ok. 11 passed; 0 failed; 1 ignored; 0 measured; 55 filtered out; finished in 2.84s
+#10 7.088
+#10 DONE 7.1s
+
+#11 [7/8] RUN cargo test --locked --release --lib -- --test-threads=1
+#11 0.303 warning: method `hold_test_sync` is never used
+#11 0.303    --> src/group_commit.rs:130:19
+#11 0.303     |
+#11 0.303 123 | impl Database {
+#11 0.303     | ------------- method in this implementation
+#11 0.303 ...
+#11 0.303 130 |     pub(crate) fn hold_test_sync(&self, gate: Arc<[std::sync::Barrier; 2]>) {
+#11 0.303     |                   ^^^^^^^^^^^^^^
+#11 0.303     |
+#11 0.303     = note: `#[warn(dead_code)]` on by default
+#11 0.303
+#11 0.303 warning: `catdb` (lib test) generated 1 warning
+#11 0.303     Finished `release` profile [optimized] target(s) in 0.02s
+#11 0.303      Running unittests src/lib.rs (target/release/deps/newdbms-476c349154e50b45)
+#11 0.304
+#11 0.304 running 67 tests
+#11 0.304 test transactions::generation_guard_bench::production_global_guard_benchmark ... ignored, explicit synthetic production-engine performance experiment
+#11 0.304 test transactions::group_commit::tests::er_group_process_exit_around_sync_preserves_acknowledged_data_and_atomic_updates ... ok
+#11 0.325 test transactions::group_commit::tests::failed_sync_marks_group_uncertain_and_recovery_keeps_complete_prefix ... ok
+#11 0.351 test transactions::group_commit::tests::global_guard_keeps_group_range_conflicts_for_insert_update_delete_and_boundaries ... ok
+#11 0.427 test transactions::group_commit::tests::global_guard_keeps_same_group_point_dependencies_and_empty_ranges ... ok
+#11 0.434 test transactions::group_commit::tests::group_admission_counts_cumulative_retained_bytes_and_releases_buffers ... ok
+#11 0.441 test transactions::group_commit::tests::group_crash_worker ... ignored, subprocess helper
+#11 0.441 test transactions::group_commit::tests::sync_precedes_publication_and_only_nonconflicting_frames_are_written ... ok
+#11 0.448 test transactions::group_commit::tests::wake_on_four_commits_a_lone_request_after_the_wait ... ok
+#11 0.455 test transactions::read_copy_tests::er_detached_versions_stay_charged_until_their_values_are_freed ... ok
+#11 0.465 test transactions::read_copy_tests::er_worker_start_failure_leaves_cooperative_reclamation_available ... ok
+#11 0.472 test transactions::read_copy_tests::st_copy_is_unlocked_while_old_value_stays_pinned ... ok
+#11 0.493 test transactions::retirement::tests::er_receipt_identity_checksum_and_database_id_protect_unrelated_files ... ok
+#11 0.505 test transactions::scan_copy_bench::full_scan_copy_benchmark ... ignored, explicit full-scan copy performance experiment
+#11 0.505 test transactions::scan_merge_bench::full_scan_merge_benchmark ... ignored, explicit full-scan merge performance experiment
+#11 0.505 test transactions::tests::bv_checkpoint_rejects_snapshot_plus_tail_over_limit_before_replacing_original ... ok
+#11 0.519 test transactions::tests::bv_checkpoint_retained_limit_rejects_excess_update_then_reuses_capacity ... ok
+#11 0.542 test transactions::tests::bv_checkpoint_snapshot_uses_transaction_budget_and_releases_it_after_failure ... ok
+#11 0.551 test transactions::tests::bv_checkpoint_tail_copy_boundaries_preserve_old_reads_and_subsequent_appends ... ok
+#11 0.699 test transactions::tests::bv_inline_latest_does_not_enlarge_the_tree_value ... ok
+#11 0.699 test transactions::tests::bv_wal_and_sequence_limits_reject_before_any_persistence ... ok
+#11 0.702 test transactions::tests::checkpoint_crash_worker ... ignored, subprocess helper
+#11 0.702 test transactions::tests::checkpoint_readers_progress_at_copy_sync_and_publication_stages ... ok
+#11 0.722 test transactions::tests::copy_scan_bv_er_budget_edges_release_and_preserve_staged_writes ... ok
+#11 0.923 test transactions::tests::copy_scan_eq_export_avoids_keys_and_preserves_empty_and_large_values ... ok
+#11 0.937 test transactions::tests::copy_scan_eq_st_shared_rows_match_owned_ranges_and_survive_mutation ... ok
+#11 0.954 test transactions::tests::copy_scan_st_shared_payloads_are_stable_after_unlock_and_owner_drop ... ok
+#11 0.964 test transactions::tests::crash_before_publication ... ignored, subprocess helper
+#11 0.964 test transactions::tests::deferred_reclaim_preserves_old_reads_updates_and_reopen ... ok
+#11 1.004 test transactions::tests::elision_export_uses_no_write_dependencies_and_preserves_file_content ... ok
+#11 1.017 test transactions::tests::elision_point_validation_keeps_advanced_generation_and_earlier_group_conflicts ... ok
+#11 1.055 test transactions::tests::eq_checkpoint_captures_concurrent_changes_and_preserves_old_generation_and_conflicts ... ok
+#11 1.230 test transactions::tests::er_acknowledged_data_survives_storage_full_partial_write_and_sync_failure ... ok
+#11 1.325 test transactions::tests::er_checkpoint_failure_before_publication_preserves_store_and_after_publication_requires_reopen ... ok
+#11 1.404 test transactions::tests::er_checkpoint_process_exit_before_and_after_replacement_preserves_committed_state ... ok
+#11 2.225 test transactions::tests::er_checkpoint_tail_failure_keeps_acknowledged_writes_and_cursor_usable ... ok
+#11 2.255 test transactions::tests::er_persistence_failure_poisoning_requires_reopen_and_reports_uncertain_outcome ... ok
+#11 2.284 test transactions::tests::er_process_exit_during_append_or_after_sync_before_publication_recovers_atomically ... ok
+#11 2.304 test transactions::tests::er_tail_output_write_failure_restores_original_wal_append_position ... ok
+#11 2.314 test transactions::tests::er_wal_decoder_rejects_invalid_counts_tags_lengths_order_and_trailing_bytes ... ok
+#11 2.314 test transactions::tests::inline_key_eq_st_boundaries_snapshots_checkpoint_and_reopen ... ok
+#11 2.334 test transactions::tests::inline_key_st_point_and_prefix_range_conflicts_cross_storage_boundary ... ok
+#11 2.398 test transactions::tests::panic_during_unlocked_persistence_requires_reopen ... ok
+#11 2.402 test transactions::tests::reads_during_persistence_keep_old_values_and_conflict_after_publication ... ok
+#11 2.412 test transactions::tests::retirement_byte_boundary_and_disabled_mode_fall_back_without_losing_data ... ok
+#11 2.463 test transactions::tests::retirement_preserves_unrecognized_sidecars_and_uses_normal_replacement ... ok
+#11 2.484 test transactions::tests::retirement_releases_writer_before_reclaim_and_preserves_old_generation_and_conflicts ... ok
+#11 2.537 test transactions::tests::scan_merge_budget_boundary_releases_reservations_and_preserves_staged_values ... ok
+#11 2.644 test transactions::tests::scan_merge_full_copy_runs_unlocked_and_keeps_original_value ... ok
+#11 2.654 test transactions::tests::scan_merge_matches_oracle_for_staged_changes_boundaries_and_old_versions ... ok
+#11 2.670 test transactions::tests::scan_merge_shadowed_large_values_do_not_consume_output_budget ... ok
+#11 2.677 test transactions::tests::st_limited_failed_persistence_releases_reservations_and_requires_reopen ... ok
+#11 2.680 test transactions::tests::st_version_one_log_can_be_opened_and_upgraded_by_checkpoint ... ok
+#11 2.694 test transactions::tests::wal_preparation_eq_encoding_matches_legacy_bytes_and_decoding ... ok
+#11 2.700 test transactions::variable_gate::tests::bv_checkpoint_capacity_and_log_capacity_reject_before_writes ... ok
+#11 2.723 test transactions::variable_gate::tests::bv_page_and_exact_slot_boundaries_preserve_rejected_state ... ok
+#11 2.754 test transactions::variable_gate::tests::bv_production_total_bytes_and_sequence_limits ... ok
+#11 2.772 test transactions::variable_gate::tests::child_phase ... ignored
+#11 2.772 test transactions::variable_gate::tests::eq_atomic_changes_empty_noop_old_read_repeated_switch_and_costs ... ok
+#11 2.800 test transactions::variable_gate::tests::er_external_kills_preserve_acknowledged_and_atomic_pending_changes ... ok
+#11 3.268 test transactions::variable_gate::tests::er_one_copy_damage_each_meaningful_byte_and_sync_before_publish ... ok
+#11 4.029 test transactions::variable_gate::tests::er_partial_copies_and_repair_keep_whole_transaction ... ok
+#11 4.046 test transactions::variable_gate::tests::er_phase_failures_poison_writer_and_repair_before_writable ... ok
+#11 4.103 test transactions::variable_gate::tests::er_untrusted_lengths_inner_corruption_and_padding ... ok
+#11 4.104 test transactions::variable_gate::tests::er_valid_outer_checksums_do_not_hide_invalid_inner_operations ... ok
+#11 4.105 test transactions::variable_gate::tests::st_selector_prefixes_keep_variable_checkpoint_across_reuse ... ok
+#11 5.581 test transactions::work_elision_bench::work_elision_points_and_export ... ignored, explicit work-elision production experiment
+#11 5.581
+#11 5.581 test result: ok. 59 passed; 0 failed; 8 ignored; 0 measured; 0 filtered out; finished in 5.28s
+#11 5.581
+#11 DONE 5.6s
+
+#12 [8/8] RUN cargo test --locked --release --lib --features service,wal-direct -- --test-threads=1
+#12 0.318  Downloading crates ...
+#12 0.536   Downloaded ctrlc v3.5.2
+#12 0.545   Downloaded bitflags v2.13.2
+#12 0.552   Downloaded itoa v1.0.18
+#12 0.556   Downloaded serde_core v1.0.229
+#12 0.561   Downloaded zmij v1.0.23
+#12 0.565   Downloaded cfg-if v1.0.5
+#12 0.569   Downloaded cfg_aliases v0.2.2
+#12 0.578   Downloaded memchr v2.8.3
+#12 0.591   Downloaded serde_json v1.0.154
+#12 0.641   Downloaded libc v0.2.191
+#12 0.765   Downloaded nix v0.31.3
+#12 0.809    Compiling cfg_aliases v0.2.2
+#12 0.809    Compiling libc v0.2.191
+#12 0.810    Compiling serde_core v1.0.229
+#12 0.810    Compiling zmij v1.0.23
+#12 0.810    Compiling bitflags v2.13.2
+#12 0.811    Compiling cfg-if v1.0.5
+#12 0.811    Compiling serde_json v1.0.154
+#12 0.811    Compiling itoa v1.0.18
+#12 0.813    Compiling memchr v2.8.3
+#12 0.832    Compiling nix v0.31.3
+#12 2.382    Compiling ctrlc v3.5.2
+#12 2.925    Compiling catdb v0.1.0 (/build)
+#12 6.884     Finished `release` profile [optimized] target(s) in 6.58s
+#12 6.887      Running unittests src/lib.rs (target/release/deps/newdbms-50ca684b5adbc387)
+#12 6.888
+#12 6.888 running 84 tests
+#12 6.888 test service::tests::bv_auth_and_connection_configuration_bounds ... ok
+#12 6.888 test service::tests::bv_hex_limits_and_page_limits_reject_both_sides ... ok
+#12 6.888 test service::tests::elision_single_dispatch_preserves_request_and_validation ... ok
+#12 6.909 test service::tests::eq_explicit_service_budgets_preserve_legacy_config_and_reject_zero_before_creation ... ok
+#12 6.915 test service::tests::eq_service_mutations_and_embedded_reopen_agree ... ok
+#12 6.926 test service::tests::er_single_request_crash_keeps_acknowledged_values ...
+#12 6.934 running 1 test
+#12 6.942
+#12 6.942 running 1 test
+#12 6.946 ok
+#12 6.946 test service::tests::single_request_crash_worker ... ignored
+#12 6.946 test service::tests::st_invalid_states_leave_existing_transaction_intact ... ok
+#12 6.950 test service::tests::st_single_update_waits_for_sync_and_hides_uncommitted_values ... ok
+#12 6.959 test service::work_elision_bench::work_elision_single_requests ... ignored, explicit work-elision service-dispatch experiment
+#12 6.959 test transactions::generation_guard_bench::production_global_guard_benchmark ... ignored, explicit synthetic production-engine performance experiment
+#12 6.959 test transactions::group_commit::tests::bv_handoff_byte_limit_keeps_values_below_at_and_above_boundary ... ok
+#12 7.019 test transactions::group_commit::tests::bv_handoff_count_limit_keeps_all_requests_and_bounds_each_batch ... ok
+#12 7.050 test transactions::group_commit::tests::bv_refill_wait_requires_prior_writer_and_expired_partial_group ... ok
+#12 7.050 test transactions::group_commit::tests::er_group_process_exit_around_sync_preserves_acknowledged_data_and_atomic_updates ... ok
+#12 7.070 test transactions::group_commit::tests::er_handoff_replies_to_every_queued_caller_after_database_is_poisoned ... ok
+#12 7.077 test transactions::group_commit::tests::failed_sync_marks_group_uncertain_and_recovery_keeps_complete_prefix ... ok
+#12 7.103 test transactions::group_commit::tests::global_guard_keeps_group_range_conflicts_for_insert_update_delete_and_boundaries ... ok
+#12 7.181 test transactions::group_commit::tests::global_guard_keeps_same_group_point_dependencies_and_empty_ranges ... ok
+#12 7.188 test transactions::group_commit::tests::group_admission_counts_cumulative_retained_bytes_and_releases_buffers ... ok
+#12 7.195 test transactions::group_commit::tests::group_crash_worker ... ignored, subprocess helper
+#12 7.195 test transactions::group_commit::tests::st_handoff_collects_during_sync_without_early_ack_or_visibility ... ok
+#12 7.217 test transactions::group_commit::tests::st_handoff_repeats_crud_without_stranding_waiters_or_changing_old_reads ... ok
+#12 7.260 test transactions::group_commit::tests::st_recent_full_group_can_reform_but_idle_or_small_groups_keep_the_original_budget ... ok
+#12 7.260 test transactions::group_commit::tests::sync_precedes_publication_and_only_nonconflicting_frames_are_written ... ok
+#12 7.267 test transactions::group_commit::tests::wake_on_four_commits_a_lone_request_after_the_wait ... ok
+#12 7.274 test transactions::read_copy_tests::er_detached_versions_stay_charged_until_their_values_are_freed ... ok
+#12 7.284 test transactions::read_copy_tests::er_worker_start_failure_leaves_cooperative_reclamation_available ... ok
+#12 7.291 test transactions::read_copy_tests::st_copy_is_unlocked_while_old_value_stays_pinned ... ok
+#12 7.314 test transactions::retirement::tests::er_receipt_identity_checksum_and_database_id_protect_unrelated_files ... ok
+#12 7.325 test transactions::scan_copy_bench::full_scan_copy_benchmark ... ignored, explicit full-scan copy performance experiment
+#12 7.325 test transactions::scan_merge_bench::full_scan_merge_benchmark ... ignored, explicit full-scan merge performance experiment
+#12 7.325 test transactions::tests::bv_checkpoint_rejects_snapshot_plus_tail_over_limit_before_replacing_original ... ok
+#12 7.342 test transactions::tests::bv_checkpoint_retained_limit_rejects_excess_update_then_reuses_capacity ... ok
+#12 7.364 test transactions::tests::bv_checkpoint_snapshot_uses_transaction_budget_and_releases_it_after_failure ... ok
+#12 7.375 test transactions::tests::bv_checkpoint_tail_copy_boundaries_preserve_old_reads_and_subsequent_appends ... ok
+#12 7.516 test transactions::tests::bv_inline_latest_does_not_enlarge_the_tree_value ... ok
+#12 7.516 test transactions::tests::bv_wal_and_sequence_limits_reject_before_any_persistence ... ok
+#12 7.520 test transactions::tests::checkpoint_crash_worker ... ignored, subprocess helper
+#12 7.520 test transactions::tests::checkpoint_readers_progress_at_copy_sync_and_publication_stages ... ok
+#12 7.539 test transactions::tests::copy_scan_bv_er_budget_edges_release_and_preserve_staged_writes ... ok
+#12 7.738 test transactions::tests::copy_scan_eq_export_avoids_keys_and_preserves_empty_and_large_values ... ok
+#12 7.753 test transactions::tests::copy_scan_eq_st_shared_rows_match_owned_ranges_and_survive_mutation ... ok
+#12 7.769 test transactions::tests::copy_scan_st_shared_payloads_are_stable_after_unlock_and_owner_drop ... ok
+#12 7.780 test transactions::tests::crash_before_publication ... ignored, subprocess helper
+#12 7.780 test transactions::tests::deferred_reclaim_preserves_old_reads_updates_and_reopen ... ok
+#12 7.819 test transactions::tests::elision_export_uses_no_write_dependencies_and_preserves_file_content ... ok
+#12 7.832 test transactions::tests::elision_point_validation_keeps_advanced_generation_and_earlier_group_conflicts ... ok
+#12 7.869 test transactions::tests::eq_checkpoint_captures_concurrent_changes_and_preserves_old_generation_and_conflicts ... ok
+#12 8.039 test transactions::tests::er_acknowledged_data_survives_storage_full_partial_write_and_sync_failure ... ok
+#12 8.134 test transactions::tests::er_checkpoint_failure_before_publication_preserves_store_and_after_publication_requires_reopen ... ok
+#12 8.214 test transactions::tests::er_checkpoint_process_exit_before_and_after_replacement_preserves_committed_state ... ok
+#12 9.010 test transactions::tests::er_checkpoint_tail_failure_keeps_acknowledged_writes_and_cursor_usable ... ok
+#12 9.038 test transactions::tests::er_persistence_failure_poisoning_requires_reopen_and_reports_uncertain_outcome ... ok
+#12 9.068 test transactions::tests::er_process_exit_during_append_or_after_sync_before_publication_recovers_atomically ... ok
+#12 9.086 test transactions::tests::er_tail_output_write_failure_restores_original_wal_append_position ... ok
+#12 9.097 test transactions::tests::er_wal_decoder_rejects_invalid_counts_tags_lengths_order_and_trailing_bytes ... ok
+#12 9.097 test transactions::tests::inline_key_eq_st_boundaries_snapshots_checkpoint_and_reopen ... ok
+#12 9.119 test transactions::tests::inline_key_st_point_and_prefix_range_conflicts_cross_storage_boundary ... ok
+#12 9.186 test transactions::tests::panic_during_unlocked_persistence_requires_reopen ... ok
+#12 9.189 test transactions::tests::reads_during_persistence_keep_old_values_and_conflict_after_publication ... ok
+#12 9.199 test transactions::tests::retirement_byte_boundary_and_disabled_mode_fall_back_without_losing_data ... ok
+#12 9.248 test transactions::tests::retirement_preserves_unrecognized_sidecars_and_uses_normal_replacement ... ok
+#12 9.268 test transactions::tests::retirement_releases_writer_before_reclaim_and_preserves_old_generation_and_conflicts ... ok
+#12 9.319 test transactions::tests::scan_merge_budget_boundary_releases_reservations_and_preserves_staged_values ... ok
+#12 9.419 test transactions::tests::scan_merge_full_copy_runs_unlocked_and_keeps_original_value ... ok
+#12 9.431 test transactions::tests::scan_merge_matches_oracle_for_staged_changes_boundaries_and_old_versions ... ok
+#12 9.444 test transactions::tests::scan_merge_shadowed_large_values_do_not_consume_output_budget ... ok
+#12 9.451 test transactions::tests::st_limited_failed_persistence_releases_reservations_and_requires_reopen ... ok
+#12 9.456 test transactions::tests::st_version_one_log_can_be_opened_and_upgraded_by_checkpoint ... ok
+#12 9.469 test transactions::tests::wal_preparation_eq_encoding_matches_legacy_bytes_and_decoding ... ok
+#12 9.473 test transactions::variable_gate::tests::bv_checkpoint_capacity_and_log_capacity_reject_before_writes ... ok
+#12 9.494 test transactions::variable_gate::tests::bv_page_and_exact_slot_boundaries_preserve_rejected_state ... ok
+#12 9.524 test transactions::variable_gate::tests::bv_production_total_bytes_and_sequence_limits ... ok
+#12 9.543 test transactions::variable_gate::tests::child_phase ... ignored
+#12 9.543 test transactions::variable_gate::tests::eq_atomic_changes_empty_noop_old_read_repeated_switch_and_costs ... ok
+#12 9.575 test transactions::variable_gate::tests::er_external_kills_preserve_acknowledged_and_atomic_pending_changes ... ok
+#12 10.08 test transactions::variable_gate::tests::er_one_copy_damage_each_meaningful_byte_and_sync_before_publish ... ok
+#12 10.82 test transactions::variable_gate::tests::er_partial_copies_and_repair_keep_whole_transaction ... ok
+#12 10.83 test transactions::variable_gate::tests::er_phase_failures_poison_writer_and_repair_before_writable ... ok
+#12 10.89 test transactions::variable_gate::tests::er_untrusted_lengths_inner_corruption_and_padding ... ok
+#12 10.89 test transactions::variable_gate::tests::er_valid_outer_checksums_do_not_hide_invalid_inner_operations ... ok
+#12 10.89 test transactions::variable_gate::tests::st_selector_prefixes_keep_variable_checkpoint_across_reuse ... ok
+#12 12.94 test transactions::work_elision_bench::work_elision_points_and_export ... ignored, explicit work-elision production experiment
+#12 12.94
+#12 12.94 test result: ok. 74 passed; 0 failed; 10 ignored; 0 measured; 0 filtered out; finished in 5.45s
+#12 12.94
+#12 DONE 13.0s
+
+#13 exporting to image
+#13 exporting layers
+#13 exporting layers 0.3s done
+#13 writing image sha256:f988ca1834837d5316a036e820c358761549f1a6c4ddaf40ad6cd5d4ad5123e2 done
+#13 naming to docker.io/library/catdb-variable-gate done
+#13 DONE 0.3s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/oty97xrqp80qtsnsu08d4fbl3

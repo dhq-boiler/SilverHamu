@@ -48,7 +48,11 @@ impl Drop for PreparedCheckpoint {
 
 impl Database {
     pub(super) fn start_checkpoint(&self, epoch: u64) -> Result<CheckpointDraft> {
+        #[cfg(all(test,target_os="linux",not(feature="retirement-timing")))]
+        let attempted=independent_trace::stamp();
         let writer = self.inner.writer.lock().map_err(|_| Error::Poisoned)?;
+        #[cfg(all(test,target_os="linux",not(feature="retirement-timing")))]
+        let writer=independent_trace::observe(attempted,writer);
         let pinned = self.begin()?;
         let state = self.state()?;
         let chunk_limit = MAX_TRANSACTION_BYTES.min(

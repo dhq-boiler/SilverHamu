@@ -148,6 +148,9 @@ pub struct Database {
 
 #[cfg(all(test, target_os = "linux"))]
 trait TestPersistence: Send + Sync {
+    fn prewrite(&self, _db: &Database, _limit: usize, _bytes: u64) -> Result<(usize,u64)> {
+        Err(Error::Invalid("unsupported experiment"))
+    }
     fn commit(&self, tx: Transaction) -> Result<u64>;
     fn checkpoint(&self, db: &Database) -> Result<CheckpointInfo>;
 }

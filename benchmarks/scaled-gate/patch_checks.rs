@@ -96,13 +96,22 @@ fn pagepatch_crashes_preserve_acknowledged_update() {
         "selector.synced",
     ] {
         let p = dir().join("kill.db");
+        kill_at(&p, point, "transactions::scaled_gate::checks::timing::patch_kill_worker");
+        let db = MvccPages::open_direct(&p, four_config(), None);
+        let mut r = db.begin_read().unwrap();
+        assert_eq!(r.version(), 1);
+        check_tx(&mut r, 500, &[(2, Some(value(2, 1)))].into());
+    }
+}
+
+fn kill_at(p:&Path,point:&str,worker:&str){
         let mut child = Command::new(std::env::current_exe().unwrap())
             .args([
-                "transactions::scaled_gate::checks::timing::patch_kill_worker",
+                worker,
                 "--exact",
                 "--ignored",
             ])
-            .env("PATCH_FILE", &p)
+            .env("PATCH_FILE", p)
             .env("PATCH_POINT", point)
             .stdout(Stdio::null())
             .spawn()
@@ -119,9 +128,4 @@ fn pagepatch_crashes_preserve_acknowledged_update() {
         }
         child.kill().unwrap();
         child.wait().unwrap();
-        let db = MvccPages::open_direct(&p, four_config(), None);
-        let mut r = db.begin_read().unwrap();
-        assert_eq!(r.version(), 1);
-        check_tx(&mut r, 500, &[(2, Some(value(2, 1)))].into());
-    }
 }

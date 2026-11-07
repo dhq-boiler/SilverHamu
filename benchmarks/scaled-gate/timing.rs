@@ -134,7 +134,7 @@ fn compare() {
             | "combine"
             | "logreuse"
             | "arrivals"
-            | "patch"
+            | "patch" | "prewrite"
     ));
     assert!(n >= 1000 && ops >= cap as usize * 3 && ops <= 8192);
     let cfg = Config {
@@ -149,7 +149,7 @@ fn compare() {
     let mut dirty = None;
     if matches!(
         mode.as_str(),
-        "direct" | "packed" | "reuse" | "linear" | "combine" | "logreuse" | "arrivals" | "patch"
+        "direct" | "packed" | "reuse" | "linear" | "combine" | "logreuse" | "arrivals" | "patch" | "prewrite"
     ) {
         db = Some(MvccPages::create_direct(
             &p,
@@ -369,3 +369,4 @@ include!("arrival_checks.rs");
 
 include!("density.rs");
 include!("patch_checks.rs");
+include!("prewrite_checks.rs");

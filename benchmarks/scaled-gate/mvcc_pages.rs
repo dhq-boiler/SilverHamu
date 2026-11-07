@@ -66,7 +66,7 @@ impl MvccPages {
         let grouped = patch
             || direct
                 && (std::env::var_os("CATDB_TEST_ARRIVALS").is_some()
-                    || std::env::var("SCALED_VARIANT").as_deref() == Ok("arrivals"));
+                    || std::env::var("SCALED_VARIANT").as_deref()  .is_ok_and(|v| matches!(v, "arrivals" | "prewrite")));
         if disk.group_version.is_some() && !grouped {
             return Err(TxError::Invalid("group persistence required"));
         }
@@ -130,7 +130,9 @@ impl MvccPages {
         Self::attach(path, Dirty::open(path, cfg, &mut noop).unwrap(), fault).unwrap()
     }
 }
+include!("prewrite.rs");
 impl TestPersistence for MvccPages {
+    fn prewrite(&self, db: &Database, count: usize, bytes: u64) -> crate::transactions::Result<(usize,u64)> { self.prepare_dirty(db,count,bytes) }
     fn commit(&self, tx: Transaction) -> crate::transactions::Result<u64> {
         if let Some(queue) = &self.arrivals {
             return queue.submit(self, tx);
@@ -175,6 +177,8 @@ impl TestPersistence for MvccPages {
             Ok(s.control.file.metadata()?.len() + s.pool.metadata()?.len())
         };
         let before_bytes = bytes(&disk)?;
+        let prepared_count = disk.prepared.len();
+        let page_bytes = disk.control.costs.writes.get("page").copied().unwrap_or(0);
         let mut scratch = db.inner.budget.buffer();
         if self.packed {
             scratch.add(PACK_SCRATCH)?;
@@ -206,6 +210,9 @@ impl TestPersistence for MvccPages {
             Phase::begin(self.profile);
             disk.switch(&mut |s| self.signal(s))
         };
+        if std::env::var_os("PREWRITE_COUNTS").is_some() {
+            println!("PREWRITE_CHECKPOINT,{version},{prepared_count},{}",disk.control.costs.writes.get("page").copied().unwrap_or(0)-page_bytes);
+        }
         let phase_times = Phase::finish();
         if let Some(ns) = phase_times {
             println!(

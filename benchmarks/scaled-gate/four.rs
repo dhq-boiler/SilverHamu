@@ -263,7 +263,19 @@ fn four_run(
     let run = Four::new(backend, cfg.logs as usize);
     let first = Barrier::new(4);
     let lane_bounds = Mutex::new(Vec::new());
+    let stop = std::sync::atomic::AtomicBool::new(false);
     let samples = std::thread::scope(|scope| {
+        let worker = (mode=="prewrite").then(|| scope.spawn(|| {
+            let db = run.wal.as_ref().unwrap();
+            let mut total = (0,0);
+            while !stop.load(Ordering::Acquire) {
+                std::thread::sleep(Duration::from_millis(4));
+                if stop.load(Ordering::Acquire) { break; }
+                let (pages,bytes)=prewrite(db,96,96*PAIR).unwrap();
+                total.0+=pages;total.1+=bytes;
+            }
+            total
+        }));
         let threads: Vec<_> = (0..4)
             .map(|lane| {
                 let engine = &run;
@@ -286,10 +298,13 @@ fn four_run(
                 })
             })
             .collect();
-        threads
-            .into_iter()
-            .flat_map(|t| t.join().unwrap())
-            .collect::<Vec<_>>()
+        let joined: Vec<_> = threads.into_iter().map(|t| t.join()).collect();
+        stop.store(true,Ordering::Release);
+        if let Some(worker)=worker {
+            let (pages,bytes)=worker.join().unwrap();
+            println!("PREWRITE_TOTAL,{pages},{bytes}");
+        }
+        joined.into_iter().flat_map(|t| t.unwrap()).collect::<Vec<_>>()
     });
     let mem = memory().0;
     let mut ordered: Vec<_> = samples.iter().collect();

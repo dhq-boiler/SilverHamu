@@ -18,6 +18,8 @@ struct Pin {
     _lease: File,
 }
 struct Dirty {
+    prepared: Directory,
+    prepared_cursor: u32,
     patch: bool,
     structural: BTreeSet<Vec<u8>>,
     patch_counts: PatchCounts,
@@ -53,6 +55,8 @@ impl Dirty {
         pool.try_lock().map_err(|e| err(&e.to_string()))?;
         let control = Store::create(path, cfg, Data::new(), BUFFER_BUDGET, &mut noop)?;
         let mut s = Self {
+            prepared: Directory::new(),
+            prepared_cursor: 0,
             patch: false,
             structural: BTreeSet::new(),
             patch_counts: PatchCounts::default(),
@@ -118,6 +122,11 @@ impl Dirty {
             let lo = fence(&self.pages, k);
             if self.patch && w[k].is_none() {
                 self.structural.insert(lo.clone());
+            }
+            if !self.prepared.is_empty() {
+                if let Some(previous) = self.prepared.remove(&lo) {
+                    self.prepared_cursor = self.prepared_cursor.min(previous.slot);
+                }
             }
             self.dirty.insert(lo);
         }
@@ -215,6 +224,11 @@ impl Dirty {
                 .next()
                 .map(|(k, _)| k.as_slice());
             next.remove(lower);
+            if let Some(page) = self.prepared.get(lower) {
+                if page.generation != generation { return Err(err("prepared generation mismatch")); }
+                next.insert(lower.clone(), page.clone());
+                continue;
+            }
             if let (Some(page), Some(addr)) = (scratch.as_mut(), self.pages.get(lower)) {
                 page.combine = true;
                 if !self.structural.contains(lower)
@@ -288,6 +302,8 @@ impl Dirty {
         hook("reclaim.before")?;
         self.live.retain(|_, w| w.strong_count() > 0);
         hook("reclaim.after")?;
+        self.prepared.clear();
+        self.prepared_cursor = 0;
         self.structural.clear();
         self.dirty.clear();
         self.failed = false;
@@ -420,6 +436,8 @@ impl Dirty {
         sync(&pool, &mut control.costs, "recovery-pages", hook)?;
         Ok(Self {
             group_version,
+            prepared: Directory::new(),
+            prepared_cursor: 0,
             patch: false,
             structural: BTreeSet::new(),
             patch_counts: PatchCounts::default(),

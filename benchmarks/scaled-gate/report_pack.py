@@ -52,6 +52,7 @@ def main():
     parser.add_argument("--append",action="store_true")
     parser.add_argument("--arrivals",action="store_true")
     parser.add_argument("--patch",action="store_true")
+    parser.add_argument("--prewrite",action="store_true")
     args=parser.parse_args();args.out.mkdir(parents=True,exist_ok=True)
     modes=MODES+(("reuse",) if args.reuse else ())
     names=NAMES+(("Pack + reuse",) if args.reuse else ())
@@ -64,8 +65,9 @@ def main():
     if args.arrivals:
         modes=("combine","arrivals");names=("FIFO","Grouped")
     if args.patch:modes=("arrivals","patch");names=("Scan","Patch")
+    if args.prewrite:modes=("arrivals","prewrite");names=("Scan","Prewrite")
     groups={}
-    for stage in (("1m",) if args.arrivals or args.patch else ("diagnostic","1m")):
+    for stage in (("1m",) if args.arrivals or args.patch or args.prewrite else ("diagnostic","1m")):
         raw=args.raw/stage
         runs=json.loads((raw/"runs.json").read_text())
         assert sorted((r["mode"],r["rep"]) for r in runs)==sorted((m,i) for m in modes for i in (range(1,4) if stage=="1m" else [1]))

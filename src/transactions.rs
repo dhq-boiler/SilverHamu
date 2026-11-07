@@ -176,6 +176,8 @@ struct Inner {
     state: Arc<Mutex<State>>,
     writer: WriterMutex,
     checkpoint: Mutex<u64>,
+    #[cfg(all(target_os = "linux", target_pointer_width = "64"))]
+    range_writeback: std::sync::atomic::AtomicBool,
     prefix_active: std::sync::atomic::AtomicBool,
     retirement: Mutex<retirement::Retirement>,
     id: [u8; 16],
@@ -772,6 +774,8 @@ impl Database {
                 state: Arc::new(Mutex::new(state)),
                 writer: WriterMutex::default(),
                 checkpoint: Mutex::new(0),
+                #[cfg(all(target_os = "linux", target_pointer_width = "64"))]
+                range_writeback: false.into(),
                 prefix_active: false.into(),
                 retirement: Mutex::new(retirement),
                 id,
@@ -4156,6 +4160,9 @@ mod tests {
         let path = std::env::var_os("NEWDBMS_CHECKPOINT_PATH").unwrap();
         let phase = std::env::var("NEWDBMS_CHECKPOINT_PHASE").unwrap();
         let db = Database::open(path).unwrap();
+        if std::env::var_os("NEWDBMS_CRASH_TEST_EXT4").is_some() {
+            db.set_checkpoint_range_writeback(true).unwrap();
+        }
         db.set_checkpoint_retirement(true, MAX_WAL_BYTES).unwrap();
         if let Some(stage) = phase.strip_prefix("prefix-") {
             let mut prefix = db.prepare_checkpoint_prefix(1).unwrap();

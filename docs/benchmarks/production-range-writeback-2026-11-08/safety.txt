@@ -1,0 +1,8 @@
+current-recovery  test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 166 filtered out; finished in 0.31s
+fifo-recovery  test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 169 filtered out; finished in 0.26s
+default-suite  test result: ok. 119 passed; 0 failed; 48 ignored; 0 measured; 0 filtered out; finished in 41.12s
+windows-test  test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 63 filtered out; finished in 0.03s
+checkpoint_writeback_is_shared_by_clones_and_captured_for_each_draft  test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 166 filtered out; finished in 0.02s
+prefix_replays_changes_on_both_sides_of_the_scan_cursor  test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 166 filtered out; finished in 0.03s
+unsupported_checkpoint_writeback_can_be_disabled_and_rejection_preserves_data  test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 166 filtered out; finished in 0.00s
+Release C ABI and service OK: ext4, tmpfs, 9 MiB, checkpoint, reopen, invalid flag and closed handle.

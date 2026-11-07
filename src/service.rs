@@ -67,25 +67,29 @@ impl Server {
     ) -> Result<Self, Box<dyn std::error::Error>> {
         config.validate()?;
         let limits = limits.validate()?;
+        let range_writeback = match std::env::var_os("CATDB_EXT4_CHECKPOINT_WRITEBACK") {
+            None => false,
+            Some(value) if value == "0" => false,
+            Some(value) if value == "1" => true,
+            _ => return Err("CATDB_EXT4_CHECKPOINT_WRITEBACK must be 0 or 1".into()),
+        };
         let listener = TcpListener::bind(config.bind)?;
         listener.set_nonblocking(true)?;
         let db = if config.database.try_exists()? {
             Database::open_with_limits(&config.database, limits)?
         } else if config.initialize {
+            let parent = config.database.parent().filter(|p| !p.as_os_str().is_empty())
+                .unwrap_or_else(|| std::path::Path::new("."));
+            if range_writeback {
+                Database::check_range_writeback_path(parent)?;
+            }
             let id = SystemTime::now()
                 .duration_since(UNIX_EPOCH)?
                 .as_nanos()
                 .to_le_bytes();
             let db = Database::create_with_limits(&config.database, id, limits)?;
             #[cfg(unix)]
-            std::fs::File::open(
-                config
-                    .database
-                    .parent()
-                    .filter(|p| !p.as_os_str().is_empty())
-                    .unwrap_or_else(|| std::path::Path::new(".")),
-            )?
-            .sync_all()?;
+            std::fs::File::open(parent)?.sync_all()?;
             db
         } else {
             return Err(
@@ -93,6 +97,7 @@ impl Server {
                     .into(),
             );
         };
+        db.set_checkpoint_range_writeback(range_writeback)?;
         if let Ok(value) = std::env::var("CATDB_EXPERIMENTAL_FIXED_LOG_BYTES") {
             #[cfg(feature = "fixed-log")]
             {

@@ -8,6 +8,7 @@ fn range_writeback_recovers_after_failure_and_exit_around_final_sync() {
     );
     let path = Fixture::new();
     let db = Database::create(&path.0, [72; 16]).unwrap();
+    db.set_checkpoint_range_writeback(true).unwrap();
     for page in 0..9_u8 {
         let mut tx = db.begin().unwrap();
         for slot in 0..=255_u8 {
@@ -38,6 +39,7 @@ fn range_writeback_recovers_after_failure_and_exit_around_final_sync() {
                 "transactions::tests::checkpoint_crash_worker",
             ])
             .env("NEWDBMS_CHECKPOINT_PATH", &path.0)
+            .env("NEWDBMS_CRASH_TEST_EXT4", "1")
             .env("NEWDBMS_CHECKPOINT_PHASE", phase)
             .output()
             .unwrap();

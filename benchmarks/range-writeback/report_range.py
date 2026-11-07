@@ -14,7 +14,7 @@ def load(path):
 def values(rows,m,v,key):
     return [float(r[key]) for r in sorted(rows,key=lambda r:int(r["rep"])) if (r["mode"],r["variant"])==(m,v)]
 
-def figure(out,title,metrics,rows):
+def figure(out,title,metrics,rows,label_aggregates=None):
     width=920;height=80+165*len(metrics)
     svg=[f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" role="img"><title>{escape(title)}</title><desc>Three paired trials in each lock mode. Left point is baseline, right point is asynchronous 8 MiB writeback.</desc><rect width="100%" height="100%" fill="#fafafa"/><g font-family="system-ui,sans-serif" fill="#142f45">',
          f'<text x="20" y="31" font-size="23">{escape(title)}</text><text x="20" y="57" font-size="14">Each line connects the same trial number. Both lock panels use the same scale per row.</text>']
@@ -32,7 +32,8 @@ def figure(out,title,metrics,rows):
                 col=["#07638c","#b6552a","#635696"][idx];dash=["none","7 3","2 3"][idx];x1=left+94;x2=left+255
                 y1=bottom-78*a/high;y2=bottom-78*b/high
                 svg.append(f'<g><title>Trial {idx+1}: {a:.3f} to {b:.3f} {unit}</title><path d="M{x1} {y1}L{x2} {y2}" stroke="{col}" stroke-dasharray="{dash}" fill="none" stroke-width="2"/><circle cx="{x1}" cy="{y1}" r="3.5" fill="{col}"/><rect x="{x2-3}" y="{y2-3}" width="6" height="6" fill="{col}"/></g>')
-            a=median(values(rows,m,"baseline",key));b=median(values(rows,m,"range8",key))
+            label_fn=(label_aggregates or {}).get(key,median)
+            a=label_fn(values(rows,m,"baseline",key));b=label_fn(values(rows,m,"range8",key))
             svg.append(f'<text x="{left+94}" y="{bottom+18}" text-anchor="middle" font-size="13">Baseline {a:,.2f}</text><text x="{left+255}" y="{bottom+18}" text-anchor="middle" font-size="13">8 MiB {b:,.2f}</text>')
     out.write_text("".join(svg)+"</g></svg>",encoding="utf-8")
     ElementTree.parse(out)

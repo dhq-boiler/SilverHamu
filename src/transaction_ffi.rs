@@ -146,6 +146,23 @@ pub extern "C" fn ndb_tx_resource_api_version() -> u32 {
 }
 
 #[unsafe(no_mangle)]
+pub extern "C" fn ndb_tx_set_checkpoint_range_writeback(id: u64, enabled: u32) -> i32 {
+    guard(|| {
+        if enabled > 1 {
+            return Err(1);
+        }
+        database(id)?.set_checkpoint_range_writeback(enabled == 1).map_err(|error| {
+            if matches!(&error, Error::Io(e) if e.kind() == std::io::ErrorKind::Unsupported) {
+                27
+            } else {
+                code(error)
+            }
+        })?;
+        Ok(0)
+    })
+}
+
+#[unsafe(no_mangle)]
 pub extern "C" fn ndb_tx_set_checkpoint_retirement(id: u64, enabled: u32, max_bytes: u64) -> i32 {
     guard(|| {
         if enabled > 1 {

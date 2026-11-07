@@ -1,12 +1,12 @@
 use super::*;
 
-#[cfg(all(test, target_os = "linux", target_pointer_width = "64"))]
-#[path = "../benchmarks/range-writeback/range.rs"]
+#[cfg(all(target_os = "linux", target_pointer_width = "64"))]
+#[path = "checkpoint_writeback.rs"]
 mod range_writeback;
 
 pub(super) struct CheckpointCursor {
     pub(super) pinned: Transaction,
-    #[cfg(all(test, target_os = "linux", target_pointer_width = "64"))]
+    #[cfg(all(target_os = "linux", target_pointer_width = "64"))]
     writeback: Option<range_writeback::Pending>,
     last_key: Option<Vec<u8>>,
     after_key: Option<Vec<u8>>,
@@ -36,6 +36,11 @@ pub struct PreparedCheckpoint {
     pub(super) draft: Option<CheckpointDraft>,
 }
 impl PreparedCheckpoint {
+    #[cfg(all(test, target_os = "linux", target_pointer_width = "64"))]
+    pub(super) fn uses_range_writeback(&self) -> bool {
+        self.draft.as_ref().unwrap().cursor.writeback.is_some()
+    }
+
     /// Completes and durably publishes the snapshot and the WAL suffix. A newer checkpoint invalidates this prefix.
     pub fn finish(mut self) -> Result<CheckpointInfo> {
         self.db
@@ -53,12 +58,48 @@ impl Drop for PreparedCheckpoint {
 }
 
 impl Database {
+    /// Enables 8 MiB checkpoint writeback on 64-bit Linux ext4 for this open database.
+    /// Clones share the setting. New opens default to false; prepared checkpoints retain their policy.
+    pub fn set_checkpoint_range_writeback(&self, enabled: bool) -> Result<()> {
+        if enabled {
+            let path = self.state()?.path.clone();
+            Self::check_range_writeback_path(&path)?;
+        }
+        #[cfg(all(target_os = "linux", target_pointer_width = "64"))]
+        self.inner
+            .range_writeback
+            .store(enabled, std::sync::atomic::Ordering::Release);
+        Ok(())
+    }
+
+    pub(crate) fn check_range_writeback_path(path: &Path) -> Result<()> {
+        #[cfg(all(target_os = "linux", target_pointer_width = "64"))]
+        {
+            range_writeback::require_ext4(&File::open(path)?)?;
+            Ok(())
+        }
+        #[cfg(not(all(target_os = "linux", target_pointer_width = "64")))]
+        {
+            let _ = path;
+            Err(io::Error::new(
+                io::ErrorKind::Unsupported,
+                "checkpoint range writeback requires 64-bit Linux ext4",
+            )
+            .into())
+        }
+    }
+
     pub(super) fn start_checkpoint(&self, epoch: u64) -> Result<CheckpointDraft> {
         #[cfg(all(test, target_os = "linux", not(feature = "retirement-timing")))]
         let attempted = independent_trace::stamp();
         let writer = self.inner.writer.lock().map_err(|_| Error::Poisoned)?;
         #[cfg(all(test, target_os = "linux", not(feature = "retirement-timing")))]
         let writer = independent_trace::observe(attempted, writer);
+        #[cfg(all(target_os = "linux", target_pointer_width = "64"))]
+        let range_enabled = self
+            .inner
+            .range_writeback
+            .load(std::sync::atomic::Ordering::Acquire);
         let pinned = self.begin()?;
         let state = self.state()?;
         let chunk_limit = MAX_TRANSACTION_BYTES.min(
@@ -87,8 +128,8 @@ impl Database {
         );
         let mut draft = CheckpointDraft {
             cursor: CheckpointCursor {
-                #[cfg(all(test, target_os = "linux", target_pointer_width = "64"))]
-                writeback: range_writeback::Pending::configured(),
+                #[cfg(all(target_os = "linux", target_pointer_width = "64"))]
+                writeback: range_enabled.then(range_writeback::Pending::new),
                 pinned,
                 last_key,
                 chunk_limit,
@@ -101,6 +142,10 @@ impl Database {
             temporary,
             file: replacement,
         };
+        #[cfg(all(target_os = "linux", target_pointer_width = "64"))]
+        if range_enabled {
+            range_writeback::require_ext4(draft.file.as_ref().unwrap())?;
+        }
         draft
             .file
             .as_mut()
@@ -163,7 +208,7 @@ impl Database {
         if !pending.is_empty() {
             let frame = encode_frame(cursor.pinned.snapshot, &pending);
             output.write_all(&frame)?;
-            #[cfg(all(test, target_os = "linux", target_pointer_width = "64"))]
+            #[cfg(all(target_os = "linux", target_pointer_width = "64"))]
             if let Some(writeback) = &mut cursor.writeback {
                 writeback.written(frame.len(), |offset, len| {
                     range_writeback::submit(output, offset, len)

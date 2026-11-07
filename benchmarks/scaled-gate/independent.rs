@@ -30,6 +30,7 @@ fn independent_campaign() {
         },
     )
     .unwrap();
+    db.set_checkpoint_range_writeback(std::env::var_os("CATDB_TEST_RANGE_WRITEBACK").is_some()).unwrap();
     for start in (0..n).step_by(1000) {
         let mut t = db.begin().unwrap();
         for i in start..(start + 1000).min(n) {

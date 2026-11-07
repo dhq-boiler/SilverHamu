@@ -1,0 +1,2 @@
+mode,variant,rep,attempt,kernel_loss,updates_s,update_p99_ms,max_ms,publications
+fifo,baseline,3,1,33156,120.98007321527422,268.200749,718.448089,63

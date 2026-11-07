@@ -6,7 +6,23 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Optional ext4 checkpoint writeback
+
+The setting defaults to **off** for every database open. On 64-bit Linux with the database and checkpoint destination on ext4, an embedded Rust application can enable it by calling `db.set_checkpoint_range_writeback(true)?`. To disable it, pass `false`. Cloned handles share the policy. A checkpoint captures it at the start, including when a prepared prefix is finished later. The file format and final snapshot, WAL-suffix and publication synchronization protocol are unchanged.
+
+For the service, set `CATDB_EXT4_CHECKPOINT_WRITEBACK=1` before startup (in Docker, pass `-e CATDB_EXT4_CHECKPOINT_WRITEBACK=1`). Unset or `0` selects the default. The C ABI adds `int32_t ndb_tx_set_checkpoint_range_writeback(uint64_t db, uint32_t enabled)`. Valid inputs are 0 and 1. Success returns 0, an invalid flag or closed handle returns 1, and an unsupported mount/platform returns 27.
+
+On a million-row ext4 volume with four writers and 63 publications, median update p99 changed from 598.7 to 663.7 ms for the current lock and 158.6 to 74.9 ms for FIFO. FIFO WAL-targeted journal p99 was 27.64 ms disabled and 18.36 ms enabled. [All trials, recovery checks and reproduction](docs/benchmarks/production-range-writeback-2026-11-08/README.md).
+
+![Production checkpoint performance](docs/benchmarks/production-range-writeback-2026-11-08/performance.svg)
+
+![ext4 and WAL timing](docs/benchmarks/production-range-writeback-2026-11-08/writeback.svg)
+
+[Fresh released-interface product comparison](docs/benchmarks/production-range-writeback-2026-11-08/README.md#released-interfaces-and-other-products)
+
 ## 8 MiB checkpoint writeback on ext4
+
+The figures in this earlier section come from the test-only prototype. The production configuration measurements are above.
 
 On one million rows with four writers and 63 independent publications, the median per-publication peak fell from 136.0 to 8.5 MiB per 10 ms with the current lock and from 136.0 to 8.3 MiB with FIFO. Across three paired runs per lock: standard p99 592.5 → 457.7 ms and throughput 130.1 → 152.7 updates/s, fifo p99 152.2 → 77.2 ms and throughput 133.2 → 142.4 updates/s. [Latency, publication time, bytes, safety checks and trial data](docs/benchmarks/range-writeback-2026-11-08/README.md).
 

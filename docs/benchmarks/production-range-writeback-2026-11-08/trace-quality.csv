@@ -1,0 +1,13 @@
+mode,variant,rep,kernel,device,resolved,wal,probe_misses,ring_loss,cleaned
+fifo,baseline,1,6.18.54.1-microsoft-standard-WSL2,"8,64",16384,16384,0,0,True
+standard,baseline,1,6.18.54.1-microsoft-standard-WSL2,"8,64",16384,16384,0,0,True
+fifo,baseline,2,6.18.54.1-microsoft-standard-WSL2,"8,64",16384,16384,0,0,True
+standard,baseline,2,6.18.54.1-microsoft-standard-WSL2,"8,64",16384,16384,0,0,True
+fifo,baseline,3,6.18.54.1-microsoft-standard-WSL2,"8,64",16384,16384,0,0,True
+standard,baseline,3,6.18.54.1-microsoft-standard-WSL2,"8,64",16384,16384,0,0,True
+fifo,range8,1,6.18.54.1-microsoft-standard-WSL2,"8,64",16384,16384,0,0,True
+standard,range8,1,6.18.54.1-microsoft-standard-WSL2,"8,64",16384,16384,0,0,True
+fifo,range8,2,6.18.54.1-microsoft-standard-WSL2,"8,64",16384,16384,0,0,True
+standard,range8,2,6.18.54.1-microsoft-standard-WSL2,"8,64",16384,16384,0,0,True
+fifo,range8,3,6.18.54.1-microsoft-standard-WSL2,"8,64",16384,16384,0,0,True
+standard,range8,3,6.18.54.1-microsoft-standard-WSL2,"8,64",16384,16384,0,0,True

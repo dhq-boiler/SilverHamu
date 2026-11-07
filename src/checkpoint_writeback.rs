@@ -9,13 +9,11 @@ pub(super) struct Pending {
 }
 
 impl Pending {
-    pub(super) fn configured() -> Option<Self> {
-        (std::env::var_os("CATDB_TEST_RANGE_WRITEBACK").as_deref()
-            == Some(std::ffi::OsStr::new("1")))
-        .then_some(Self {
+    pub(super) fn new() -> Self {
+        Self {
             written: HEADER_BYTES as i64,
             submitted: 0,
-        })
+        }
     }
 
     pub(super) fn written(
@@ -30,6 +28,30 @@ impl Pending {
         }
         Ok(())
     }
+}
+
+pub(super) fn require_ext4(file: &File) -> io::Result<()> {
+    // statfs magic is also shared by ext2 and ext3.
+    let info = std::fs::read_to_string(format!("/proc/self/fdinfo/{}", file.as_raw_fd()))?;
+    let id = info
+        .lines()
+        .find_map(|line| line.strip_prefix("mnt_id:"))
+        .map(str::trim)
+        .ok_or_else(|| io::Error::other("missing file mount ID"))?;
+    let mounts = std::fs::read("/proc/self/mountinfo")?;
+    for line in mounts.split(|&b| b == b'\n') {
+        let mut fields = line.split(|&b| b == b' ');
+        if fields.next() == Some(id.as_bytes()) && fields.any(|field| field == b"-") {
+            if fields.next() == Some(b"ext4".as_slice()) {
+                return Ok(());
+            }
+            break;
+        }
+    }
+    Err(io::Error::new(
+        io::ErrorKind::Unsupported,
+        "checkpoint range writeback requires an ext4 mount",
+    ))
 }
 
 pub(super) fn submit(file: &File, offset: i64, length: i64) -> io::Result<()> {

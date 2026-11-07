@@ -2,6 +2,9 @@
 fn prefix_replays_changes_on_both_sides_of_the_scan_cursor() {
     let path = Fixture::new();
     let db = Database::create(&path.0, [91; 16]).unwrap();
+    if std::env::var_os("CATDB_TEST_RANGE_WRITEBACK").is_some() {
+        db.set_checkpoint_range_writeback(true).unwrap();
+    }
     let mut seed = db.begin().unwrap();
     for i in 0..600u32 {
         seed.put(&i.to_be_bytes(), &i.to_be_bytes()).unwrap();
@@ -209,3 +212,53 @@ fn fifo_orders_a_single_commit_checkpoint_cutover_and_group_commit() {
     assert_eq!(r.get(b"last").unwrap(), Some(b"2".to_vec()));
 }
 include!("../benchmarks/range-writeback/recovery.rs");
+
+#[cfg(all(target_os = "linux", target_pointer_width = "64"))]
+#[test]
+#[ignore = "requires ext4 for the fixture directory"]
+fn checkpoint_writeback_is_shared_by_clones_and_captured_for_each_draft() {
+    let path = Fixture::new();
+    let db = Database::create(&path.0, [73; 16]).unwrap();
+    let other = db.clone();
+    for (enabled, next) in [(false, true), (true, false)] {
+        let prefix = db.prepare_checkpoint_prefix(1).unwrap();
+        other.set_checkpoint_range_writeback(next).unwrap();
+        assert_eq!(prefix.uses_range_writeback(), enabled);
+        prefix.finish().unwrap();
+    }
+    db.set_checkpoint_range_writeback(true).unwrap();
+    drop(other);
+    drop(db);
+    let reopened = Database::open(&path.0).unwrap();
+    assert!(
+        !reopened
+            .prepare_checkpoint_prefix(1)
+            .unwrap()
+            .uses_range_writeback()
+    );
+}
+
+#[test]
+#[ignore = "requires an unsupported fixture filesystem or OS"]
+fn unsupported_checkpoint_writeback_can_be_disabled_and_rejection_preserves_data() {
+    let path = Fixture::new();
+    let db = Database::create(&path.0, [74; 16]).unwrap();
+    let mut tx = db.begin().unwrap();
+    tx.put(b"key", b"original").unwrap();
+    tx.commit().unwrap();
+    assert!(
+        matches!(db.set_checkpoint_range_writeback(true), Err(Error::Io(e)) if e.kind()==io::ErrorKind::Unsupported)
+    );
+    db.set_checkpoint_range_writeback(false).unwrap();
+    db.checkpoint().unwrap();
+    drop(db);
+    assert_eq!(
+        Database::open(&path.0)
+            .unwrap()
+            .begin_read()
+            .unwrap()
+            .get(b"key")
+            .unwrap(),
+        Some(b"original".to_vec())
+    );
+}

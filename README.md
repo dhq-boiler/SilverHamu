@@ -6,6 +6,20 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Bounded log-capacity tradeoff
+
+With real synchronization after every update, moving from 4 to 16 to 64 log slots
+raises median throughput **405.66 → 545.80 → 582.05 updates/s** in the small fixture.
+The cost is warm full-log reopening **0.453 → 1.497 → 5.805 ms** and reserved files
+**384 KiB → 1.125 MiB → 4.125 MiB**. Capacity 16 is a next experimental candidate,
+not a production default; the extra gain at 64 is only 6.6% versus 16 here.
+
+![Capacity, throughput and recovery tradeoffs](docs/benchmarks/capacity-gate-2026-11-07/comparison.svg)
+
+18,432 measured updates and 900 warm reopen checks pass, alongside 39 added external
+kills and cross-capacity rejection tests. Production behavior is unchanged.
+[All nine trials, p99/maxima, limits and reproduction](docs/benchmarks/capacity-gate-2026-11-07/README.md).
+
 ## Bounded reuse: locating long requests
 
 Matched request-phase diagnostics place **94.39–94.59%** of summed request time

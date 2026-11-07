@@ -1,0 +1,11 @@
+$ErrorActionPreference='Stop'
+$volume='catdb-capacity-20261107'
+docker volume create $volume | Out-File artifacts/capacity-gate/volume.txt
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+$cases=@(@(4,1),@(16,1),@(64,1),@(16,2),@(64,2),@(4,2),@(64,3),@(4,3),@(16,3))
+foreach($case in $cases){
+ $cap=$case[0];$trial=$case[1];$out="artifacts/capacity-gate/cap-$cap-$trial.log"
+ docker run --rm --cpus=2 --memory=4g --mount "type=volume,source=$volume,target=/data" -e CAP_ROOT=/data -e "CAP_TRIAL=$trial" catdb-capacity-gate cargo test --locked --release --lib "transactions::capacity_gate::cap${cap}::tests::capacity_speed" -- --exact --ignored --nocapture --test-threads=1 2>&1 | Out-File -Encoding utf8 $out
+ if($LASTEXITCODE -ne 0){Get-Content $out -Tail 30;exit $LASTEXITCODE}
+ if (-not (Select-String -Path $out -Pattern 'CAP_SUMMARY' -Quiet)) { throw 'Benchmark did not run' }; Get-Content $out | Select-String 'CAP_SUMMARY|test result:'
+}

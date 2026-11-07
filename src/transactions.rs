@@ -4629,3 +4629,7 @@ mod wal_preparation_bench;
 #[cfg(all(test, target_os = "linux"))]
 #[path = "../benchmarks/variable-gate/probe.rs"]
 mod variable_gate;
+
+#[cfg(all(test, target_os = "linux"))]
+#[path = "../benchmarks/capacity-gate/mod.rs"]
+mod capacity_gate;

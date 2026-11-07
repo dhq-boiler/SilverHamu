@@ -6,6 +6,12 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Outstanding checkpoint I/O at WAL sync entry
+
+In a zero-loss 16 ms priority run, none of 13,888 WAL syncs with no nearby checkpoint submission had an old target-file BIO outstanding at entry. Their mean sync time still reached 7.31 ms. Across three 16 ms runs, direct overlap could account for at most 0.108 ms of a run's mean in that subset. 3 of nine captures met the strict zero-loss check. [All nine runs, original journal waits, bounds for incomplete traces and the deployment decision](docs/benchmarks/old-bio-2026-11-08/README.md).
+
+![Pending old checkpoint I/O and update performance](docs/benchmarks/old-bio-2026-11-08/pending.svg)
+
 ## Checkpoint writeback and the slow 16 ms handoff trial
 
 When throughput fell from 150 to 112 updates/s, checkpoint submissions in the 10 ms before WAL sync became less frequent (2,033 to 1,100 updates). Of the extra 36.33 s inside sync, 35.02 s accumulated on calls without observed checkpoint submissions in either the prior window or the sync itself. Strict FIFO had the most prior exposure in each pair. [Lock order, all nine runs and decision](docs/benchmarks/writer-overlap-2026-11-08/README.md).

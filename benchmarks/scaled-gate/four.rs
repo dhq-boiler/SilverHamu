@@ -265,7 +265,7 @@ fn four_run(
     let lane_bounds = Mutex::new(Vec::new());
     let stop = std::sync::atomic::AtomicBool::new(false);
     let samples = std::thread::scope(|scope| {
-        let worker = (mode == "prewrite").then(|| {
+        let worker = matches!(mode, "prewrite" | "defer").then(|| {
             scope.spawn(|| {
                 let db = run.wal.as_ref().unwrap();
                 let mut total = (0, 0);

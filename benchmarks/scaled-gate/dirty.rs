@@ -17,7 +17,32 @@ struct Pin {
     _pages: Directory,
     _lease: File,
 }
+#[derive(Default)]
+struct StageBytes {
+    slots: HashMap<u32, u64>,
+    reused: u64,
+    invalidated: u64,
+    split: u64,
+    failed: u64,
+}
+impl Drop for StageBytes {
+    fn drop(&mut self) {
+        if std::env::var_os("DEFER_COUNTS").is_some() {
+            println!(
+                "STAGE_BYTES,{},{},{},{},{}",
+                self.reused,
+                self.invalidated,
+                self.split,
+                self.failed,
+                self.slots.values().sum::<u64>()
+            );
+        }
+    }
+}
 struct Dirty {
+    stage_bytes: StageBytes,
+    deferred: BTreeSet<Vec<u8>>,
+    delay_invalidated: bool,
     prepared: Directory,
     prepared_cursor: u32,
     patch: bool,
@@ -55,6 +80,9 @@ impl Dirty {
         pool.try_lock().map_err(|e| err(&e.to_string()))?;
         let control = Store::create(path, cfg, Data::new(), BUFFER_BUDGET, &mut noop)?;
         let mut s = Self {
+            stage_bytes: StageBytes::default(),
+            deferred: BTreeSet::new(),
+            delay_invalidated: std::env::var("SCALED_VARIANT").as_deref() == Ok("defer"),
             prepared: Directory::new(),
             prepared_cursor: 0,
             patch: false,
@@ -126,6 +154,11 @@ impl Dirty {
             if !self.prepared.is_empty() {
                 if let Some(previous) = self.prepared.remove(&lo) {
                     self.prepared_cursor = self.prepared_cursor.min(previous.slot);
+                    self.stage_bytes.invalidated +=
+                        self.stage_bytes.slots.remove(&previous.slot).unwrap();
+                    if self.delay_invalidated && self.deferred.len() < 96 {
+                        self.deferred.insert(lo.clone());
+                    }
                 }
             }
             self.dirty.insert(lo);
@@ -304,6 +337,9 @@ impl Dirty {
         hook("reclaim.before")?;
         self.live.retain(|_, w| w.strong_count() > 0);
         hook("reclaim.after")?;
+        self.stage_bytes.reused += self.stage_bytes.slots.values().sum::<u64>();
+        self.stage_bytes.slots.clear();
+        self.deferred.clear();
         self.prepared.clear();
         self.prepared_cursor = 0;
         self.structural.clear();
@@ -438,6 +474,9 @@ impl Dirty {
         sync(&pool, &mut control.costs, "recovery-pages", hook)?;
         Ok(Self {
             group_version,
+            stage_bytes: StageBytes::default(),
+            deferred: BTreeSet::new(),
+            delay_invalidated: std::env::var("SCALED_VARIANT").as_deref() == Ok("defer"),
             prepared: Directory::new(),
             prepared_cursor: 0,
             patch: false,

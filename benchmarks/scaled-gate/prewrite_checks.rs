@@ -202,7 +202,8 @@ fn prewrite_recycling_and_conflict() {
         let mut tx = db.begin().unwrap();
         tx.put(&key(2), &value(2, pass)).unwrap();
         tx.commit().unwrap();
-        assert_eq!(prewrite(&db, 1, PAIR).unwrap().0, 1);
+        let expect = pass == 1 || std::env::var("SCALED_VARIANT").as_deref() != Ok("defer");
+        assert_eq!(prewrite(&db, 1, PAIR).unwrap().0, usize::from(expect));
         let len = fs::metadata(p.with_extension("pages")).unwrap().len();
         if pass == 1 {
             max_len = len;
@@ -227,4 +228,46 @@ fn prewrite_recycling_and_conflict() {
         500,
         &[(2, Some(value(2, 12)))].into(),
     );
+}
+
+#[test]
+#[ignore = "matched hot range, shifted writes and epoch reset"]
+fn defer_pilot() {
+    let delayed = std::env::var("SCALED_VARIANT").unwrap() == "defer";
+    let path = dir().join("pilot.db");
+    let cfg = Config {
+        checkpoints: 16,
+        logs: 64,
+    };
+    let n = 12000;
+    let db = MvccPages::create_direct(&path, cfg, (0..n).map(|i| (key(i), value(i, 0))), None);
+    let mut old = db.begin_read().unwrap();
+    let mut expected = BTreeMap::new();
+    let mut total = 0;
+    for round in 1..=4 {
+        let mut t = db.begin().unwrap();
+        for bucket in 0..16 {
+            let id = bucket * 600 + if round <= 2 || round == 4 { 1 } else { 300 };
+            let v = value(id, round);
+            t.put(&key(id), &v).unwrap();
+            expected.insert(id, Some(v));
+        }
+        t.commit().unwrap();
+        let mut prepared = 0;
+        for _ in 0..8 {
+            let (pages, bytes) = prewrite(&db, 32, 32 * PAIR).unwrap();
+            total += bytes;
+            prepared += pages;
+        }
+        assert_eq!(prepared, if round == 2 && delayed { 0 } else { 16 });
+        if round >= 3 {
+            db.checkpoint().unwrap();
+        }
+    }
+    println!("PILOT_BYTES,{total}");
+    check_tx(&mut old, n, &BTreeMap::new());
+    drop(old);
+    drop(db);
+    let db = MvccPages::open_direct(&path, cfg, None);
+    check_tx(&mut db.begin_read().unwrap(), n, &expected);
 }

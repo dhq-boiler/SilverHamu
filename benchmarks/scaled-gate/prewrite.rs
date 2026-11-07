@@ -18,7 +18,10 @@ impl MvccPages {
         let ranges: Vec<_> = disk
             .dirty
             .iter()
-            .filter(|k| !disk.prepared.contains_key(*k))
+            .filter(|k| {
+                !disk.prepared.contains_key(*k)
+                    && (!disk.delay_invalidated || !disk.deferred.contains(*k))
+            })
             .take(capacity.saturating_sub(disk.prepared.len()).min(4))
             .cloned()
             .collect();
@@ -49,6 +52,7 @@ impl MvccPages {
                 .map(|(k, _)| k.clone());
             let mut first = None;
             let mut outputs = 0;
+            let start_bytes = disk.control.costs.writes.get("page").copied().unwrap_or(0);
             let old_cursor = disk.prepared_cursor;
             let result =
                 Self::collect_pages(&reader, &lo, hi.as_deref(), &mut page, &mut |_, body| {
@@ -71,9 +75,18 @@ impl MvccPages {
             if result.is_err() || outputs != 1 {
                 disk.prepared_cursor = old_cursor;
             }
+            let written = disk.control.costs.writes.get("page").copied().unwrap_or(0) - start_bytes;
+            if result.is_err() {
+                disk.stage_bytes.failed += written;
+            }
             result?;
+            if outputs > 1 {
+                disk.stage_bytes.split += written;
+            }
             if outputs == 1 {
-                disk.prepared.insert(lo, first.unwrap());
+                let page = first.unwrap();
+                disk.stage_bytes.slots.insert(page.slot, written);
+                disk.prepared.insert(lo, page);
                 added += 1;
             }
         }

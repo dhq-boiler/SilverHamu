@@ -68,7 +68,7 @@ impl MvccPages {
                 && (std::env::var_os("CATDB_TEST_ARRIVALS").is_some()
                     || std::env::var("SCALED_VARIANT")
                         .as_deref()
-                        .is_ok_and(|v| matches!(v, "arrivals" | "prewrite")));
+                        .is_ok_and(|v| matches!(v, "arrivals" | "prewrite" | "defer")));
         if disk.group_version.is_some() && !grouped {
             return Err(TxError::Invalid("group persistence required"));
         }

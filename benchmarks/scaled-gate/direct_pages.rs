@@ -83,7 +83,7 @@ fn direct_reopen_memory() {
         "wal" => Database::open(path).unwrap(),
         "mvcc" => MvccPages::open(&path, cfg, None),
         "direct" | "packed" | "reuse" | "linear" | "combine" | "logreuse" | "arrivals"
-        | "patch" | "prewrite" => MvccPages::open_direct(&path, cfg, None),
+        | "patch" | "prewrite" | "defer" => MvccPages::open_direct(&path, cfg, None),
         _ => unreachable!(),
     };
     let read = db.begin_read().unwrap();

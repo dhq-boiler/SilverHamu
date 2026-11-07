@@ -136,6 +136,7 @@ fn compare() {
             | "arrivals"
             | "patch"
             | "prewrite"
+            | "defer"
     ));
     assert!(n >= 1000 && ops >= cap as usize * 3 && ops <= 8192);
     let cfg = Config {
@@ -159,6 +160,7 @@ fn compare() {
             | "arrivals"
             | "patch"
             | "prewrite"
+            | "defer"
     ) {
         db = Some(MvccPages::create_direct(
             &p,

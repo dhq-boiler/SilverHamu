@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 350" role="img"><title>Elapsed time including drain</title><rect width="900" height="350" fill="white"/><g font-family="sans-serif" fill="#203345">
+<text x="18" y="32" font-size="22">Where time elapsed through the last response and publication</text>
+<text x="18" y="57" font-size="14">Arithmetic means of three trials. All segments are disjoint wall-clock intervals.</text>
+<text x="18" y="90" font-size="15">Standard</text>
+<rect x="106.00" y="75" width="488.35" height="18" fill="#345d84"/>
+<rect x="594.35" y="75" width="5.37" height="18" fill="#87a9bd"/>
+<rect x="599.72" y="75" width="9.70" height="18" fill="#a96738"/>
+<rect x="609.42" y="75" width="1.85" height="18" fill="#393f63"/>
+<rect x="611.27" y="75" width="13.59" height="18" fill="#549374"/>
+<text x="633" y="90" font-size="14">101.089 s</text>
+<text x="18" y="124" font-size="15">FIFO</text>
+<rect x="106.00" y="109" width="630.34" height="18" fill="#345d84"/>
+<rect x="736.34" y="109" width="6.13" height="18" fill="#87a9bd"/>
+<rect x="742.47" y="109" width="10.50" height="18" fill="#a96738"/>
+<rect x="752.97" y="109" width="3.03" height="18" fill="#393f63"/>
+<rect x="756.00" y="109" width="0.00" height="18" fill="#549374"/>
+<text x="764" y="124" font-size="14">126.640 s</text>
+<text x="300" y="169" font-size="15">Standard (s)</text>
+<text x="485" y="169" font-size="15">FIFO (s)</text>
+<text x="650" y="169" font-size="15">Difference (s)</text>
+<rect x="19" y="187" width="12" height="12" fill="#345d84"/>
+<text x="40" y="199" font-size="15">Commit WAL sync</text>
+<text x="300" y="199" font-size="15">95.145</text>
+<text x="485" y="199" font-size="15">122.809</text>
+<text x="650" y="199" font-size="15">+27.664</text>
+<rect x="19" y="216" width="12" height="12" fill="#87a9bd"/>
+<text x="40" y="228" font-size="15">Other commit hold</text>
+<text x="300" y="228" font-size="15">1.046</text>
+<text x="485" y="228" font-size="15">1.195</text>
+<text x="650" y="228" font-size="15">+0.149</text>
+<rect x="19" y="245" width="12" height="12" fill="#a96738"/>
+<text x="40" y="257" font-size="15">Checkpoint lock</text>
+<text x="300" y="257" font-size="15">1.891</text>
+<text x="485" y="257" font-size="15">2.046</text>
+<text x="650" y="257" font-size="15">+0.155</text>
+<rect x="19" y="274" width="12" height="12" fill="#393f63"/>
+<text x="40" y="286" font-size="15">Handoff envelope</text>
+<text x="300" y="286" font-size="15">0.360</text>
+<text x="485" y="286" font-size="15">0.591</text>
+<text x="650" y="286" font-size="15">+0.231</text>
+<rect x="19" y="303" width="12" height="12" fill="#549374"/>
+<text x="40" y="315" font-size="15">Remaining time</text>
+<text x="300" y="315" font-size="15">2.647</text>
+<text x="485" y="315" font-size="15">0.000</text>
+<text x="650" y="315" font-size="15">-2.647</text>
+</g></svg>

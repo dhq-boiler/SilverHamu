@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 485" role="img"><title>Equal checkpoint count and independent writers</title><rect width="920" height="485" fill="white"/><g font-family="sans-serif" fill="#203345">
+<text x="16" y="30" font-size="23">Four writers with 63 independent checkpoint publications</text>
+<text x="16" y="55" font-size="14">One million rows, two CPUs, 4 GiB. Trial medians; worst update is the maximum across runs.</text>
+<text x="16" y="90" font-size="17">Updates/s through last response</text>
+<text x="16" y="122" font-size="14">Standard</text>
+<rect x="92" y="109" width="205.00" height="15" fill="#506e87"/>
+<text x="304.0" y="122" font-size="14">176.61</text>
+<text x="16" y="154" font-size="14">FIFO</text>
+<rect x="92" y="141" width="148.35" height="15" fill="#29755c"/>
+<text x="247.35459549261168" y="154" font-size="14">127.81</text>
+<text x="471" y="90" font-size="17">Updates/s through final publication</text>
+<text x="471" y="122" font-size="14">Standard</text>
+<rect x="547" y="109" width="205.00" height="15" fill="#506e87"/>
+<text x="759.0" y="122" font-size="14">176.61</text>
+<text x="471" y="154" font-size="14">FIFO</text>
+<rect x="547" y="141" width="148.35" height="15" fill="#29755c"/>
+<text x="702.3545954926117" y="154" font-size="14">127.81</text>
+<text x="16" y="220" font-size="17">Update p99 (ms)</text>
+<text x="16" y="252" font-size="14">Standard</text>
+<rect x="92" y="239" width="205.00" height="15" fill="#506e87"/>
+<text x="304.0" y="252" font-size="14">442.65</text>
+<text x="16" y="284" font-size="14">FIFO</text>
+<rect x="92" y="271" width="85.96" height="15" fill="#29755c"/>
+<text x="184.96320815127402" y="284" font-size="14">185.62</text>
+<text x="471" y="220" font-size="17">Worst update (ms)</text>
+<text x="471" y="252" font-size="14">Standard</text>
+<rect x="547" y="239" width="205.00" height="15" fill="#506e87"/>
+<text x="759.0" y="252" font-size="14">4,402.84</text>
+<text x="471" y="284" font-size="14">FIFO</text>
+<rect x="547" y="271" width="26.09" height="15" fill="#29755c"/>
+<text x="580.0853324852914" y="284" font-size="14">560.24</text>
+<text x="16" y="350" font-size="17">Logical KiB/update, including drain</text>
+<text x="16" y="382" font-size="14">Standard</text>
+<rect x="92" y="369" width="205.00" height="15" fill="#506e87"/>
+<text x="304.0" y="382" font-size="14">1,074.06</text>
+<text x="16" y="414" font-size="14">FIFO</text>
+<rect x="92" y="401" width="204.90" height="15" fill="#29755c"/>
+<text x="303.90294675384814" y="414" font-size="14">1,073.55</text>
+<text x="471" y="350" font-size="17">Contended handoff envelope (µs)</text>
+<text x="471" y="382" font-size="14">Standard</text>
+<rect x="547" y="369" width="127.56" height="15" fill="#506e87"/>
+<text x="681.5580468469917" y="382" font-size="14">22.41</text>
+<text x="471" y="414" font-size="14">FIFO</text>
+<rect x="547" y="401" width="205.00" height="15" fill="#29755c"/>
+<text x="759.0" y="414" font-size="14">36.01</text>
+</g></svg>

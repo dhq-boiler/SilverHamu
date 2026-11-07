@@ -1,0 +1,53 @@
+ Downloading crates ...
+  Downloaded ctrlc v3.5.2
+  Downloaded itoa v1.0.18
+  Downloaded cfg-if v1.0.5
+  Downloaded cfg_aliases v0.2.2
+  Downloaded zmij v1.0.23
+  Downloaded memchr v2.8.3
+  Downloaded serde_core v1.0.229
+  Downloaded bitflags v2.13.2
+  Downloaded serde_json v1.0.154
+  Downloaded nix v0.31.3
+  Downloaded libc v0.2.191
+   Compiling libc v0.2.191
+   Compiling cfg_aliases v0.2.2
+   Compiling zmij v1.0.23
+   Compiling serde_core v1.0.229
+   Compiling bitflags v2.13.2
+   Compiling serde_json v1.0.154
+   Compiling cfg-if v1.0.5
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling nix v0.31.3
+   Compiling ctrlc v3.5.2
+   Compiling catdb v0.1.0 (/build)
+warning: function `stamp` is never used
+  --> src/../benchmarks/scaled-gate/independent_trace.rs:40:15
+   |
+40 | pub(super) fn stamp() -> u64 {
+   |               ^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: struct `Observed` is never constructed
+  --> src/../benchmarks/scaled-gate/independent_trace.rs:46:19
+   |
+46 | pub(super) struct Observed<G> {
+   |                   ^^^^^^^^
+
+warning: function `observe` is never used
+  --> src/../benchmarks/scaled-gate/independent_trace.rs:52:15
+   |
+52 | pub(super) fn observe<G>(start: u64, guard: G) -> Observed<G> {
+   |               ^^^^^^^
+
+warning: `catdb` (lib test) generated 3 warnings
+    Finished `release` profile [optimized] target(s) in 11.62s
+     Running unittests src/lib.rs (target/release/deps/newdbms-4c8eedad6088b0d1)
+
+running 2 tests
+test transactions::scaled_gate::checks::timing::missing_and_duplicate_checkpoint_notifications_are_detected ... ok
+test transactions::scaled_gate::checks::timing::queued_signals_preserve_each_publication_even_when_notifications_arrive_out_of_order ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 191 filtered out; finished in 0.00s

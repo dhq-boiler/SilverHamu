@@ -42,33 +42,34 @@ fn independent_campaign() {
     let now = || clock.elapsed().as_nanos() as u64;
     let (send, recv) = std::sync::mpsc::channel::<usize>();
     let barrier = Barrier::new(5);
-    let exact=std::env::var_os("EXACT_PUBLICATIONS").is_some();
-    let holds=Mutex::new(Vec::new());
-    let worker_holds=&holds;
+    let exact = std::env::var_os("EXACT_PUBLICATIONS").is_some();
+    let holds = Mutex::new(Vec::new());
+    let worker_holds = &holds;
     let (attempts, publications) = std::thread::scope(|scope| {
         let worker_db = &db;
         let worker = scope.spawn(move || {
             let db = worker_db;
             independent_trace::enable(clock);
             let mut result = Vec::new();
-            if exact { independent_trace::enable_handoffs(clock,2*ops/cap); }
-            let mut pending=std::collections::BTreeSet::new();
+            if exact {
+                independent_trace::enable_handoffs(clock, 2 * ops / cap);
+            }
+            let mut pending = std::collections::BTreeSet::new();
             let mut last = 0;
             while last < ops / cap - 1 {
                 let start = now();
                 let mut prefix = enabled.then(|| db.prepare_checkpoint_prefix(2048).unwrap());
                 let ready = now();
-                let due=if exact {
-                    let next=last+1;
-                    while !pending.remove(&next) {
-                        let signal=recv.recv().unwrap();
-                        assert!(signal>last && signal<ops/cap && pending.insert(signal));
-                    }
-                    next
+                let due = if exact {
+                    next_publication(&recv, &mut pending, last, ops / cap - 1)
                 } else {
-                    let mut due=recv.recv().unwrap();
-                    while due<=last { due=recv.recv().unwrap(); }
-                    for signal in recv.try_iter(){due=due.max(signal);}
+                    let mut due = recv.recv().unwrap();
+                    while due <= last {
+                        due = recv.recv().unwrap();
+                    }
+                    for signal in recv.try_iter() {
+                        due = due.max(signal);
+                    }
                     due
                 };
                 let checkpoint = now();
@@ -101,7 +102,14 @@ fn independent_campaign() {
                 ));
                 last = due;
             }
-            if exact {worker_holds.lock().unwrap().push((4,independent_trace::take_holds()));}
+            if exact {
+                assert!(pending.is_empty());
+                assert!(recv.recv().is_err(), "duplicate final checkpoint trigger");
+                worker_holds
+                    .lock()
+                    .unwrap()
+                    .push((4, independent_trace::take_holds()));
+            }
             result
         });
         let mut threads = Vec::new();
@@ -109,10 +117,12 @@ fn independent_campaign() {
             let db = &db;
             let send = send.clone();
             let barrier = &barrier;
-            let holds=&holds;
+            let holds = &holds;
             threads.push(scope.spawn(move || {
                 independent_trace::enable(clock);
-                if exact { independent_trace::enable_handoffs(clock,ops/4+128); }
+                if exact {
+                    independent_trace::enable_handoffs(clock, ops / 4 + 128);
+                }
                 let mut records = Vec::new();
                 barrier.wait();
                 for id in (lane..ops).step_by(4) {
@@ -140,13 +150,22 @@ fn independent_campaign() {
                         if seq > 0 {
                             let pos = (seq - base) as usize;
                             if pos % cap == 0 && pos < ops {
-                                if exact {send.send(pos/cap).unwrap();} else {let _=send.send(pos/cap);}
+                                if exact {
+                                    send.send(pos / cap).unwrap();
+                                } else {
+                                    let _ = send.send(pos / cap);
+                                }
                             }
                             break;
                         }
                     }
                 }
-                if exact {holds.lock().unwrap().push((lane,independent_trace::take_holds()));}
+                if exact {
+                    holds
+                        .lock()
+                        .unwrap()
+                        .push((lane, independent_trace::take_holds()));
+                }
                 records
             }));
         }
@@ -159,9 +178,14 @@ fn independent_campaign() {
         (rows, worker.join().unwrap())
     });
     if exact {
-        assert_eq!(publications.iter().map(|p|p.0).collect::<Vec<_>>(),(1..ops/cap).collect::<Vec<_>>());
-        for (lane,events) in holds.into_inner().unwrap(){
-            for [start,acq,before,after] in events {println!("HOLD,{lane},{start},{acq},{before},{after}");}
+        assert_eq!(
+            publications.iter().map(|p| p.0).collect::<Vec<_>>(),
+            (1..ops / cap).collect::<Vec<_>>()
+        );
+        for (lane, events) in holds.into_inner().unwrap() {
+            for [start, acq, before, after] in events {
+                println!("HOLD,{lane},{start},{acq},{before},{after}");
+            }
         }
     }
     let mut expected = BTreeMap::new();
@@ -258,5 +282,55 @@ fn independent_admission_during_scan_and_publication() {
         assert_eq!(r.version(), 3);
         assert_eq!(r.get(b"original").unwrap(), Some(b"two".to_vec()));
         assert_eq!(r.get(b"new").unwrap(), Some(b"three".to_vec()));
+    }
+}
+
+fn next_publication(
+    signals: &std::sync::mpsc::Receiver<usize>,
+    pending: &mut std::collections::BTreeSet<usize>,
+    last: usize,
+    total: usize,
+) -> usize {
+    let next = last + 1;
+    while !pending.remove(&next) {
+        let signal = signals
+            .recv()
+            .expect("writer stopped before all checkpoint triggers");
+        assert!(
+            signal > last && signal <= total && pending.insert(signal),
+            "invalid checkpoint trigger"
+        );
+    }
+    next
+}
+
+#[test]
+fn queued_signals_preserve_each_publication_even_when_notifications_arrive_out_of_order() {
+    let (s, r) = std::sync::mpsc::channel();
+    for id in [4, 2, 3, 1] {
+        s.send(id).unwrap();
+    }
+    drop(s);
+    let mut pending = std::collections::BTreeSet::new();
+    for last in 0..4 {
+        assert_eq!(next_publication(&r, &mut pending, last, 4), last + 1);
+    }
+    assert!(pending.is_empty());
+}
+
+#[test]
+fn missing_and_duplicate_checkpoint_notifications_are_detected() {
+    for signals in [vec![2], vec![2, 2, 1]] {
+        assert!(
+            std::panic::catch_unwind(move || {
+                let (s, r) = std::sync::mpsc::channel();
+                for id in signals {
+                    s.send(id).unwrap();
+                }
+                drop(s);
+                next_publication(&r, &mut std::collections::BTreeSet::new(), 0, 2);
+            })
+            .is_err()
+        );
     }
 }

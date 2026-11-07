@@ -1,0 +1,26 @@
+[
+  {
+    "rep": 1,
+    "mode": "off"
+  },
+  {
+    "rep": 1,
+    "mode": "on"
+  },
+  {
+    "rep": 2,
+    "mode": "on"
+  },
+  {
+    "rep": 2,
+    "mode": "off"
+  },
+  {
+    "rep": 3,
+    "mode": "off"
+  },
+  {
+    "rep": 3,
+    "mode": "on"
+  }
+]

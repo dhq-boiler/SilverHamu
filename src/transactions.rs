@@ -957,12 +957,12 @@ impl Database {
 
             #[cfg(feature = "lock-timing")]
             let timing_start = std::time::Instant::now();
-            #[cfg(all(test,target_os="linux",not(feature="retirement-timing")))]
-        let attempted=independent_trace::stamp();
-        let cutover = self.inner.writer.lock().map_err(|_| Error::Poisoned)?;
-        #[cfg(all(test,target_os="linux",not(feature="retirement-timing")))]
-        let cutover=independent_trace::observe(attempted,cutover);
-            publication_guard=Some(cutover);
+            #[cfg(all(test, target_os = "linux", not(feature = "retirement-timing")))]
+            let attempted = independent_trace::stamp();
+            let cutover = self.inner.writer.lock().map_err(|_| Error::Poisoned)?;
+            #[cfg(all(test, target_os = "linux", not(feature = "retirement-timing")))]
+            let cutover = independent_trace::observe(attempted, cutover);
+            publication_guard = Some(cutover);
             #[cfg(all(test, target_os = "linux"))]
             independent_trace::mark(0);
             #[cfg(feature = "lock-timing")]
@@ -1790,11 +1790,11 @@ impl Transaction {
         take_retirement_trace();
         #[cfg(all(test, target_os = "linux"))]
         independent_trace::mark(0);
-        #[cfg(all(test,target_os="linux",not(feature="retirement-timing")))]
-        let attempted=independent_trace::stamp();
+        #[cfg(all(test, target_os = "linux", not(feature = "retirement-timing")))]
+        let attempted = independent_trace::stamp();
         let _writer = database.inner.writer.lock().map_err(|_| Error::Poisoned)?;
-        #[cfg(all(test,target_os="linux",not(feature="retirement-timing")))]
-        let _writer=independent_trace::observe(attempted,_writer);
+        #[cfg(all(test, target_os = "linux", not(feature = "retirement-timing")))]
+        let _writer = independent_trace::observe(attempted, _writer);
         #[cfg(all(test, target_os = "linux"))]
         independent_trace::mark(1);
         #[cfg(feature = "retirement-timing")]

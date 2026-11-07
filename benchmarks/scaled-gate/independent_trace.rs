@@ -38,7 +38,9 @@ pub(super) fn enable_handoffs(clock: Instant, capacity: usize) {
 }
 
 pub(super) fn stamp() -> u64 {
-    HANDOFF_CLOCK.get().map_or(0, |clock| clock.elapsed().as_nanos() as u64)
+    HANDOFF_CLOCK
+        .get()
+        .map_or(0, |clock| clock.elapsed().as_nanos() as u64)
 }
 
 pub(super) struct Observed<G> {
@@ -47,19 +49,25 @@ pub(super) struct Observed<G> {
     acquired: u64,
 }
 
-pub(super) fn observe<G>(start:u64, guard:G) -> Observed<G> {
-    Observed { guard:Some(guard),start,acquired:stamp() }
+pub(super) fn observe<G>(start: u64, guard: G) -> Observed<G> {
+    Observed {
+        guard: Some(guard),
+        start,
+        acquired: stamp(),
+    }
 }
 
 impl<G> Drop for Observed<G> {
     fn drop(&mut self) {
         if self.start != 0 {
-            let before=stamp();
+            let before = stamp();
             drop(self.guard.take());
-            let after=stamp();
-            HOLDS.with_borrow_mut(|v| v.push([self.start,self.acquired,before,after]));
+            let after = stamp();
+            HOLDS.with_borrow_mut(|v| v.push([self.start, self.acquired, before, after]));
         }
     }
 }
 
-pub(super) fn take_holds()->Vec<[u64;4]> { HOLDS.take() }
+pub(super) fn take_holds() -> Vec<[u64; 4]> {
+    HOLDS.take()
+}

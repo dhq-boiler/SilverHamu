@@ -1,0 +1,10 @@
+{
+  "rows": 1000000,
+  "ops": 16384,
+  "cap": 256,
+  "image": "sha256:eab9d643c763f0c45fca46d09af58eb698938b7200a15ae7a5f4eab218bdd9be",
+  "cpus": 2,
+  "memory": 4294967296,
+  "fifo_comparison": true,
+  "equal_publications": true
+}

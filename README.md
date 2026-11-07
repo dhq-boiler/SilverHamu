@@ -6,6 +6,12 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Checkpoint writeback and the slow 16 ms handoff trial
+
+When throughput fell from 150 to 112 updates/s, checkpoint submissions in the 10 ms before WAL sync became less frequent (2,033 to 1,100 updates). Of the extra 36.33 s inside sync, 35.02 s accumulated on calls without observed checkpoint submissions in either the prior window or the sync itself. Strict FIFO had the most prior exposure in each pair. [Lock order, all nine runs and decision](docs/benchmarks/writer-overlap-2026-11-08/README.md).
+
+![WAL time by checkpoint exposure](docs/benchmarks/writer-overlap-2026-11-08/overlap.svg)
+
 ## Writer handoff at light and saturated demand
 
 In the earlier pair with 33.9% lower throughput, 46.35 s of 47.61 s of extra response time fell inside WAL sync. The contended handoff envelope grew by 0.34 s. Fresh continuous-load trials measured current / 16 ms update p99 at 887.26 / 134.92 ms and throughput at 108.14 / 112.05 updates/s. The light-load panels include planned arrivals and actual dispatch. [Decision, all 27 trials, scheduling lag and OS evidence](docs/benchmarks/aged-load-2026-11-08/README.md).

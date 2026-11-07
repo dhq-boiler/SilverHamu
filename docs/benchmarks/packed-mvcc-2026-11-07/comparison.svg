@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 460" role="img"><title>Checkpoint scan and copy comparison</title><rect width="960" height="460" fill="white"/><g fill="#17283b" font-family="sans-serif">
+<text x="16" y="32" font-size="23">MVCC checkpoint reads: one million rows and four writers</text>
+<text x="16" y="56" font-size="14">Two CPUs, 4 GiB. Trial medians except worst request across all trials. Independent scales.</text>
+<text x="16" y="88" font-size="17">Update p99 (ms)</text>
+<text x="16" y="117" font-size="12">Dual index</text>
+<rect x="88" y="105" width="115.20" height="13" fill="#526c88"/>
+<text x="209.20268001715715" y="117" font-size="12">80.81</text>
+<text x="16" y="150" font-size="12">Scan page</text>
+<rect x="88" y="138" width="142.00" height="13" fill="#a54c31"/>
+<text x="236.0" y="150" font-size="12">99.61</text>
+<text x="16" y="183" font-size="12">Pack range</text>
+<rect x="88" y="171" width="119.34" height="13" fill="#27785e"/>
+<text x="213.34412763828382" y="183" font-size="12">83.71</text>
+<text x="16" y="216" font-size="12">Pack + reuse</text>
+<rect x="88" y="204" width="98.29" height="13" fill="#594885"/>
+<text x="192.28817159906907" y="216" font-size="12">68.94</text>
+<text x="332" y="88" font-size="17">Worst update (ms)</text>
+<text x="332" y="117" font-size="12">Dual index</text>
+<rect x="404" y="105" width="106.44" height="13" fill="#526c88"/>
+<text x="516.442801169289" y="117" font-size="12">132.25</text>
+<text x="332" y="150" font-size="12">Scan page</text>
+<rect x="404" y="138" width="142.00" height="13" fill="#a54c31"/>
+<text x="552.0" y="150" font-size="12">176.43</text>
+<text x="332" y="183" font-size="12">Pack range</text>
+<rect x="404" y="171" width="108.69" height="13" fill="#27785e"/>
+<text x="518.6937229964452" y="183" font-size="12">135.05</text>
+<text x="332" y="216" font-size="12">Pack + reuse</text>
+<rect x="404" y="204" width="98.97" height="13" fill="#594885"/>
+<text x="508.9686996290791" y="216" font-size="12">122.97</text>
+<text x="648" y="88" font-size="17">Transactions / second</text>
+<text x="648" y="117" font-size="12">Dual index</text>
+<rect x="720" y="105" width="135.69" height="13" fill="#526c88"/>
+<text x="861.6911920867597" y="117" font-size="12">285.71</text>
+<text x="648" y="150" font-size="12">Scan page</text>
+<rect x="720" y="138" width="132.35" height="13" fill="#a54c31"/>
+<text x="858.345572626788" y="150" font-size="12">278.67</text>
+<text x="648" y="183" font-size="12">Pack range</text>
+<rect x="720" y="171" width="142.00" height="13" fill="#27785e"/>
+<text x="868.0" y="183" font-size="12">299.00</text>
+<text x="648" y="216" font-size="12">Pack + reuse</text>
+<rect x="720" y="204" width="139.74" height="13" fill="#594885"/>
+<text x="865.7359529080403" y="216" font-size="12">294.23</text>
+<text x="16" y="272" font-size="17">End RSS (MiB)</text>
+<text x="16" y="301" font-size="12">Dual index</text>
+<rect x="88" y="289" width="142.00" height="13" fill="#526c88"/>
+<text x="236.0" y="301" font-size="12">767.28</text>
+<text x="16" y="334" font-size="12">Scan page</text>
+<rect x="88" y="322" width="76.46" height="13" fill="#a54c31"/>
+<text x="170.46315114242657" y="334" font-size="12">413.16</text>
+<text x="16" y="367" font-size="12">Pack range</text>
+<rect x="88" y="355" width="76.47" height="13" fill="#27785e"/>
+<text x="170.47471795707247" y="367" font-size="12">413.22</text>
+<text x="16" y="400" font-size="12">Pack + reuse</text>
+<rect x="88" y="388" width="76.74" height="13" fill="#594885"/>
+<text x="170.74003176801205" y="400" font-size="12">414.66</text>
+<text x="332" y="272" font-size="17">Checkpoint (ms)</text>
+<text x="332" y="301" font-size="12">Dual index</text>
+<rect x="404" y="289" width="121.43" height="13" fill="#526c88"/>
+<text x="531.4285943545128" y="301" font-size="12">81.89</text>
+<text x="332" y="334" font-size="12">Scan page</text>
+<rect x="404" y="322" width="142.00" height="13" fill="#a54c31"/>
+<text x="552.0" y="334" font-size="12">95.76</text>
+<text x="332" y="367" font-size="12">Pack range</text>
+<rect x="404" y="355" width="127.48" height="13" fill="#27785e"/>
+<text x="537.4761022726785" y="367" font-size="12">85.97</text>
+<text x="332" y="400" font-size="12">Pack + reuse</text>
+<rect x="404" y="388" width="95.17" height="13" fill="#594885"/>
+<text x="505.16989684076725" y="400" font-size="12">64.18</text>
+<text x="648" y="272" font-size="17">p99 outside checkpoints (ms)</text>
+<text x="648" y="301" font-size="12">Dual index</text>
+<rect x="720" y="289" width="140.96" height="13" fill="#526c88"/>
+<text x="866.9566250712525" y="301" font-size="12">24.22</text>
+<text x="648" y="334" font-size="12">Scan page</text>
+<rect x="720" y="322" width="142.00" height="13" fill="#a54c31"/>
+<text x="868.0" y="334" font-size="12">24.40</text>
+<text x="648" y="367" font-size="12">Pack range</text>
+<rect x="720" y="355" width="129.41" height="13" fill="#27785e"/>
+<text x="855.409109508834" y="367" font-size="12">22.24</text>
+<text x="648" y="400" font-size="12">Pack + reuse</text>
+<rect x="720" y="388" width="137.04" height="13" fill="#594885"/>
+<text x="863.0446587432258" y="400" font-size="12">23.55</text>
+</g></svg>

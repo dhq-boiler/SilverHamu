@@ -652,14 +652,30 @@ fn er_identifiable_misplacement_uses_the_intact_peer() {
         drop(s);
         let image = fs::read(&p).unwrap();
         let (from, to, len) = match case {
-            "chunk" => (config().at(root.bank,true,1,0), config().at(root.bank,true,0,0), PAGE),
-            "log" => (config().at(root.bank,false,1,0), config().at(root.bank,false,0,0), PAGE),
-            _ => (root_at(root.epoch-1,0),root_at(root.epoch,1),HEAD),
+            "chunk" => (
+                config().at(root.bank, true, 1, 0),
+                config().at(root.bank, true, 0, 0),
+                PAGE,
+            ),
+            "log" => (
+                config().at(root.bank, false, 1, 0),
+                config().at(root.bank, false, 0, 0),
+                PAGE,
+            ),
+            _ => (root_at(root.epoch - 1, 0), root_at(root.epoch, 1), HEAD),
         };
-        overwrite(&p,to,&image[from as usize..from as usize+len]);
-        let s=Store::open(&p,config(),BUFFER_BUDGET,&mut noop).unwrap();
-        assert_eq!(s.rows,expected);assert!(!s.costs.writes.is_empty());drop(s);
-        assert!(Store::open(&p,config(),BUFFER_BUDGET,&mut noop).unwrap().costs.writes.is_empty());
+        overwrite(&p, to, &image[from as usize..from as usize + len]);
+        let s = Store::open(&p, config(), BUFFER_BUDGET, &mut noop).unwrap();
+        assert_eq!(s.rows, expected);
+        assert!(!s.costs.writes.is_empty());
+        drop(s);
+        assert!(
+            Store::open(&p, config(), BUFFER_BUDGET, &mut noop)
+                .unwrap()
+                .costs
+                .writes
+                .is_empty()
+        );
     }
 }
 

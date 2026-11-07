@@ -18,6 +18,7 @@ struct Pin {
     _lease: File,
 }
 struct Dirty {
+    reuse_encoded: bool,
     control: Store,
     pool: File,
     rows: Data,
@@ -48,6 +49,7 @@ impl Dirty {
         pool.try_lock().map_err(|e| err(&e.to_string()))?;
         let control = Store::create(path, cfg, Data::new(), BUFFER_BUDGET, &mut noop)?;
         let mut s = Self {
+            reuse_encoded: false,
             control,
             pool,
             rows,
@@ -117,6 +119,41 @@ impl Dirty {
             &mut dyn FnMut(&[u8], &[u8]) -> io::Result<()>,
         ) -> io::Result<()>,
     ) -> io::Result<()> {
+        self.switch_chunks(hook, |lower, upper, emit| {
+            let _phase = Phase::enter(2);
+            let mut entries = WriteSet::new();
+            let mut bytes = 140;
+            let mut start = lower.to_vec();
+            visit(lower, upper, &mut |k, v| {
+                let size = 9 + k.len() + v.len();
+                if 140 + size > BLOCK {
+                    return Err(err("row exceeds page"));
+                }
+                if bytes + size > BLOCK || entries.len() == MAX_OPS {
+                    emit(std::mem::take(&mut start), &entries)?;
+                    start = k.to_vec();
+                    entries.clear();
+                    bytes = 140;
+                }
+                entries.insert(k.to_vec(), Some(v.to_vec()));
+                bytes += size;
+                Ok(())
+            })?;
+            if !entries.is_empty() {
+                emit(start, &entries)?;
+            }
+            Ok(())
+        })
+    }
+    fn switch_chunks(
+        &mut self,
+        hook: Hook<'_>,
+        mut chunks: impl FnMut(
+            &[u8],
+            Option<&[u8]>,
+            &mut dyn FnMut(Vec<u8>, &WriteSet) -> io::Result<()>,
+        ) -> io::Result<()>,
+    ) -> io::Result<()> {
         if self.failed || self.control.poisoned {
             return Err(err("reopen required"));
         }
@@ -136,35 +173,8 @@ impl Dirty {
                 .next()
                 .map(|(k, _)| k.as_slice());
             next.remove(lower);
-            let mut entries = WriteSet::new();
-            let mut bytes = 140;
-            let mut start = lower.clone();
-            visit(lower, upper, &mut |k, v| {
-                let size = 9 + k.len() + v.len();
-                if 140 + size > BLOCK {
-                    return Err(err("row exceeds page"));
-                }
-                if bytes + size > BLOCK || entries.len() == MAX_OPS {
-                    let page = save(
-                        &mut self.pool,
-                        &mut self.control.costs,
-                        &mut self.live,
-                        &mut cursor,
-                        &self.control.root,
-                        generation,
-                        &entries,
-                        hook,
-                    )?;
-                    next.insert(std::mem::take(&mut start), page);
-                    start = k.to_vec();
-                    entries.clear();
-                    bytes = 140;
-                }
-                entries.insert(k.to_vec(), Some(v.to_vec()));
-                bytes += size;
-                Ok(())
-            })?;
-            if !entries.is_empty() {
+            chunks(lower, upper, &mut |start, entries| {
+                let _phase = Phase::enter(2);
                 let page = save(
                     &mut self.pool,
                     &mut self.control.costs,
@@ -172,11 +182,13 @@ impl Dirty {
                     &mut cursor,
                     &self.control.root,
                     generation,
-                    &entries,
+                    entries,
+                    self.reuse_encoded,
                     hook,
                 )?;
                 next.insert(start, page);
-            }
+                Ok(())
+            })?;
         }
         if !self.dirty.is_empty() {
             sync(&self.pool, &mut self.control.costs, "pages", hook)?;
@@ -306,6 +318,7 @@ impl Dirty {
         }
         sync(&pool, &mut control.costs, "recovery-pages", hook)?;
         Ok(Self {
+            reuse_encoded: false,
             control,
             pool,
             rows: Data::new(),
@@ -324,6 +337,7 @@ fn save(
     root: &Record,
     generation: u64,
     w: &WriteSet,
+    reuse_encoded: bool,
     hook: Hook<'_>,
 ) -> io::Result<Arc<Address>> {
     while live.get(cursor).is_some_and(|p| p.strong_count() > 0) {
@@ -346,22 +360,40 @@ fn save(
     if r.payload.len() + HEAD > BLOCK {
         return Err(err("block overflow"));
     }
-    for lane in 0..2 {
-        write_record(
-            pool,
-            costs,
-            u64::from(slot) * PAIR + lane * BLOCK as u64,
-            &r,
-            "page",
-            "page",
-            hook,
-        )?;
-    }
+    let digest = if reuse_encoded {
+        let encoded = r.encode();
+        let checksum = u32::from_le_bytes(encoded[80..84].try_into().unwrap());
+        for lane in 0..2 {
+            write_encoded_record(
+                pool,
+                costs,
+                u64::from(slot) * PAIR + lane * BLOCK as u64,
+                &encoded,
+                "page",
+                "page",
+                hook,
+            )?;
+        }
+        checksum
+    } else {
+        for lane in 0..2 {
+            write_record(
+                pool,
+                costs,
+                u64::from(slot) * PAIR + lane * BLOCK as u64,
+                &r,
+                "page",
+                "page",
+                hook,
+            )?;
+        }
+        r.checksum()
+    };
     let address = Arc::new(Address {
         rows: w.len(),
         slot,
         generation,
-        digest: r.checksum(),
+        digest,
     });
     live.insert(slot, Arc::downgrade(&address));
     Ok(address)

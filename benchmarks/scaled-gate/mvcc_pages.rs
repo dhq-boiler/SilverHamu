@@ -3,6 +3,8 @@ type Fault = Option<Arc<dyn Fn(&str) -> io::Result<()> + Send + Sync>>;
 
 struct MvccPages {
     direct: bool,
+    packed: bool,
+    profile: bool,
     disk: Mutex<Dirty>,
     turns: TurnQueue,
     fault: Fault,
@@ -49,6 +51,11 @@ impl MvccPages {
         fault: Fault,
         direct: bool,
     ) -> crate::transactions::Result<Database> {
+        let mut disk = disk;
+        let reuse = direct
+            && (std::env::var_os("CATDB_TEST_REUSE").is_some()
+                || std::env::var("SCALED_VARIANT").as_deref() == Ok("reuse"));
+        disk.reuse_encoded = reuse;
         let lease = disk.pool.try_clone()?;
         let db = Database::from_state(state, [87; 16], lease);
         db.set_group_commit(false);
@@ -56,6 +63,11 @@ impl MvccPages {
             direct,
             disk: Mutex::new(disk),
             turns: TurnQueue::default(),
+            packed: reuse
+                || direct
+                    && (std::env::var_os("CATDB_TEST_PACK").is_some()
+                        || std::env::var("SCALED_VARIANT").as_deref() == Ok("packed")),
+            profile: std::env::var_os("CATDB_CHECKPOINT_PHASES").is_some(),
             fault,
         });
         assert!(db.inner.test_persistence.set(backend).is_ok());
@@ -108,17 +120,36 @@ impl TestPersistence for MvccPages {
             Ok(s.control.file.metadata()?.len() + s.pool.metadata()?.len())
         };
         let before_bytes = bytes(&disk)?;
+        let mut scratch = db.inner.budget.buffer();
+        if self.packed {
+            scratch.add(PACK_SCRATCH)?;
+        }
         let switched = if self.direct {
             let mut reader = db.begin_read()?;
             if reader.version() != version {
                 return Err(TxError::Invalid("checkpoint snapshot"));
             }
-            disk.switch_from(&mut |s| self.signal(s), |lo, hi, emit| {
-                Self::visit_range(&mut reader, lo, hi, emit)
-            })
+            Phase::begin(self.profile);
+            if self.packed {
+                disk.switch_chunks(&mut |s| self.signal(s), |lo, hi, emit| {
+                    Self::pack_range(&reader, lo, hi, emit)
+                })
+            } else {
+                disk.switch_from(&mut |s| self.signal(s), |lo, hi, emit| {
+                    Self::visit_range(&mut reader, lo, hi, emit)
+                })
+            }
         } else {
+            Phase::begin(self.profile);
             disk.switch(&mut |s| self.signal(s))
         };
+        let phase_times = Phase::finish();
+        if let Some(ns) = phase_times {
+            println!(
+                "CHECKPOINT_PHASE,{version},{},{},{},{},{}",
+                ns[0], ns[1], ns[2], ns[3], ns[4]
+            );
+        }
         if let Err(e) = switched {
             db.state()?.poisoned = true;
             return Err(TxError::CommitUncertain(e));

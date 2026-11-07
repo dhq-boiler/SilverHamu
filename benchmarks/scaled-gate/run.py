@@ -5,8 +5,8 @@ def call(*args,timeout=600):
     p=subprocess.run(list(map(str,args)),capture_output=True,text=True,encoding='utf-8',errors='replace',timeout=timeout)
     if p.returncode:raise RuntimeError(p.stdout[-2000:]+p.stderr[-2000:])
     return p.stdout.strip()
-def main(include_dirty=False, four=False, waits=False, mvcc=False, direct=False):
-    p=argparse.ArgumentParser();p.add_argument('--out',type=pathlib.Path,required=True);p.add_argument('--stage',choices=(['pilot','diagnostic','light','1m'] if waits else ['pilot','100k','1m']),required=True);a=p.parse_args()
+def main(include_dirty=False, four=False, waits=False, mvcc=False, direct=False, packed=False, reuse=False):
+    p=argparse.ArgumentParser();p.add_argument('--out',type=pathlib.Path,required=True);p.add_argument('--stage',choices=(['pilot','diagnostic','light','1m'] if waits else (['pilot','diagnostic','1m'] if packed else ['pilot','100k','1m'])),required=True);a=p.parse_args()
     n,ops,cap,reps={'pilot':(10000,64,16,1),'100k':(100000,1024,256,3),'1m':(1000000,1024,256,3),'diagnostic':(1000000,1024,256,1),'light':(1000000,1024,256,1)}[a.stage]
     image='catdb-dirty-gate' if include_dirty else 'catdb-scaled-gate'
     if four: image='catdb-four-gate'
@@ -29,6 +29,12 @@ def main(include_dirty=False, four=False, waits=False, mvcc=False, direct=False)
     if direct:
         image='catdb-direct-pages'
         orders=[('wal','mvcc','direct'),('mvcc','direct','wal'),('direct','wal','mvcc')]
+    if packed:
+        image='catdb-pack-gate'
+        orders=[('mvcc','direct','packed'),('direct','packed','mvcc'),('packed','mvcc','direct')]
+    if reuse:
+        image='catdb-page-reuse'
+        orders=[('mvcc','direct','packed','reuse'),('direct','reuse','mvcc','packed'),('packed','mvcc','reuse','direct')]
     root=a.out.resolve();root.mkdir(parents=True,exist_ok=False);results=[]
     files=['Cargo.toml','Cargo.lock','src/transactions.rs','src/lib.rs',*[str(p.relative_to(ROOT)).replace('\\','/') for p in (ROOT/'benchmarks/scaled-gate').glob('*.rs')]]
     (root/'environment.json').write_text(json.dumps({'commit':call('git','rev-parse','HEAD'),'image':call('docker','image','inspect',image,'--format','{{.Id}}'),'stage':a.stage,'rows':n,'ops':ops,'log_capacity':cap,'cpu':2,'memory_bytes':4*1024**3,'swap_bytes':0,'utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'hashes':{f:hashlib.sha256((ROOT/f).read_bytes().replace(b'\r\n',b'\n')).hexdigest() for f in files}},indent=2))
@@ -41,6 +47,7 @@ def main(include_dirty=False, four=False, waits=False, mvcc=False, direct=False)
             backend='dirty' if mode in ('observed','fifo','light') else mode
             call('docker','volume','create',volume)
             command=['docker','run','--name',uid,'--network','none','--cpus','2','--memory','4g','--memory-swap','4g','-v',volume+':/data','-e','SCALED_ROOT=/data','-e',f'SCALED_ROWS={n}','-e',f'SCALED_OPS={ops}','-e',f'SCALED_CAP={cap}','-e',f'SCALED_VARIANT={backend}',image,'cargo','test','--locked','--release','--lib','transactions::scaled_gate::checks::timing::compare','--','--ignored','--exact','--nocapture','--test-threads=1']
+            if packed and a.stage=='diagnostic': command[command.index('-v'):command.index('-v')]=['-e','CATDB_CHECKPOINT_PHASES=1']
             if direct: command[command.index('-v'):command.index('-v')]=['-e','CATDB_REOPEN_RSS=1']
             if four: command[command.index('-v'):command.index('-v')]=['-e','SCALED_FOUR=1']
             if waits and mode in ('observed','fifo','light'):

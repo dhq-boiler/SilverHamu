@@ -1,0 +1,33 @@
+{
+  "commit": "01c11bcda0c3a1e0c75921036c952b295e10f60c",
+  "image": "sha256:d5efb3aca63fa2fbca671a5e4fc07b6885fea2841b10881c17e180db8f069b41",
+  "stage": "diagnostic",
+  "rows": 1000000,
+  "ops": 1024,
+  "log_capacity": 256,
+  "cpu": 2,
+  "memory_bytes": 4294967296,
+  "swap_bytes": 0,
+  "utc": "2026-11-07T09:07:16.076004+00:00",
+  "hashes": {
+    "Cargo.toml": "7e581f07edefa30f8b145cc883c3b83d37d2bb27e500060766ec99b476fc3049",
+    "Cargo.lock": "df9a4a2f931c9a3e3d2d1076aea9650b9297334ec81f574cb2f333d77dc5bef6",
+    "src/transactions.rs": "991320be64aaa5a809b9e881186419237f7352d3afc2e030da8f51f3b30137c8",
+    "src/lib.rs": "c82e49ece09308bb6890850b5cab81aafff6bbe6fa167cf0c496f7be54f44ce5",
+    "benchmarks/scaled-gate/checks.rs": "89badead97551af82f274a84413e4083bd581f6a11f373ca8bc93ff7bf2b2cf7",
+    "benchmarks/scaled-gate/direct_checks.rs": "c645a0492e06e1c9c3ec790451788310d5e264ab90bcb7013e60651e9ad837af",
+    "benchmarks/scaled-gate/direct_pages.rs": "ded983b49455b3568dd5abdd7bf491dc93f18034508293bdd0d7e68e30da48cc",
+    "benchmarks/scaled-gate/dirty.rs": "68761f9d7c48c9ec853045835b982afe16095f7dcf32094c7e3429d55a09439c",
+    "benchmarks/scaled-gate/dirty_checks.rs": "3994e82503be29fb9102f84fac961b3d1ef7ecde26ac87e2bf0cf38058ba7d39",
+    "benchmarks/scaled-gate/four.rs": "6c137abcd96ba695d4d365480d9a764b15875c9fafa18fbe912a245c50d30098",
+    "benchmarks/scaled-gate/four_checks.rs": "38882a8f8473893849cc8b81b2b40fa564dff2ff74206585022f4484b7d25aa5",
+    "benchmarks/scaled-gate/mod.rs": "ecf64b32ff1733674c29e46bfc39e50c76db1d28ce9a57534b5003d0696843ce",
+    "benchmarks/scaled-gate/mvcc_checks.rs": "66a47ca50012db534e579ce1a9b9214c8d6d67e255676d0064847133630c3372",
+    "benchmarks/scaled-gate/mvcc_pages.rs": "ca5957d6fc7653f8b9627e0f978bb08ba09a129ac70e9b683679be8b1ec5af84",
+    "benchmarks/scaled-gate/pack.rs": "1a9f429d8c282d32e6874a8d454162061961bffa0e75146ac433380d0dcde4c7",
+    "benchmarks/scaled-gate/pack_checks.rs": "184810034f9960a955a5c4ed9c51a10baed1fed6b0f223902f6279cd38be3a14",
+    "benchmarks/scaled-gate/phase.rs": "fe4d2cb269205cf983e5e5008b966e523ad2fa4e1eab80177d258b358457a17f",
+    "benchmarks/scaled-gate/timing.rs": "aa37f6946717d8eabf84e8ec8e0bb83817aef41f2e806383147e3f718748f279",
+    "benchmarks/scaled-gate/wait_trace.rs": "8e93d485fc3f2ae3b6b029ba61175ea9577e0dc6ac00a6871ab5d19d16742a87"
+  }
+}

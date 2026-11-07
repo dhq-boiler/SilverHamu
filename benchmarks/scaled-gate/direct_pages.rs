@@ -7,6 +7,7 @@ impl MvccPages {
     ) -> io::Result<()> {
         let mut after = None;
         loop {
+            let scan = Phase::enter(1);
             let page = reader
                 .scan_page(
                     lower,
@@ -19,6 +20,7 @@ impl MvccPages {
                     },
                 )
                 .map_err(io::Error::other)?;
+            drop(scan);
             for (k, v) in &page.rows {
                 emit(k, v)?;
             }
@@ -80,7 +82,7 @@ fn direct_reopen_memory() {
     let db = match std::env::var("SCALED_VARIANT").unwrap().as_str() {
         "wal" => Database::open(path).unwrap(),
         "mvcc" => MvccPages::open(&path, cfg, None),
-        "direct" => MvccPages::open_direct(&path, cfg, None),
+        "direct" | "packed" | "reuse" => MvccPages::open_direct(&path, cfg, None),
         _ => unreachable!(),
     };
     let read = db.begin_read().unwrap();

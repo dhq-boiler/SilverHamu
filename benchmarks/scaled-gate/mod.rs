@@ -9,6 +9,7 @@ use std::io::{self, Read, Seek, SeekFrom, Write};
 use std::path::Path;
 use std::sync::Arc;
 
+include!("phase.rs");
 const PAGE: usize = 1024 * 1024;
 const HEAD: usize = 96;
 const PAYLOAD: usize = PAGE - HEAD;
@@ -155,6 +156,18 @@ fn write_record(
     hook: Hook<'_>,
 ) -> io::Result<()> {
     let b = r.encode();
+    write_encoded_record(file, cost, offset, &b, category, label, hook)
+}
+fn write_encoded_record(
+    file: &mut File,
+    cost: &mut Costs,
+    offset: u64,
+    b: &[u8],
+    category: &'static str,
+    label: &str,
+    hook: Hook<'_>,
+) -> io::Result<()> {
+    let _phase = Phase::enter(3);
     file.seek(SeekFrom::Start(offset))?;
     let mid = b.len() / 2;
     file.write_all(&b[..mid])?;
@@ -167,7 +180,10 @@ fn write_record(
 fn sync(file: &File, cost: &mut Costs, category: &'static str, hook: Hook<'_>) -> io::Result<()> {
     hook(&format!("{category}.before-sync"))?;
     *cost.syncs.entry(category).or_default() += 1;
-    file.sync_data()?;
+    {
+        let _phase = Phase::enter(4);
+        file.sync_data()?;
+    }
     hook(&format!("{category}.synced"))
 }
 fn read_record(file: &mut File, cost: &mut Costs, offset: u64) -> io::Result<Option<Record>> {
@@ -577,14 +593,30 @@ fn pair(
 ) -> io::Result<(Option<Record>, [bool; 2])> {
     let a = read_record(file, cost, root.config.at(root.bank, checkpoint, index, 0))?;
     let b = read_record(file, cost, root.config.at(root.bank, checkpoint, index, 1))?;
-    let expected_seq = if checkpoint { Some(root.seq) } else { root.seq.checked_add(u64::from(index)+1) };
-    let matches = |r: &&Record| r.config == root.config && r.epoch == root.epoch && r.bank == root.bank
-        && r.index == index && r.kind == if checkpoint { 1 } else { 3 }
-        && Some(r.seq) == expected_seq && r.previous == previous;
+    let expected_seq = if checkpoint {
+        Some(root.seq)
+    } else {
+        root.seq.checked_add(u64::from(index) + 1)
+    };
+    let matches = |r: &&Record| {
+        r.config == root.config
+            && r.epoch == root.epoch
+            && r.bank == root.bank
+            && r.index == index
+            && r.kind == if checkpoint { 1 } else { 3 }
+            && Some(r.seq) == expected_seq
+            && r.previous == previous
+    };
     let x = a.as_ref().filter(matches);
     let y = b.as_ref().filter(matches);
     // A valid current/future envelope in the wrong position is not an unused tail.
-    if x.is_none() && y.is_none() && [a.as_ref(), b.as_ref()].into_iter().flatten().any(|r| r.epoch >= root.epoch) {
+    if x.is_none()
+        && y.is_none()
+        && [a.as_ref(), b.as_ref()]
+            .into_iter()
+            .flatten()
+            .any(|r| r.epoch >= root.epoch)
+    {
         return Err(err("no peer with expected identity"));
     }
     if x.is_some() && y.is_some() && x != y {

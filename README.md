@@ -6,6 +6,18 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Sharing a durable sync across FIFO arrivals
+
+With four writers the no-delay FIFO group committed **2.45 transactions per log sync** versus 1.00 for single-commit FIFO. The grouped path measured 640.2 transactions/s, p99 44.6 ms and worst wait 89.8 ms. Single FIFO measured 290.8 transactions/s, 47.3 ms and 90.9 ms.
+
+[Per-trial results, safety tests and peer comparison](docs/benchmarks/arrival-group-2026-11-07/README.md).
+
+![No-delay group commit](docs/benchmarks/arrival-group-2026-11-07/comparison.svg)
+
+![Embedded update comparison](docs/benchmarks/arrival-group-2026-11-07/embedded.svg)
+
+![Service update comparison](docs/benchmarks/arrival-group-2026-11-07/service.svg)
+
 ## Durable updates across database products
 
 Reusing a single encoding for two durable log copies measured 286.9 transactions/s, p99 43.6 ms and worst wait 98.9 ms. The previous path measured 297.1 transactions/s, 44.5 ms and 89.8 ms. The throughput improvement did not reproduce. The candidate remains experimental.

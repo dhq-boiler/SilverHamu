@@ -27,6 +27,7 @@ def chart(path,title,groups):
 def main():
     p=argparse.ArgumentParser()
     for arg in ("products","native","out"):p.add_argument(arg,type=Path)
+    p.add_argument("--arrivals",action="store_true")
     a=p.parse_args()
     rows=json.loads((a.products/"results.json").read_text())
     env=json.loads((a.products/"environment.json").read_text())
@@ -47,6 +48,8 @@ def main():
     assert all(r["expected_sha256"] in checks[r["rep"]] for r in native)
     rows+=native
     engines={"combine":"catdb prototype / before","logreuse":"catdb prototype / after","catdb-embedded":"catdb embedded (C ABI)","sqlite":"SQLite","catdb-service":"catdb service","postgres":"PostgreSQL","mysql":"MySQL","oracle":"Oracle Free"}
+    candidate="arrivals" if a.arrivals else "logreuse"
+    if a.arrivals:engines["arrivals"]=engines.pop("logreuse");engines["combine"]="catdb FIFO (Rust)";engines["arrivals"]="catdb grouped (Rust)"
     assert sorted((r["engine"],r["rep"]) for r in rows)==sorted((e,i) for e in engines for i in (1,2,3))
     summary={}
     for e,name in engines.items():
@@ -55,6 +58,6 @@ def main():
     a.out.mkdir(exist_ok=True,parents=True)
     with (a.out/"product-summary.csv").open("w",newline="") as f:
         w=csv.DictWriter(f,["engine","ops_s","p99_ms"],lineterminator="\n");w.writeheader();w.writerows(summary.values())
-    for name,title,order in [("embedded","Embedded updates (Rust prototype; Python for C ABI and SQLite)",["combine","logreuse","catdb-embedded","sqlite"]),("service","Service update comparison (Python clients)",["catdb-service","postgres","mysql","oracle"]),("native","Experimental catdb storage paths (native Rust)",["combine","logreuse"])]:
+    for name,title,order in [("embedded","Embedded updates (Rust prototype; Python for C ABI and SQLite)",["combine",candidate,"catdb-embedded","sqlite"]),("service","Service update comparison (Python clients)",["catdb-service","postgres","mysql","oracle"]),("native","Experimental catdb storage paths (native Rust)",["combine",candidate])]:
         chart(a.out/(name+".svg"),title,[summary[e] for e in order])
 if __name__=="__main__":main()

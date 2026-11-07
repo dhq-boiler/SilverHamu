@@ -1,0 +1,17 @@
+test transactions::scaled_gate::checks::timing::arrival_gate_conflict_and_bounds ... ok
+test transactions::scaled_gate::checks::timing::arrival_gate_count_limit_and_refusal ... ok
+test transactions::scaled_gate::checks::timing::arrival_gate_process_exit ... ok
+test transactions::scaled_gate::checks::timing::arrival_gate_queue_caps_do_not_orphan_admitted_work ... ok
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 140 filtered out; finished in 0.67s
+test transactions::scaled_gate::checks::timing::combined_pages_repair_one_bad_body_and_reject_two ... ok
+test transactions::scaled_gate::checks::timing::concurrent_point_range_and_write_dependencies_survive_switch ... ok
+test transactions::scaled_gate::checks::timing::crc_combination_matches_concatenation_at_every_page_length ... ok
+test transactions::scaled_gate::checks::timing::direct_dirty_ranges_split_delete_and_restore_empty_generation ... ok
+test transactions::scaled_gate::checks::timing::four_acked_commits_recover_across_sync_and_publication ... ok
+test transactions::scaled_gate::checks::timing::linear_pages_are_byte_identical_across_generations_boundaries_and_splits ... ok
+test transactions::scaled_gate::checks::timing::mvcc_fifo_revalidates_and_publishes_only_after_sync ... ok
+test transactions::scaled_gate::checks::timing::mvcc_kills_recover_acknowledged_versions ... ok
+test transactions::scaled_gate::checks::timing::mvcc_persistence_error_requires_reopen ... ok
+test transactions::scaled_gate::checks::timing::packed_ranges_match_snapshot_across_split_and_tombstone_continuations ... ok
+test transactions::scaled_gate::checks::timing::ticket_handoff_drains_in_registration_order ... ok
+test result: ok. 111 passed; 0 failed; 33 ignored; 0 measured; 0 filtered out; finished in 28.87s

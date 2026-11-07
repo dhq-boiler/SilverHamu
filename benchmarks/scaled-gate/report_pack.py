@@ -50,6 +50,7 @@ def main():
     parser.add_argument("--linear",action="store_true")
     parser.add_argument("--combine",action="store_true")
     parser.add_argument("--append",action="store_true")
+    parser.add_argument("--arrivals",action="store_true")
     args=parser.parse_args();args.out.mkdir(parents=True,exist_ok=True)
     modes=MODES+(("reuse",) if args.reuse else ())
     names=NAMES+(("Pack + reuse",) if args.reuse else ())
@@ -59,15 +60,24 @@ def main():
         modes=("linear","combine");names=("Full scan","Combine")
     if args.append:
         modes=("combine","logreuse");names=("Baseline","Log reuse")
+    if args.arrivals:
+        modes=("combine","arrivals");names=("FIFO","Grouped")
     groups={}
-    for stage in ("diagnostic","1m"):
+    for stage in (("1m",) if args.arrivals else ("diagnostic","1m")):
         raw=args.raw/stage
         runs=json.loads((raw/"runs.json").read_text())
         assert sorted((r["mode"],r["rep"]) for r in runs)==sorted((m,i) for m in modes for i in (range(1,4) if stage=="1m" else [1]))
         rows=[]
         for r in runs:
             v=summarize(raw,r)
-            v.update(overlap_rows(raw,r));rows.append(v)
+            v.update(overlap_rows(raw,r))
+            if args.arrivals:
+                log=(raw/(r["label"]+".log")).read_text()
+                counters=[int(l.split("ARRIVAL_SYNCS,")[1]) for l in log.splitlines() if "ARRIVAL_SYNCS," in l]
+                assert len(counters)==1 and 256<=counters[0]<=1024
+                if r["mode"]=="combine":assert counters[0]==1024
+                v.update(commit_syncs=counters[0],commits_per_sync=1024/counters[0])
+            rows.append(v)
         write(args.out/(stage+".csv"),rows)
         if stage=="diagnostic" and args.combine:
             counters=[]
@@ -88,6 +98,7 @@ def main():
     label(16,56,"Two CPUs, 4 GiB. Trial medians except worst request across all trials. Independent scales.",14)
     metrics=[("p99_ms","Update p99 (ms)"),("max_ms","Worst update (ms)"),("tx_s","Transactions / second"),
              ("rss_MiB","End RSS (MiB)"),("checkpoint_ms","Checkpoint (ms)"),("outside_only_p99_ms","p99 outside checkpoints (ms)")]
+    if args.arrivals:metrics[-1]=("commits_per_sync","Commits per log sync")
     for i,(key,title) in enumerate(metrics):
         x,y=16+i%3*316,88+i//3*184;label(x,y,title,17)
         vals=[(max if key=="max_ms" else median)(r[key] for r in groups[m]) for m in modes]

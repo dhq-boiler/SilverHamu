@@ -631,6 +631,15 @@ fn persist_group(
     requests: &mut [Request],
     persist: impl FnOnce(&mut WalFile, &[Vec<u8>]) -> io::Result<()>,
 ) -> Vec<Result<u64>> {
+    persist_entries(database, requests, |r| &mut r.transaction, persist)
+}
+
+pub(super) fn persist_entries<T>(
+    database: &Database,
+    requests: &mut [T],
+    transaction_of: fn(&mut T) -> &mut Transaction,
+    persist: impl FnOnce(&mut WalFile, &[Vec<u8>]) -> io::Result<()>,
+) -> Vec<Result<u64>> {
     #[cfg(feature = "retirement-timing")]
     take_retirement_trace();
     #[cfg(feature = "lock-timing")]
@@ -656,7 +665,7 @@ fn persist_group(
     let mut wal_bytes = state.wal_bytes;
     let mut retained = 0usize;
     for (index, request) in requests.iter_mut().enumerate() {
-        let transaction = &mut request.transaction;
+        let transaction = transaction_of(request);
         let result = (|| {
             transaction.validate_commit(&state, &earlier)?;
             let next = sequence
@@ -709,7 +718,7 @@ fn persist_group(
     };
     #[cfg(feature = "skip-unneeded-history")]
     for &(index, _) in &accepted {
-        requests[index].transaction.unregister_snapshot(&mut state);
+        transaction_of(&mut requests[index]).unregister_snapshot(&mut state);
     }
     #[cfg(feature = "skip-unneeded-history")]
     let mut retired = state.empty_retirement();
@@ -718,7 +727,7 @@ fn persist_group(
             state
                 .apply_inner(
                     version,
-                    std::mem::take(&mut requests[index].transaction.writes),
+                    std::mem::take(&mut transaction_of(&mut requests[index]).writes),
                     #[cfg(feature = "skip-unneeded-history")]
                     &mut retired,
                 )

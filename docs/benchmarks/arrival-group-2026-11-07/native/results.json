@@ -1,0 +1,68 @@
+[
+  {
+    "engine": "combine",
+    "rep": 1,
+    "ops_s": 207.97847226532372,
+    "p99_ms": 25.939986,
+    "max_ms": 38.77439,
+    "rows_verified": 100000,
+    "expected_sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+    "elapsed_ns": 4923586508,
+    "image": "sha256:0e274b1bd32cfccf8d34515e7e638f1d15a34e35b390a210b00c8cd688766e03"
+  },
+  {
+    "engine": "arrivals",
+    "rep": 1,
+    "ops_s": 487.0159729567868,
+    "p99_ms": 14.163665,
+    "max_ms": 17.009828,
+    "rows_verified": 100000,
+    "expected_sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+    "elapsed_ns": 2102600442,
+    "image": "sha256:0e274b1bd32cfccf8d34515e7e638f1d15a34e35b390a210b00c8cd688766e03"
+  },
+  {
+    "engine": "arrivals",
+    "rep": 2,
+    "ops_s": 474.09558396630956,
+    "p99_ms": 13.598451,
+    "max_ms": 28.537108,
+    "rows_verified": 100000,
+    "expected_sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+    "elapsed_ns": 2159902000,
+    "image": "sha256:0e274b1bd32cfccf8d34515e7e638f1d15a34e35b390a210b00c8cd688766e03"
+  },
+  {
+    "engine": "combine",
+    "rep": 2,
+    "ops_s": 186.57814197542803,
+    "p99_ms": 31.49452,
+    "max_ms": 41.630866,
+    "rows_verified": 100000,
+    "expected_sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+    "elapsed_ns": 5488317062,
+    "image": "sha256:0e274b1bd32cfccf8d34515e7e638f1d15a34e35b390a210b00c8cd688766e03"
+  },
+  {
+    "engine": "combine",
+    "rep": 3,
+    "ops_s": 187.0171678675415,
+    "p99_ms": 31.005309,
+    "max_ms": 40.397086,
+    "rows_verified": 100000,
+    "expected_sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+    "elapsed_ns": 5475433147,
+    "image": "sha256:0e274b1bd32cfccf8d34515e7e638f1d15a34e35b390a210b00c8cd688766e03"
+  },
+  {
+    "engine": "arrivals",
+    "rep": 3,
+    "ops_s": 590.4311873410307,
+    "p99_ms": 13.741271,
+    "max_ms": 20.579684,
+    "rows_verified": 100000,
+    "expected_sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+    "elapsed_ns": 1734325730,
+    "image": "sha256:0e274b1bd32cfccf8d34515e7e638f1d15a34e35b390a210b00c8cd688766e03"
+  }
+]

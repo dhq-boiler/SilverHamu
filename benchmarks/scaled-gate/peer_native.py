@@ -13,10 +13,12 @@ from run import call
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("out",type=Path)
+    parser.add_argument("--arrivals",action="store_true")
     args=parser.parse_args()
     args.out.mkdir(parents=True,exist_ok=False)
     results=[]
-    image="catdb-append-reuse"
+    candidate="arrivals" if args.arrivals else "logreuse"
+    image="catdb-arrivals" if args.arrivals else "catdb-append-reuse"
     image_id=call("docker","image","inspect",image,"--format","{{.Id}}")
     for rep in (1,2,3):
         with tempfile.TemporaryDirectory() as tmp:
@@ -34,7 +36,7 @@ def main():
             for key_id in range(100000):
                 k=key_id.to_bytes(8,'big')
                 digest.update(k+k+stamps.get(key_id,0).to_bytes(8,'big')+b'x'*240)
-            for mode in (("combine","logreuse") if rep%2 else ("logreuse","combine")):
+            for mode in (("combine",candidate) if rep%2 else (candidate,"combine")):
                 volume="catdb-peer-native-"+uuid.uuid4().hex
                 call("docker","volume","create",volume)
                 try:

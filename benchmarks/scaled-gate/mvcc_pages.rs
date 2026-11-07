@@ -2,6 +2,7 @@ use crate::transactions::{Budget, CheckpointInfo, State, TestPersistence, legacy
 type Fault = Option<Arc<dyn Fn(&str) -> io::Result<()> + Send + Sync>>;
 
 struct MvccPages {
+    arrivals: Option<Arrivals>,
     direct: bool,
     packed: bool,
     linear: bool,
@@ -58,7 +59,18 @@ impl MvccPages {
         let logreuse = direct
             && (std::env::var_os("CATDB_TEST_LOG_REUSE").is_some()
                 || std::env::var("SCALED_VARIANT").as_deref() == Ok("logreuse"));
-        let combine = logreuse
+        let grouped = direct
+            && (std::env::var_os("CATDB_TEST_ARRIVALS").is_some()
+                || std::env::var("SCALED_VARIANT").as_deref() == Ok("arrivals"));
+        if disk.group_version.is_some() && !grouped {
+            return Err(TxError::Invalid("group persistence required"));
+        }
+        if grouped {
+            let seq = disk.logical_seq();
+            disk.group_version = Some(seq);
+        }
+        let combine = grouped
+            || logreuse
             || direct
                 && (std::env::var_os("CATDB_TEST_COMBINE").is_some()
                     || std::env::var("SCALED_VARIANT").as_deref() == Ok("combine"));
@@ -81,6 +93,7 @@ impl MvccPages {
             direct,
             disk: Mutex::new(disk),
             turns: TurnQueue::default(),
+            arrivals: grouped.then(Arrivals::default),
             linear,
             combine,
             commit_profile,
@@ -114,6 +127,10 @@ impl MvccPages {
 }
 impl TestPersistence for MvccPages {
     fn commit(&self, tx: Transaction) -> crate::transactions::Result<u64> {
+        if let Some(queue) = &self.arrivals {
+            return queue.submit(self, tx);
+        }
+        let db = tx.database.clone();
         if self.commit_profile {
             CommitSample::attempt();
         }
@@ -129,7 +146,9 @@ impl TestPersistence for MvccPages {
                 return Err(err("MVCC and disk generation differ"));
             }
             if self.direct {
-                disk.append_log(&w, &mut |stage| self.signal(stage))
+                disk.append_log(&w, &mut |stage| self.signal(stage))?;
+                db.inner.group.record_sync();
+                Ok(())
             } else {
                 disk.append(&w, &mut |stage| self.signal(stage))
             }
@@ -144,7 +163,7 @@ impl TestPersistence for MvccPages {
         let _writer = db.inner.writer.lock().map_err(|_| TxError::Poisoned)?;
         let mut disk = self.disk.lock().map_err(|_| TxError::Poisoned)?;
         let version = db.state()?.sequence;
-        if version != disk.control.seq {
+        if version != disk.logical_seq() {
             return Err(TxError::Invalid("MVCC and checkpoint generation differ"));
         }
         let bytes = |s: &Dirty| -> io::Result<u64> {

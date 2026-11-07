@@ -18,6 +18,7 @@ struct Pin {
     _lease: File,
 }
 struct Dirty {
+    group_version: Option<u64>,
     reuse_encoded: bool,
     control: Store,
     pool: File,
@@ -50,6 +51,7 @@ impl Dirty {
         let control = Store::create(path, cfg, Data::new(), BUFFER_BUDGET, &mut noop)?;
         let mut s = Self {
             reuse_encoded: false,
+            group_version: None,
             control,
             pool,
             rows,
@@ -74,6 +76,17 @@ impl Dirty {
         Ok(())
     }
     fn append_log(&mut self, w: &WriteSet, hook: Hook<'_>) -> io::Result<()> {
+        self.append_changes(w, None, hook)
+    }
+    fn logical_seq(&self) -> u64 {
+        self.group_version.unwrap_or(self.control.seq)
+    }
+    fn append_changes(
+        &mut self,
+        w: &WriteSet,
+        group: Option<u64>,
+        hook: Hook<'_>,
+    ) -> io::Result<()> {
         if self.failed {
             return Err(err("reopen required"));
         }
@@ -90,7 +103,11 @@ impl Dirty {
                 }),
             );
         }
+        if let Some(seq) = group {
+            overlay.insert(vec![2], Some(seq.to_le_bytes().to_vec()));
+        }
         self.control.append(&overlay, hook)?;
+        self.group_version = group;
         for k in w.keys() {
             self.dirty.insert(fence(&self.pages, k));
         }
@@ -213,6 +230,9 @@ impl Dirty {
             b.extend(p.digest.to_le_bytes());
             manifest.insert(tagged(0, k), b.into());
         }
+        if let Some(seq) = self.group_version {
+            manifest.insert(vec![2], seq.to_le_bytes().to_vec().into());
+        }
         self.control.rows = manifest;
         self.control.switch(hook)?;
         self.pages = next;
@@ -244,6 +264,21 @@ impl Dirty {
             .open(path.with_extension("pages"))?;
         pool.try_lock().map_err(|e| err(&e.to_string()))?;
         let mut control = Store::open(path, cfg, BUFFER_BUDGET, hook)?;
+        let group_version = control
+            .rows
+            .get([2u8].as_slice())
+            .map(|v| -> io::Result<u64> {
+                Ok(u64::from_le_bytes(
+                    v.as_ref()
+                        .try_into()
+                        .map_err(|_| err("group sequence length"))?,
+                ))
+            })
+            .transpose()?;
+        let generation = group_version.unwrap_or(control.seq);
+        if generation < control.seq {
+            return Err(err("group sequence precedes physical frame"));
+        }
         let mut pages = Directory::new();
         let mut live = HashMap::new();
         let mut dirty = BTreeSet::new();
@@ -253,6 +288,9 @@ impl Dirty {
             let (&tag, k) = encoded
                 .split_first()
                 .ok_or_else(|| err("empty tagged key"))?;
+            if tag == 2 && k.is_empty() {
+                continue;
+            }
             if tag == 1 {
                 dirty.insert(fence(&pages, k));
                 let value = match b.split_first() {
@@ -260,7 +298,7 @@ impl Dirty {
                     Some((1, v)) => Some(v.to_vec()),
                     _ => return Err(err("overlay")),
                 };
-                accept(control.seq, [(k.to_vec(), value)].into())?;
+                accept(generation, [(k.to_vec(), value)].into())?;
                 continue;
             }
             if tag != 0
@@ -313,7 +351,7 @@ impl Dirty {
             page.rows = w.len();
             let page = Arc::new(page);
             live.insert(page.slot, Arc::downgrade(&page));
-            accept(control.seq, w)?;
+            accept(generation, w)?;
             for (lane, r) in copies.iter().enumerate() {
                 if r.is_none() {
                     write_record(
@@ -331,6 +369,7 @@ impl Dirty {
         }
         sync(&pool, &mut control.costs, "recovery-pages", hook)?;
         Ok(Self {
+            group_version,
             reuse_encoded: false,
             control,
             pool,

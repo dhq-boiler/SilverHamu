@@ -133,6 +133,7 @@ fn compare() {
             | "linear"
             | "combine"
             | "logreuse"
+            | "arrivals"
     ));
     assert!(n >= 1000 && ops >= cap as usize * 3 && ops <= 8192);
     let cfg = Config {
@@ -147,7 +148,7 @@ fn compare() {
     let mut dirty = None;
     if matches!(
         mode.as_str(),
-        "direct" | "packed" | "reuse" | "linear" | "combine" | "logreuse"
+        "direct" | "packed" | "reuse" | "linear" | "combine" | "logreuse" | "arrivals"
     ) {
         db = Some(MvccPages::create_direct(
             &p,
@@ -361,3 +362,6 @@ include!("linear_checks.rs");
 include!("combine_checks.rs");
 
 include!("peer_case.rs");
+
+include!("arrivals.rs");
+include!("arrival_checks.rs");

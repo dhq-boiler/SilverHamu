@@ -58,7 +58,7 @@ impl MvccPages {
         })
         .unwrap();
         // An empty checkpoint has no page callback to carry its commit sequence.
-        state.sequence = disk.control.seq;
+        state.sequence = disk.logical_seq();
         while !state.history_keys.is_empty() {
             drop(state.collect());
             if state.gc_target == 0 {
@@ -82,7 +82,7 @@ fn direct_reopen_memory() {
     let db = match std::env::var("SCALED_VARIANT").unwrap().as_str() {
         "wal" => Database::open(path).unwrap(),
         "mvcc" => MvccPages::open(&path, cfg, None),
-        "direct" | "packed" | "reuse" | "linear" | "combine" | "logreuse" => {
+        "direct" | "packed" | "reuse" | "linear" | "combine" | "logreuse" | "arrivals" => {
             MvccPages::open_direct(&path, cfg, None)
         }
         _ => unreachable!(),

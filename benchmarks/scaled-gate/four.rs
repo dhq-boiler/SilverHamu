@@ -305,6 +305,12 @@ fn four_run(
     assert_eq!(cp.len(), 3);
     let begin = samples.iter().map(|s| s.start).min().unwrap();
     let end = samples.iter().map(|s| s.end).max().unwrap();
+    if matches!(mode, "combine" | "arrivals") {
+        println!(
+            "ARRIVAL_SYNCS,{}",
+            run.wal.as_ref().unwrap().commit_sync_attempts()
+        );
+    }
     let backend = run.publication.into_inner().unwrap().backend;
     match &backend {
         Backend::Wal(db) => {
@@ -352,10 +358,10 @@ fn four_run(
         println!("{line}");
     }
     match mode {
-        "mvcc" | "direct" | "packed" | "reuse" | "linear" | "combine" | "logreuse" => {
+        "mvcc" | "direct" | "packed" | "reuse" | "linear" | "combine" | "logreuse" | "arrivals" => {
             let recovered = if matches!(
                 mode,
-                "direct" | "packed" | "reuse" | "linear" | "combine" | "logreuse"
+                "direct" | "packed" | "reuse" | "linear" | "combine" | "logreuse" | "arrivals"
             ) {
                 MvccPages::open_direct(p, cfg, None)
             } else {

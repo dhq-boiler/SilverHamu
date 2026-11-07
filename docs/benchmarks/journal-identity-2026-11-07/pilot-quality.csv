@@ -1,0 +1,5 @@
+run,kernel,device,buffer_kib_per_cpu,cpu_buffers,target_probe_missed,wait_probe_missed,ring_overruns,dropped_events,cleaned
+1-fifo-trace,6.18.54.1-microsoft-standard-WSL2,"8,64",8192,32,0,0,0,0,True
+1-standard-trace,6.18.54.1-microsoft-standard-WSL2,"8,64",8192,32,0,0,0,0,True
+2-fifo-trace,6.18.54.1-microsoft-standard-WSL2,"8,64",8192,32,0,0,0,0,True
+2-standard-trace,6.18.54.1-microsoft-standard-WSL2,"8,64",8192,32,0,0,0,0,True

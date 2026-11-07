@@ -55,6 +55,9 @@ fn independent_campaign() {
         let worker_db = &db;
         let worker = scope.spawn(move || {
             let db = worker_db;
+            if let Ok(tag) = std::env::var("JOURNAL_WORKER_TAG") {
+                sync_clock::identify(&tag, 4);
+            }
             independent_trace::enable(clock);
             let mut result = Vec::new();
             if exact {

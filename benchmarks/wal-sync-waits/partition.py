@@ -25,10 +25,10 @@ def check_metadata(folder):
         for field in ("overrun","commit overrun","dropped events"):
             assert int(re.search("^"+field+r":\s*(\d+)",stats,re.M)[1])==0,"lost trace events"
 
-def normalize(folder,tag):
+def normalize(folder,tag,lanes=4):
     check_metadata(folder)
     assert json.loads((folder/"meta.json").read_text())["tag"]==tag
-    names={f"cw{tag}{i}":i for i in range(4)}
+    names={f"cw{tag}{i}":i for i in range(lanes)}
     out=[];latest={};frames=[];stack=None;ids={}
     def add(t,comm,pid,kind,cpu):
         lane=names[comm];assert ids.setdefault(lane,pid)==pid
@@ -65,7 +65,7 @@ def normalize(folder,tag):
                 k=latest.get((cpu,pid))
                 if k is not None and out[k][3]=="blocked_unknown":stack=k
     if stack is not None:out[stack][3]=stack_kind(frames)
-    assert len(set(ids.values()))==4
+    assert len(set(ids.values()))==lanes
     return out
 
 def syscall_segments(events,diagnostics=None):

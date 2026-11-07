@@ -31,7 +31,7 @@ def one(out,rep,mode,trace,pilot,calibration=False, image='catdb-journal-identit
             cmd+=["-e",f"{k}={v}"]
         if range_writeback:cmd+=["-e","CATDB_TEST_RANGE_WRITEBACK=1"]
         cmd+=[image,"cargo","test","--locked","--release"]
-        if mode=="fifo":cmd+=["--features","fifo-writer"]
+        if mode in ("fifo","aged"):cmd+=["--features",mode+"-writer"]
         cmd+=["--lib","transactions::scaled_gate::checks::timing::independent_campaign","--","--ignored","--exact","--nocapture"]
         print("START",name,flush=True)
         with (folder/"app.log").open("w") as f:subprocess.run(cmd,stdout=f,stderr=subprocess.STDOUT,check=True,timeout=450)

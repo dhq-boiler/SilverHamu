@@ -1,0 +1,10 @@
+run,kernel,device,ring_loss,probe_misses,cleaned
+1-aged-trace,6.18.54.1-microsoft-standard-WSL2,"8,64",0,0,True
+1-fifo-trace,6.18.54.1-microsoft-standard-WSL2,"8,64",0,0,True
+1-standard-trace,6.18.54.1-microsoft-standard-WSL2,"8,64",0,0,True
+2-aged-trace,6.18.54.1-microsoft-standard-WSL2,"8,64",0,0,True
+2-fifo-trace,6.18.54.1-microsoft-standard-WSL2,"8,64",0,0,True
+2-standard-trace,6.18.54.1-microsoft-standard-WSL2,"8,64",0,0,True
+3-aged-trace,6.18.54.1-microsoft-standard-WSL2,"8,64",0,0,True
+3-fifo-trace,6.18.54.1-microsoft-standard-WSL2,"8,64",0,0,True
+3-standard-trace,6.18.54.1-microsoft-standard-WSL2,"8,64",0,0,True

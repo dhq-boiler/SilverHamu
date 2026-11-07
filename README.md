@@ -6,6 +6,16 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Age-based writer handoff
+
+The earlier 6.80 s update was overtaken by 1,012 writer attempts. The longest overlap with a single WAL sync was 20.50 ms. A prototype gives priority to the oldest registered writer after 16 ms. With current / FIFO / 16 ms locks, update p99 was 787.49 / 119.46 / 96.95 ms, worst latency was 5,672.07 / 350.23 / 390.58 ms and throughput was 123.31 / 119.12 / 144.14 updates/s. [Pair-by-pair results, recovery and replayable input](docs/benchmarks/aged-writer-2026-11-08/README.md).
+
+![Update performance by lock](docs/benchmarks/aged-writer-2026-11-08/comparison.svg)
+
+![Overtaking among writers](docs/benchmarks/aged-writer-2026-11-08/overtaking.svg)
+
+[Fresh product comparison](docs/benchmarks/aged-writer-2026-11-08/README.md#other-database-products)
+
 ## Optional ext4 checkpoint writeback
 
 The setting defaults to **off** for every database open. On 64-bit Linux with the database and checkpoint destination on ext4, an embedded Rust application can enable it by calling `db.set_checkpoint_range_writeback(true)?`. To disable it, pass `false`. Cloned handles share the policy. A checkpoint captures it at the start, including when a prepared prefix is finished later. The file format and final snapshot, WAL-suffix and publication synchronization protocol are unchanged.

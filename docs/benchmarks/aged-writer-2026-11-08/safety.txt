@@ -1,0 +1,6 @@
+build.txt  test result: ok. 30 passed; 0 failed; 25 ignored; 0 measured; 112 filtered out; finished in 11.10s
+build.txt  test result: ok. 122 passed; 0 failed; 48 ignored; 0 measured; 0 filtered out; finished in 27.93s
+build.txt  test result: ok. 123 passed; 0 failed; 48 ignored; 0 measured; 0 filtered out; finished in 30.74s
+recovery.txt  test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 170 filtered out; finished in 0.25s
+conflicts.txt  test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 170 filtered out; finished in 0.02s
+windows.txt  test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 65 filtered out; finished in 0.02s

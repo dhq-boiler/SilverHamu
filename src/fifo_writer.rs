@@ -14,7 +14,45 @@ pub(super) struct WriterMutex {
 #[derive(Default, Debug)]
 struct Queue {
     held: bool,
-    waiters: VecDeque<Arc<Condvar>>,
+    waiters: VecDeque<Arc<Waiter>>,
+}
+
+#[derive(Debug, Default)]
+struct Waiter {
+    wake: Condvar,
+    #[cfg(feature = "aged-writer")]
+    queued: Enqueued,
+}
+
+#[cfg(feature = "aged-writer")]
+#[derive(Debug)]
+struct Enqueued(std::time::Instant);
+
+#[cfg(feature = "aged-writer")]
+impl Default for Enqueued {
+    fn default() -> Self {
+        Self(std::time::Instant::now())
+    }
+}
+
+impl Queue {
+    fn must_handoff(&self) -> bool {
+        #[cfg(feature = "aged-writer")]
+        {
+            self.waiters
+                .front()
+                .is_some_and(|head| Self::aged(head.queued.0.elapsed()))
+        }
+        #[cfg(not(feature = "aged-writer"))]
+        {
+            !self.waiters.is_empty()
+        }
+    }
+
+    #[cfg(feature = "aged-writer")]
+    fn aged(wait: std::time::Duration) -> bool {
+        wait >= std::time::Duration::from_millis(16)
+    }
 }
 
 #[derive(Debug)]
@@ -45,8 +83,8 @@ impl WriterMutex {
 
     pub(super) fn lock(&self) -> LockResult<WriterGuard<'_>> {
         let mut state = self.state.lock().unwrap();
-        if state.held || !state.waiters.is_empty() {
-            let wake = Arc::new(Condvar::new());
+        if state.held || state.must_handoff() {
+            let wake = Arc::new(Waiter::default());
             state.waiters.push_back(wake.clone());
             while state.held
                 || !state
@@ -54,7 +92,7 @@ impl WriterMutex {
                     .front()
                     .is_some_and(|head| Arc::ptr_eq(head, &wake))
             {
-                state = wake.wait(state).unwrap();
+                state = wake.wake.wait(state).unwrap();
             }
             state.waiters.pop_front();
         }
@@ -79,7 +117,7 @@ impl WriterMutex {
             .state
             .try_lock()
             .map_err(|_| TryLockError::WouldBlock)?;
-        if state.held || !state.waiters.is_empty() {
+        if state.held || state.must_handoff() {
             return Err(TryLockError::WouldBlock);
         }
         self.acquire(&mut state).map_err(TryLockError::Poisoned)
@@ -94,7 +132,7 @@ impl Drop for WriterGuard<'_> {
         }
         state.held = false;
         if let Some(head) = state.waiters.front() {
-            head.notify_one();
+            head.wake.notify_one();
         }
     }
 }
@@ -102,6 +140,29 @@ impl Drop for WriterGuard<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[cfg(feature = "aged-writer")]
+    #[test]
+    fn only_the_oldest_waiter_controls_barging_at_the_threshold() {
+        use std::time::{Duration, Instant};
+        let limit = Duration::from_millis(16);
+        assert!(!Queue::aged(limit - Duration::from_nanos(1)));
+        assert!(Queue::aged(limit));
+        assert!(Queue::aged(limit + Duration::from_nanos(1)));
+        let lock = WriterMutex::default();
+        let held = lock.lock().unwrap();
+        let mut state = lock.state.lock().unwrap();
+        state.waiters.push_back(Arc::new(Waiter::default()));
+        drop(state);
+        drop(held);
+        drop(lock.try_lock().expect("young head permits a new arrival"));
+        let mut state = lock.state.lock().unwrap();
+        Arc::get_mut(state.waiters.front_mut().unwrap())
+            .unwrap()
+            .queued = Enqueued(Instant::now() - 2 * limit);
+        drop(state);
+        assert!(matches!(lock.try_lock(), Err(TryLockError::WouldBlock)));
+    }
 
     #[test]
     fn queued_workers_are_admitted_in_registration_order() {
@@ -118,6 +179,8 @@ mod tests {
                 lock.wait_queued(id + 1);
             }
             assert!(matches!(lock.try_lock(), Err(TryLockError::WouldBlock)));
+            #[cfg(feature = "aged-writer")]
+            std::thread::sleep(std::time::Duration::from_millis(17));
             drop(guard);
             let _guard = lock.lock().unwrap();
             assert_eq!(*observed.lock().unwrap(), (0..8).collect::<Vec<_>>());

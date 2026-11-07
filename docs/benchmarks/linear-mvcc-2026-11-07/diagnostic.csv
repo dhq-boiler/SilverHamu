@@ -1,0 +1,3 @@
+mode,rep,tx_s,p99_ms,max_ms,conflicts,worst_checkpoint_overlap_ms,other_completions_during_worst,worst_retries,overlap,overlap_max_ms,checkpoint_ms,rss_MiB,p99_overlap_ms,max_overlap_ms,outside_only_p99_ms
+reuse,1,347.50398145560206,70.591918,112.980097,2,93.602385,4,0,12,112.980097,65.876691,415.34765625,65.218134,93.602385,24.245468
+linear,1,312.4974055505621,54.391064,92.316031,3,72.082842,3,0,12,92.316031,49.125322,413.265625,49.125322,72.082842,23.1406

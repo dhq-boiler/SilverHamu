@@ -345,8 +345,8 @@ fn four_run(
         println!("{line}");
     }
     match mode {
-        "mvcc" | "direct" | "packed" | "reuse" => {
-            let recovered = if matches!(mode, "direct" | "packed" | "reuse") {
+        "mvcc" | "direct" | "packed" | "reuse" | "linear" => {
+            let recovered = if matches!(mode, "direct" | "packed" | "reuse" | "linear") {
                 MvccPages::open_direct(p, cfg, None)
             } else {
                 MvccPages::open(p, cfg, None)

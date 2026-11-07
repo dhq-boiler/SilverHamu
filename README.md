@@ -6,6 +6,14 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Encoding sorted MVCC rows directly
+
+Direct encoding of sorted MVCC rows measured **52.0 ms update p99**, a **103.4 ms** worst request, and 293.8 transactions/s at 414.5 MiB end RSS. The previous page-map encoder measured 66.4 ms, 111.2 ms and 292.3 transactions/s at 414.6 MiB.
+
+[Timing breakdown, all trials and byte-compatibility checks](docs/benchmarks/linear-mvcc-2026-11-07/README.md).
+
+![Comparison of checkpoint encoders](docs/benchmarks/linear-mvcc-2026-11-07/comparison.svg)
+
 ## Cost of copying MVCC rows into checkpoint pages
 
 At 1M rows, four writers, two CPUs and 4 GiB, direct page packing with one encoding per paired page measured **68.9 ms update p99, 123.0 ms worst wait and 294.2 transactions/s** at 414.7 MiB end RSS. The previous direct scan measured 99.6 ms, 176.4 ms and 278.7 transactions/s. The dual-index reference measured 80.8 ms, 132.3 ms and 285.7 transactions/s at 767.3 MiB.

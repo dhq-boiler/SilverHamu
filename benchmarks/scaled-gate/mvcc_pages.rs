@@ -4,6 +4,7 @@ type Fault = Option<Arc<dyn Fn(&str) -> io::Result<()> + Send + Sync>>;
 struct MvccPages {
     direct: bool,
     packed: bool,
+    linear: bool,
     profile: bool,
     disk: Mutex<Dirty>,
     turns: TurnQueue,
@@ -52,9 +53,13 @@ impl MvccPages {
         direct: bool,
     ) -> crate::transactions::Result<Database> {
         let mut disk = disk;
-        let reuse = direct
-            && (std::env::var_os("CATDB_TEST_REUSE").is_some()
-                || std::env::var("SCALED_VARIANT").as_deref() == Ok("reuse"));
+        let linear = direct
+            && (std::env::var_os("CATDB_TEST_LINEAR").is_some()
+                || std::env::var("SCALED_VARIANT").as_deref() == Ok("linear"));
+        let reuse = linear
+            || direct
+                && (std::env::var_os("CATDB_TEST_REUSE").is_some()
+                    || std::env::var("SCALED_VARIANT").as_deref() == Ok("reuse"));
         disk.reuse_encoded = reuse;
         let lease = disk.pool.try_clone()?;
         let db = Database::from_state(state, [87; 16], lease);
@@ -63,6 +68,7 @@ impl MvccPages {
             direct,
             disk: Mutex::new(disk),
             turns: TurnQueue::default(),
+            linear,
             packed: reuse
                 || direct
                     && (std::env::var_os("CATDB_TEST_PACK").is_some()
@@ -130,7 +136,14 @@ impl TestPersistence for MvccPages {
                 return Err(TxError::Invalid("checkpoint snapshot"));
             }
             Phase::begin(self.profile);
-            if self.packed {
+            if self.linear {
+                let mut page = LinearPage::new();
+                disk.switch_sources(&mut |s| self.signal(s), |lo, hi, emit| {
+                    Self::collect_pages(&reader, lo, hi, &mut page, &mut |start, page| {
+                        emit(start, PageSource::Linear(page))
+                    })
+                })
+            } else if self.packed {
                 disk.switch_chunks(&mut |s| self.signal(s), |lo, hi, emit| {
                     Self::pack_range(&reader, lo, hi, emit)
                 })

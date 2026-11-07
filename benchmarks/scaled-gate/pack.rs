@@ -5,7 +5,17 @@ impl MvccPages {
         hi: Option<&[u8]>,
         emit: &mut dyn FnMut(Vec<u8>, &WriteSet) -> io::Result<()>,
     ) -> io::Result<()> {
-        let mut entries = WriteSet::new();
+        Self::collect_pages(reader, lo, hi, &mut WriteSet::new(), &mut |start, w| {
+            emit(start, w)
+        })
+    }
+    fn collect_pages<T: RowCollector>(
+        reader: &Transaction,
+        lo: &[u8],
+        hi: Option<&[u8]>,
+        entries: &mut T,
+        emit: &mut dyn FnMut(Vec<u8>, &mut T) -> io::Result<()>,
+    ) -> io::Result<()> {
         let mut after: Option<Vec<u8>> = None;
         let mut fence = lo.to_vec();
         let mut bytes = 140usize;
@@ -32,11 +42,11 @@ impl MvccPages {
                         if 140 + size > BLOCK {
                             return Err(err("row exceeds page"));
                         }
-                        if bytes + size > BLOCK || entries.len() == MAX_OPS {
+                        if bytes + size > BLOCK || entries.count() == MAX_OPS {
                             split = Some(key.to_vec());
                             break;
                         }
-                        entries.insert(key.to_vec(), Some(value.to_vec()));
+                        entries.push_row(key, value);
                         bytes += size;
                     }
                     consumed = Some(key);
@@ -47,9 +57,9 @@ impl MvccPages {
                 split.is_none() && rows.peek().is_none()
             };
             if split.is_some() || done {
-                if !entries.is_empty() {
-                    emit(std::mem::take(&mut fence), &entries)?;
-                    entries.clear();
+                if entries.count() > 0 {
+                    emit(std::mem::take(&mut fence), entries)?;
+                    entries.reset();
                     bytes = 140;
                 }
             }

@@ -681,3 +681,5 @@ fn er_identifiable_misplacement_uses_the_intact_peer() {
 
 include!("dirty.rs");
 include!("dirty_checks.rs");
+
+include!("linear.rs");

@@ -47,9 +47,12 @@ def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("raw",type=Path);parser.add_argument("out",type=Path)
     parser.add_argument("--reuse",action="store_true")
+    parser.add_argument("--linear",action="store_true")
     args=parser.parse_args();args.out.mkdir(parents=True,exist_ok=True)
     modes=MODES+(("reuse",) if args.reuse else ())
     names=NAMES+(("Pack + reuse",) if args.reuse else ())
+    if args.linear:
+        modes=("reuse","linear");names=("Page map","Linear")
     groups={}
     for stage in ("diagnostic","1m"):
         raw=args.raw/stage

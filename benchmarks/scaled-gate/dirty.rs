@@ -154,6 +154,19 @@ impl Dirty {
             &mut dyn FnMut(Vec<u8>, &WriteSet) -> io::Result<()>,
         ) -> io::Result<()>,
     ) -> io::Result<()> {
+        self.switch_sources(hook, |lo, hi, emit| {
+            chunks(lo, hi, &mut |start, w| emit(start, PageSource::Tree(w)))
+        })
+    }
+    fn switch_sources(
+        &mut self,
+        hook: Hook<'_>,
+        mut chunks: impl FnMut(
+            &[u8],
+            Option<&[u8]>,
+            &mut dyn FnMut(Vec<u8>, PageSource<'_>) -> io::Result<()>,
+        ) -> io::Result<()>,
+    ) -> io::Result<()> {
         if self.failed || self.control.poisoned {
             return Err(err("reopen required"));
         }
@@ -336,7 +349,7 @@ fn save(
     cursor: &mut u32,
     root: &Record,
     generation: u64,
-    w: &WriteSet,
+    source: PageSource<'_>,
     reuse_encoded: bool,
     hook: Hook<'_>,
 ) -> io::Result<Arc<Address>> {
@@ -349,52 +362,73 @@ fn save(
     if pool.metadata()?.len() < end {
         pool.set_len(end)?;
     }
-    let r = Record {
+    let mut r = Record {
         kind: 1,
         index: slot,
         epoch: generation,
         seq: generation,
-        payload: encode_frame(generation, w),
+        payload: vec![],
         ..root.clone()
     };
-    if r.payload.len() + HEAD > BLOCK {
-        return Err(err("block overflow"));
-    }
-    let digest = if reuse_encoded {
-        let encoded = r.encode();
-        let checksum = u32::from_le_bytes(encoded[80..84].try_into().unwrap());
-        for lane in 0..2 {
-            write_encoded_record(
-                pool,
-                costs,
-                u64::from(slot) * PAIR + lane * BLOCK as u64,
-                &encoded,
-                "page",
-                "page",
-                hook,
-            )?;
+    let (count, digest) = match source {
+        PageSource::Linear(page) => {
+            let count = page.count;
+            let encoded = page.seal(&r)?;
+            (count, write_pair(pool, costs, slot, encoded, hook)?)
         }
-        checksum
-    } else {
-        for lane in 0..2 {
-            write_record(
-                pool,
-                costs,
-                u64::from(slot) * PAIR + lane * BLOCK as u64,
-                &r,
-                "page",
-                "page",
-                hook,
-            )?;
+        PageSource::Tree(w) => {
+            r.payload = encode_frame(generation, w);
+            if r.payload.len() + HEAD > BLOCK {
+                return Err(err("block overflow"));
+            }
+            let digest = if reuse_encoded {
+                let encoded = r.encode();
+                write_pair(pool, costs, slot, &encoded, hook)?
+            } else {
+                for lane in 0..2 {
+                    write_record(
+                        pool,
+                        costs,
+                        u64::from(slot) * PAIR + lane * BLOCK as u64,
+                        &r,
+                        "page",
+                        "page",
+                        hook,
+                    )?;
+                }
+                r.checksum()
+            };
+            (w.len(), digest)
         }
-        r.checksum()
     };
     let address = Arc::new(Address {
-        rows: w.len(),
+        rows: count,
         slot,
         generation,
         digest,
     });
     live.insert(slot, Arc::downgrade(&address));
     Ok(address)
+}
+
+fn write_pair(
+    pool: &mut File,
+    costs: &mut Costs,
+    slot: u32,
+    encoded: &[u8],
+    hook: Hook<'_>,
+) -> io::Result<u32> {
+    let checksum = u32::from_le_bytes(encoded[80..84].try_into().unwrap());
+    for lane in 0..2 {
+        write_encoded_record(
+            pool,
+            costs,
+            u64::from(slot) * PAIR + lane * BLOCK as u64,
+            encoded,
+            "page",
+            "page",
+            hook,
+        )?;
+    }
+    Ok(checksum)
 }

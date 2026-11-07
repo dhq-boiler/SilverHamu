@@ -66,18 +66,23 @@ struct Record {
 impl Record {
     fn encode(&self) -> Vec<u8> {
         let mut b = vec![0; HEAD + self.payload.len()];
+        self.fill_header(&mut b[..HEAD], &self.payload);
+        b[HEAD..].copy_from_slice(&self.payload);
+        b
+    }
+    fn fill_header(&self, b: &mut [u8], payload: &[u8]) {
         b[..8].copy_from_slice(b"CATBIG01");
         for (at, value) in [
             (8, self.kind),
             (12, self.bank),
             (32, self.index),
-            (36, self.payload.len() as u32),
+            (36, payload.len() as u32),
             (40, self.previous),
             (44, self.config.checkpoints),
             (48, self.config.logs),
             (52, self.chunks),
             (64, self.chain),
-            (76, !(self.payload.len() as u32)),
+            (76, !(payload.len() as u32)),
         ] {
             b[at..at + 4].copy_from_slice(&value.to_le_bytes());
         }
@@ -88,15 +93,13 @@ impl Record {
         let digest = if self.kind == 2 {
             crate::crc32(&[])
         } else {
-            crate::crc32(&self.payload[..self.payload.len() - TRAILER_BYTES])
+            crate::crc32(&payload[..payload.len() - TRAILER_BYTES])
         };
         b[72..76].copy_from_slice(&digest.to_le_bytes());
         let checksum = crate::crc32(&b[..80]);
         b[80..84].copy_from_slice(&checksum.to_le_bytes());
         b[84..88].copy_from_slice(&(!checksum).to_le_bytes());
         b[88..96].copy_from_slice(b"BIGSEAL1");
-        b[HEAD..].copy_from_slice(&self.payload);
-        b
     }
     fn checksum(&self) -> u32 {
         u32::from_le_bytes(self.encode()[80..84].try_into().unwrap())

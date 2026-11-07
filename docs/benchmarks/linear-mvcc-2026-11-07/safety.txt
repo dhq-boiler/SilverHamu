@@ -1,0 +1,12 @@
+test transactions::scaled_gate::checks::timing::concurrent_point_range_and_write_dependencies_survive_switch ... ok
+test transactions::scaled_gate::checks::timing::direct_dirty_ranges_split_delete_and_restore_empty_generation ... ok
+test transactions::scaled_gate::checks::timing::four_acked_commits_recover_across_sync_and_publication ... ok
+test transactions::scaled_gate::checks::timing::linear_pages_are_byte_identical_across_generations_boundaries_and_splits ... ok
+test transactions::scaled_gate::checks::timing::mvcc_fifo_revalidates_and_publishes_only_after_sync ... ok
+test transactions::scaled_gate::checks::timing::mvcc_kills_recover_acknowledged_versions ... ok
+test transactions::scaled_gate::checks::timing::mvcc_persistence_error_requires_reopen ... ok
+test transactions::scaled_gate::checks::timing::packed_ranges_match_snapshot_across_split_and_tombstone_continuations ... ok
+test transactions::scaled_gate::checks::timing::ticket_handoff_drains_in_registration_order ... ok
+test result: ok. 108 passed; 0 failed; 27 ignored; 0 measured; 0 filtered out; finished in 28.38s
+test transactions::scaled_gate::checks::timing::packed_budget_refusal_preserves_updates_and_permit_reuse ... ok
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 134 filtered out; finished in 0.04s

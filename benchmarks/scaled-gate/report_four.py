@@ -35,9 +35,10 @@ def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("raw",type=Path)
     parser.add_argument("out",type=Path)
+    parser.add_argument("--mvcc",action="store_true")
     args=parser.parse_args()
     rows=[summarize(args.raw,run) for run in json.loads((args.raw/"runs.json").read_text())]
-    modes=("wal","dual","dirty")
+    modes=("wal","mvcc") if args.mvcc else ("wal","dual","dirty")
     assert sorted((r["mode"],r["rep"]) for r in rows)==sorted((m,i) for m in modes for i in (1,2,3))
     args.out.mkdir(parents=True,exist_ok=True)
     with (args.out/"trials.csv").open("w",newline="") as f:
@@ -48,11 +49,11 @@ def main():
     metrics=[("tx_s","Transactions / second"),("p99_ms","Request p99 (ms)"),
              ("max_ms","Worst request (ms)"),("checkpoint_ms","Checkpoint (ms)"),
              ("conflicts","Conflict retries / run"),("overlap","Requests overlapping a checkpoint")]
-    names=("WAL","Full dual","64 KiB delta")
+    names=("WAL","FIFO delta") if args.mvcc else ("WAL","Full dual","64 KiB delta")
     svg=['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" role="img"><title>Four-writer checkpoint comparison</title><rect width="960" height="420" fill="white"/><g fill="#18293d" font-family="sans-serif">']
     def label(x,y,s,size):
         svg.append(f'<text x="{x}" y="{y}" font-size="{size}">{s}</text>')
-    label(16,30,"One million rows, four writers, two CPUs and 4 GiB",23)
+    label(16,30,"MVCC persistence: one million rows, four writers, two CPUs and 4 GiB" if args.mvcc else "One million rows, four writers, two CPUs and 4 GiB",23)
     label(16,55,"Median of three runs, except worst request across all runs. Each panel has an independent scale.",14)
     for i,(key,title) in enumerate(metrics):
         x,y=16+i%3*316,90+i//3*160

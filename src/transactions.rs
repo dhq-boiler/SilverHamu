@@ -146,7 +146,16 @@ pub struct Database {
     inner: Arc<Inner>,
 }
 
+#[cfg(all(test, target_os = "linux"))]
+trait TestPersistence: Send + Sync {
+    fn commit(&self, tx: Transaction) -> Result<u64>;
+    fn checkpoint(&self, db: &Database) -> Result<CheckpointInfo>;
+}
+
 struct Inner {
+    #[cfg(all(test, target_os = "linux"))]
+    test_persistence: std::sync::OnceLock<Arc<dyn TestPersistence>>,
+
     group: group_commit::GroupCommit,
     reclaimer: reclamation::Reclaimer,
     state: Arc<Mutex<State>>,
@@ -735,6 +744,8 @@ impl Database {
         retirement.cleanup();
         Self {
             inner: Arc::new(Inner {
+                #[cfg(all(test, target_os = "linux"))]
+                test_persistence: std::sync::OnceLock::new(),
                 group: group_commit::GroupCommit::default(),
                 reclaimer: reclamation::Reclaimer::default(),
                 state: Arc::new(Mutex::new(state)),
@@ -802,6 +813,8 @@ impl Database {
     /// Replaces the WAL with a synced snapshot and commits made during its construction.
     /// Active transactions retain their in-memory history and may still commit.
     pub fn checkpoint(&self) -> Result<CheckpointInfo> {
+        #[cfg(all(test, target_os = "linux"))]
+        if let Some(storage) = self.inner.test_persistence.get() { return storage.checkpoint(self); }
         self.checkpoint_with(|_| Ok(()))
     }
 
@@ -1723,6 +1736,8 @@ impl Transaction {
             trace_mark(0);
         }
         let database = self.database.clone();
+        #[cfg(all(test, target_os = "linux"))]
+        if let Some(storage) = database.inner.test_persistence.get() { return storage.commit(self); }
         if !self.writes.is_empty() && database.inner.group.enabled() {
             return database.inner.group.submit(self);
         }

@@ -6,6 +6,14 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## FIFO delta checkpoints on native MVCC
+
+With native MVCC on both paths, FIFO delta persistence measured **293.2 transactions/s**, p99 **84.2 ms**, and worst request **149.7 ms**. WAL measured 203.4 transactions/s, 579.1 ms and 1,511.1 ms. End RSS was 769 MiB for the prototype and 409 MiB for WAL.
+
+[All six trials, crash tests and setup](docs/benchmarks/mvcc-delta-2026-11-07/README.md).
+
+![Native MVCC checkpoint comparison](docs/benchmarks/mvcc-delta-2026-11-07/comparison.svg)
+
 ## FIFO publication under four writers
 
 FIFO publication completed 271.5 transactions/s at p99 109.8 ms. The worst request across three runs fell from 2,841.8 ms with the original delta mutex to **164.4 ms**. WAL measured 208.3 transactions/s, p99 207.5 ms and a 2,951.9 ms worst request. The original delta path was slightly faster on throughput (275.0 transactions/s).

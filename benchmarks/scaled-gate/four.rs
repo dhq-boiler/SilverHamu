@@ -318,6 +318,12 @@ fn four_run(
     drop(backend);
     drop(run.wal);
     match mode {
+        "mvcc" => {
+            let recovered = MvccPages::open(p, cfg, None);
+            let mut reader = recovered.begin_read().unwrap();
+            assert_eq!(reader.version(), ordered.last().unwrap().seq);
+            check_tx(&mut reader, n, &expected);
+        }
         "wal" => check_tx(
             &mut Database::open(p).unwrap().begin_read().unwrap(),
             n,

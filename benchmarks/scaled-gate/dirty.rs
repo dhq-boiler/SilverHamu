@@ -225,7 +225,9 @@ impl Dirty {
                 .map(|(k, _)| k.as_slice());
             next.remove(lower);
             if let Some(page) = self.prepared.get(lower) {
-                if page.generation != generation { return Err(err("prepared generation mismatch")); }
+                if page.generation != generation {
+                    return Err(err("prepared generation mismatch"));
+                }
                 next.insert(lower.clone(), page.clone());
                 continue;
             }

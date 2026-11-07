@@ -96,7 +96,11 @@ fn pagepatch_crashes_preserve_acknowledged_update() {
         "selector.synced",
     ] {
         let p = dir().join("kill.db");
-        kill_at(&p, point, "transactions::scaled_gate::checks::timing::patch_kill_worker");
+        kill_at(
+            &p,
+            point,
+            "transactions::scaled_gate::checks::timing::patch_kill_worker",
+        );
         let db = MvccPages::open_direct(&p, four_config(), None);
         let mut r = db.begin_read().unwrap();
         assert_eq!(r.version(), 1);
@@ -104,28 +108,24 @@ fn pagepatch_crashes_preserve_acknowledged_update() {
     }
 }
 
-fn kill_at(p:&Path,point:&str,worker:&str){
-        let mut child = Command::new(std::env::current_exe().unwrap())
-            .args([
-                worker,
-                "--exact",
-                "--ignored",
-            ])
-            .env("PATCH_FILE", p)
-            .env("PATCH_POINT", point)
-            .stdout(Stdio::null())
-            .spawn()
-            .unwrap();
-        let until = Instant::now() + Duration::from_secs(12);
-        while !p.with_extension("ready").exists() {
-            assert!(child.try_wait().unwrap().is_none(), "child exited {point}");
-            if Instant::now() > until {
-                let _ = child.kill();
-                let _ = child.wait();
-                panic!("missed {point}");
-            }
-            std::thread::sleep(Duration::from_millis(5));
+fn kill_at(p: &Path, point: &str, worker: &str) {
+    let mut child = Command::new(std::env::current_exe().unwrap())
+        .args([worker, "--exact", "--ignored"])
+        .env("PATCH_FILE", p)
+        .env("PATCH_POINT", point)
+        .stdout(Stdio::null())
+        .spawn()
+        .unwrap();
+    let until = Instant::now() + Duration::from_secs(12);
+    while !p.with_extension("ready").exists() {
+        assert!(child.try_wait().unwrap().is_none(), "child exited {point}");
+        if Instant::now() > until {
+            let _ = child.kill();
+            let _ = child.wait();
+            panic!("missed {point}");
         }
-        child.kill().unwrap();
-        child.wait().unwrap();
+        std::thread::sleep(Duration::from_millis(5));
+    }
+    child.kill().unwrap();
+    child.wait().unwrap();
 }

@@ -6,6 +6,16 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Prewriting dirty MVCC pages
+
+With one million rows and four writers, preparing checkpoint pages ahead of publication measured **42.27 ms update p99** compared with **48.54 ms** for scanning at publication. The controlled pilot reused all sixteen prepared ranges when later commits touched other pages, and none when they touched the same pages. [Per-trial results, write amplification and recovery tests](docs/benchmarks/prewrite-2026-11-07/README.md).
+
+![Four-writer checkpoint experiment](docs/benchmarks/prewrite-2026-11-07/comparison.svg)
+
+![Service product update reference](docs/benchmarks/prewrite-2026-11-07/service.svg)
+
+![Embedded product update reference](docs/benchmarks/prewrite-2026-11-07/embedded.svg)
+
 ## Same-size updates to a copied checkpoint page
 
 Across 96 dirty 64 KiB pages, one changed row per page took **21.06 ms** with the existing MVCC scan and **24.89 ms** with a validated page copy. Copying won 3 of 18 paired trials across six update densities. With four writers, update p99 rose from **42.61 to 47.70 ms**. The copy path remains a test-only experiment. [Recovery tests, per-trial results and reproduction](docs/benchmarks/copy-patch-2026-11-07/README.md).

@@ -66,7 +66,9 @@ impl MvccPages {
         let grouped = patch
             || direct
                 && (std::env::var_os("CATDB_TEST_ARRIVALS").is_some()
-                    || std::env::var("SCALED_VARIANT").as_deref()  .is_ok_and(|v| matches!(v, "arrivals" | "prewrite")));
+                    || std::env::var("SCALED_VARIANT")
+                        .as_deref()
+                        .is_ok_and(|v| matches!(v, "arrivals" | "prewrite")));
         if disk.group_version.is_some() && !grouped {
             return Err(TxError::Invalid("group persistence required"));
         }
@@ -132,7 +134,14 @@ impl MvccPages {
 }
 include!("prewrite.rs");
 impl TestPersistence for MvccPages {
-    fn prewrite(&self, db: &Database, count: usize, bytes: u64) -> crate::transactions::Result<(usize,u64)> { self.prepare_dirty(db,count,bytes) }
+    fn prewrite(
+        &self,
+        db: &Database,
+        count: usize,
+        bytes: u64,
+    ) -> crate::transactions::Result<(usize, u64)> {
+        self.prepare_dirty(db, count, bytes)
+    }
     fn commit(&self, tx: Transaction) -> crate::transactions::Result<u64> {
         if let Some(queue) = &self.arrivals {
             return queue.submit(self, tx);
@@ -211,7 +220,10 @@ impl TestPersistence for MvccPages {
             disk.switch(&mut |s| self.signal(s))
         };
         if std::env::var_os("PREWRITE_COUNTS").is_some() {
-            println!("PREWRITE_CHECKPOINT,{version},{prepared_count},{}",disk.control.costs.writes.get("page").copied().unwrap_or(0)-page_bytes);
+            println!(
+                "PREWRITE_CHECKPOINT,{version},{prepared_count},{}",
+                disk.control.costs.writes.get("page").copied().unwrap_or(0) - page_bytes
+            );
         }
         let phase_times = Phase::finish();
         if let Some(ns) = phase_times {

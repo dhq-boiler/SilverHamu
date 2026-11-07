@@ -2,7 +2,6 @@
 import csv
 import re
 from pathlib import Path
-from statistics import median
 import argparse
 
 def save(path, rows):

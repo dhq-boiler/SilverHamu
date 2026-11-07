@@ -1,0 +1,63 @@
+warning: method `hold_test_sync` is never used
+   --> src/group_commit.rs:130:19
+    |
+123 | impl Database {
+    | ------------- method in this implementation
+...
+130 |     pub(crate) fn hold_test_sync(&self, gate: Arc<[std::sync::Barrier; 2]>) {
+    |                   ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: `catdb` (lib test) generated 1 warning
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running unittests src/lib.rs (target/release/deps/newdbms-458055916a75b401)
+
+running 4 tests
+test transactions::scaled_gate::checks::timing::prewrite_crashes ... ok
+test transactions::scaled_gate::checks::timing::prewrite_pilot ... PREWRITE_CHECKPOINT,0,0,6854840
+PREWRITE_CHECKPOINT,32,0,4185920
+PREWRITE_PILOT,0,false,false,0,0,220,18951993,18952213
+PREWRITE_CHECKPOINT,0,0,6854840
+PREWRITE_CHECKPOINT,32,16,2093008
+PREWRITE_PILOT,0,false,true,16,2092912,2144747,17050849,19195596
+PREWRITE_CHECKPOINT,0,0,6854840
+PREWRITE_CHECKPOINT,32,0,2092912
+PREWRITE_PILOT,0,true,false,0,0,184,15291350,15291534
+PREWRITE_CHECKPOINT,0,0,6854840
+PREWRITE_CHECKPOINT,32,0,2092912
+PREWRITE_PILOT,0,true,true,16,2092912,2066316,13821157,15887473
+PREWRITE_CHECKPOINT,0,0,6854840
+PREWRITE_CHECKPOINT,32,16,2093008
+PREWRITE_PILOT,1,false,true,16,2092912,2101272,15538844,17640116
+PREWRITE_CHECKPOINT,0,0,6854840
+PREWRITE_CHECKPOINT,32,0,4185920
+PREWRITE_PILOT,1,false,false,0,0,175,16797647,16797822
+PREWRITE_CHECKPOINT,0,0,6854840
+PREWRITE_CHECKPOINT,32,0,2092912
+PREWRITE_PILOT,1,true,true,16,2092912,2023074,13312854,15335928
+PREWRITE_CHECKPOINT,0,0,6854840
+PREWRITE_CHECKPOINT,32,0,2092912
+PREWRITE_PILOT,1,true,false,0,0,165,16540622,16540787
+PREWRITE_CHECKPOINT,0,0,6854840
+PREWRITE_CHECKPOINT,32,0,4185920
+PREWRITE_PILOT,2,false,false,0,0,633,16920660,16921293
+PREWRITE_CHECKPOINT,0,0,6854840
+PREWRITE_CHECKPOINT,32,16,2093008
+PREWRITE_PILOT,2,false,true,16,2092912,2132833,19472697,21605530
+PREWRITE_CHECKPOINT,0,0,6854840
+PREWRITE_CHECKPOINT,32,0,2092912
+PREWRITE_PILOT,2,true,false,0,0,202,17369895,17370097
+PREWRITE_CHECKPOINT,0,0,6854840
+PREWRITE_CHECKPOINT,32,0,2092912
+PREWRITE_PILOT,2,true,true,16,2092912,2743846,16709273,19453119
+ok
+test transactions::scaled_gate::checks::timing::prewrite_recycling_and_conflict ... PREWRITE_CHECKPOINT,0,0,285840
+PREWRITE_CHECKPOINT,12,1,0
+ok
+test transactions::scaled_gate::checks::timing::prewrite_shapes_and_failure ... PREWRITE_CHECKPOINT,0,0,400120
+PREWRITE_CHECKPOINT,2,0,146554
+PREWRITE_CHECKPOINT,10,0,0
+ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 149 filtered out; finished in 3.70s

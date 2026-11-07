@@ -946,6 +946,8 @@ impl Database {
             #[cfg(feature = "lock-timing")]
             let timing_start = std::time::Instant::now();
             publication_guard = Some(self.inner.writer.lock().map_err(|_| Error::Poisoned)?);
+            #[cfg(all(test, target_os = "linux"))]
+            independent_trace::mark(0);
             #[cfg(feature = "lock-timing")]
             let timing_acquired = std::time::Instant::now();
             let end = self.state()?.wal_bytes;
@@ -1077,6 +1079,8 @@ impl Database {
                 }
             }
         };
+        #[cfg(all(test, target_os = "linux"))]
+        independent_trace::mark(1);
         drop(publication_guard);
         if result.is_ok() {
             hook(CheckpointStage::Released)?;
@@ -1697,13 +1701,19 @@ impl Transaction {
     fn commit_single(self) -> Result<u64> {
         let database = self.database.clone();
         self.commit_with(|file, frame| {
+        #[cfg(all(test, target_os = "linux"))]
+        independent_trace::size(frame.len());
             file.write_all(frame)?;
             #[cfg(feature = "lock-timing")]
             trace_mark(5);
             database.inner.group.record_sync();
             #[cfg(feature = "lock-timing")]
             sync_start_mark();
+        #[cfg(all(test, target_os = "linux"))]
+        independent_trace::mark(2);
             let result = file.sync_all();
+            #[cfg(all(test, target_os = "linux"))]
+            independent_trace::mark(3);
             #[cfg(feature = "lock-timing")]
             trace_mark(6);
             result
@@ -1761,7 +1771,11 @@ impl Transaction {
         self.prepare_log()?;
         #[cfg(feature = "retirement-timing")]
         take_retirement_trace();
+        #[cfg(all(test, target_os = "linux"))]
+        independent_trace::mark(0);
         let _writer = database.inner.writer.lock().map_err(|_| Error::Poisoned)?;
+        #[cfg(all(test, target_os = "linux"))]
+        independent_trace::mark(1);
         #[cfg(feature = "retirement-timing")]
         let _writer = TimedWriter(Some(_writer));
         #[cfg(feature = "lock-timing")]
@@ -4631,3 +4645,7 @@ mod capacity_gate;
 #[cfg(all(test, target_os = "linux"))]
 #[path = "../benchmarks/scaled-gate/mod.rs"]
 mod scaled_gate;
+
+#[cfg(all(test, target_os = "linux"))]
+#[path = "../benchmarks/scaled-gate/independent_trace.rs"]
+mod independent_trace;

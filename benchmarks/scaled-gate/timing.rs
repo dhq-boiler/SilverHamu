@@ -385,3 +385,5 @@ include!("arrival_checks.rs");
 include!("density.rs");
 include!("patch_checks.rs");
 include!("prewrite_checks.rs");
+
+include!("independent.rs");

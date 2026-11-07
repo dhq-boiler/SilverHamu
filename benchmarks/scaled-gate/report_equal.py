@@ -10,15 +10,15 @@ from statistics import median
 from report_independent import analyze, overlap, records, save
 
 
-def handoffs(log, ops, cap):
+def handoffs(log, ops, cap, lanes=4, allow_idle=False):
     attempts = records(log, "ATTEMPT")
     publications = records(log, "PUBLICATION")
     assert [c[0] for c in publications] == list(range(1, ops // cap))
     holds = sorted(records(log, "HOLD"), key=lambda h: h[2])
     assert len(holds) == len(attempts) + 2 * len(publications)
-    for lane in range(4):
+    for lane in range(lanes):
         lane_holds = [h for h in holds if h[0] == lane]
-        lane_attempts = [a for a in attempts if a[0] % 4 == lane]
+        lane_attempts = [a for a in attempts if a[0] % lanes == lane]
         assert len(lane_holds) == len(lane_attempts)
         for a,h in zip(lane_attempts,lane_holds):
             assert a[3] <= h[1] <= h[2] <= h[3] <= h[4] <= a[9]
@@ -48,7 +48,7 @@ def handoffs(log, ops, cap):
         waiting_gaps.append(observed-before)
         release_overlap += observed - min(after,observed)
         active_gap_ns += overlap(before,observed,first,last)
-    assert waiting_gaps and sum(waiting_gaps) >= release_overlap
+    assert (allow_idle or waiting_gaps) and sum(waiting_gaps) >= release_overlap
     durable_ids = [a[10] for a in attempts if a[10]]
     base = min(durable_ids) - 1
     trigger_commits = {a[10]-base: a for a in attempts if a[10] and (a[10]-base)%cap==0}
@@ -80,8 +80,8 @@ def handoffs(log, ops, cap):
                 maintenance_hold_ms=held_cp/1e6,other_time_ms=remaining/1e6,
                 sync_during_prefix_ms=during_prefix/1e6,sync_during_scan_ms=during_scan/1e6,
                 sync_during_snapshot_sync_ms=during_snapshot_sync/1e6,
-                mean_envelope_us=sum(waiting_gaps)/len(waiting_gaps)/1e3,
-                p99_envelope_us=sorted(waiting_gaps)[math.ceil(.99*len(waiting_gaps))-1]/1e3,
+                mean_envelope_us=sum(waiting_gaps)/max(1,len(waiting_gaps))/1e3,
+                p99_envelope_us=(sorted(waiting_gaps)[math.ceil(.99*len(waiting_gaps))-1]/1e3 if waiting_gaps else 0),
                 total_envelope_ms=sum(waiting_gaps)/1e6,
                 after_unlock_return_to_acquired_ms=release_overlap/1e6,
                 active_envelope_ms=active_gap_ns/1e6,

@@ -6,12 +6,13 @@ def call(*cmd,timeout=600):
     r=subprocess.run(list(map(str,cmd)),capture_output=True,text=True,timeout=timeout)
     if r.returncode:raise RuntimeError(r.stderr[-2000:]+r.stdout[-1000:])
     return r.stdout.strip()
-def one(out,rep,mode,trace,pilot,calibration=False, image='catdb-journal-identity', range_writeback=False):
+def one(out,rep,mode,trace,pilot,calibration=False, image='catdb-journal-identity', range_writeback=False, writers=4, rate=0):
     tag=uuid.uuid4().hex[:10]
     name=f"{rep}-{mode}-"+("trace" if trace else "plain");folder=out/name;folder.mkdir()
     vol="catdb-os-"+tag;obs=vol+"-observer"
     n,ops,cap=(10000,512,32) if pilot else (1_000_000,16384,256)
     if calibration: n,ops,cap=1_000_000,768,256
+    if rate: n,ops,cap=1_000_000,1024,256
     call("docker","volume","create",vol)
     owned=False
     try:
@@ -29,6 +30,7 @@ def one(out,rep,mode,trace,pilot,calibration=False, image='catdb-journal-identit
         cmd=["docker","run","--rm","--name",vol+"-db","--network","none","--cpus","2","--memory","4g","--memory-swap","4g","-v",vol+":/data"]
         for k,v in dict(SCALED_ROOT="/data",SCALED_VARIANT="prefix-on",SCALED_ROWS=n,SCALED_OPS=ops,SCALED_CAP=cap,EXACT_PUBLICATIONS=1,JOURNAL_WORKER_TAG=tag,SYNC_OS_TAG=tag).items():
             cmd+=["-e",f"{k}={v}"]
+        if rate or writers!=4:cmd+=["-e",f"BENCH_RATE={rate}","-e",f"BENCH_WRITERS={writers}"]
         if range_writeback:cmd+=["-e","CATDB_TEST_RANGE_WRITEBACK=1"]
         cmd+=[image,"cargo","test","--locked","--release"]
         if mode in ("fifo","aged"):cmd+=["--features",mode+"-writer"]

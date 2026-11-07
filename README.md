@@ -6,6 +6,16 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Writer handoff at light and saturated demand
+
+In the earlier pair with 33.9% lower throughput, 46.35 s of 47.61 s of extra response time fell inside WAL sync. The contended handoff envelope grew by 0.34 s. Fresh continuous-load trials measured current / 16 ms update p99 at 887.26 / 134.92 ms and throughput at 108.14 / 112.05 updates/s. The light-load panels include planned arrivals and actual dispatch. [Decision, all 27 trials, scheduling lag and OS evidence](docs/benchmarks/aged-load-2026-11-08/README.md).
+
+The current lock remains the default. The 16 ms candidate targets long waits among competing writers.
+
+![Update rates and latency at three loads](docs/benchmarks/aged-load-2026-11-08/load.svg)
+
+![Where the original elapsed time changed](docs/benchmarks/aged-load-2026-11-08/previous.svg)
+
 ## Age-based writer handoff
 
 The earlier 6.80 s update was overtaken by 1,012 writer attempts. The longest overlap with a single WAL sync was 20.50 ms. A prototype gives priority to the oldest registered writer after 16 ms. With current / FIFO / 16 ms locks, update p99 was 787.49 / 119.46 / 96.95 ms, worst latency was 5,672.07 / 350.23 / 390.58 ms and throughput was 123.31 / 119.12 / 144.14 updates/s. [Pair-by-pair results, recovery and replayable input](docs/benchmarks/aged-writer-2026-11-08/README.md).

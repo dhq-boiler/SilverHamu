@@ -48,7 +48,11 @@ fn independent_campaign() {
     }
     let now = || clock.elapsed().as_nanos() as u64;
     let (send, recv) = std::sync::mpsc::channel::<usize>();
-    let barrier = Barrier::new(5);
+    let lanes: usize = std::env::var("BENCH_WRITERS").map_or(4, |v| v.parse().unwrap());
+    let rate: u64 = std::env::var("BENCH_RATE").map_or(0, |v| v.parse().unwrap());
+    assert!(matches!(lanes, 1 | 4));
+    let schedule = std::sync::OnceLock::new();
+    let barrier = Barrier::new(lanes + 1);
     let exact = std::env::var_os("EXACT_PUBLICATIONS").is_some();
     let holds = Mutex::new(Vec::new());
     let worker_holds = &holds;
@@ -123,11 +127,12 @@ fn independent_campaign() {
             result
         });
         let mut threads = Vec::new();
-        for lane in 0..4 {
+        for lane in 0..lanes {
             let db = &db;
             let send = send.clone();
             let barrier = &barrier;
             let tag = os_tag.as_deref();
+            let schedule = &schedule;
             let holds = &holds;
             threads.push(scope.spawn(move || {
                 if let Some(tag) = tag {
@@ -135,11 +140,18 @@ fn independent_campaign() {
                 }
                 independent_trace::enable(clock);
                 if exact {
-                    independent_trace::enable_handoffs(clock, ops / 4 + 128);
+                    independent_trace::enable_handoffs(clock, ops / lanes + 128);
                 }
                 let mut records = Vec::new();
                 barrier.wait();
-                for id in (lane..ops).step_by(4) {
+                let origin = *schedule.get_or_init(now);
+                for id in (lane..ops).step_by(lanes) {
+                    if rate != 0 {
+                        let due = origin + (id as u64 * 1_000_000_000) / rate;
+                        while let Some(left) = due.checked_sub(now()).filter(|&n| n > 0) {
+                            std::thread::sleep(std::time::Duration::from_nanos(left));
+                        }
+                    }
                     let received = now();
                     let w = changes(id, n);
                     loop {
@@ -205,6 +217,7 @@ fn independent_campaign() {
     if os_tag.is_some() {
         sync_clock::clock_anchor(clock);
     }
+    println!("LOAD_SCHEDULE,{},{lanes},{rate}", schedule.get().unwrap());
     let mut expected = BTreeMap::new();
     let mut committed = Vec::new();
     for (id, received, begin, commit, [l, a, s, f, b], end, seq) in attempts {

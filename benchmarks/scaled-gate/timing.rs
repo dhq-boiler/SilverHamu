@@ -124,7 +124,8 @@ fn compare() {
     assert!(matches!(
         mode.as_str(),
         "wal"
-            | "prefix-on" | "prefix-off"
+            | "prefix-on"
+            | "prefix-off"
             | "dual"
             | "dirty"
             | "mvcc"
@@ -184,7 +185,9 @@ fn compare() {
             max_buffer_bytes: 64 * PAGE,
         };
         let d = Database::create_with_limits(&p, [87; 16], limits).unwrap();
-        if !mode.starts_with("prefix-") {d.set_group_commit(false);}
+        if !mode.starts_with("prefix-") {
+            d.set_group_commit(false);
+        }
         for begin in (0..n).step_by(1000) {
             let mut tx = d.begin().unwrap();
             for i in begin..(begin + 1000).min(n) {

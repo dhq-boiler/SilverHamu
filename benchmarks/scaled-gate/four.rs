@@ -122,7 +122,8 @@ struct Sample {
     end: u128,
     retries: usize,
 }
-type PrefixWorker=std::thread::JoinHandle<crate::transactions::Result<crate::transactions::PreparedCheckpoint>>;
+type PrefixWorker =
+    std::thread::JoinHandle<crate::transactions::Result<crate::transactions::PreparedCheckpoint>>;
 struct Four {
     native_prefix: bool,
     native_measure: bool,
@@ -147,7 +148,7 @@ impl Four {
             _ => None,
         };
         Self {
-            native_prefix: std::env::var("SCALED_VARIANT").as_deref()==Ok("prefix-on"),
+            native_prefix: std::env::var("SCALED_VARIANT").as_deref() == Ok("prefix-on"),
             native_measure: std::env::var_os("PREFIX_MEASURE").is_some(),
             prefix_worker: Mutex::new(None),
             commit_profile: std::env::var_os("CATDB_COMMIT_PHASES").is_some(),
@@ -195,15 +196,17 @@ impl Four {
             Trace::end(&mut trace, self.clock, "prepare");
             let _permit = loop {
                 let guard = self.admission.read().unwrap();
-                if let Ok(previous) = self
-                    .remaining
-                    .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_sub(1))
+                if let Ok(previous) =
+                    self.remaining
+                        .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_sub(1))
                 {
-                    if self.native_prefix && previous==self.cap {
-                        let mut worker=self.prefix_worker.lock().unwrap();
+                    if self.native_prefix && previous == self.cap {
+                        let mut worker = self.prefix_worker.lock().unwrap();
                         if worker.is_none() {
-                            let db=self.wal.as_ref().unwrap().clone();
-                            *worker=Some(std::thread::spawn(move || db.prepare_checkpoint_prefix(2048)));
+                            let db = self.wal.as_ref().unwrap().clone();
+                            *worker = Some(std::thread::spawn(move || {
+                                db.prepare_checkpoint_prefix(2048)
+                            }));
                         }
                     }
                     break guard;
@@ -213,16 +216,42 @@ impl Four {
                 if self.remaining.load(Ordering::Acquire) == 0 {
                     let before = self.clock.elapsed().as_nanos();
                     if self.native_measure {
-                        let db=self.wal.as_ref().unwrap();
-                        let end=db.state().unwrap().wal_bytes;
-                        let (info,prefix_bytes)=if self.native_prefix {
-                            let p=self.prefix_worker.lock().unwrap().take().unwrap().join().unwrap().unwrap();
-                            let bytes=p.draft.as_ref().unwrap().file.as_ref().unwrap().metadata().unwrap().len();
-                            (p.finish().unwrap(),bytes)
-                        } else {(db.checkpoint().unwrap(),0)};
-                        println!("NATIVE_BYTES,{end},{},{},{prefix_bytes}",info.before_bytes,info.after_bytes);
+                        let db = self.wal.as_ref().unwrap();
+                        let end = db.state().unwrap().wal_bytes;
+                        let (info, prefix_bytes) = if self.native_prefix {
+                            let p = self
+                                .prefix_worker
+                                .lock()
+                                .unwrap()
+                                .take()
+                                .unwrap()
+                                .join()
+                                .unwrap()
+                                .unwrap();
+                            let bytes = p
+                                .draft
+                                .as_ref()
+                                .unwrap()
+                                .file
+                                .as_ref()
+                                .unwrap()
+                                .metadata()
+                                .unwrap()
+                                .len();
+                            (p.finish().unwrap(), bytes)
+                        } else {
+                            (db.checkpoint().unwrap(), 0)
+                        };
+                        println!(
+                            "NATIVE_BYTES,{end},{},{},{prefix_bytes}",
+                            info.before_bytes, info.after_bytes
+                        );
                     } else {
-                        self.publication.lock().unwrap().backend.checkpoint(&mut noop);
+                        self.publication
+                            .lock()
+                            .unwrap()
+                            .backend
+                            .checkpoint(&mut noop);
                     }
                     let after = self.clock.elapsed().as_nanos();
                     self.checkpoints.lock().unwrap().push((before, after));
@@ -334,7 +363,7 @@ fn four_run(
             .flat_map(|t| t.unwrap())
             .collect::<Vec<_>>()
     });
-    if let Some(worker)=run.prefix_worker.lock().unwrap().take() {
+    if let Some(worker) = run.prefix_worker.lock().unwrap().take() {
         drop(worker.join().unwrap().unwrap());
     }
     let mem = memory().0;

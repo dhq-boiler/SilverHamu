@@ -1,0 +1,28 @@
+   Compiling catdb v0.1.0 (/build)
+warning: method `hold_test_sync` is never used
+   --> src/group_commit.rs:130:19
+    |
+123 | impl Database {
+    | ------------- method in this implementation
+...
+130 |     pub(crate) fn hold_test_sync(&self, gate: Arc<[std::sync::Barrier; 2]>) {
+    |                   ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: `catdb` (lib test) generated 1 warning
+    Finished `release` profile [optimized] target(s) in 7.41s
+     Running unittests src/lib.rs (target/release/deps/newdbms-15071bdef1c20fd0)
+
+running 9 tests
+test transactions::capacity_gate::cap16::tests::tail_prefix_model_preserves_atomicity_and_valid_peer ... ok
+test transactions::capacity_gate::cap4::tests::tail_prefix_model_preserves_atomicity_and_valid_peer ... ok
+test transactions::capacity_gate::cap64::tests::tail_prefix_model_preserves_atomicity_and_valid_peer ... ok
+test transactions::scaled_gate::checks::er_selector_prefix_models_and_reordered_checkpoint_reject_partial_generation ... ok
+test transactions::tests::inline_key_st_point_and_prefix_range_conflicts_cross_storage_boundary ... ok
+test transactions::tests::prefix_buffer_refusal_preserves_the_original_file ... ok
+test transactions::tests::prefix_preserves_fixed_capacity_and_commits_after_the_snapshot ... ok
+test transactions::tests::prefix_releases_resources_after_refusal_failure_or_stale_wal ... ok
+test transactions::tests::prefix_replays_changes_on_both_sides_of_the_scan_cursor ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 167 filtered out; finished in 2.39s

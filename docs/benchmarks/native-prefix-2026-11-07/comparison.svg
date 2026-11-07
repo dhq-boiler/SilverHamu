@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 360" role="img"><title>Production WAL checkpoint prefix</title><rect width="920" height="360" fill="white"/><g font-family="sans-serif" fill="#182b40">
+<text x="18" y="30" font-size="23">Production WAL checkpoint with ahead-of-time prefix writes</text>
+<text x="18" y="54" font-size="14">One million rows, four writers, 59 complete periods per trial. Maximum across trials for worst wait.</text>
+<text x="18" y="91" font-size="17">Logical WAL writes (KiB/commit)</text>
+<text x="18" y="122" font-size="14">Off</text>
+<rect x="63" y="110" width="219.95" height="14" fill="#576e83"/>
+<text x="289.94531386454383" y="122" font-size="14">1,090.36</text>
+<text x="18" y="155" font-size="14">On</text>
+<rect x="63" y="143" width="220.00" height="14" fill="#237465"/>
+<text x="290.0" y="155" font-size="14">1,090.63</text>
+<text x="473" y="91" font-size="17">Commits per second</text>
+<text x="473" y="122" font-size="14">Off</text>
+<rect x="518" y="110" width="192.22" height="14" fill="#576e83"/>
+<text x="717.2231347370439" y="122" font-size="14">132.61</text>
+<text x="473" y="155" font-size="14">On</text>
+<rect x="518" y="143" width="220.00" height="14" fill="#237465"/>
+<text x="745.0" y="155" font-size="14">151.77</text>
+<text x="18" y="219" font-size="17">Update p99 (ms)</text>
+<text x="18" y="250" font-size="14">Off</text>
+<rect x="63" y="238" width="220.00" height="14" fill="#576e83"/>
+<text x="290.0" y="250" font-size="14">761.94</text>
+<text x="18" y="283" font-size="14">On</text>
+<rect x="63" y="271" width="185.38" height="14" fill="#237465"/>
+<text x="255.37555289824664" y="283" font-size="14">642.02</text>
+<text x="473" y="219" font-size="17">Worst update (ms)</text>
+<text x="473" y="250" font-size="14">Off</text>
+<rect x="518" y="238" width="191.88" height="14" fill="#576e83"/>
+<text x="716.878598226675" y="250" font-size="14">2,999.95</text>
+<text x="473" y="283" font-size="14">On</text>
+<rect x="518" y="271" width="220.00" height="14" fill="#237465"/>
+<text x="745.0" y="283" font-size="14">3,439.62</text>
+</g></svg>

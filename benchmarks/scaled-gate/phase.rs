@@ -6,7 +6,7 @@ struct PhaseState {
     enabled: bool,
     stage: usize,
     stamp: Option<Instant>,
-    ns: [u128; 7],
+    ns: [u128; 10],
 }
 thread_local! {static PHASE:Cell<PhaseState>=Cell::new(PhaseState::default());}
 struct Phase(Option<usize>);
@@ -37,7 +37,7 @@ impl Phase {
             Some(old)
         }))
     }
-    fn finish() -> Option<[u128; 7]> {
+    fn finish() -> Option<[u128; 10]> {
         PHASE.with(|s| {
             let mut m = s.replace(PhaseState::default());
             if !m.enabled {

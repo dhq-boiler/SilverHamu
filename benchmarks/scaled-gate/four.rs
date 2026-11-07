@@ -305,7 +305,7 @@ fn four_run(
     assert_eq!(cp.len(), 3);
     let begin = samples.iter().map(|s| s.start).min().unwrap();
     let end = samples.iter().map(|s| s.end).max().unwrap();
-    if matches!(mode, "combine" | "arrivals") {
+    if matches!(mode, "combine" | "arrivals" | "patch") {
         println!(
             "ARRIVAL_SYNCS,{}",
             run.wal.as_ref().unwrap().commit_sync_attempts()
@@ -358,10 +358,18 @@ fn four_run(
         println!("{line}");
     }
     match mode {
-        "mvcc" | "direct" | "packed" | "reuse" | "linear" | "combine" | "logreuse" | "arrivals" => {
+        "mvcc" | "direct" | "packed" | "reuse" | "linear" | "combine" | "logreuse" | "arrivals"
+        | "patch" => {
             let recovered = if matches!(
                 mode,
-                "direct" | "packed" | "reuse" | "linear" | "combine" | "logreuse" | "arrivals"
+                "direct"
+                    | "packed"
+                    | "reuse"
+                    | "linear"
+                    | "combine"
+                    | "logreuse"
+                    | "arrivals"
+                    | "patch"
             ) {
                 MvccPages::open_direct(p, cfg, None)
             } else {

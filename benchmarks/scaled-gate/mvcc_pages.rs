@@ -59,9 +59,14 @@ impl MvccPages {
         let logreuse = direct
             && (std::env::var_os("CATDB_TEST_LOG_REUSE").is_some()
                 || std::env::var("SCALED_VARIANT").as_deref() == Ok("logreuse"));
-        let grouped = direct
-            && (std::env::var_os("CATDB_TEST_ARRIVALS").is_some()
-                || std::env::var("SCALED_VARIANT").as_deref() == Ok("arrivals"));
+        let patch = direct
+            && (std::env::var_os("CATDB_TEST_PATCH").is_some()
+                || std::env::var("SCALED_VARIANT").as_deref() == Ok("patch"));
+        disk.patch = patch;
+        let grouped = patch
+            || direct
+                && (std::env::var_os("CATDB_TEST_ARRIVALS").is_some()
+                    || std::env::var("SCALED_VARIANT").as_deref() == Ok("arrivals"));
         if disk.group_version.is_some() && !grouped {
             return Err(TxError::Invalid("group persistence required"));
         }
@@ -203,6 +208,15 @@ impl TestPersistence for MvccPages {
         };
         let phase_times = Phase::finish();
         if let Some(ns) = phase_times {
+            println!(
+                "PATCH_PHASE,{version},{},{},{},{},{},{}",
+                ns[7],
+                ns[8],
+                ns[9],
+                disk.patch_counts.used,
+                disk.patch_counts.fallback,
+                disk.patch_counts.bytes
+            );
             println!("PAGE_CRC,{version},{},{}", ns[5], ns[6]);
             println!(
                 "CHECKPOINT_PHASE,{version},{},{},{},{},{}",
@@ -211,6 +225,12 @@ impl TestPersistence for MvccPages {
                 ns[2] + ns[5] + ns[6],
                 ns[3],
                 ns[4]
+            );
+        }
+        if std::env::var_os("DENSITY_COUNTS").is_some() {
+            println!(
+                "PAGE_COUNTS,{version},{},{},{}",
+                disk.patch_counts.used, disk.patch_counts.fallback, disk.patch_counts.bytes
             );
         }
         if let Err(e) = switched {

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 405" role="img"><title>Checkpoint time by changed rows per page</title><rect width="820" height="405" fill="white"/><g fill="#182d3b" font-family="sans-serif">
+<text x="16" y="30" font-size="22">Checkpoint elapsed time by changed rows per 64 KiB page</text>
+<text x="16" y="55" font-size="15">96 updated pages, 1M rows, warm files. Median ms of three runs; smaller is faster.</text>
+<text x="16" y="84" font-size="14">Changed rows</text>
+<text x="155" y="84" font-size="14">MVCC scan</text>
+<text x="480" y="84" font-size="14">Patch new copy</text>
+<text x="16" y="121" font-size="15">1</text>
+<rect x="155" y="108" width="173.39" height="16" fill="#396494"/>
+<text x="335.393177712583" y="121" font-size="14">21.06</text>
+<rect x="480" y="108" width="204.97" height="16" fill="#ae572d"/>
+<text x="691.9724750028292" y="121" font-size="14">24.89</text>
+<text x="16" y="167" font-size="15">4</text>
+<rect x="155" y="154" width="174.94" height="16" fill="#396494"/>
+<text x="336.9429843657972" y="167" font-size="14">21.24</text>
+<rect x="480" y="154" width="184.31" height="16" fill="#ae572d"/>
+<text x="671.3068572996335" y="167" font-size="14">22.38</text>
+<text x="16" y="213" font-size="15">16</text>
+<rect x="155" y="200" width="182.88" height="16" fill="#396494"/>
+<text x="344.87643568022304" y="213" font-size="14">22.21</text>
+<rect x="480" y="200" width="195.02" height="16" fill="#ae572d"/>
+<text x="682.0156462444108" y="213" font-size="14">23.68</text>
+<text x="16" y="259" font-size="15">58 (25%)</text>
+<rect x="155" y="246" width="179.57" height="16" fill="#396494"/>
+<text x="341.57087763175406" y="259" font-size="14">21.81</text>
+<rect x="480" y="246" width="206.55" height="16" fill="#ae572d"/>
+<text x="693.5454718509245" y="259" font-size="14">25.08</text>
+<text x="16" y="305" font-size="15">115 (50%)</text>
+<rect x="155" y="292" width="201.28" height="16" fill="#396494"/>
+<text x="363.2832905202905" y="305" font-size="14">24.44</text>
+<rect x="480" y="292" width="198.59" height="16" fill="#ae572d"/>
+<text x="685.5899503226204" y="305" font-size="14">24.11</text>
+<text x="16" y="351" font-size="15">229 (100%)</text>
+<rect x="155" y="338" width="210.23" height="16" fill="#396494"/>
+<text x="372.22510355432195" y="351" font-size="14">25.53</text>
+<rect x="480" y="338" width="225.00" height="16" fill="#ae572d"/>
+<text x="712.0" y="351" font-size="14">27.32</text>
+</g></svg>

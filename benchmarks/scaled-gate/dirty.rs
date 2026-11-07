@@ -18,6 +18,9 @@ struct Pin {
     _lease: File,
 }
 struct Dirty {
+    patch: bool,
+    structural: BTreeSet<Vec<u8>>,
+    patch_counts: PatchCounts,
     group_version: Option<u64>,
     reuse_encoded: bool,
     control: Store,
@@ -50,6 +53,9 @@ impl Dirty {
         pool.try_lock().map_err(|e| err(&e.to_string()))?;
         let control = Store::create(path, cfg, Data::new(), BUFFER_BUDGET, &mut noop)?;
         let mut s = Self {
+            patch: false,
+            structural: BTreeSet::new(),
+            patch_counts: PatchCounts::default(),
             reuse_encoded: false,
             group_version: None,
             control,
@@ -109,7 +115,11 @@ impl Dirty {
         self.control.append(&overlay, hook)?;
         self.group_version = group;
         for k in w.keys() {
-            self.dirty.insert(fence(&self.pages, k));
+            let lo = fence(&self.pages, k);
+            if self.patch && w[k].is_none() {
+                self.structural.insert(lo.clone());
+            }
+            self.dirty.insert(lo);
         }
 
         Ok(())
@@ -196,6 +206,8 @@ impl Dirty {
             .ok_or_else(|| err("generation exhausted"))?;
         let mut next = self.pages.clone();
         let mut cursor = 0u32;
+        let mut scratch = self.patch.then(LinearPage::new);
+        self.patch_counts = PatchCounts::default();
         for lower in &self.dirty {
             let upper = self
                 .pages
@@ -203,6 +215,43 @@ impl Dirty {
                 .next()
                 .map(|(k, _)| k.as_slice());
             next.remove(lower);
+            if let (Some(page), Some(addr)) = (scratch.as_mut(), self.pages.get(lower)) {
+                page.combine = true;
+                if !self.structural.contains(lower)
+                    && patch_copy(
+                        &mut self.pool,
+                        addr,
+                        self.control.root.config,
+                        &self.control.rows,
+                        lower,
+                        upper,
+                        page,
+                        &mut self.patch_counts,
+                    )?
+                {
+                    let _phase = Phase::enter(2);
+                    hook("patch.validated")?;
+                    let new = save(
+                        &mut self.pool,
+                        &mut self.control.costs,
+                        &mut self.live,
+                        &mut cursor,
+                        &self.control.root,
+                        generation,
+                        PageSource::Linear(page),
+                        self.reuse_encoded,
+                        hook,
+                    )?;
+                    next.insert(lower.clone(), new);
+                    self.patch_counts.used += 1;
+                    hook("patch.used")?;
+                    continue;
+                }
+            }
+            self.patch_counts.fallback += 1;
+            if self.patch {
+                hook("patch.fallback")?;
+            }
             chunks(lower, upper, &mut |start, entries| {
                 let _phase = Phase::enter(2);
                 let page = save(
@@ -239,6 +288,7 @@ impl Dirty {
         hook("reclaim.before")?;
         self.live.retain(|_, w| w.strong_count() > 0);
         hook("reclaim.after")?;
+        self.structural.clear();
         self.dirty.clear();
         self.failed = false;
         Ok(())
@@ -370,6 +420,9 @@ impl Dirty {
         sync(&pool, &mut control.costs, "recovery-pages", hook)?;
         Ok(Self {
             group_version,
+            patch: false,
+            structural: BTreeSet::new(),
+            patch_counts: PatchCounts::default(),
             reuse_encoded: false,
             control,
             pool,

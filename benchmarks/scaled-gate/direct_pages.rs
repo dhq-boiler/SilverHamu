@@ -82,9 +82,8 @@ fn direct_reopen_memory() {
     let db = match std::env::var("SCALED_VARIANT").unwrap().as_str() {
         "wal" => Database::open(path).unwrap(),
         "mvcc" => MvccPages::open(&path, cfg, None),
-        "direct" | "packed" | "reuse" | "linear" | "combine" | "logreuse" | "arrivals" => {
-            MvccPages::open_direct(&path, cfg, None)
-        }
+        "direct" | "packed" | "reuse" | "linear" | "combine" | "logreuse" | "arrivals"
+        | "patch" => MvccPages::open_direct(&path, cfg, None),
         _ => unreachable!(),
     };
     let read = db.begin_read().unwrap();

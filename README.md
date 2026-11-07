@@ -6,6 +6,12 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Same-size updates to a copied checkpoint page
+
+Across 96 dirty 64 KiB pages, one changed row per page took **21.06 ms** with the existing MVCC scan and **24.89 ms** with a validated page copy. Copying won 3 of 18 paired trials across six update densities. With four writers, update p99 rose from **42.61 to 47.70 ms**. The copy path remains a test-only experiment. [Recovery tests, per-trial results and reproduction](docs/benchmarks/copy-patch-2026-11-07/README.md).
+
+![Median checkpoint time by number of changed rows per page](docs/benchmarks/copy-patch-2026-11-07/density.svg)
+
 ## Sharing a durable sync across FIFO arrivals
 
 With four writers the no-delay FIFO group committed **2.45 transactions per log sync** versus 1.00 for single-commit FIFO. The grouped path measured 640.2 transactions/s, p99 44.6 ms and worst wait 89.8 ms. Single FIFO measured 290.8 transactions/s, 47.3 ms and 90.9 ms.

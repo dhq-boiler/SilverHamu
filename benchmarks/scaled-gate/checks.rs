@@ -687,3 +687,5 @@ include!("linear.rs");
 include!("combine.rs");
 
 include!("append_checks.rs");
+
+include!("patch_copy.rs");

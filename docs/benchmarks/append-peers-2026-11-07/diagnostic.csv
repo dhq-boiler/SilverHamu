@@ -1,0 +1,3 @@
+mode,rep,tx_s,p99_ms,max_ms,conflicts,worst_checkpoint_overlap_ms,other_completions_during_worst,worst_retries,overlap,overlap_max_ms,checkpoint_ms,rss_MiB,p99_overlap_ms,max_overlap_ms,outside_only_p99_ms
+combine,1,355.41591609755335,42.223894,82.885195,3,67.279303,3,0,12,82.885195,39.105927,413.49609375,37.236243,67.279303,23.895281
+logreuse,1,314.499654413099,44.089727,87.167252,3,62.678459,4,0,12,87.167252,41.036545,415.21484375,37.257473,62.678459,23.553306

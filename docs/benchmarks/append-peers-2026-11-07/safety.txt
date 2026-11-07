@@ -1,0 +1,5 @@
+test transactions::scaled_gate::checks::reused_log_bytes_survive_peer_damage_and_match_original ... ok
+test transactions::scaled_gate::checks::timing::mvcc_fifo_revalidates_and_publishes_only_after_sync ... ok
+test transactions::scaled_gate::checks::timing::mvcc_kills_recover_acknowledged_versions ... ok
+test transactions::scaled_gate::checks::timing::mvcc_persistence_error_requires_reopen ... ok
+test result: ok. 111 passed; 0 failed; 28 ignored; 0 measured; 0 filtered out; finished in 28.57s

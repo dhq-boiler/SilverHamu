@@ -6,6 +6,18 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Durable updates across database products
+
+Reusing a single encoding for two durable log copies measured 286.9 transactions/s, p99 43.6 ms and worst wait 98.9 ms. The previous path measured 297.1 transactions/s, 44.5 ms and 89.8 ms. The throughput improvement did not reproduce. The candidate remains experimental.
+
+The fresh cross-product comparison uses 100k rows, 256-byte values and four clients. The checkpoint experiment above uses 1M rows and a different transaction mix. [All trials, timing details and driver differences](docs/benchmarks/append-peers-2026-11-07/README.md).
+
+![Embedded products and native prototypes](docs/benchmarks/append-peers-2026-11-07/embedded.svg)
+
+![Service products](docs/benchmarks/append-peers-2026-11-07/service.svg)
+
+![Internal checkpoint comparison](docs/benchmarks/append-peers-2026-11-07/comparison.svg)
+
 ## Reusing the body checksum in checkpoint pages
 
 Combining CRCs in the 64 KiB MVCC checkpoint writer measured **44.6 ms update p99** and a **84.6 ms worst request**, at 296.3 transactions/s and 413.2 MiB RSS. With the previous full scan of the envelope payload the same workload measured 51.1 ms, 104.1 ms, 302.2 transactions/s and 414.8 MiB.

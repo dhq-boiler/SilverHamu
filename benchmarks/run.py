@@ -9,7 +9,7 @@ def run(*args,env=None,timeout=600):
     return r.stdout.strip()
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--single-request',action='store_true');p.add_argument('--image',default='catdb-comparison:local');p.add_argument('--out',required=True,type=pathlib.Path);p.add_argument('--rows',type=int,default=100000);p.add_argument('--ops',type=int,default=8000);p.add_argument('--reps',type=int,default=3);p.add_argument('--engines',nargs='+',default=['catdb-embedded','sqlite','catdb-service','postgres','mysql','oracle']);args=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument("--four-updates",action="store_true",help="benchmark only four-client durable updates");p.add_argument('--single-request',action='store_true');p.add_argument('--image',default='catdb-comparison:local');p.add_argument('--out',required=True,type=pathlib.Path);p.add_argument('--rows',type=int,default=100000);p.add_argument('--ops',type=int,default=8000);p.add_argument('--reps',type=int,default=3);p.add_argument('--engines',nargs='+',default=['catdb-embedded','sqlite','catdb-service','postgres','mysql','oracle']);args=p.parse_args()
     IMAGES['catdb-service']=args.image
     out=args.out.resolve();out.mkdir(parents=True,exist_ok=False)
     environment={'utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'rows':args.rows,'value_bytes':256,'ops_per_case':args.ops,'reps':args.reps,'single_request':args.single_request,'git_commit':run('git','-C',str(ROOT),'rev-parse','HEAD'),'docker':json.loads(run('docker','info','--format','{{json .}}')),'images':{},'source_sha256':{},'runs':[], 'skipped':{'sql-server':'SQL Server 2022 Developer/Express/Evaluation license section 5 requires prior written permission for disclosure; permission not obtained, not measured.'}}
@@ -70,7 +70,7 @@ def main():
                             time.sleep(2)
                 if engine!='catdb-service':execute('init')
                 entry['python_packages']=run('docker','exec',client,'pip','freeze').splitlines();entry['metadata']=execute('metadata');entry['verification'].append({'stage':'initial',**execute('verify')});save()
-                cases=list(itertools.product(['get','range100','update'],[1,4]));random.Random(912+rep).shuffle(cases)
+                cases=[('update',4)] if args.four_updates else list(itertools.product(['get','range100','update'],[1,4]));random.Random(912+rep).shuffle(cases)
                 for work,clients in cases:
                     result=execute('measure','--workload',work,'--clients',clients,'--rep',rep)
                     samples=result.pop('latencies_ns');name=f'{engine}-r{rep}-{work}-c{clients}.json.gz'

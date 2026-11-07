@@ -41,3 +41,7 @@ Report bugs with a minimal synthetic reproducer, platform/toolchain, and sanitiz
 Run test cases sequentially to isolate subprocess crash fixtures from other
 tests' file-lock lifetimes. Tests still exercise their own concurrent readers
 and writers; this flag does not disable that internal concurrency.
+
+## Comparing an optimization with other databases
+
+For each measured performance improvement, update the README with a fresh peer comparison figure for the affected workload alongside the catdb before/after result. Keep the key stream, operation count, client count, durability, CPU and memory limits comparable. Report versions, individual trials, verification and raw data. Group embedded and service products by execution mode. When an experimental path is reachable only through a native test harness, measure that actual path, identify its driver, and label the shipped service separately. Record unavailable products and publication restrictions with the results. Include slower outcomes.

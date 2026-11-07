@@ -6,6 +6,7 @@ struct MvccPages {
     packed: bool,
     linear: bool,
     combine: bool,
+    commit_profile: bool,
     profile: bool,
     disk: Mutex<Dirty>,
     turns: TurnQueue,
@@ -54,9 +55,13 @@ impl MvccPages {
         direct: bool,
     ) -> crate::transactions::Result<Database> {
         let mut disk = disk;
-        let combine = direct
-            && (std::env::var_os("CATDB_TEST_COMBINE").is_some()
-                || std::env::var("SCALED_VARIANT").as_deref() == Ok("combine"));
+        let logreuse = direct
+            && (std::env::var_os("CATDB_TEST_LOG_REUSE").is_some()
+                || std::env::var("SCALED_VARIANT").as_deref() == Ok("logreuse"));
+        let combine = logreuse
+            || direct
+                && (std::env::var_os("CATDB_TEST_COMBINE").is_some()
+                    || std::env::var("SCALED_VARIANT").as_deref() == Ok("combine"));
         let linear = combine
             || direct
                 && (std::env::var_os("CATDB_TEST_LINEAR").is_some()
@@ -65,6 +70,9 @@ impl MvccPages {
             || direct
                 && (std::env::var_os("CATDB_TEST_REUSE").is_some()
                     || std::env::var("SCALED_VARIANT").as_deref() == Ok("reuse"));
+        disk.control.reuse_append = logreuse;
+        let commit_profile = std::env::var_os("CATDB_COMMIT_PHASES").is_some();
+        disk.control.profile_append = commit_profile;
         disk.reuse_encoded = reuse;
         let lease = disk.pool.try_clone()?;
         let db = Database::from_state(state, [87; 16], lease);
@@ -75,6 +83,7 @@ impl MvccPages {
             turns: TurnQueue::default(),
             linear,
             combine,
+            commit_profile,
             packed: reuse
                 || direct
                     && (std::env::var_os("CATDB_TEST_PACK").is_some()
@@ -105,8 +114,14 @@ impl MvccPages {
 }
 impl TestPersistence for MvccPages {
     fn commit(&self, tx: Transaction) -> crate::transactions::Result<u64> {
+        if self.commit_profile {
+            CommitSample::attempt();
+        }
         let _turn = self.turns.enter();
-        tx.commit_with(|_, frame| {
+        if self.commit_profile {
+            CommitSample::set(1);
+        }
+        let result = tx.commit_with(|_, frame| {
             let (seq, w) = decode_frame(&frame[PREFIX_BYTES..frame.len() - TRAILER_BYTES])
                 .map_err(io::Error::other)?;
             let mut disk = self.disk.lock().map_err(|_| err("page store poisoned"))?;
@@ -118,7 +133,11 @@ impl TestPersistence for MvccPages {
             } else {
                 disk.append(&w, &mut |stage| self.signal(stage))
             }
-        })
+        });
+        if self.commit_profile {
+            CommitSample::stop();
+        }
+        result
     }
     fn checkpoint(&self, db: &Database) -> crate::transactions::Result<CheckpointInfo> {
         let _turn = self.turns.enter();

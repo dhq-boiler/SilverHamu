@@ -49,6 +49,7 @@ def main():
     parser.add_argument("--reuse",action="store_true")
     parser.add_argument("--linear",action="store_true")
     parser.add_argument("--combine",action="store_true")
+    parser.add_argument("--append",action="store_true")
     args=parser.parse_args();args.out.mkdir(parents=True,exist_ok=True)
     modes=MODES+(("reuse",) if args.reuse else ())
     names=NAMES+(("Pack + reuse",) if args.reuse else ())
@@ -56,6 +57,8 @@ def main():
         modes=("reuse","linear");names=("Page map","Linear")
     if args.combine:
         modes=("linear","combine");names=("Full scan","Combine")
+    if args.append:
+        modes=("combine","logreuse");names=("Baseline","Log reuse")
     groups={}
     for stage in ("diagnostic","1m"):
         raw=args.raw/stage

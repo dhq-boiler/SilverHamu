@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 460" role="img"><title>Checkpoint scan and copy comparison</title><rect width="960" height="460" fill="white"/><g fill="#17283b" font-family="sans-serif">
+<text x="16" y="32" font-size="23">MVCC checkpoint reads: one million rows and four writers</text>
+<text x="16" y="56" font-size="14">Two CPUs, 4 GiB. Trial medians except worst request across all trials. Independent scales.</text>
+<text x="16" y="88" font-size="17">Update p99 (ms)</text>
+<text x="16" y="117" font-size="12">Baseline</text>
+<rect x="88" y="105" width="142.00" height="13" fill="#526c88"/>
+<text x="236.0" y="117" font-size="12">44.53</text>
+<text x="16" y="150" font-size="12">Log reuse</text>
+<rect x="88" y="138" width="139.05" height="13" fill="#a54c31"/>
+<text x="233.04860573346045" y="150" font-size="12">43.61</text>
+<text x="332" y="88" font-size="17">Worst update (ms)</text>
+<text x="332" y="117" font-size="12">Baseline</text>
+<rect x="404" y="105" width="128.90" height="13" fill="#526c88"/>
+<text x="538.8991687920502" y="117" font-size="12">89.78</text>
+<text x="332" y="150" font-size="12">Log reuse</text>
+<rect x="404" y="138" width="142.00" height="13" fill="#a54c31"/>
+<text x="552.0" y="150" font-size="12">98.90</text>
+<text x="648" y="88" font-size="17">Transactions / second</text>
+<text x="648" y="117" font-size="12">Baseline</text>
+<rect x="720" y="105" width="142.00" height="13" fill="#526c88"/>
+<text x="868.0" y="117" font-size="12">297.07</text>
+<text x="648" y="150" font-size="12">Log reuse</text>
+<rect x="720" y="138" width="137.11" height="13" fill="#a54c31"/>
+<text x="863.1137967989" y="150" font-size="12">286.85</text>
+<text x="16" y="272" font-size="17">End RSS (MiB)</text>
+<text x="16" y="301" font-size="12">Baseline</text>
+<rect x="88" y="289" width="141.86" height="13" fill="#526c88"/>
+<text x="235.86106198020548" y="301" font-size="12">414.80</text>
+<text x="16" y="334" font-size="12">Log reuse</text>
+<rect x="88" y="322" width="142.00" height="13" fill="#a54c31"/>
+<text x="236.0" y="334" font-size="12">415.20</text>
+<text x="332" y="272" font-size="17">Checkpoint (ms)</text>
+<text x="332" y="301" font-size="12">Baseline</text>
+<rect x="404" y="289" width="132.13" height="13" fill="#526c88"/>
+<text x="542.1261698522545" y="301" font-size="12">40.11</text>
+<text x="332" y="334" font-size="12">Log reuse</text>
+<rect x="404" y="322" width="142.00" height="13" fill="#a54c31"/>
+<text x="552.0" y="334" font-size="12">43.11</text>
+<text x="648" y="272" font-size="17">p99 outside checkpoints (ms)</text>
+<text x="648" y="301" font-size="12">Baseline</text>
+<rect x="720" y="289" width="127.88" height="13" fill="#526c88"/>
+<text x="853.8759343834284" y="301" font-size="12">24.79</text>
+<text x="648" y="334" font-size="12">Log reuse</text>
+<rect x="720" y="322" width="142.00" height="13" fill="#a54c31"/>
+<text x="868.0" y="334" font-size="12">27.53</text>
+</g></svg>

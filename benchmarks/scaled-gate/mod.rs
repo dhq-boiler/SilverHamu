@@ -380,6 +380,8 @@ fn save_checkpoint(
 }
 
 struct Store {
+    reuse_append: bool,
+    profile_append: bool,
     file: File,
     root: Record,
     rows: Data,
@@ -434,6 +436,8 @@ impl Store {
             used: 0,
             seq: 0,
             poisoned: false,
+            reuse_append: false,
+            profile_append: false,
             costs,
         })
     }
@@ -504,6 +508,8 @@ impl Store {
             seq,
             chain,
             poisoned: false,
+            reuse_append: false,
+            profile_append: false,
             costs,
         })
     }
@@ -536,21 +542,58 @@ impl Store {
         let pending = w.clone();
         self.poisoned = true;
         hook("append.prepared")?;
-        for lane in 0..2 {
-            write_record(
-                &mut self.file,
-                &mut self.costs,
-                self.root.config.at(r.bank, false, self.used, lane),
-                &r,
-                "append",
-                &format!("append-{lane}"),
-                hook,
-            )?;
+        let digest = if self.reuse_append {
+            let encoded = r.encode();
+            let digest = u32::from_le_bytes(encoded[80..84].try_into().unwrap());
+            for lane in 0..2 {
+                if self.profile_append {
+                    CommitSample::set(2);
+                }
+                write_encoded_record(
+                    &mut self.file,
+                    &mut self.costs,
+                    self.root.config.at(r.bank, false, self.used, lane),
+                    &encoded,
+                    "append",
+                    &format!("append-{lane}"),
+                    hook,
+                )?;
+                if self.profile_append {
+                    CommitSample::set(1);
+                }
+            }
+            Some(digest)
+        } else {
+            for lane in 0..2 {
+                let encoded = r.encode();
+                if self.profile_append {
+                    CommitSample::set(2);
+                }
+                write_encoded_record(
+                    &mut self.file,
+                    &mut self.costs,
+                    self.root.config.at(r.bank, false, self.used, lane),
+                    &encoded,
+                    "append",
+                    &format!("append-{lane}"),
+                    hook,
+                )?;
+                if self.profile_append {
+                    CommitSample::set(1);
+                }
+            }
+            None
+        };
+        if self.profile_append {
+            CommitSample::set(3);
         }
         sync(&self.file, &mut self.costs, "append", hook)?;
+        if self.profile_append {
+            CommitSample::set(4);
+        }
         apply(&mut self.rows, pending);
         self.seq = seq;
-        self.chain = r.checksum();
+        self.chain = digest.unwrap_or_else(|| r.checksum());
         self.used += 1;
         hook("append.published")?;
         self.poisoned = false;
@@ -742,3 +785,5 @@ fn scan(
 
 #[cfg(test)]
 mod checks;
+
+include!("commit_sample.rs");

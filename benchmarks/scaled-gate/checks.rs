@@ -685,3 +685,5 @@ include!("dirty_checks.rs");
 include!("linear.rs");
 
 include!("combine.rs");
+
+include!("append_checks.rs");

@@ -113,6 +113,7 @@ impl Publication {
 }
 include!("wait_trace.rs");
 struct Sample {
+    commit_phases: Option<([u128; 6], u32)>,
     trace: Option<Trace>,
     id: usize,
     lane: usize,
@@ -122,6 +123,7 @@ struct Sample {
     retries: usize,
 }
 struct Four {
+    commit_profile: bool,
     turn: Option<TurnQueue>,
     diagnostic: bool,
     lite: bool,
@@ -141,6 +143,7 @@ impl Four {
             _ => None,
         };
         Self {
+            commit_profile: std::env::var_os("CATDB_COMMIT_PHASES").is_some(),
             turn: std::env::var_os("SCALED_FIFO").map(|_| TurnQueue::default()),
             diagnostic: std::env::var_os("SCALED_TRACE").is_some()
                 || std::env::var_os("SCALED_LITE").is_some(),
@@ -161,6 +164,9 @@ impl Four {
     fn run_one(&self, id: usize, lane: usize, n: usize, first: Option<&Barrier>) -> Sample {
         let start = self.clock.elapsed().as_nanos();
         let mut trace = self.diagnostic.then(|| Trace::start(self.clock, self.lite));
+        if self.commit_profile {
+            CommitSample::begin();
+        }
         let w = changes(id, n);
         let mut retries = 0;
         loop {
@@ -227,6 +233,7 @@ impl Four {
             Trace::end(&mut trace, self.clock, "commit");
             if let Some(seq) = seq {
                 return Sample {
+                    commit_phases: self.commit_profile.then(CommitSample::result),
                     trace,
                     id,
                     lane,
@@ -345,9 +352,11 @@ fn four_run(
         println!("{line}");
     }
     match mode {
-        "mvcc" | "direct" | "packed" | "reuse" | "linear" | "combine" => {
-            let recovered = if matches!(mode, "direct" | "packed" | "reuse" | "linear" | "combine")
-            {
+        "mvcc" | "direct" | "packed" | "reuse" | "linear" | "combine" | "logreuse" => {
+            let recovered = if matches!(
+                mode,
+                "direct" | "packed" | "reuse" | "linear" | "combine" | "logreuse"
+            ) {
                 MvccPages::open_direct(p, cfg, None)
             } else {
                 MvccPages::open(p, cfg, None)
@@ -379,6 +388,12 @@ fn four_run(
         println!("WAIT_LANE,{lane},{cpu},{ready}");
     }
     for s in samples {
+        if let Some((ns, n)) = s.commit_phases {
+            println!(
+                "COMMIT_PHASE,{},{},{},{},{},{},{}",
+                s.id, n, ns[0], ns[1], ns[2], ns[3], ns[4]
+            );
+        }
         if let Some(t) = s.trace {
             for v in t.spans {
                 println!(

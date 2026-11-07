@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="540" viewBox="0 0 920 540" role="img"><title>Checkpoint-inclusive single-writer benchmark</title><rect width="920" height="540" fill="white"/><g font-family="sans-serif" fill="#17263a">
+<text x="20" y="32" font-size="24">Dual records and region reuse vs. current WAL</text>
+<text x="20" y="56" font-size="14">2 CPUs / 4 GiB. Median of three runs, except slowest update (worst of three). Independent panel scales.</text>
+<text x="18" y="89" font-size="17">Updates / second</text>
+<text x="18" y="121" font-size="12">100k WAL</text>
+<rect x="86" y="108" width="135.000" height="15" fill="#396494"/>
+<text x="226.0" y="121" font-size="12">299.06</text>
+<text x="18" y="160" font-size="12">100k dual</text>
+<rect x="86" y="147" width="124.662" height="15" fill="#ae5429"/>
+<text x="215.66219494419704" y="160" font-size="12">276.16</text>
+<text x="18" y="199" font-size="12">1M WAL</text>
+<rect x="86" y="186" width="87.794" height="15" fill="#396494"/>
+<text x="178.79365506864872" y="199" font-size="12">194.48</text>
+<text x="18" y="238" font-size="12">1M dual</text>
+<rect x="86" y="225" width="65.834" height="15" fill="#ae5429"/>
+<text x="156.8336030306615" y="238" font-size="12">145.84</text>
+<text x="322" y="89" font-size="17">Update p99 (ms)</text>
+<text x="322" y="121" font-size="12">100k WAL</text>
+<rect x="390" y="108" width="50.745" height="15" fill="#396494"/>
+<text x="445.74455106865634" y="121" font-size="12">5.47</text>
+<text x="322" y="160" font-size="12">100k dual</text>
+<rect x="390" y="147" width="71.718" height="15" fill="#ae5429"/>
+<text x="466.7178075432899" y="160" font-size="12">7.73</text>
+<text x="322" y="199" font-size="12">1M WAL</text>
+<rect x="390" y="186" width="50.502" height="15" fill="#396494"/>
+<text x="445.5022428386092" y="199" font-size="12">5.44</text>
+<text x="322" y="238" font-size="12">1M dual</text>
+<rect x="390" y="225" width="135.000" height="15" fill="#ae5429"/>
+<text x="530.0" y="238" font-size="12">14.55</text>
+<text x="626" y="89" font-size="17">Slowest update (ms)</text>
+<text x="626" y="121" font-size="12">100k WAL</text>
+<rect x="694" y="108" width="7.328" height="15" fill="#396494"/>
+<text x="706.3280883779489" y="121" font-size="12">79.88</text>
+<text x="626" y="160" font-size="12">100k dual</text>
+<rect x="694" y="147" width="11.343" height="15" fill="#ae5429"/>
+<text x="710.3428816930415" y="160" font-size="12">123.64</text>
+<text x="626" y="199" font-size="12">1M WAL</text>
+<rect x="694" y="186" width="77.240" height="15" fill="#396494"/>
+<text x="776.2398928165959" y="199" font-size="12">841.90</text>
+<text x="626" y="238" font-size="12">1M dual</text>
+<rect x="694" y="225" width="135.000" height="15" fill="#ae5429"/>
+<text x="834.0" y="238" font-size="12">1,471.48</text>
+<text x="18" y="309" font-size="17">Application writes (MiB)</text>
+<text x="18" y="341" font-size="12">100k WAL</text>
+<rect x="86" y="328" width="6.790" height="15" fill="#396494"/>
+<text x="97.78955281601718" y="341" font-size="12">82.09</text>
+<text x="18" y="380" font-size="12">100k dual</text>
+<rect x="86" y="367" width="13.588" height="15" fill="#ae5429"/>
+<text x="104.5883061351125" y="380" font-size="12">164.29</text>
+<text x="18" y="419" font-size="12">1M WAL</text>
+<rect x="86" y="406" width="67.524" height="15" fill="#396494"/>
+<text x="158.5239250942185" y="419" font-size="12">816.38</text>
+<text x="18" y="458" font-size="12">1M dual</text>
+<rect x="86" y="445" width="135.000" height="15" fill="#ae5429"/>
+<text x="226.0" y="458" font-size="12">1,632.19</text>
+<text x="322" y="309" font-size="17">End RSS (MiB)</text>
+<text x="322" y="341" font-size="12">100k WAL</text>
+<rect x="390" y="328" width="13.818" height="15" fill="#396494"/>
+<text x="408.81750506758254" y="341" font-size="12">45.17</text>
+<text x="322" y="380" font-size="12">100k dual</text>
+<rect x="390" y="367" width="15.847" height="15" fill="#ae5429"/>
+<text x="410.8465739601498" y="380" font-size="12">51.80</text>
+<text x="322" y="419" font-size="12">1M WAL</text>
+<rect x="390" y="406" width="124.758" height="15" fill="#396494"/>
+<text x="519.757862498119" y="419" font-size="12">407.82</text>
+<text x="322" y="458" font-size="12">1M dual</text>
+<rect x="390" y="445" width="135.000" height="15" fill="#ae5429"/>
+<text x="530.0" y="458" font-size="12">441.30</text>
+<text x="626" y="309" font-size="17">Warm reopen (ms)</text>
+<text x="626" y="341" font-size="12">100k WAL</text>
+<rect x="694" y="328" width="5.072" height="15" fill="#396494"/>
+<text x="704.0716286988824" y="341" font-size="12">74.88</text>
+<text x="626" y="380" font-size="12">100k dual</text>
+<rect x="694" y="367" width="11.885" height="15" fill="#ae5429"/>
+<text x="710.8846097600839" y="380" font-size="12">175.48</text>
+<text x="626" y="419" font-size="12">1M WAL</text>
+<rect x="694" y="406" width="66.724" height="15" fill="#396494"/>
+<text x="765.7240018508227" y="419" font-size="12">985.20</text>
+<text x="626" y="458" font-size="12">1M dual</text>
+<rect x="694" y="445" width="135.000" height="15" fill="#ae5429"/>
+<text x="834.0" y="458" font-size="12">1,993.31</text>
+</g></svg>

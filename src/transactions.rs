@@ -4633,3 +4633,7 @@ mod variable_gate;
 #[cfg(all(test, target_os = "linux"))]
 #[path = "../benchmarks/capacity-gate/mod.rs"]
 mod capacity_gate;
+
+#[cfg(all(test, target_os = "linux"))]
+#[path = "../benchmarks/scaled-gate/mod.rs"]
+mod scaled_gate;

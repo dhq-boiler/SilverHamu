@@ -6,6 +6,14 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Dual-record region reuse at one million rows
+
+The experimental store recovered the latest data and preserved the old reader in every final run. It did **not** reduce syncs: both paths used 1,030 for 1,024 transactions and three full checkpoints. At one million rows the prototype submitted about twice the bytes of the current WAL. These are separate single-writer paths, and the prototype protects against at most one detectably damaged copy per record. The production WAL remains unchanged.
+
+[All trials, failure cases and reproduction instructions](docs/benchmarks/scaled-gate-2026-11-07/README.md).
+
+![Throughput, p99, worst wait, application writes, RSS and reopen](docs/benchmarks/scaled-gate-2026-11-07/comparison.svg)
+
 ## Inline short keys are now the default
 
 At aged 1M rows /1 CPU /512MiB, short-key RSS falls **420.12 → 390.46 MiB (-7.1%)**.

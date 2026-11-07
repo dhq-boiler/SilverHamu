@@ -1,0 +1,21 @@
+{
+  "commit": "add8135b4438a30ddfb463f832e17d58ba586874",
+  "image": "sha256:307d5ce48312f2f82c24ecf0a87bcb7d81032117913099759aa2840195cd97b4",
+  "stage": "pilot",
+  "rows": 10000,
+  "ops": 64,
+  "log_capacity": 16,
+  "cpu": 2,
+  "memory_bytes": 4294967296,
+  "swap_bytes": 0,
+  "utc": "2026-11-07T01:58:15.234885+00:00",
+  "hashes": {
+    "Cargo.toml": "7e581f07edefa30f8b145cc883c3b83d37d2bb27e500060766ec99b476fc3049",
+    "Cargo.lock": "df9a4a2f931c9a3e3d2d1076aea9650b9297334ec81f574cb2f333d77dc5bef6",
+    "src/transactions.rs": "9ca76cb745f67adf2eafd385de04aae59c67f3383ead895c7401d98c74d9e4ae",
+    "src/lib.rs": "c82e49ece09308bb6890850b5cab81aafff6bbe6fa167cf0c496f7be54f44ce5",
+    "benchmarks/scaled-gate/checks.rs": "02c33f3cf8b88bfdc1ae3df81abe53f3ffb4353a7bb7f49b05c2399263946a25",
+    "benchmarks/scaled-gate/mod.rs": "558251c2417effcf7803ef82140a1f37d92c416ee0ce8a959b16c0cedf5bd514",
+    "benchmarks/scaled-gate/timing.rs": "9237f2d86020571b51bb1aa2719ca21b687fe26543262b6ec8fdf89be213b74e"
+  }
+}

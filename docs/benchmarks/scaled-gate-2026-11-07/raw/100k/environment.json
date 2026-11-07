@@ -1,0 +1,21 @@
+{
+  "commit": "add8135b4438a30ddfb463f832e17d58ba586874",
+  "image": "sha256:c6a749f51c5b059757ffc3d2e880354fc61ae00165ae8092ae2dce21077d6ff8",
+  "stage": "100k",
+  "rows": 100000,
+  "ops": 1024,
+  "log_capacity": 256,
+  "cpu": 2,
+  "memory_bytes": 4294967296,
+  "swap_bytes": 0,
+  "utc": "2026-11-07T02:00:08.262872+00:00",
+  "hashes": {
+    "Cargo.toml": "7e581f07edefa30f8b145cc883c3b83d37d2bb27e500060766ec99b476fc3049",
+    "Cargo.lock": "df9a4a2f931c9a3e3d2d1076aea9650b9297334ec81f574cb2f333d77dc5bef6",
+    "src/transactions.rs": "9ca76cb745f67adf2eafd385de04aae59c67f3383ead895c7401d98c74d9e4ae",
+    "src/lib.rs": "c82e49ece09308bb6890850b5cab81aafff6bbe6fa167cf0c496f7be54f44ce5",
+    "benchmarks/scaled-gate/checks.rs": "a6ff8ec77ace6d71890fc0d5e9c0b510d002f9d18a0c4c6d0e6815f5d7b860a5",
+    "benchmarks/scaled-gate/mod.rs": "2d67e68ed10a6b63da345c8566f8a2a921a5c9dcdf123ba2062c211f260dd2ab",
+    "benchmarks/scaled-gate/timing.rs": "20ecc39ff7c0a7c23e64b628ef5f941b997ed5f2b2d0cfa00226822d9b9eb3e7"
+  }
+}

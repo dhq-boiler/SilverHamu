@@ -1,0 +1,123 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 370B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/rust:1.89-bookworm
+#2 DONE 0.0s
+
+#3 [1/6] FROM docker.io/library/rust:1.89-bookworm
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 53.67kB 0.0s done
+#4 DONE 0.1s
+
+#5 [2/6] WORKDIR /build
+#5 CACHED
+
+#6 [3/6] COPY Cargo.toml Cargo.lock ./
+#6 CACHED
+
+#7 [4/6] COPY src ./src
+#7 CACHED
+
+#8 [5/6] COPY benchmarks ./benchmarks
+#8 DONE 0.2s
+
+#9 [6/6] RUN cargo test --locked --release --lib scaled_gate -- --nocapture --test-threads=1
+#9 0.529     Updating crates.io index
+#9 0.974    Compiling catdb v0.1.0 (/build)
+#9 2.175 warning: method `hold_test_sync` is never used
+#9 2.175    --> src/group_commit.rs:130:19
+#9 2.175     |
+#9 2.175 123 | impl Database {
+#9 2.175     | ------------- method in this implementation
+#9 2.175 ...
+#9 2.175 130 |     pub(crate) fn hold_test_sync(&self, gate: Arc<[std::sync::Barrier; 2]>) {
+#9 2.175     |                   ^^^^^^^^^^^^^^
+#9 2.175     |
+#9 2.175     = note: `#[warn(dead_code)]` on by default
+#9 2.175
+#9 5.841 warning: `catdb` (lib test) generated 1 warning
+#9 5.841     Finished `release` profile [optimized] target(s) in 5.43s
+#9 5.846      Running unittests src/lib.rs (target/release/deps/newdbms-458055916a75b401)
+#9 5.847
+#9 5.847 running 14 tests
+#9 5.847 test transactions::scaled_gate::checks::bv_checkpoint_growth_refusal_preserves_values_and_can_recover ... ok
+#9 5.990 test transactions::scaled_gate::checks::bv_frames_budget_capacity_empty_and_generation_bounds ... ok
+#9 6.261 test transactions::scaled_gate::checks::crash_child ... ignored, external crash barrier helper
+#9 6.261 test transactions::scaled_gate::checks::eq_st_segmented_checkpoint_updates_old_snapshots_and_reuse ... ok
+#9 6.545 test transactions::scaled_gate::checks::er_external_exit_checkpoint_publication_append_and_repair ... SCALED_KILL,append,append-0.half
+#9 6.811 SCALED_KILL,append,append-0.written
+#9 6.967 SCALED_KILL,append,append-1.half
+#9 7.115 SCALED_KILL,append,append.before-sync
+#9 7.251 SCALED_KILL,append,append.synced
+#9 7.407 SCALED_KILL,append,append.published
+#9 7.557 SCALED_KILL,switch,chunk-0-0.half
+#9 7.722 SCALED_KILL,switch,chunk-1-1.written
+#9 7.880 SCALED_KILL,switch,checkpoint.before-sync
+#9 8.037 SCALED_KILL,switch,checkpoint.synced
+#9 8.173 SCALED_KILL,switch,selector-0.half
+#9 8.331 SCALED_KILL,switch,selector-0.written
+#9 8.488 SCALED_KILL,switch,selector-1.half
+#9 8.643 SCALED_KILL,switch,selector.before-sync
+#9 8.798 SCALED_KILL,switch,selector.synced
+#9 8.959 SCALED_KILL,switch,switch.published
+#9 9.115 SCALED_KILL,repair,repair-chunk-0-0.half
+#9 9.294 SCALED_KILL,repair,repair-data.before-sync
+#9 9.470 SCALED_KILL,repair,repair-data.synced
+#9 9.638 SCALED_KILL,repair,repair-selector-1.half
+#9 9.812 SCALED_KILL,repair,repair-selector.before-sync
+#9 9.981 SCALED_KILL,repair,repair-selector.synced
+#9 10.14 SCALED_KILL,repair,recovery.before-sync
+#9 10.32 SCALED_KILL,repair,recovery.synced
+#9 10.50 SCALED_KILL,repair,open.ready
+#9 10.50 ok
+#9 10.50 test transactions::scaled_gate::checks::er_failed_switch_reopen_updates_and_retry_preserve_committed_state ... ok
+#9 11.34 test transactions::scaled_gate::checks::er_failed_sync_does_not_publish_and_requires_reopen ... ok
+#9 11.73 test transactions::scaled_gate::checks::er_header_payload_reordering_and_bounded_streaming_recovery ... ok
+#9 12.19 test transactions::scaled_gate::checks::er_identifiable_misplacement_uses_the_intact_peer ...
+#9 12.34 thread 'transactions::scaled_gate::checks::er_identifiable_misplacement_uses_the_intact_peer' panicked at src/../benchmarks/scaled-gate/checks.rs:660:64:
+#9 12.34 called `Result::unwrap()` on an `Err` value: Custom { kind: Other, error: "copies disagree" }
+#9 12.34 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+#9 12.35 FAILED
+#9 12.35 test transactions::scaled_gate::checks::er_manifest_missing_swapped_chunks_and_disagreeing_copies_reject ... ok
+#9 12.55 test transactions::scaled_gate::checks::er_one_copy_repair_is_bounded_idempotent_and_failure_keeps_peer ... ok
+#9 12.67 test transactions::scaled_gate::checks::er_partial_append_model_and_both_copy_loss_counterexample ... SCALED_MODEL,64,both-copy-loss-outside-contract
+#9 14.76 ok
+#9 14.76 test transactions::scaled_gate::checks::er_selector_prefix_models_and_reordered_checkpoint_reject_partial_generation ... SCALED_SELECTOR_MODEL,25,unsynced-data-root-rejected
+#9 16.47 ok
+#9 16.47 test transactions::scaled_gate::checks::timing::compare ... ignored, explicit staged large-data comparison
+#9 16.47
+#9 16.47 failures:
+#9 16.47
+#9 16.47 failures:
+#9 16.47     transactions::scaled_gate::checks::er_identifiable_misplacement_uses_the_intact_peer
+#9 16.47
+#9 16.47 test result: FAILED. 11 passed; 1 failed; 2 ignored; 0 measured; 105 filtered out; finished in 10.17s
+#9 16.47
+#9 16.48 error: test failed, to rerun pass `--lib`
+#9 ERROR: process "/bin/sh -c cargo test --locked --release --lib scaled_gate -- --nocapture --test-threads=1" did not complete successfully: exit code: 101
+------
+ > [6/6] RUN cargo test --locked --release --lib scaled_gate -- --nocapture --test-threads=1:
+16.47 test transactions::scaled_gate::checks::timing::compare ... ignored, explicit staged large-data comparison
+16.47
+16.47 failures:
+16.47
+16.47 failures:
+16.47     transactions::scaled_gate::checks::er_identifiable_misplacement_uses_the_intact_peer
+16.47
+16.47 test result: FAILED. 11 passed; 1 failed; 2 ignored; 0 measured; 105 filtered out; finished in 10.17s
+16.47
+16.48 error: test failed, to rerun pass `--lib`
+------
+Dockerfile:6
+--------------------
+   4 |     COPY src ./src
+   5 |     COPY benchmarks ./benchmarks
+   6 | >>> RUN cargo test --locked --release --lib scaled_gate -- --nocapture --test-threads=1
+   7 |
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c cargo test --locked --release --lib scaled_gate -- --nocapture --test-threads=1" did not complete successfully: exit code: 101

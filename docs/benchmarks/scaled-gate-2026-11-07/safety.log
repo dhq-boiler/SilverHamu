@@ -1,0 +1,99 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 370B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/rust:1.89-bookworm
+#2 DONE 0.0s
+
+#3 [1/6] FROM docker.io/library/rust:1.89-bookworm
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 54.11kB 0.0s done
+#4 DONE 0.0s
+
+#5 [2/6] WORKDIR /build
+#5 CACHED
+
+#6 [3/6] COPY Cargo.toml Cargo.lock ./
+#6 CACHED
+
+#7 [4/6] COPY src ./src
+#7 CACHED
+
+#8 [5/6] COPY benchmarks ./benchmarks
+#8 DONE 0.2s
+
+#9 [6/6] RUN cargo test --locked --release --lib scaled_gate -- --nocapture --test-threads=1
+#9 0.438     Updating crates.io index
+#9 0.869    Compiling catdb v0.1.0 (/build)
+#9 2.098 warning: method `hold_test_sync` is never used
+#9 2.098    --> src/group_commit.rs:130:19
+#9 2.098     |
+#9 2.098 123 | impl Database {
+#9 2.098     | ------------- method in this implementation
+#9 2.098 ...
+#9 2.098 130 |     pub(crate) fn hold_test_sync(&self, gate: Arc<[std::sync::Barrier; 2]>) {
+#9 2.098     |                   ^^^^^^^^^^^^^^
+#9 2.098     |
+#9 2.098     = note: `#[warn(dead_code)]` on by default
+#9 2.098
+#9 5.888 warning: `catdb` (lib test) generated 1 warning
+#9 5.888     Finished `release` profile [optimized] target(s) in 5.57s
+#9 5.893      Running unittests src/lib.rs (target/release/deps/newdbms-458055916a75b401)
+#9 5.894
+#9 5.894 running 14 tests
+#9 5.894 test transactions::scaled_gate::checks::bv_checkpoint_growth_refusal_preserves_values_and_can_recover ... ok
+#9 5.988 test transactions::scaled_gate::checks::bv_frames_budget_capacity_empty_and_generation_bounds ... ok
+#9 6.160 test transactions::scaled_gate::checks::crash_child ... ignored, external crash barrier helper
+#9 6.160 test transactions::scaled_gate::checks::eq_st_segmented_checkpoint_updates_old_snapshots_and_reuse ... ok
+#9 6.319 test transactions::scaled_gate::checks::er_external_exit_checkpoint_publication_append_and_repair ... SCALED_KILL,append,append-0.half
+#9 6.525 SCALED_KILL,append,append-0.written
+#9 6.636 SCALED_KILL,append,append-1.half
+#9 6.739 SCALED_KILL,append,append.before-sync
+#9 6.839 SCALED_KILL,append,append.synced
+#9 6.943 SCALED_KILL,append,append.published
+#9 7.041 SCALED_KILL,switch,chunk-0-0.half
+#9 7.142 SCALED_KILL,switch,chunk-1-1.written
+#9 7.248 SCALED_KILL,switch,checkpoint.before-sync
+#9 7.353 SCALED_KILL,switch,checkpoint.synced
+#9 7.465 SCALED_KILL,switch,selector-0.half
+#9 7.569 SCALED_KILL,switch,selector-0.written
+#9 7.683 SCALED_KILL,switch,selector-1.half
+#9 7.777 SCALED_KILL,switch,selector.before-sync
+#9 7.879 SCALED_KILL,switch,selector.synced
+#9 7.988 SCALED_KILL,switch,switch.published
+#9 8.096 SCALED_KILL,repair,repair-chunk-0-0.half
+#9 8.199 SCALED_KILL,repair,repair-data.before-sync
+#9 8.311 SCALED_KILL,repair,repair-data.synced
+#9 8.427 SCALED_KILL,repair,repair-selector-1.half
+#9 8.527 SCALED_KILL,repair,repair-selector.before-sync
+#9 8.626 SCALED_KILL,repair,repair-selector.synced
+#9 8.729 SCALED_KILL,repair,recovery.before-sync
+#9 8.841 SCALED_KILL,repair,recovery.synced
+#9 8.957 SCALED_KILL,repair,open.ready
+#9 8.958 ok
+#9 8.958 test transactions::scaled_gate::checks::er_failed_switch_reopen_updates_and_retry_preserve_committed_state ... ok
+#9 9.393 test transactions::scaled_gate::checks::er_failed_sync_does_not_publish_and_requires_reopen ... ok
+#9 9.577 test transactions::scaled_gate::checks::er_header_payload_reordering_and_bounded_streaming_recovery ... ok
+#9 9.941 test transactions::scaled_gate::checks::er_identifiable_misplacement_uses_the_intact_peer ... ok
+#9 10.28 test transactions::scaled_gate::checks::er_manifest_missing_swapped_chunks_and_disagreeing_copies_reject ... ok
+#9 10.44 test transactions::scaled_gate::checks::er_one_copy_repair_is_bounded_idempotent_and_failure_keeps_peer ... ok
+#9 10.52 test transactions::scaled_gate::checks::er_partial_append_model_and_both_copy_loss_counterexample ... SCALED_MODEL,64,both-copy-loss-outside-contract
+#9 12.52 ok
+#9 12.52 test transactions::scaled_gate::checks::er_selector_prefix_models_and_reordered_checkpoint_reject_partial_generation ... SCALED_SELECTOR_MODEL,25,unsynced-data-root-rejected
+#9 13.70 ok
+#9 13.70 test transactions::scaled_gate::checks::timing::compare ... ignored, explicit staged large-data comparison
+#9 13.70
+#9 13.70 test result: ok. 12 passed; 0 failed; 2 ignored; 0 measured; 105 filtered out; finished in 7.80s
+#9 13.70
+#9 DONE 13.7s
+
+#10 exporting to image
+#10 exporting layers
+#10 exporting layers 2.5s done
+#10 writing image sha256:081580bdb1a65bdc64d4a94c4cd67791c2ea895214fbf2807abfe6d16c4ada1c done
+#10 naming to docker.io/library/catdb-scaled-gate done
+#10 DONE 2.5s

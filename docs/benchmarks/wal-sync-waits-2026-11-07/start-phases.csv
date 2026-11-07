@@ -1,0 +1,15 @@
+mode,start_phase,mean_calls,mean_call_ms
+standard,prefix,2340.0,5.113030000427351
+standard,snapshot_write,2027.0,5.392768266239106
+standard,snapshot_sync,191.66666666666666,48.12943708173913
+standard,pre_cutover,11505.666666666666,5.071846380044616
+standard,cutover,0.0,0
+standard,after_unlock,0.0,0
+standard,outside,319.6666666666667,5.998218543274244
+fifo,prefix,2927.0,5.517471989636715
+fifo,snapshot_write,2455.0,5.840791488662593
+fifo,snapshot_sync,245.66666666666666,59.24524797557666
+fifo,pre_cutover,189.0,6.056236964726631
+fifo,cutover,0.0,0
+fifo,after_unlock,0.0,0
+fifo,outside,10567.333333333334,6.214125992050975

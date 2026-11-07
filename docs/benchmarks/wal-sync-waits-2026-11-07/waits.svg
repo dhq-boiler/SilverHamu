@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 970 375" role="img"><title>Where the writers waited inside WAL synchronization</title><rect width="970" height="375" fill="white"/><g font-family="sans-serif" fill="#203247">
+<text x="16" y="32" font-size="23">Where the writers waited inside WAL synchronization</text>
+<text x="16" y="57" font-size="14">Seconds per 16,384-update run, mean of three trials. Each panel has its own scale.</text>
+<text x="16" y="95" font-size="17">Journal commit sleep</text>
+<text x="16" y="125" font-size="14">Standard</text>
+<rect x="91" y="112" width="185.74" height="15" fill="#536e83"/>
+<text x="282.74179001954656" y="125" font-size="14">87.80</text>
+<text x="16" y="157" font-size="14">FIFO</text>
+<rect x="91" y="144" width="225.00" height="15" fill="#237669"/>
+<text x="322.0" y="157" font-size="14">106.36</text>
+<text x="496" y="95" font-size="17">File writeback sleep</text>
+<text x="496" y="125" font-size="14">Standard</text>
+<rect x="571" y="112" width="174.24" height="15" fill="#536e83"/>
+<text x="751.242336417714" y="125" font-size="14">3.04</text>
+<text x="496" y="157" font-size="14">FIFO</text>
+<rect x="571" y="144" width="225.00" height="15" fill="#237669"/>
+<text x="802.0" y="157" font-size="14">3.92</text>
+<text x="16" y="227" font-size="17">Wakeup to switch-in</text>
+<text x="16" y="257" font-size="14">Standard</text>
+<rect x="91" y="244" width="225.00" height="15" fill="#536e83"/>
+<text x="322.0" y="257" font-size="14">0.177</text>
+<text x="16" y="289" font-size="14">FIFO</text>
+<rect x="91" y="276" width="223.67" height="15" fill="#237669"/>
+<text x="320.67158452542253" y="289" font-size="14">0.176</text>
+<text x="496" y="227" font-size="17">Scheduled on guest CPU</text>
+<text x="496" y="257" font-size="14">Standard</text>
+<rect x="571" y="244" width="222.32" height="15" fill="#536e83"/>
+<text x="799.319839572043" y="257" font-size="14">1.30</text>
+<text x="496" y="289" font-size="14">FIFO</text>
+<rect x="571" y="276" width="225.00" height="15" fill="#237669"/>
+<text x="802.0" y="289" font-size="14">1.31</text>
+</g></svg>

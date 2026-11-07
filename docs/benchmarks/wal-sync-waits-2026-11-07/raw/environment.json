@@ -1,0 +1,9 @@
+{
+  "rows": 1000000,
+  "ops": 16384,
+  "cap": 256,
+  "db_image": "sha256:63773bb86aa89609592a79ab95ec6a80983d2ecd6b3388eeb7b019217e8d4dd2",
+  "observer_image": "sha256:1ab8e2ff4619759f99a4a910d2db2079271f5987020eb8af534a098cd187b9f4",
+  "cpu": 2,
+  "memory": 4294967296
+}

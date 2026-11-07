@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 970 375" role="img"><title>63 independent checkpoints with guest tracing</title><rect width="970" height="375" fill="white"/><g font-family="sans-serif" fill="#203247">
+<text x="16" y="32" font-size="23">63 independent checkpoints with guest tracing</text>
+<text x="16" y="57" font-size="14">1M rows, four writers, two CPUs, 4 GiB. Three trial medians except the maximum across all trials.</text>
+<text x="16" y="95" font-size="17">Update p99 (ms)</text>
+<text x="16" y="125" font-size="14">Standard</text>
+<rect x="91" y="112" width="225.00" height="15" fill="#536e83"/>
+<text x="322.0" y="125" font-size="14">465.85</text>
+<text x="16" y="157" font-size="14">FIFO</text>
+<rect x="91" y="144" width="80.78" height="15" fill="#237669"/>
+<text x="177.78484113477623" y="157" font-size="14">167.26</text>
+<text x="496" y="95" font-size="17">Worst update (ms)</text>
+<text x="496" y="125" font-size="14">Standard</text>
+<rect x="571" y="112" width="225.00" height="15" fill="#536e83"/>
+<text x="802.0" y="125" font-size="14">5,612.08</text>
+<text x="496" y="157" font-size="14">FIFO</text>
+<rect x="571" y="144" width="19.74" height="15" fill="#237669"/>
+<text x="596.7404196143702" y="157" font-size="14">492.38</text>
+<text x="16" y="227" font-size="17">Updates/s to last response</text>
+<text x="16" y="257" font-size="14">Standard</text>
+<rect x="91" y="244" width="225.00" height="15" fill="#536e83"/>
+<text x="322.0" y="257" font-size="14">183.21</text>
+<text x="16" y="289" font-size="14">FIFO</text>
+<rect x="91" y="276" width="185.91" height="15" fill="#237669"/>
+<text x="282.9101042747311" y="289" font-size="14">151.38</text>
+<text x="496" y="227" font-size="17">Updates/s including drain</text>
+<text x="496" y="257" font-size="14">Standard</text>
+<rect x="571" y="244" width="225.00" height="15" fill="#536e83"/>
+<text x="802.0" y="257" font-size="14">157.89</text>
+<text x="496" y="289" font-size="14">FIFO</text>
+<rect x="571" y="276" width="215.72" height="15" fill="#237669"/>
+<text x="792.718080976254" y="289" font-size="14">151.38</text>
+</g></svg>

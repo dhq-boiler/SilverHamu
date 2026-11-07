@@ -1,5 +1,5 @@
 import unittest
-from partition import allocate,stack_kind,syscall_segments
+from partition import check_metadata,allocate,stack_kind,syscall_segments
 
 class TraceTests(unittest.TestCase):
     def test_sleep_wake_and_preempt_are_disjoint(self):
@@ -15,6 +15,17 @@ class TraceTests(unittest.TestCase):
         self.assertEqual(syscall_segments(events,observed)[0][0],[(0,2,"scheduled"),(2,5,"journal"),(5,6,"wake_wait"),(6,8,"scheduled")])
         self.assertEqual(observed["wake_while_scheduled"],1)
         with self.assertRaises(AssertionError):syscall_segments(events[:3]+events[4:])
+    def test_loss_in_any_cpu_invalidates_capture(self):
+        import tempfile,json
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as tmp:
+            d=Path(tmp)
+            good="overrun: 0\ncommit overrun: 0\ndropped events: 0"
+            for counts in (good,good.replace("overrun: 0","overrun: 1",1),good.replace("dropped events: 0","dropped events: 1")):
+                (d/"meta.json").write_text(json.dumps(dict(cleaned=True,stats={"cpu0":good,"cpu1":counts})))
+                if counts==good:check_metadata(d)
+                else:
+                    with self.assertRaises(AssertionError):check_metadata(d)
     def test_stack_evidence_required_for_io_path(self):
         self.assertEqual(stack_kind(["schedule","ext4_sync_file"]),"blocked_unknown")
         self.assertEqual(stack_kind(["io_schedule","folio_wait_writeback"]),"writeback")

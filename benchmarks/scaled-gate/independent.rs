@@ -1,4 +1,4 @@
-#[path="sync_clock.rs"]
+#[path = "sync_clock.rs"]
 mod sync_clock;
 use crate::transactions::independent_trace;
 #[test]
@@ -41,8 +41,10 @@ fn independent_campaign() {
     let mut old = db.begin_read().unwrap();
     let base = old.version();
     let clock = Instant::now();
-    let os_tag=std::env::var("SYNC_OS_TAG").ok();
-    if os_tag.is_some() {sync_clock::clock_anchor(clock);}
+    let os_tag = std::env::var("SYNC_OS_TAG").ok();
+    if os_tag.is_some() {
+        sync_clock::clock_anchor(clock);
+    }
     let now = || clock.elapsed().as_nanos() as u64;
     let (send, recv) = std::sync::mpsc::channel::<usize>();
     let barrier = Barrier::new(5);
@@ -121,10 +123,12 @@ fn independent_campaign() {
             let db = &db;
             let send = send.clone();
             let barrier = &barrier;
-            let tag=os_tag.as_deref();
+            let tag = os_tag.as_deref();
             let holds = &holds;
             threads.push(scope.spawn(move || {
-                if let Some(tag)=tag {sync_clock::identify(tag,lane);}
+                if let Some(tag) = tag {
+                    sync_clock::identify(tag, lane);
+                }
                 independent_trace::enable(clock);
                 if exact {
                     independent_trace::enable_handoffs(clock, ops / 4 + 128);
@@ -194,7 +198,9 @@ fn independent_campaign() {
             }
         }
     }
-    if os_tag.is_some() {sync_clock::clock_anchor(clock);}
+    if os_tag.is_some() {
+        sync_clock::clock_anchor(clock);
+    }
     let mut expected = BTreeMap::new();
     let mut committed = Vec::new();
     for (id, received, begin, commit, [l, a, s, f, b], end, seq) in attempts {

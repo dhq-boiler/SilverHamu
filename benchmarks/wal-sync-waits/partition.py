@@ -10,7 +10,7 @@ sys.path.insert(0,str(BENCH/"sync-os"))
 from analyze import LINE
 
 KINDS=("writeback","journal","io_other","blocked_unknown","wake_wait","preempt_wait","scheduled","outside_syscall")
-PHASES=("prefix","snapshot_write","snapshot_sync","finalize","outside")
+PHASES=("prefix","snapshot_write","snapshot_sync","pre_cutover","cutover","after_unlock","outside")
 
 def stack_kind(frames):
     if any(s.startswith("jbd2_log_wait_commit") for s in frames):return "journal"
@@ -121,7 +121,7 @@ def allocate(log,events):
         if a[-1]:app[a[0]%4].append((a[6],a[7],a[0]))
     intervals=[]
     for c in records(log,"PUBLICATION"):
-        intervals.extend([(c[1],c[2],"prefix"),(c[3],c[4],"snapshot_write"),(c[4],c[5],"snapshot_sync"),(c[5],c[11],"finalize")])
+        intervals.extend([(c[1],c[2],"prefix"),(c[3],c[4],"snapshot_write"),(c[4],c[5],"snapshot_sync"),(c[5],c[6],"pre_cutover"),(c[6],c[10],"cutover"),(c[10],c[11],"after_unlock")])
     assert all(a<=b for a,b,_ in intervals) and all(u[1]<=v[0] for u,v in zip(intervals,intervals[1:]))
     ends=[s[1] for s in intervals]
     def book(phase,kind,length):

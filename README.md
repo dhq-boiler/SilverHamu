@@ -6,6 +6,14 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Guest wait attribution for WAL sync
+
+With equal checkpoint counts, the new traced FIFO-minus-standard difference in cumulative WAL sync was **+19.462 s per run**. The journal commit wait accounted for **+18.558 s**, and wakeup-to-CPU delay for **-0.001 s**. [Checkpoint phase intersections, throughput, update p99, worst latency and observer overhead](docs/benchmarks/wal-sync-waits-2026-11-07/README.md).
+
+![Guest wait categories](docs/benchmarks/wal-sync-waits-2026-11-07/waits.svg)
+
+![Writer performance](docs/benchmarks/wal-sync-waits-2026-11-07/performance.svg)
+
 ## Writer handoff with an equal checkpoint count
 
 With exactly 63 independent checkpoint publications per trial, FIFO changed throughput by **-27.63% through the last response** and **-27.63% through final maintenance**. Update p99 measured 442.65 ms with the standard mutex and 185.62 ms with FIFO. [All trials, maximum wait, logical writes and handoff accounting](docs/benchmarks/equal-publications-2026-11-07/README.md).

@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 380" role="img"><title>Wall time of the slowest update in each trial</title><rect width="950" height="380" fill="white"/><g font-family="sans-serif" fill="#213248">
+<text x="16" y="30" font-size="22">Where the slowest update in each trial spent its time</text>
+<text x="16" y="55" font-size="14">Absolute wall time; each millisecond is assigned to one segment.</text>
+<rect x="16" y="75" width="12" height="12" fill="#355d93"/>
+<text x="33" y="86" font-size="13">Wait: peer sync</text>
+<rect x="199" y="75" width="12" height="12" fill="#ce7d32"/>
+<text x="216" y="86" font-size="13">Wait: checkpoint lock</text>
+<rect x="382" y="75" width="12" height="12" fill="#92a5ba"/>
+<text x="399" y="86" font-size="13">Other lock wait</text>
+<rect x="565" y="75" width="12" height="12" fill="#22715c"/>
+<text x="582" y="86" font-size="13">Own sync</text>
+<rect x="748" y="75" width="12" height="12" fill="#c1cbc3"/>
+<text x="765" y="86" font-size="13">Remaining request</text>
+<text x="16" y="120" font-size="14">Prefix off / 1</text>
+<rect x="113.00" y="106" width="415.32" height="18" fill="#355d93"/>
+<rect x="528.32" y="106" width="4.16" height="18" fill="#ce7d32"/>
+<rect x="532.49" y="106" width="4.23" height="18" fill="#92a5ba"/>
+<rect x="536.72" y="106" width="0.74" height="18" fill="#22715c"/>
+<rect x="537.46" y="106" width="0.03" height="18" fill="#c1cbc3"/>
+<text x="545.4855861095758" y="120" font-size="14">3,308.4 ms</text>
+<text x="16" y="159" font-size="14">Prefix on / 1</text>
+<rect x="113.00" y="145" width="361.50" height="18" fill="#355d93"/>
+<rect x="474.50" y="145" width="0.00" height="18" fill="#ce7d32"/>
+<rect x="474.50" y="145" width="3.13" height="18" fill="#92a5ba"/>
+<rect x="477.63" y="145" width="1.30" height="18" fill="#22715c"/>
+<rect x="478.93" y="145" width="0.01" height="18" fill="#c1cbc3"/>
+<text x="486.93841980462815" y="159" font-size="14">2,852.0 ms</text>
+<text x="16" y="198" font-size="14">Prefix off / 2</text>
+<rect x="113.00" y="184" width="527.34" height="18" fill="#355d93"/>
+<rect x="640.34" y="184" width="0.00" height="18" fill="#ce7d32"/>
+<rect x="640.34" y="184" width="6.48" height="18" fill="#92a5ba"/>
+<rect x="646.82" y="184" width="0.79" height="18" fill="#22715c"/>
+<rect x="647.61" y="184" width="0.01" height="18" fill="#c1cbc3"/>
+<text x="655.6249727541252" y="198" font-size="14">4,166.8 ms</text>
+<text x="16" y="237" font-size="14">Prefix on / 2</text>
+<rect x="113.00" y="223" width="691.73" height="18" fill="#355d93"/>
+<rect x="804.73" y="223" width="0.00" height="18" fill="#ce7d32"/>
+<rect x="804.73" y="223" width="7.44" height="18" fill="#92a5ba"/>
+<rect x="812.18" y="223" width="0.81" height="18" fill="#22715c"/>
+<rect x="812.98" y="223" width="0.02" height="18" fill="#c1cbc3"/>
+<text x="821.0000000000001" y="237" font-size="14">5,455.7 ms</text>
+<text x="16" y="276" font-size="14">Prefix off / 3</text>
+<rect x="113.00" y="262" width="381.48" height="18" fill="#355d93"/>
+<rect x="494.48" y="262" width="4.06" height="18" fill="#ce7d32"/>
+<rect x="498.54" y="262" width="4.80" height="18" fill="#92a5ba"/>
+<rect x="503.33" y="262" width="0.77" height="18" fill="#22715c"/>
+<rect x="504.11" y="262" width="0.03" height="18" fill="#c1cbc3"/>
+<text x="512.1371622908549" y="276" font-size="14">3,048.4 ms</text>
+<text x="16" y="315" font-size="14">Prefix on / 3</text>
+<rect x="113.00" y="301" width="615.90" height="18" fill="#355d93"/>
+<rect x="728.90" y="301" width="3.80" height="18" fill="#ce7d32"/>
+<rect x="732.70" y="301" width="6.33" height="18" fill="#92a5ba"/>
+<rect x="739.02" y="301" width="0.66" height="18" fill="#22715c"/>
+<rect x="739.68" y="301" width="0.02" height="18" fill="#c1cbc3"/>
+<text x="747.7035319039602" y="315" font-size="14">4,884.4 ms</text>
+</g></svg>

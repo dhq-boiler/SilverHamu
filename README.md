@@ -6,6 +6,14 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Independent checkpoints with continuous writer admission
+
+Across three one-million-row runs per mode, update p99 measured **741.46 ms off / 679.87 ms on** and the worst update **4,166.76 ms off / 5,455.66 ms on**. Each mode received 63 triggers per trial; busy-worker coalescing produced 44–55 and 42–58 publications respectively. [Throughput, write traffic and request-level attribution](docs/benchmarks/independent-2026-11-07/README.md).
+
+![Independent checkpoint measurements](docs/benchmarks/independent-2026-11-07/comparison.svg)
+
+![Slow-request breakdown](docs/benchmarks/independent-2026-11-07/attribution.svg)
+
 ## Production WAL checkpoint prefix
 
 Preparing the initial snapshot chunks on a maintenance thread changed update p99 from **761.94 to 642.02 ms**, throughput by **+14.45%** and logical writes per commit by **+0.025%**. The Rust API is opt-in. [All trials, recovery checks and reproduction](docs/benchmarks/native-prefix-2026-11-07/README.md).

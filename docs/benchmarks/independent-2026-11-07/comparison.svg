@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 380" role="img"><title>Independent production checkpoints</title><rect width="920" height="380" fill="white"/><g font-family="sans-serif" fill="#213248">
+<text x="16" y="30" font-size="22">Independent checkpoints with four continuously admitted writers</text>
+<text x="16" y="58" font-size="14">One million rows, two CPUs, 4 GiB. Trial medians except maximum across all three runs.</text>
+<text x="16" y="93" font-size="17">Update p99 (ms)</text>
+<text x="16" y="125" font-size="14">Off</text>
+<rect x="91" y="113" width="202.00" height="14" fill="#536982"/>
+<text x="299.0" y="125" font-size="14">741.46</text>
+<text x="16" y="158" font-size="14">Prefix on</text>
+<rect x="91" y="146" width="185.22" height="14" fill="#297465"/>
+<text x="282.220656102692" y="158" font-size="14">679.87</text>
+<text x="471" y="93" font-size="17">Worst update (ms)</text>
+<text x="471" y="125" font-size="14">Off</text>
+<rect x="546" y="113" width="154.28" height="14" fill="#536982"/>
+<text x="706.277492137619" y="125" font-size="14">4,166.76</text>
+<text x="471" y="158" font-size="14">Prefix on</text>
+<rect x="546" y="146" width="202.00" height="14" fill="#297465"/>
+<text x="754.0" y="158" font-size="14">5,455.66</text>
+<text x="16" y="233" font-size="17">Updates / second</text>
+<text x="16" y="265" font-size="14">Off</text>
+<rect x="91" y="253" width="202.00" height="14" fill="#536982"/>
+<text x="299.0" y="265" font-size="14">132.72</text>
+<text x="16" y="298" font-size="14">Prefix on</text>
+<rect x="91" y="286" width="198.22" height="14" fill="#297465"/>
+<text x="295.22351192237204" y="298" font-size="14">130.24</text>
+<text x="471" y="233" font-size="17">Logical KiB / update, including drain</text>
+<text x="471" y="265" font-size="14">Off</text>
+<rect x="546" y="253" width="202.00" height="14" fill="#536982"/>
+<text x="754.0" y="265" font-size="14">886.86</text>
+<text x="471" y="298" font-size="14">Prefix on</text>
+<rect x="546" y="286" width="194.07" height="14" fill="#297465"/>
+<text x="746.0747186064737" y="298" font-size="14">852.06</text>
+</g></svg>

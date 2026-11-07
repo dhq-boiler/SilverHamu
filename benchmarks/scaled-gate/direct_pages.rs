@@ -80,7 +80,7 @@ fn direct_reopen_memory() {
     };
     let initial = memory().0;
     let db = match std::env::var("SCALED_VARIANT").unwrap().as_str() {
-        "wal" => Database::open(path).unwrap(),
+        "prefix-on" | "prefix-off" | "wal" => Database::open(path).unwrap(),
         "mvcc" => MvccPages::open(&path, cfg, None),
         "direct" | "packed" | "reuse" | "linear" | "combine" | "logreuse" | "arrivals"
         | "patch" | "prewrite" | "defer" => MvccPages::open_direct(&path, cfg, None),

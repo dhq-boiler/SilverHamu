@@ -138,7 +138,7 @@ fn compare() {
             | "prewrite"
             | "defer"
     ));
-    assert!(n >= 1000 && ops >= cap as usize * 3 && ops <= 8192);
+    assert!(n >= 1000 && ops >= cap as usize * 3 && ops <= 16384);
     let cfg = Config {
         checkpoints: (n / 3000 + 4) as u32,
         logs: cap,

@@ -1,0 +1,174 @@
+warning: method `hold_test_sync` is never used
+   --> src/group_commit.rs:130:19
+    |
+123 | impl Database {
+    | ------------- method in this implementation
+...
+130 |     pub(crate) fn hold_test_sync(&self, gate: Arc<[std::sync::Barrier; 2]>) {
+    |                   ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: `catdb` (lib test) generated 1 warning
+    Finished `release` profile [optimized] target(s) in 0.01s
+     Running unittests src/lib.rs (target/release/deps/newdbms-458055916a75b401)
+
+running 156 tests
+test inline_key::tests::bv_layout_and_storage_boundary ... ok
+test inline_key::tests::eq_order_and_borrowed_ranges_match_bytes ... ok
+test transactions::capacity_gate::cap16::tests::boundaries_repeated_reuse_and_old_generation ... ok
+test transactions::capacity_gate::cap16::tests::capacity_speed ... ignored, explicit bounded capacity timing experiment
+test transactions::capacity_gate::cap16::tests::child_phase ... ignored, external crash child helper
+test transactions::capacity_gate::cap16::tests::damaged_tail_repair_and_interrupted_switch_retry ... ok
+test transactions::capacity_gate::cap16::tests::external_exit_at_tail_switch_and_repair ... ok
+test transactions::capacity_gate::cap16::tests::foreign_open ... ignored, cross-capacity child helper
+test transactions::capacity_gate::cap16::tests::tail_prefix_model_preserves_atomicity_and_valid_peer ... ok
+test transactions::capacity_gate::cap16::tests::wrong_capacity_rejects_before_modifying_file ... ok
+test transactions::capacity_gate::cap4::tests::boundaries_repeated_reuse_and_old_generation ... ok
+test transactions::capacity_gate::cap4::tests::capacity_speed ... ignored, explicit bounded capacity timing experiment
+test transactions::capacity_gate::cap4::tests::child_phase ... ignored, external crash child helper
+test transactions::capacity_gate::cap4::tests::damaged_tail_repair_and_interrupted_switch_retry ... ok
+test transactions::capacity_gate::cap4::tests::external_exit_at_tail_switch_and_repair ... ok
+test transactions::capacity_gate::cap4::tests::foreign_open ... ignored, cross-capacity child helper
+test transactions::capacity_gate::cap4::tests::tail_prefix_model_preserves_atomicity_and_valid_peer ... ok
+test transactions::capacity_gate::cap4::tests::wrong_capacity_rejects_before_modifying_file ... ok
+test transactions::capacity_gate::cap64::tests::boundaries_repeated_reuse_and_old_generation ... ok
+test transactions::capacity_gate::cap64::tests::capacity_speed ... ignored, explicit bounded capacity timing experiment
+test transactions::capacity_gate::cap64::tests::child_phase ... ignored, external crash child helper
+test transactions::capacity_gate::cap64::tests::damaged_tail_repair_and_interrupted_switch_retry ... ok
+test transactions::capacity_gate::cap64::tests::external_exit_at_tail_switch_and_repair ... ok
+test transactions::capacity_gate::cap64::tests::foreign_open ... ignored, cross-capacity child helper
+test transactions::capacity_gate::cap64::tests::tail_prefix_model_preserves_atomicity_and_valid_peer ... ok
+test transactions::capacity_gate::cap64::tests::wrong_capacity_rejects_before_modifying_file ... ok
+test transactions::generation_guard_bench::production_global_guard_benchmark ... ignored, explicit synthetic production-engine performance experiment
+test transactions::group_commit::tests::er_group_process_exit_around_sync_preserves_acknowledged_data_and_atomic_updates ... ok
+test transactions::group_commit::tests::failed_sync_marks_group_uncertain_and_recovery_keeps_complete_prefix ... ok
+test transactions::group_commit::tests::global_guard_keeps_group_range_conflicts_for_insert_update_delete_and_boundaries ... ok
+test transactions::group_commit::tests::global_guard_keeps_same_group_point_dependencies_and_empty_ranges ... ok
+test transactions::group_commit::tests::group_admission_counts_cumulative_retained_bytes_and_releases_buffers ... ok
+test transactions::group_commit::tests::group_crash_worker ... ignored, subprocess helper
+test transactions::group_commit::tests::sync_precedes_publication_and_only_nonconflicting_frames_are_written ... ok
+test transactions::group_commit::tests::wake_on_four_commits_a_lone_request_after_the_wait ... ok
+test transactions::read_copy_tests::er_detached_versions_stay_charged_until_their_values_are_freed ... ok
+test transactions::read_copy_tests::er_worker_start_failure_leaves_cooperative_reclamation_available ... ok
+test transactions::read_copy_tests::st_copy_is_unlocked_while_old_value_stays_pinned ... ok
+test transactions::retirement::tests::er_receipt_identity_checksum_and_database_id_protect_unrelated_files ... ok
+test transactions::scaled_gate::checks::bv_checkpoint_growth_refusal_preserves_values_and_can_recover ... ok
+test transactions::scaled_gate::checks::bv_frames_budget_capacity_empty_and_generation_bounds ... ok
+test transactions::scaled_gate::checks::carry_cohort_counts_only_the_original_slot_incarnation ... ok
+test transactions::scaled_gate::checks::crash_child ... ignored, external crash barrier helper
+test transactions::scaled_gate::checks::dirty_crash_publish_reclaim_and_repair ... ok
+test transactions::scaled_gate::checks::dirty_kill_child ... ignored, subprocess crash fixture
+test transactions::scaled_gate::checks::dirty_split_delete_empty_pin_and_reuse ... ok
+test transactions::scaled_gate::checks::eq_st_segmented_checkpoint_updates_old_snapshots_and_reuse ... ok
+test transactions::scaled_gate::checks::er_external_exit_checkpoint_publication_append_and_repair ... ok
+test transactions::scaled_gate::checks::er_failed_switch_reopen_updates_and_retry_preserve_committed_state ... ok
+test transactions::scaled_gate::checks::er_failed_sync_does_not_publish_and_requires_reopen ... ok
+test transactions::scaled_gate::checks::er_header_payload_reordering_and_bounded_streaming_recovery ... ok
+test transactions::scaled_gate::checks::er_identifiable_misplacement_uses_the_intact_peer ... ok
+test transactions::scaled_gate::checks::er_manifest_missing_swapped_chunks_and_disagreeing_copies_reject ... ok
+test transactions::scaled_gate::checks::er_one_copy_repair_is_bounded_idempotent_and_failure_keeps_peer ... ok
+test transactions::scaled_gate::checks::er_partial_append_model_and_both_copy_loss_counterexample ... ok
+test transactions::scaled_gate::checks::er_selector_prefix_models_and_reordered_checkpoint_reject_partial_generation ... ok
+test transactions::scaled_gate::checks::reused_log_bytes_survive_peer_damage_and_match_original ... ok
+test transactions::scaled_gate::checks::timing::arrival_gate_conflict_and_bounds ... ignored, explicit arrival group
+test transactions::scaled_gate::checks::timing::arrival_gate_count_limit_and_refusal ... ignored, explicit arrival group
+test transactions::scaled_gate::checks::timing::arrival_gate_process_exit ... ignored, explicit arrival group
+test transactions::scaled_gate::checks::timing::arrival_gate_queue_caps_do_not_orphan_admitted_work ... ignored, explicit arrival group
+test transactions::scaled_gate::checks::timing::arrivals_kill_worker ... ignored, child process for a multi-commit group
+test transactions::scaled_gate::checks::timing::combined_pages_repair_one_bad_body_and_reject_two ... ok
+test transactions::scaled_gate::checks::timing::compare ... ignored, explicit staged large-data comparison
+test transactions::scaled_gate::checks::timing::concurrent_point_range_and_write_dependencies_survive_switch ... ok
+test transactions::scaled_gate::checks::timing::crc_combination_matches_concatenation_at_every_page_length ... ok
+test transactions::scaled_gate::checks::timing::defer_capacity_and_split ... ignored, deferral capacity and split-byte accounting
+test transactions::scaled_gate::checks::timing::defer_pilot ... ignored, matched hot range, shifted writes and epoch reset
+test transactions::scaled_gate::checks::timing::density_compare ... ignored, matched checkpoint density sweep
+test transactions::scaled_gate::checks::timing::direct_dirty_ranges_split_delete_and_restore_empty_generation ... ok
+test transactions::scaled_gate::checks::timing::direct_reopen_memory ... ignored, fresh-process warm reopen RSS
+test transactions::scaled_gate::checks::timing::four_acked_commits_recover_across_sync_and_publication ... ok
+test transactions::scaled_gate::checks::timing::four_child ... ignored, child process for four-writer durability
+test transactions::scaled_gate::checks::timing::linear_pages_are_byte_identical_across_generations_boundaries_and_splits ... ok
+test transactions::scaled_gate::checks::timing::mvcc_fifo_revalidates_and_publishes_only_after_sync ... ok
+test transactions::scaled_gate::checks::timing::mvcc_kill_child ... ignored, MVCC subprocess durability fixture
+test transactions::scaled_gate::checks::timing::mvcc_kills_recover_acknowledged_versions ... ok
+test transactions::scaled_gate::checks::timing::mvcc_persistence_error_requires_reopen ... ok
+test transactions::scaled_gate::checks::timing::packed_budget_refusal_preserves_updates_and_permit_reuse ... ignored, explicit packed-mode budget boundary
+test transactions::scaled_gate::checks::timing::packed_ranges_match_snapshot_across_split_and_tombstone_continuations ... ok
+test transactions::scaled_gate::checks::timing::pagepatch_crashes_preserve_acknowledged_update ... ignored, explicit copy-patch safety
+test transactions::scaled_gate::checks::timing::pagepatch_fallback_repair_and_old_reader ... ignored, explicit copy-patch safety
+test transactions::scaled_gate::checks::timing::patch_kill_worker ... ignored, child for patch-specific checkpoint termination
+test transactions::scaled_gate::checks::timing::peer_updates ... ignored, native test backend on the peer update workload
+test transactions::scaled_gate::checks::timing::prepared_kill_worker ... ignored, prewrite crash fixture
+test transactions::scaled_gate::checks::timing::prewrite_crashes ... ignored, prewrite recovery boundaries
+test transactions::scaled_gate::checks::timing::prewrite_pilot ... ignored, bounded checkpoint prewrite pilot
+test transactions::scaled_gate::checks::timing::prewrite_recycling_and_conflict ... ignored, invalidated slots are recycled and read conflicts survive staging
+test transactions::scaled_gate::checks::timing::prewrite_shapes_and_failure ... ignored, prewrite shape changes and I/O failure
+test transactions::scaled_gate::checks::timing::ticket_handoff_drains_in_registration_order ... ok
+test transactions::scan_copy_bench::full_scan_copy_benchmark ... ignored, explicit full-scan copy performance experiment
+test transactions::scan_merge_bench::full_scan_merge_benchmark ... ignored, explicit full-scan merge performance experiment
+test transactions::tests::bv_checkpoint_rejects_snapshot_plus_tail_over_limit_before_replacing_original ... ok
+test transactions::tests::bv_checkpoint_retained_limit_rejects_excess_update_then_reuses_capacity ... ok
+test transactions::tests::bv_checkpoint_snapshot_uses_transaction_budget_and_releases_it_after_failure ... ok
+test transactions::tests::bv_checkpoint_tail_copy_boundaries_preserve_old_reads_and_subsequent_appends ... ok
+test transactions::tests::bv_inline_latest_does_not_enlarge_the_tree_value ... ok
+test transactions::tests::bv_wal_and_sequence_limits_reject_before_any_persistence ... ok
+test transactions::tests::checkpoint_crash_worker ... ignored, subprocess helper
+test transactions::tests::checkpoint_readers_progress_at_copy_sync_and_publication_stages ... ok
+test transactions::tests::copy_scan_bv_er_budget_edges_release_and_preserve_staged_writes ... ok
+test transactions::tests::copy_scan_eq_export_avoids_keys_and_preserves_empty_and_large_values ... ok
+test transactions::tests::copy_scan_eq_st_shared_rows_match_owned_ranges_and_survive_mutation ... ok
+test transactions::tests::copy_scan_st_shared_payloads_are_stable_after_unlock_and_owner_drop ... ok
+test transactions::tests::crash_before_publication ... ignored, subprocess helper
+test transactions::tests::deferred_reclaim_preserves_old_reads_updates_and_reopen ... ok
+test transactions::tests::elision_export_uses_no_write_dependencies_and_preserves_file_content ... ok
+test transactions::tests::elision_point_validation_keeps_advanced_generation_and_earlier_group_conflicts ... ok
+test transactions::tests::eq_checkpoint_captures_concurrent_changes_and_preserves_old_generation_and_conflicts ... ok
+test transactions::tests::er_acknowledged_data_survives_storage_full_partial_write_and_sync_failure ... ok
+test transactions::tests::er_checkpoint_failure_before_publication_preserves_store_and_after_publication_requires_reopen ... ok
+test transactions::tests::er_checkpoint_process_exit_before_and_after_replacement_preserves_committed_state ... ok
+test transactions::tests::er_checkpoint_tail_failure_keeps_acknowledged_writes_and_cursor_usable ... ok
+test transactions::tests::er_persistence_failure_poisoning_requires_reopen_and_reports_uncertain_outcome ... ok
+test transactions::tests::er_process_exit_during_append_or_after_sync_before_publication_recovers_atomically ... ok
+test transactions::tests::er_tail_output_write_failure_restores_original_wal_append_position ... ok
+test transactions::tests::er_wal_decoder_rejects_invalid_counts_tags_lengths_order_and_trailing_bytes ... ok
+test transactions::tests::inline_key_eq_st_boundaries_snapshots_checkpoint_and_reopen ... ok
+test transactions::tests::inline_key_st_point_and_prefix_range_conflicts_cross_storage_boundary ... ok
+test transactions::tests::panic_during_unlocked_persistence_requires_reopen ... ok
+test transactions::tests::reads_during_persistence_keep_old_values_and_conflict_after_publication ... ok
+test transactions::tests::retirement_byte_boundary_and_disabled_mode_fall_back_without_losing_data ... ok
+test transactions::tests::retirement_preserves_unrecognized_sidecars_and_uses_normal_replacement ... ok
+test transactions::tests::retirement_releases_writer_before_reclaim_and_preserves_old_generation_and_conflicts ... ok
+test transactions::tests::scan_merge_budget_boundary_releases_reservations_and_preserves_staged_values ... ok
+test transactions::tests::scan_merge_full_copy_runs_unlocked_and_keeps_original_value ... ok
+test transactions::tests::scan_merge_matches_oracle_for_staged_changes_boundaries_and_old_versions ... ok
+test transactions::tests::scan_merge_shadowed_large_values_do_not_consume_output_budget ... ok
+test transactions::tests::st_limited_failed_persistence_releases_reservations_and_requires_reopen ... ok
+test transactions::tests::st_version_one_log_can_be_opened_and_upgraded_by_checkpoint ... ok
+test transactions::tests::wal_preparation_eq_encoding_matches_legacy_bytes_and_decoding ... ok
+test transactions::variable_gate::tests::bv_checkpoint_capacity_and_log_capacity_reject_before_writes ... ok
+test transactions::variable_gate::tests::bv_page_and_exact_slot_boundaries_preserve_rejected_state ... ok
+test transactions::variable_gate::tests::bv_production_total_bytes_and_sequence_limits ... ok
+test transactions::variable_gate::tests::child_phase ... ignored
+test transactions::variable_gate::tests::eq_atomic_changes_empty_noop_old_read_repeated_switch_and_costs ... ok
+test transactions::variable_gate::tests::er_external_kills_preserve_acknowledged_and_atomic_pending_changes ... ok
+test transactions::variable_gate::tests::er_one_copy_damage_each_meaningful_byte_and_sync_before_publish ... ok
+test transactions::variable_gate::tests::er_partial_copies_and_repair_keep_whole_transaction ... ok
+test transactions::variable_gate::tests::er_phase_failures_poison_writer_and_repair_before_writable ... ok
+test transactions::variable_gate::tests::er_untrusted_lengths_inner_corruption_and_padding ... ok
+test transactions::variable_gate::tests::er_valid_outer_checksums_do_not_hide_invalid_inner_operations ... ok
+test transactions::variable_gate::tests::phase_trace_order_bound_and_failure_records ... ok
+test transactions::variable_gate::tests::reuse_child ... ignored
+test transactions::variable_gate::tests::reuse_eq_same_workload_costs_and_old_snapshots ... ok
+test transactions::variable_gate::tests::reuse_er_damage_repair_negative_control_and_capacity ... ok
+test transactions::variable_gate::tests::reuse_er_external_kills_then_update_retry_and_reopen ... ok
+test transactions::variable_gate::tests::reuse_er_interrupted_switch_retry_after_more_updates ... ok
+test transactions::variable_gate::tests::reuse_er_stale_classification_rejects_future_and_holes ... ok
+test transactions::variable_gate::tests::reuse_model_recovers_torn_reuse_after_full_inner_validation ... ok
+test transactions::variable_gate::tests::reuse_negative_nested_crc_does_not_bind_inner_sequence ... ok
+test transactions::variable_gate::tests::reuse_phases ... ignored, explicit bounded persistence timing experiment
+test transactions::variable_gate::tests::reuse_speed ... ignored, explicit bounded persistence timing experiment
+test transactions::variable_gate::tests::reuse_st_repeated_long_short_records_capacity_and_epoch_exhaustion ... ok
+test transactions::variable_gate::tests::st_selector_prefixes_keep_variable_checkpoint_across_reuse ... ok
+test transactions::work_elision_bench::work_elision_points_and_export ... ignored, explicit work-elision production experiment
+
+test result: ok. 112 passed; 0 failed; 44 ignored; 0 measured; 0 filtered out; finished in 29.11s

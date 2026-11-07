@@ -18,7 +18,47 @@ struct Pin {
     _lease: File,
 }
 #[derive(Default)]
+struct CarryCohort {
+    pending: HashMap<u32, u64>,
+    marked: u64,
+    published: u64,
+    invalidated: u64,
+}
+impl CarryCohort {
+    fn capture(slots: &HashMap<u32, u64>) -> Self {
+        Self {
+            pending: slots.clone(),
+            marked: slots.values().sum(),
+            ..Self::default()
+        }
+    }
+    fn invalidate(&mut self, slot: u32) {
+        self.invalidated += self.pending.remove(&slot).unwrap_or(0);
+    }
+    fn publish(&mut self, live: &HashMap<u32, u64>) {
+        for (slot, bytes) in self.pending.drain() {
+            assert_eq!(live.get(&slot), Some(&bytes));
+            self.published += bytes;
+        }
+        assert_eq!(self.published + self.invalidated, self.marked);
+    }
+}
+#[test]
+fn carry_cohort_counts_only_the_original_slot_incarnation() {
+    let mut slots = HashMap::new();
+    let mut empty = CarryCohort::capture(&slots);
+    empty.publish(&slots);
+    slots.extend([(1, 30), (2, 40)]);
+    let mut c = CarryCohort::capture(&slots);
+    c.invalidate(1);
+    slots.insert(1, 30);
+    c.invalidate(1);
+    c.publish(&slots);
+    assert_eq!((c.marked, c.published, c.invalidated), (70, 40, 30));
+}
+#[derive(Default)]
 struct StageBytes {
+    cohort: Option<CarryCohort>,
     slots: HashMap<u32, u64>,
     reused: u64,
     invalidated: u64,
@@ -154,6 +194,9 @@ impl Dirty {
             if !self.prepared.is_empty() {
                 if let Some(previous) = self.prepared.remove(&lo) {
                     self.prepared_cursor = self.prepared_cursor.min(previous.slot);
+                    if let Some(c) = &mut self.stage_bytes.cohort {
+                        c.invalidate(previous.slot);
+                    }
                     self.stage_bytes.invalidated +=
                         self.stage_bytes.slots.remove(&previous.slot).unwrap();
                     if self.delay_invalidated && self.deferred.len() < 96 {
@@ -162,6 +205,9 @@ impl Dirty {
                 }
             }
             self.dirty.insert(lo);
+        }
+        if self.logical_seq() == 1024 && std::env::var_os("CARRY_WINDOW").is_some() {
+            self.stage_bytes.cohort = Some(CarryCohort::capture(&self.stage_bytes.slots));
         }
 
         Ok(())
@@ -337,6 +383,18 @@ impl Dirty {
         hook("reclaim.before")?;
         self.live.retain(|_, w| w.strong_count() > 0);
         hook("reclaim.after")?;
+        if let Some(mut c) = self.stage_bytes.cohort.take() {
+            let count = c.pending.len();
+            c.publish(&self.stage_bytes.slots);
+            println!(
+                "CARRY_OUTCOME,{},{},{},{},{}",
+                self.logical_seq(),
+                c.marked,
+                c.published,
+                c.invalidated,
+                count
+            );
+        }
         self.stage_bytes.reused += self.stage_bytes.slots.values().sum::<u64>();
         self.stage_bytes.slots.clear();
         self.deferred.clear();

@@ -225,6 +225,15 @@ impl TestPersistence for MvccPages {
                 disk.control.costs.writes.get("page").copied().unwrap_or(0) - page_bytes
             );
         }
+        if switched.is_ok() && std::env::var_os("CARRY_WINDOW").is_some() {
+            let w = &disk.control.costs.writes;
+            println!(
+                "WINDOW_BYTES,{version},{},{},{}",
+                w.get("page").copied().unwrap_or(0),
+                w.values().sum::<u64>(),
+                disk.stage_bytes.invalidated
+            );
+        }
         let phase_times = Phase::finish();
         if let Some(ns) = phase_times {
             println!(

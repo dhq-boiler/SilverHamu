@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 410" role="img"><title>Steady checkpoint intervals, four writers</title><rect width="960" height="410" fill="white"/><g font-family="sans-serif" fill="#182b40">
+<text x="16" y="32" font-size="24">Four writers across 59 complete checkpoint intervals</text>
+<text x="16" y="56" font-size="15">One million rows, two CPUs, 4 GiB. Three trial medians, maximum across trials for worst latency.</text>
+<text x="16" y="93" font-size="18">Page-file bytes per commit</text>
+<text x="16" y="119" font-size="14">Publish-time scan</text>
+<rect x="164" y="107" width="189.20" height="14" fill="#566c82"/>
+<text x="360.20259402015887" y="119" font-size="14">172,008.06</text>
+<text x="16" y="149" font-size="14">Immediate prewrite</text>
+<rect x="164" y="137" width="190.00" height="14" fill="#a35436"/>
+<text x="361.0" y="149" font-size="14">172,733.00</text>
+<text x="16" y="179" font-size="14">Defer invalidated</text>
+<rect x="164" y="167" width="189.95" height="14" fill="#237463"/>
+<text x="360.9532557737001" y="179" font-size="14">172,690.50</text>
+<text x="490" y="93" font-size="18">Update p99 (ms)</text>
+<text x="490" y="119" font-size="14">Publish-time scan</text>
+<rect x="638" y="107" width="190.00" height="14" fill="#566c82"/>
+<text x="835.0" y="119" font-size="14">43.95</text>
+<text x="490" y="149" font-size="14">Immediate prewrite</text>
+<rect x="638" y="137" width="159.34" height="14" fill="#a35436"/>
+<text x="804.3376957301172" y="149" font-size="14">36.86</text>
+<text x="490" y="179" font-size="14">Defer invalidated</text>
+<rect x="638" y="167" width="159.42" height="14" fill="#237463"/>
+<text x="804.4217116848819" y="179" font-size="14">36.87</text>
+<text x="16" y="248" font-size="18">Worst update (ms)</text>
+<text x="16" y="274" font-size="14">Publish-time scan</text>
+<rect x="164" y="262" width="190.00" height="14" fill="#566c82"/>
+<text x="361.0" y="274" font-size="14">278.56</text>
+<text x="16" y="304" font-size="14">Immediate prewrite</text>
+<rect x="164" y="292" width="38.33" height="14" fill="#a35436"/>
+<text x="209.33276026418855" y="304" font-size="14">56.20</text>
+<text x="16" y="334" font-size="14">Defer invalidated</text>
+<rect x="164" y="322" width="60.98" height="14" fill="#237463"/>
+<text x="231.9800811346151" y="334" font-size="14">89.40</text>
+<text x="490" y="248" font-size="18">Commits per second</text>
+<text x="490" y="274" font-size="14">Publish-time scan</text>
+<rect x="638" y="262" width="190.00" height="14" fill="#566c82"/>
+<text x="835.0" y="274" font-size="14">1,176.37</text>
+<text x="490" y="304" font-size="14">Immediate prewrite</text>
+<rect x="638" y="292" width="189.59" height="14" fill="#a35436"/>
+<text x="834.5884665720434" y="304" font-size="14">1,173.82</text>
+<text x="490" y="334" font-size="14">Defer invalidated</text>
+<rect x="638" y="322" width="186.79" height="14" fill="#237463"/>
+<text x="831.7922799585764" y="334" font-size="14">1,156.51</text>
+</g></svg>

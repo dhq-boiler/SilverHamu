@@ -325,7 +325,7 @@ fn four_run(
         }
     }
     let cp = run.checkpoints.into_inner().unwrap();
-    assert_eq!(cp.len(), 3);
+    assert_eq!(cp.len(), (ops - 1) / cfg.logs as usize);
     let begin = samples.iter().map(|s| s.start).min().unwrap();
     let end = samples.iter().map(|s| s.end).max().unwrap();
     if matches!(mode, "combine" | "arrivals" | "patch") {
@@ -382,7 +382,7 @@ fn four_run(
     }
     match mode {
         "mvcc" | "direct" | "packed" | "reuse" | "linear" | "combine" | "logreuse" | "arrivals"
-        | "patch" => {
+        | "patch" | "prewrite" | "defer" => {
             let recovered = if matches!(
                 mode,
                 "direct"
@@ -393,6 +393,8 @@ fn four_run(
                     | "logreuse"
                     | "arrivals"
                     | "patch"
+                    | "prewrite"
+                    | "defer"
             ) {
                 MvccPages::open_direct(p, cfg, None)
             } else {

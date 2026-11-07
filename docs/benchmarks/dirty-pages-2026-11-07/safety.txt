@@ -1,0 +1,18 @@
+#9 6.968 test transactions::scaled_gate::checks::bv_checkpoint_growth_refusal_preserves_values_and_can_recover ... ok
+#9 7.049 test transactions::scaled_gate::checks::bv_frames_budget_capacity_empty_and_generation_bounds ... ok
+#9 7.230 test transactions::scaled_gate::checks::crash_child ... ignored, external crash barrier helper
+#9 7.230 test transactions::scaled_gate::checks::dirty_crash_publish_reclaim_and_repair ... ok
+#9 7.719 test transactions::scaled_gate::checks::dirty_kill_child ... ignored, subprocess crash fixture
+#9 7.719 test transactions::scaled_gate::checks::dirty_split_delete_empty_pin_and_reuse ... ok
+#9 7.830 test transactions::scaled_gate::checks::eq_st_segmented_checkpoint_updates_old_snapshots_and_reuse ... ok
+#9 7.999 test transactions::scaled_gate::checks::er_external_exit_checkpoint_publication_append_and_repair ... SCALED_KILL,append,append-0.half
+#9 10.87 test transactions::scaled_gate::checks::er_failed_switch_reopen_updates_and_retry_preserve_committed_state ... ok
+#9 11.37 test transactions::scaled_gate::checks::er_failed_sync_does_not_publish_and_requires_reopen ... ok
+#9 11.57 test transactions::scaled_gate::checks::er_header_payload_reordering_and_bounded_streaming_recovery ... ok
+#9 11.97 test transactions::scaled_gate::checks::er_identifiable_misplacement_uses_the_intact_peer ... ok
+#9 12.37 test transactions::scaled_gate::checks::er_manifest_missing_swapped_chunks_and_disagreeing_copies_reject ... ok
+#9 12.54 test transactions::scaled_gate::checks::er_one_copy_repair_is_bounded_idempotent_and_failure_keeps_peer ... ok
+#9 12.62 test transactions::scaled_gate::checks::er_partial_append_model_and_both_copy_loss_counterexample ... SCALED_MODEL,64,both-copy-loss-outside-contract
+#9 14.68 test transactions::scaled_gate::checks::er_selector_prefix_models_and_reordered_checkpoint_reject_partial_generation ... SCALED_SELECTOR_MODEL,25,unsynced-data-root-rejected
+#9 15.84 test transactions::scaled_gate::checks::timing::compare ... ignored, explicit staged large-data comparison
+#9 15.84 test result: ok. 14 passed; 0 failed; 3 ignored; 0 measured; 105 filtered out; finished in 8.88s

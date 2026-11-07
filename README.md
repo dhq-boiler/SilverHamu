@@ -6,6 +6,14 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Incremental dual-record checkpoints
+
+At 1M rows the 64 KiB incremental path submitted **128.5 MiB** against 816.4 MiB for WAL and 1,632.2 MiB for full dual records. The worst checkpoint-inclusive update took **117.9 ms**, compared with 1,230.1 ms and 1,310.9 ms, respectively. Update p99 was 8.22 ms for incremental and 5.38 ms for WAL. Warm reopen took 1.90 s and 0.99 s, respectively. At 100k the incremental path still wrote more bytes than WAL. All 18 main trials verified latest, pinned and reopened data.
+
+[Trial data, recovery checks and reproduction](docs/benchmarks/dirty-pages-2026-11-07/README.md).
+
+![Incremental checkpoint comparison](docs/benchmarks/dirty-pages-2026-11-07/comparison.svg)
+
 ## Dual-record region reuse at one million rows
 
 The experimental store recovered the latest data and preserved the old reader in every final run. It did **not** reduce syncs: both paths used 1,030 for 1,024 transactions and three full checkpoints. At one million rows the prototype submitted about twice the bytes of the current WAL. These are separate single-writer paths, and the prototype protects against at most one detectably damaged copy per record. The production WAL remains unchanged.

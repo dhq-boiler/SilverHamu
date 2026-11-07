@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 554" role="img"><title>Single writer, two CPUs and four GiB</title><rect width="960" height="554" fill="white"/><g font-family="sans-serif" fill="#17263a">
+<text x="16" y="30" font-size="24">Checkpoint comparison including publication and reuse</text>
+<text x="16" y="54" font-size="14">Median of three runs per condition. Worst update includes every request. Each panel has its own scale.</text>
+<text x="16" y="88" font-size="17">Application writes (MiB)</text>
+<text x="16" y="113" font-size="12">100k wal</text>
+<rect x="92" y="102" width="7.29" height="13" fill="#396494"/>
+<text x="104.29248265424067" y="113" font-size="12">82.09</text>
+<text x="16" y="143" font-size="12">100k dual</text>
+<rect x="92" y="132" width="14.59" height="13" fill="#a54c31"/>
+<text x="111.59484733030602" y="143" font-size="12">164.29</text>
+<text x="16" y="173" font-size="12">100k dirty</text>
+<rect x="92" y="162" width="8.14" height="13" fill="#28795d"/>
+<text x="105.14272769452802" y="173" font-size="12">91.66</text>
+<text x="16" y="203" font-size="12">1M wal</text>
+<rect x="92" y="192" width="72.53" height="13" fill="#396494"/>
+<text x="169.52569732341985" y="203" font-size="12">816.38</text>
+<text x="16" y="233" font-size="12">1M dual</text>
+<rect x="92" y="222" width="145.00" height="13" fill="#a54c31"/>
+<text x="242.0" y="233" font-size="12">1,632.19</text>
+<text x="16" y="263" font-size="12">1M dirty</text>
+<rect x="92" y="252" width="11.42" height="13" fill="#28795d"/>
+<text x="108.4186843517821" y="263" font-size="12">128.53</text>
+<text x="334" y="88" font-size="17">Checkpoint (ms)</text>
+<text x="334" y="113" font-size="12">100k wal</text>
+<rect x="410" y="102" width="10.17" height="13" fill="#396494"/>
+<text x="425.16648681214394" y="113" font-size="12">65.94</text>
+<text x="334" y="143" font-size="12">100k dual</text>
+<rect x="410" y="132" width="14.80" height="13" fill="#a54c31"/>
+<text x="429.7952391699924" y="143" font-size="12">95.97</text>
+<text x="334" y="173" font-size="12">100k dirty</text>
+<rect x="410" y="162" width="12.07" height="13" fill="#28795d"/>
+<text x="427.0655924020124" y="173" font-size="12">78.26</text>
+<text x="334" y="203" font-size="12">1M wal</text>
+<rect x="410" y="192" width="109.06" height="13" fill="#396494"/>
+<text x="524.0577393596905" y="203" font-size="12">707.38</text>
+<text x="334" y="233" font-size="12">1M dual</text>
+<rect x="410" y="222" width="145.00" height="13" fill="#a54c31"/>
+<text x="560.0" y="233" font-size="12">940.51</text>
+<text x="334" y="263" font-size="12">1M dirty</text>
+<rect x="410" y="252" width="14.95" height="13" fill="#28795d"/>
+<text x="429.94975461898224" y="263" font-size="12">96.97</text>
+<text x="652" y="88" font-size="17">Transactions per second</text>
+<text x="652" y="113" font-size="12">100k wal</text>
+<rect x="728" y="102" width="145.00" height="13" fill="#396494"/>
+<text x="878.0" y="113" font-size="12">304.91</text>
+<text x="652" y="143" font-size="12">100k dual</text>
+<rect x="728" y="132" width="136.08" height="13" fill="#a54c31"/>
+<text x="869.0833996835106" y="143" font-size="12">286.16</text>
+<text x="652" y="173" font-size="12">100k dirty</text>
+<rect x="728" y="162" width="137.04" height="13" fill="#28795d"/>
+<text x="870.0446823731471" y="173" font-size="12">288.19</text>
+<text x="652" y="203" font-size="12">1M wal</text>
+<rect x="728" y="192" width="87.67" height="13" fill="#396494"/>
+<text x="820.67030966797" y="203" font-size="12">184.36</text>
+<text x="652" y="233" font-size="12">1M dual</text>
+<rect x="728" y="222" width="82.62" height="13" fill="#a54c31"/>
+<text x="815.6216567179644" y="233" font-size="12">173.74</text>
+<text x="652" y="263" font-size="12">1M dirty</text>
+<rect x="728" y="252" width="131.94" height="13" fill="#28795d"/>
+<text x="864.940446523391" y="263" font-size="12">277.45</text>
+<text x="16" y="317" font-size="17">Update p99 (ms)</text>
+<text x="16" y="342" font-size="12">100k wal</text>
+<rect x="92" y="331" width="90.25" height="13" fill="#396494"/>
+<text x="187.24728691634834" y="342" font-size="12">5.12</text>
+<text x="16" y="372" font-size="12">100k dual</text>
+<rect x="92" y="361" width="133.74" height="13" fill="#a54c31"/>
+<text x="230.73839664550937" y="372" font-size="12">7.58</text>
+<text x="16" y="402" font-size="12">100k dirty</text>
+<rect x="92" y="391" width="126.67" height="13" fill="#28795d"/>
+<text x="223.66761618311654" y="402" font-size="12">7.18</text>
+<text x="16" y="432" font-size="12">1M wal</text>
+<rect x="92" y="421" width="94.91" height="13" fill="#396494"/>
+<text x="191.90863118357134" y="432" font-size="12">5.38</text>
+<text x="16" y="462" font-size="12">1M dual</text>
+<rect x="92" y="451" width="122.75" height="13" fill="#a54c31"/>
+<text x="219.74746871277432" y="462" font-size="12">6.96</text>
+<text x="16" y="492" font-size="12">1M dirty</text>
+<rect x="92" y="481" width="145.00" height="13" fill="#28795d"/>
+<text x="242.0" y="492" font-size="12">8.22</text>
+<text x="334" y="317" font-size="17">Worst update (ms)</text>
+<text x="334" y="342" font-size="12">100k wal</text>
+<rect x="410" y="331" width="8.72" height="13" fill="#396494"/>
+<text x="423.7206581833298" y="342" font-size="12">78.84</text>
+<text x="334" y="372" font-size="12">100k dual</text>
+<rect x="410" y="361" width="15.57" height="13" fill="#a54c31"/>
+<text x="430.5686518021434" y="372" font-size="12">140.75</text>
+<text x="334" y="402" font-size="12">100k dirty</text>
+<rect x="410" y="391" width="9.46" height="13" fill="#28795d"/>
+<text x="424.45792606823187" y="402" font-size="12">85.51</text>
+<text x="334" y="432" font-size="12">1M wal</text>
+<rect x="410" y="421" width="136.06" height="13" fill="#396494"/>
+<text x="551.0640344722256" y="432" font-size="12">1,230.11</text>
+<text x="334" y="462" font-size="12">1M dual</text>
+<rect x="410" y="451" width="145.00" height="13" fill="#a54c31"/>
+<text x="560.0" y="462" font-size="12">1,310.90</text>
+<text x="334" y="492" font-size="12">1M dirty</text>
+<rect x="410" y="481" width="13.04" height="13" fill="#28795d"/>
+<text x="428.036809427723" y="492" font-size="12">117.86</text>
+<text x="652" y="317" font-size="17">Warm reopen (ms)</text>
+<text x="652" y="342" font-size="12">100k wal</text>
+<rect x="728" y="331" width="5.13" height="13" fill="#396494"/>
+<text x="738.12768781657" y="342" font-size="12">75.86</text>
+<text x="652" y="372" font-size="12">100k dual</text>
+<rect x="728" y="361" width="11.73" height="13" fill="#a54c31"/>
+<text x="744.7337515777479" y="372" font-size="12">173.58</text>
+<text x="652" y="402" font-size="12">100k dirty</text>
+<rect x="728" y="391" width="11.19" height="13" fill="#28795d"/>
+<text x="744.1874075503176" y="402" font-size="12">165.50</text>
+<text x="652" y="432" font-size="12">1M wal</text>
+<rect x="728" y="421" width="66.79" height="13" fill="#396494"/>
+<text x="799.790226646278" y="432" font-size="12">988.05</text>
+<text x="652" y="462" font-size="12">1M dual</text>
+<rect x="728" y="451" width="145.00" height="13" fill="#a54c31"/>
+<text x="878.0" y="462" font-size="12">2,145.03</text>
+<text x="652" y="492" font-size="12">1M dirty</text>
+<rect x="728" y="481" width="128.66" height="13" fill="#28795d"/>
+<text x="861.6562303075507" y="492" font-size="12">1,903.25</text>
+</g></svg>

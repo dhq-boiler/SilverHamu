@@ -121,7 +121,7 @@ fn compare() {
     let ops: usize = std::env::var("SCALED_OPS").unwrap().parse().unwrap();
     let cap: u32 = std::env::var("SCALED_CAP").unwrap().parse().unwrap();
     let mode = std::env::var("SCALED_VARIANT").unwrap();
-    assert!(mode == "wal" || mode == "dual");
+    assert!(matches!(mode.as_str(), "wal" | "dual" | "dirty"));
     assert!(n >= 1000 && ops >= cap as usize * 3 && ops <= 8192);
     let cfg = Config {
         checkpoints: (n / 3000 + 4) as u32,
@@ -132,7 +132,10 @@ fn compare() {
     let start = Instant::now();
     let mut store = None;
     let mut db = None;
-    if mode == "dual" {
+    let mut dirty = None;
+    if mode == "dirty" {
+        dirty = Some(Dirty::create(&p, cfg, data(n)).unwrap());
+    } else if mode == "dual" {
         store = Some(Store::create(&p, cfg, data(n), BUFFER_BUDGET, &mut noop).unwrap());
     } else {
         let limits = ResourceLimits {
@@ -156,6 +159,7 @@ fn compare() {
     }
     let init_ns = start.elapsed().as_nanos();
     let pin = Instant::now();
+    let pinned = dirty.as_ref().map(|s| s.pin().unwrap());
     let old_map = store.as_ref().map(Store::snapshot);
     let mut old_tx = db.as_ref().map(|d| d.begin_read().unwrap());
     let pin_ns = pin.elapsed().as_nanos();
@@ -165,10 +169,13 @@ fn compare() {
     let before_sync = db.as_ref().map_or(0, Database::commit_sync_attempts);
     let mut checkpoint_syncs = 0;
     let mut transitions = 0;
-    let dual_bytes_before = store
+    let control = store
+        .as_ref()
+        .or_else(|| dirty.as_ref().map(|s| &s.control));
+    let dual_bytes_before = control
         .as_ref()
         .map_or(0, |s| s.costs.writes.values().sum::<u64>());
-    let dual_sync_before = store
+    let dual_sync_before = control
         .as_ref()
         .map_or(0, |s| s.costs.syncs.values().sum::<u64>());
     let begin = Instant::now();
@@ -177,7 +184,9 @@ fn compare() {
         let mut switch_ns = 0;
         if i > 0 && i % (cap as usize) == 0 {
             let sw = Instant::now();
-            if let Some(s) = store.as_mut() {
+            if let Some(s) = dirty.as_mut() {
+                s.switch(&mut noop).unwrap();
+            } else if let Some(s) = store.as_mut() {
                 s.switch(&mut noop).unwrap();
             } else {
                 let cp = db
@@ -198,7 +207,9 @@ fn compare() {
         }
         let w = changes(i, n);
         let ap = Instant::now();
-        if let Some(s) = store.as_mut() {
+        if let Some(s) = dirty.as_mut() {
+            s.append(&w, &mut noop).unwrap();
+        } else if let Some(s) = store.as_mut() {
             s.append(&w, &mut noop).unwrap();
         } else {
             let mut tx = db.as_ref().unwrap().begin().unwrap();
@@ -223,21 +234,31 @@ fn compare() {
     }
     let elapsed = begin.elapsed().as_nanos();
     let mem_after = memory();
-    let io_bytes = store.as_ref().map_or(wal_written, |s| {
+    let control = store
+        .as_ref()
+        .or_else(|| dirty.as_ref().map(|s| &s.control));
+    let io_bytes = control.map_or(wal_written, |s| {
         s.costs.writes.values().sum::<u64>() - dual_bytes_before
     });
-    let syncs = if let Some(s) = store.as_ref() {
+    let syncs = if let Some(s) = control {
         s.costs.syncs.values().sum::<u64>() - dual_sync_before
     } else {
         db.as_ref().unwrap().commit_sync_attempts() - before_sync + checkpoint_syncs
     };
-    assert_eq!(syncs, ops as u64 + 2 * transitions);
+    assert_eq!(
+        syncs,
+        ops as u64 + (if mode == "dirty" { 3 } else { 2 }) * transitions
+    );
     if let Some(d) = db.as_ref() {
         assert_eq!(d.state().unwrap().wal_bytes, expected_wal);
     }
     let final_count;
     let expected = oracle(n, ops);
-    if let Some(s) = store.as_ref() {
+    if let Some(s) = dirty.as_ref() {
+        check_data(&s.rows, n, &expected);
+        check_data(&pinned.as_ref().unwrap().rows, n, &BTreeMap::new());
+        final_count = s.rows.len();
+    } else if let Some(s) = store.as_ref() {
         check_data(&s.rows, n, &expected);
         check_data(old_map.as_ref().unwrap(), n, &BTreeMap::new());
         final_count = s.rows.len();
@@ -251,8 +272,11 @@ fn compare() {
         final_count = wanted(n, &expected);
     }
     let meta = fs::metadata(&p).unwrap();
-    let file_size = meta.len();
-    let allocated = meta.blocks() * 512;
+    let pool = dirty.as_ref().map(|s| s.pool.metadata().unwrap());
+    let file_size = meta.len() + pool.as_ref().map_or(0, |m| m.len());
+    let allocated = (meta.blocks() + pool.as_ref().map_or(0, |m| m.blocks())) * 512;
+    drop(pinned);
+    drop(dirty);
     drop(old_map);
     drop(old_tx);
     drop(store);
@@ -260,7 +284,12 @@ fn compare() {
     let t = Instant::now();
     let reopen_ns;
     let recovery_sync;
-    if mode == "dual" {
+    if mode == "dirty" {
+        let s = Dirty::open(&p, cfg, &mut noop).unwrap();
+        reopen_ns = t.elapsed().as_nanos();
+        recovery_sync = s.control.costs.syncs.values().sum();
+        check_data(&s.rows, n, &expected);
+    } else if mode == "dual" {
         let s = Store::open(&p, cfg, BUFFER_BUDGET, &mut noop).unwrap();
         reopen_ns = t.elapsed().as_nanos();
         recovery_sync = s.costs.syncs.values().sum::<u64>();

@@ -7,7 +7,7 @@ from pathlib import Path
 from statistics import median
 
 
-def trials(raw, stage):
+def trials(raw, stage, variants=('wal','dual')):
     result = []
     for run in json.loads((raw / stage / "runs.json").read_text()):
         assert run["status"] == "passed" and not run["state"]["OOMKilled"]
@@ -18,13 +18,13 @@ def trials(raw, stage):
         assert [int(q[3]) for q in requests] == list(range(ops))
         lat = sorted(int(q[4])/1e6 for q in requests)
         switches = [int(q[6])/1e6 for q in requests if int(q[6])]
-        assert verified == "true" and cp == len(switches) == 3 and sync == ops + 2*cp
+        assert verified == "true" and cp == len(switches) == 3 and sync == ops + (3 if variant=='dirty' else 2)*cp
         result.append(dict(rows=n, variant=variant, rep=run["rep"], ops_s=ops*1e9/elapsed,
             p99_ms=lat[math.ceil(.99*ops)-1], max_ms=max(lat), checkpoint_ms=median(switches),
             syncs=sync, written_MiB=size/2**20, rss_end_MiB=rss1/2**20, hwm_MiB=hwm1/2**20,
             reopen_ms=reopen/1e6, logical_MiB=logical/2**20, allocated_MiB=disk/2**20,
             pin_ms=pin/1e6, verified_rows=count))
-    assert len(result)==6
+    assert sorted((r['rep'],r['variant']) for r in result)==sorted((rep,v) for rep in range(1,4) for v in variants)
     return result
 
 

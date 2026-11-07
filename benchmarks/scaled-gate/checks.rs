@@ -662,3 +662,6 @@ fn er_identifiable_misplacement_uses_the_intact_peer() {
         assert!(Store::open(&p,config(),BUFFER_BUDGET,&mut noop).unwrap().costs.writes.is_empty());
     }
 }
+
+include!("dirty.rs");
+include!("dirty_checks.rs");

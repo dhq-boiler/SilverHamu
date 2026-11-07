@@ -155,6 +155,18 @@ trait TestPersistence: Send + Sync {
     fn checkpoint(&self, db: &Database) -> Result<CheckpointInfo>;
 }
 
+#[cfg(feature = "fifo-writer")]
+#[path = "fifo_writer.rs"]
+mod fifo_writer;
+#[cfg(feature = "fifo-writer")]
+use fifo_writer::WriterMutex;
+#[cfg(all(feature = "retirement-timing",feature = "fifo-writer"))]
+use fifo_writer::WriterGuard;
+#[cfg(not(feature = "fifo-writer"))]
+type WriterMutex = Mutex<()>;
+#[cfg(all(feature = "retirement-timing",not(feature = "fifo-writer")))]
+type WriterGuard<'a> = std::sync::MutexGuard<'a, ()>;
+
 struct Inner {
     #[cfg(all(test, target_os = "linux"))]
     test_persistence: std::sync::OnceLock<Arc<dyn TestPersistence>>,
@@ -162,7 +174,7 @@ struct Inner {
     group: group_commit::GroupCommit,
     reclaimer: reclamation::Reclaimer,
     state: Arc<Mutex<State>>,
-    writer: Mutex<()>,
+    writer: WriterMutex,
     checkpoint: Mutex<u64>,
     prefix_active: std::sync::atomic::AtomicBool,
     retirement: Mutex<retirement::Retirement>,
@@ -273,7 +285,7 @@ fn retirement_mark(index: usize) {
     });
 }
 #[cfg(feature = "retirement-timing")]
-struct TimedWriter<'a>(Option<std::sync::MutexGuard<'a, ()>>);
+struct TimedWriter<'a>(Option<WriterGuard<'a>>);
 #[cfg(feature = "retirement-timing")]
 impl Drop for TimedWriter<'_> {
     fn drop(&mut self) {
@@ -758,7 +770,7 @@ impl Database {
                 group: group_commit::GroupCommit::default(),
                 reclaimer: reclamation::Reclaimer::default(),
                 state: Arc::new(Mutex::new(state)),
-                writer: Mutex::new(()),
+                writer: WriterMutex::default(),
                 checkpoint: Mutex::new(0),
                 prefix_active: false.into(),
                 retirement: Mutex::new(retirement),

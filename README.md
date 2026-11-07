@@ -6,6 +6,16 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Deferring repeated checkpoint page writes
+
+With four writers on one million rows, postponing the next early write to an invalidated range changed total page writes from **139.61 to 138.92 MiB** and update p99 from **40.43 to 37.62 ms**. The largest category of unpublished prewrites was the set still pending at the end of the run. [Byte accounting, all trials and recovery checks](docs/benchmarks/defer-2026-11-07/README.md).
+
+![Deferring invalidated checkpoint ranges](docs/benchmarks/defer-2026-11-07/comparison.svg)
+
+![Service updates](docs/benchmarks/defer-2026-11-07/service.svg)
+
+![Embedded updates](docs/benchmarks/defer-2026-11-07/embedded.svg)
+
 ## Prewriting dirty MVCC pages
 
 With one million rows and four writers, preparing checkpoint pages ahead of publication measured **42.27 ms update p99** compared with **48.54 ms** for scanning at publication. The controlled pilot reused all sixteen prepared ranges when later commits touched other pages, and none when they touched the same pages. [Per-trial results, write amplification and recovery tests](docs/benchmarks/prewrite-2026-11-07/README.md).

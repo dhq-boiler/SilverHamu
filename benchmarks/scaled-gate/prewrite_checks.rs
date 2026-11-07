@@ -271,3 +271,44 @@ fn defer_pilot() {
     let db = MvccPages::open_direct(&path, cfg, None);
     check_tx(&mut db.begin_read().unwrap(), n, &expected);
 }
+
+#[test]
+#[ignore = "deferral capacity and split-byte accounting"]
+fn defer_capacity_and_split() {
+    assert_eq!(std::env::var("SCALED_VARIANT").unwrap(), "defer");
+    let path = dir().join("capacity.db");
+    let cfg = Config { checkpoints: 32, logs: 256 };
+    let n = 30000;
+    let db = MvccPages::create_direct(&path, cfg, (0..n).map(|i| (key(i), value(i, 0))), None);
+    let mut old = db.begin_read().unwrap();
+    let mut expected = BTreeMap::new();
+    for bucket in 0..97 {
+        let id = 300 * bucket;
+        for stage in 1..=2 {
+            let mut tx = db.begin().unwrap();
+            let bytes = value(id, stage);
+            tx.put(&key(id), &bytes).unwrap();
+            tx.commit().unwrap();
+            expected.insert(id, Some(bytes));
+            let count = prewrite(&db, 1, PAIR).unwrap().0;
+            assert_eq!(count, usize::from(stage == 1 || bucket == 96));
+        }
+    }
+    assert_eq!(db.checkpoint().unwrap().records, n);
+    let mut tx = db.begin().unwrap();
+    tx.put(&key(2), &vec![7; 8000]).unwrap();
+    tx.commit().unwrap();
+    expected.insert(2, Some(vec![7; 8000]));
+    let (count, bytes) = prewrite(&db, 1, PAIR).unwrap();
+    assert_eq!(count, 0);
+    assert!(bytes > 0 && bytes <= PAIR);
+    println!("EXPECTED_SPLIT_BYTES,{bytes}");
+    assert_eq!(db.checkpoint().unwrap().records, n);
+    check_tx(&mut old, n, &BTreeMap::new());
+    drop(old);
+    drop(db);
+    let db = MvccPages::open_direct(&path, cfg, None);
+    let mut reader = db.begin_read().unwrap();
+    assert_eq!(reader.version(), 195);
+    check_tx(&mut reader, n, &expected);
+}

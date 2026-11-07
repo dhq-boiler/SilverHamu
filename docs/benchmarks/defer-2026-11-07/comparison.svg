@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 870 390" role="img"><title>Deferring invalidated ranges in the four-writer benchmark</title><rect width="870" height="390" fill="white"/><g font-family="sans-serif" fill="#192b40">
+<text x="16" y="30" font-size="23">Deferring invalidated checkpoint ranges</text>
+<text x="16" y="55" font-size="14">One million rows, four writers. Median of three trials except for the worst update.</text>
+<text x="16" y="88" font-size="17">Page writes (MiB)</text>
+<text x="16" y="114" font-size="14">Scan</text>
+<rect x="86" y="102" width="171.75" height="14" fill="#596e86"/>
+<text x="265.75131628515874" y="114" font-size="14">126.20</text>
+<text x="16" y="143" font-size="14">Prewrite</text>
+<rect x="86" y="131" width="190.00" height="14" fill="#ae5d35"/>
+<text x="284.0" y="143" font-size="14">139.61</text>
+<text x="16" y="172" font-size="14">Defer</text>
+<rect x="86" y="160" width="189.06" height="14" fill="#267264"/>
+<text x="283.0611755391835" y="172" font-size="14">138.92</text>
+<text x="446" y="88" font-size="17">Update p99 (ms)</text>
+<text x="446" y="114" font-size="14">Scan</text>
+<rect x="516" y="102" width="190.00" height="14" fill="#596e86"/>
+<text x="714.0" y="114" font-size="14">45.54</text>
+<text x="446" y="143" font-size="14">Prewrite</text>
+<rect x="516" y="131" width="168.65" height="14" fill="#ae5d35"/>
+<text x="692.6509261784684" y="143" font-size="14">40.43</text>
+<text x="446" y="172" font-size="14">Defer</text>
+<rect x="516" y="160" width="156.95" height="14" fill="#267264"/>
+<text x="680.9545127610631" y="172" font-size="14">37.62</text>
+<text x="16" y="238" font-size="17">Worst update (ms)</text>
+<text x="16" y="264" font-size="14">Scan</text>
+<rect x="86" y="252" width="66.56" height="14" fill="#596e86"/>
+<text x="160.55747657827158" y="264" font-size="14">88.25</text>
+<text x="16" y="293" font-size="14">Prewrite</text>
+<rect x="86" y="281" width="190.00" height="14" fill="#ae5d35"/>
+<text x="284.0" y="293" font-size="14">251.94</text>
+<text x="16" y="322" font-size="14">Defer</text>
+<rect x="86" y="310" width="58.23" height="14" fill="#267264"/>
+<text x="152.22714841166737" y="322" font-size="14">77.21</text>
+<text x="446" y="238" font-size="17">Updates per second</text>
+<text x="446" y="264" font-size="14">Scan</text>
+<rect x="516" y="252" width="187.39" height="14" fill="#596e86"/>
+<text x="711.3881031700379" y="264" font-size="14">655.84</text>
+<text x="446" y="293" font-size="14">Prewrite</text>
+<rect x="516" y="281" width="184.33" height="14" fill="#ae5d35"/>
+<text x="708.3277434455792" y="293" font-size="14">645.13</text>
+<text x="446" y="322" font-size="14">Defer</text>
+<rect x="516" y="310" width="190.00" height="14" fill="#267264"/>
+<text x="714.0" y="322" font-size="14">664.98</text>
+</g></svg>

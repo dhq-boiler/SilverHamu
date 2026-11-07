@@ -1,0 +1,22 @@
+warning: method `hold_test_sync` is never used
+   --> src/group_commit.rs:130:19
+    |
+123 | impl Database {
+    | ------------- method in this implementation
+...
+130 |     pub(crate) fn hold_test_sync(&self, gate: Arc<[std::sync::Barrier; 2]>) {
+    |                   ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: `catdb` (lib test) generated 1 warning
+    Finished `release` profile [optimized] target(s) in 0.01s
+     Running unittests src/lib.rs (target/release/deps/newdbms-458055916a75b401)
+
+running 4 tests
+test transactions::scaled_gate::checks::timing::arrival_gate_conflict_and_bounds ... ok
+test transactions::scaled_gate::checks::timing::arrival_gate_count_limit_and_refusal ... ok
+test transactions::scaled_gate::checks::timing::arrival_gate_process_exit ... ok
+test transactions::scaled_gate::checks::timing::arrival_gate_queue_caps_do_not_orphan_admitted_work ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 150 filtered out; finished in 0.60s

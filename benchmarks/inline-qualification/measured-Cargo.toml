@@ -1,0 +1,83 @@
+[package]
+name = "catdb"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.89"
+license = "MIT"
+description = "Experimental embedded transactional key-value database with an optional service process"
+repository = "https://github.com/dhq-boiler/catdb"
+readme = "README.md"
+publish = false
+default-run = "catdb"
+
+[lib]
+name = "newdbms"
+crate-type = ["rlib", "cdylib"]
+
+[dependencies]
+serde_json = { version = "1", optional = true }
+ctrlc = { version = "3.5", features = ["termination"], optional = true }
+
+[features]
+default = ["inline-latest"]
+service = ["dep:serde_json", "dep:ctrlc", "handoff-refill"]
+fixed-log = []
+wal-direct = []
+wal-prepare = ["wal-direct"]
+lock-timing = []
+benchmark-metrics = []
+backlog-batch = ["group-handoff"]
+single-client-commit = []
+checkpoint-handle-reuse = []
+group-handoff = []
+handoff-refill = ["group-handoff"]
+commit-window = ["group-handoff"]
+adaptive-window = ["commit-window"]
+sync-stall = []
+history-metrics = []
+inline-latest = []
+inline-key = []
+wire-buffer = []
+wire-metrics = []
+skip-unneeded-history = ["inline-latest"]
+retirement-timing = ["skip-unneeded-history", "lock-timing"]
+allocation-metrics = []
+
+[[bin]]
+name = "catdb"
+path = "src/main.rs"
+
+[[bin]]
+name = "catdb-server"
+path = "src/bin/catdb-server.rs"
+required-features = ["service"]
+
+[[bin]]
+name = "read-gc-bench"
+path = "src/bin/read-gc-bench.rs"
+required-features = ["service", "lock-timing"]
+
+[[bin]]
+name = "reclamation-bench"
+path = "src/bin/reclamation-bench.rs"
+required-features = ["service"]
+
+[[bin]]
+name = "history-capacity-bench"
+path = "src/bin/history-capacity-bench.rs"
+required-features = ["service", "history-metrics"]
+
+[[bin]]
+name = "key-allocation-bench"
+path = "src/bin/key-allocation-bench.rs"
+required-features = ["service", "history-metrics", "allocation-metrics"]
+
+[[bin]]
+name = "wire-probe"
+path = "src/bin/wire-probe.rs"
+required-features = ["service", "wire-metrics"]
+
+[[bin]]
+name = "solo-update-bench"
+path = "src/bin/solo-update-bench.rs"
+required-features = ["service"]

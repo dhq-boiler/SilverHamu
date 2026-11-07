@@ -1,0 +1,304 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Default.Dockerfile
+#1 transferring dockerfile: 1.21kB 0.0s done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/catdb-inline-qualification:safety
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/catdb-capacity-gate:latest
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 43.82kB 0.0s done
+#4 DONE 0.1s
+
+#5 [checks 1/7] FROM docker.io/library/catdb-capacity-gate:latest
+#5 CACHED
+
+#6 [checks 2/7] COPY Cargo.toml Cargo.lock ./
+#6 DONE 0.1s
+
+#7 [stage-1 1/8] FROM docker.io/library/catdb-inline-qualification:safety
+#7 ...
+
+#8 [checks 3/7] COPY src ./src
+#8 DONE 0.1s
+
+#7 [stage-1 1/8] FROM docker.io/library/catdb-inline-qualification:safety
+#7 DONE 0.4s
+
+#9 [checks 4/7] COPY benchmarks ./benchmarks
+#9 DONE 0.2s
+
+#10 [checks 5/7] RUN cargo test --locked --release --features service -- --test-threads=1
+#10 0.319    Compiling catdb v0.1.0 (/build)
+#10 5.081     Finished `release` profile [optimized] target(s) in 4.83s
+#10 5.082      Running unittests src/lib.rs (target/release/deps/newdbms-a9f97dc3da2eeccf)
+#10 5.083
+#10 5.083 running 122 tests
+#10 5.083 test inline_key::tests::bv_layout_and_storage_boundary ... ok
+#10 5.084 test inline_key::tests::eq_order_and_borrowed_ranges_match_bytes ... ok
+#10 5.084 test service::tests::bv_auth_and_connection_configuration_bounds ... ok
+#10 5.084 test service::tests::bv_hex_limits_and_page_limits_reject_both_sides ... ok
+#10 5.084 test service::tests::elision_single_dispatch_preserves_request_and_validation ... ok
+#10 5.104 test service::tests::eq_explicit_service_budgets_preserve_legacy_config_and_reject_zero_before_creation ... ok
+#10 5.110 test service::tests::eq_service_mutations_and_embedded_reopen_agree ... ok
+#10 5.121 test service::tests::er_single_request_crash_keeps_acknowledged_values ...
+#10 5.129 running 1 test
+#10 5.138
+#10 5.138 running 1 test
+#10 5.142 ok
+#10 5.142 test service::tests::single_request_crash_worker ... ignored
+#10 5.142 test service::tests::st_invalid_states_leave_existing_transaction_intact ... ok
+#10 5.146 test service::tests::st_single_update_waits_for_sync_and_hides_uncommitted_values ... ok
+#10 5.154 test service::work_elision_bench::work_elision_single_requests ... ignored, explicit work-elision service-dispatch experiment
+#10 5.154 test transactions::capacity_gate::cap16::tests::boundaries_repeated_reuse_and_old_generation ... ok
+#10 5.339 test transactions::capacity_gate::cap16::tests::capacity_speed ... ignored, explicit bounded capacity timing experiment
+#10 5.339 test transactions::capacity_gate::cap16::tests::child_phase ... ignored, external crash child helper
+#10 5.339 test transactions::capacity_gate::cap16::tests::damaged_tail_repair_and_interrupted_switch_retry ... ok
+#10 5.457 test transactions::capacity_gate::cap16::tests::external_exit_at_tail_switch_and_repair ... ok
+#10 6.841 test transactions::capacity_gate::cap16::tests::foreign_open ... ignored, cross-capacity child helper
+#10 6.841 test transactions::capacity_gate::cap16::tests::tail_prefix_model_preserves_atomicity_and_valid_peer ... ok
+#10 7.009 test transactions::capacity_gate::cap16::tests::wrong_capacity_rejects_before_modifying_file ... ok
+#10 7.104 test transactions::capacity_gate::cap4::tests::boundaries_repeated_reuse_and_old_generation ... ok
+#10 7.165 test transactions::capacity_gate::cap4::tests::capacity_speed ... ignored, explicit bounded capacity timing experiment
+#10 7.165 test transactions::capacity_gate::cap4::tests::child_phase ... ignored, external crash child helper
+#10 7.165 test transactions::capacity_gate::cap4::tests::damaged_tail_repair_and_interrupted_switch_retry ... ok
+#10 7.207 test transactions::capacity_gate::cap4::tests::external_exit_at_tail_switch_and_repair ... ok
+#10 7.722 test transactions::capacity_gate::cap4::tests::foreign_open ... ignored, cross-capacity child helper
+#10 7.722 test transactions::capacity_gate::cap4::tests::tail_prefix_model_preserves_atomicity_and_valid_peer ... ok
+#10 7.776 test transactions::capacity_gate::cap4::tests::wrong_capacity_rejects_before_modifying_file ... ok
+#10 7.808 test transactions::capacity_gate::cap64::tests::boundaries_repeated_reuse_and_old_generation ... ok
+#10 8.470 test transactions::capacity_gate::cap64::tests::capacity_speed ... ignored, explicit bounded capacity timing experiment
+#10 8.470 test transactions::capacity_gate::cap64::tests::child_phase ... ignored, external crash child helper
+#10 8.470 test transactions::capacity_gate::cap64::tests::damaged_tail_repair_and_interrupted_switch_retry ... ok
+#10 8.844 test transactions::capacity_gate::cap64::tests::external_exit_at_tail_switch_and_repair ... ok
+#10 13.72 test transactions::capacity_gate::cap64::tests::foreign_open ... ignored, cross-capacity child helper
+#10 13.72 test transactions::capacity_gate::cap64::tests::tail_prefix_model_preserves_atomicity_and_valid_peer ... ok
+#10 14.39 test transactions::capacity_gate::cap64::tests::wrong_capacity_rejects_before_modifying_file ... ok
+#10 14.76 test transactions::generation_guard_bench::production_global_guard_benchmark ... ignored, explicit synthetic production-engine performance experiment
+#10 14.76 test transactions::group_commit::tests::bv_handoff_byte_limit_keeps_values_below_at_and_above_boundary ... ok
+#10 14.82 test transactions::group_commit::tests::bv_handoff_count_limit_keeps_all_requests_and_bounds_each_batch ... ok
+#10 14.85 test transactions::group_commit::tests::bv_refill_wait_requires_prior_writer_and_expired_partial_group ... ok
+#10 14.85 test transactions::group_commit::tests::er_group_process_exit_around_sync_preserves_acknowledged_data_and_atomic_updates ... ok
+#10 14.87 test transactions::group_commit::tests::er_handoff_replies_to_every_queued_caller_after_database_is_poisoned ... ok
+#10 14.88 test transactions::group_commit::tests::failed_sync_marks_group_uncertain_and_recovery_keeps_complete_prefix ... ok
+#10 14.91 test transactions::group_commit::tests::global_guard_keeps_group_range_conflicts_for_insert_update_delete_and_boundaries ... ok
+#10 14.99 test transactions::group_commit::tests::global_guard_keeps_same_group_point_dependencies_and_empty_ranges ... ok
+#10 14.99 test transactions::group_commit::tests::group_admission_counts_cumulative_retained_bytes_and_releases_buffers ... ok
+#10 15.00 test transactions::group_commit::tests::group_crash_worker ... ignored, subprocess helper
+#10 15.00 test transactions::group_commit::tests::st_handoff_collects_during_sync_without_early_ack_or_visibility ... ok
+#10 15.03 test transactions::group_commit::tests::st_handoff_repeats_crud_without_stranding_waiters_or_changing_old_reads ... ok
+#10 15.07 test transactions::group_commit::tests::st_recent_full_group_can_reform_but_idle_or_small_groups_keep_the_original_budget ... ok
+#10 15.07 test transactions::group_commit::tests::sync_precedes_publication_and_only_nonconflicting_frames_are_written ... ok
+#10 15.08 test transactions::group_commit::tests::wake_on_four_commits_a_lone_request_after_the_wait ... ok
+#10 15.09 test transactions::read_copy_tests::er_detached_versions_stay_charged_until_their_values_are_freed ... ok
+#10 15.10 test transactions::read_copy_tests::er_worker_start_failure_leaves_cooperative_reclamation_available ... ok
+#10 15.11 test transactions::read_copy_tests::st_copy_is_unlocked_while_old_value_stays_pinned ... ok
+#10 15.13 test transactions::retirement::tests::er_receipt_identity_checksum_and_database_id_protect_unrelated_files ... ok
+#10 15.15 test transactions::scan_copy_bench::full_scan_copy_benchmark ... ignored, explicit full-scan copy performance experiment
+#10 15.15 test transactions::scan_merge_bench::full_scan_merge_benchmark ... ignored, explicit full-scan merge performance experiment
+#10 15.15 test transactions::tests::bv_checkpoint_rejects_snapshot_plus_tail_over_limit_before_replacing_original ... ok
+#10 15.16 test transactions::tests::bv_checkpoint_retained_limit_rejects_excess_update_then_reuses_capacity ... ok
+#10 15.19 test transactions::tests::bv_checkpoint_snapshot_uses_transaction_budget_and_releases_it_after_failure ... ok
+#10 15.20 test transactions::tests::bv_checkpoint_tail_copy_boundaries_preserve_old_reads_and_subsequent_appends ... ok
+#10 15.34 test transactions::tests::bv_inline_latest_does_not_enlarge_the_tree_value ... ok
+#10 15.34 test transactions::tests::bv_wal_and_sequence_limits_reject_before_any_persistence ... ok
+#10 15.35 test transactions::tests::checkpoint_crash_worker ... ignored, subprocess helper
+#10 15.35 test transactions::tests::checkpoint_readers_progress_at_copy_sync_and_publication_stages ... ok
+#10 15.37 test transactions::tests::copy_scan_bv_er_budget_edges_release_and_preserve_staged_writes ... ok
+#10 15.57 test transactions::tests::copy_scan_eq_export_avoids_keys_and_preserves_empty_and_large_values ... ok
+#10 15.59 test transactions::tests::copy_scan_eq_st_shared_rows_match_owned_ranges_and_survive_mutation ... ok
+#10 15.60 test transactions::tests::copy_scan_st_shared_payloads_are_stable_after_unlock_and_owner_drop ... ok
+#10 15.61 test transactions::tests::crash_before_publication ... ignored, subprocess helper
+#10 15.61 test transactions::tests::deferred_reclaim_preserves_old_reads_updates_and_reopen ... ok
+#10 15.65 test transactions::tests::elision_export_uses_no_write_dependencies_and_preserves_file_content ... ok
+#10 15.67 test transactions::tests::elision_point_validation_keeps_advanced_generation_and_earlier_group_conflicts ... ok
+#10 15.71 test transactions::tests::eq_checkpoint_captures_concurrent_changes_and_preserves_old_generation_and_conflicts ... ok
+#10 15.88 test transactions::tests::er_acknowledged_data_survives_storage_full_partial_write_and_sync_failure ... ok
+#10 15.98 test transactions::tests::er_checkpoint_failure_before_publication_preserves_store_and_after_publication_requires_reopen ... ok
+#10 16.05 test transactions::tests::er_checkpoint_process_exit_before_and_after_replacement_preserves_committed_state ... ok
+#10 16.88 test transactions::tests::er_checkpoint_tail_failure_keeps_acknowledged_writes_and_cursor_usable ... ok
+#10 16.91 test transactions::tests::er_persistence_failure_poisoning_requires_reopen_and_reports_uncertain_outcome ... ok
+#10 16.94 test transactions::tests::er_process_exit_during_append_or_after_sync_before_publication_recovers_atomically ... ok
+#10 16.96 test transactions::tests::er_tail_output_write_failure_restores_original_wal_append_position ... ok
+#10 16.97 test transactions::tests::er_wal_decoder_rejects_invalid_counts_tags_lengths_order_and_trailing_bytes ... ok
+#10 16.97 test transactions::tests::inline_key_eq_st_boundaries_snapshots_checkpoint_and_reopen ... ok
+#10 16.99 test transactions::tests::inline_key_st_point_and_prefix_range_conflicts_cross_storage_boundary ... ok
+#10 17.05 test transactions::tests::panic_during_unlocked_persistence_requires_reopen ... ok
+#10 17.05 test transactions::tests::reads_during_persistence_keep_old_values_and_conflict_after_publication ... ok
+#10 17.06 test transactions::tests::retirement_byte_boundary_and_disabled_mode_fall_back_without_losing_data ... ok
+#10 17.11 test transactions::tests::retirement_preserves_unrecognized_sidecars_and_uses_normal_replacement ... ok
+#10 17.13 test transactions::tests::retirement_releases_writer_before_reclaim_and_preserves_old_generation_and_conflicts ... ok
+#10 17.18 test transactions::tests::scan_merge_budget_boundary_releases_reservations_and_preserves_staged_values ... ok
+#10 17.28 test transactions::tests::scan_merge_full_copy_runs_unlocked_and_keeps_original_value ... ok
+#10 17.29 test transactions::tests::scan_merge_matches_oracle_for_staged_changes_boundaries_and_old_versions ... ok
+#10 17.30 test transactions::tests::scan_merge_shadowed_large_values_do_not_consume_output_budget ... ok
+#10 17.31 test transactions::tests::st_limited_failed_persistence_releases_reservations_and_requires_reopen ... ok
+#10 17.31 test transactions::tests::st_version_one_log_can_be_opened_and_upgraded_by_checkpoint ... ok
+#10 17.33 test transactions::tests::wal_preparation_eq_encoding_matches_legacy_bytes_and_decoding ... ok
+#10 17.33 test transactions::variable_gate::tests::bv_checkpoint_capacity_and_log_capacity_reject_before_writes ... ok
+#10 17.35 test transactions::variable_gate::tests::bv_page_and_exact_slot_boundaries_preserve_rejected_state ... ok
+#10 17.38 test transactions::variable_gate::tests::bv_production_total_bytes_and_sequence_limits ... ok
+#10 17.40 test transactions::variable_gate::tests::child_phase ... ignored
+#10 17.40 test transactions::variable_gate::tests::eq_atomic_changes_empty_noop_old_read_repeated_switch_and_costs ... ok
+#10 17.43 test transactions::variable_gate::tests::er_external_kills_preserve_acknowledged_and_atomic_pending_changes ... ok
+#10 17.90 test transactions::variable_gate::tests::er_one_copy_damage_each_meaningful_byte_and_sync_before_publish ... ok
+#10 18.62 test transactions::variable_gate::tests::er_partial_copies_and_repair_keep_whole_transaction ... ok
+#10 18.64 test transactions::variable_gate::tests::er_phase_failures_poison_writer_and_repair_before_writable ... ok
+#10 18.69 test transactions::variable_gate::tests::er_untrusted_lengths_inner_corruption_and_padding ... ok
+#10 18.69 test transactions::variable_gate::tests::er_valid_outer_checksums_do_not_hide_invalid_inner_operations ... ok
+#10 18.69 test transactions::variable_gate::tests::phase_trace_order_bound_and_failure_records ... ok
+#10 18.72 test transactions::variable_gate::tests::reuse_child ... ignored
+#10 18.72 test transactions::variable_gate::tests::reuse_eq_same_workload_costs_and_old_snapshots ... ok
+#10 18.77 test transactions::variable_gate::tests::reuse_er_damage_repair_negative_control_and_capacity ... ok
+#10 18.81 test transactions::variable_gate::tests::reuse_er_external_kills_then_update_retry_and_reopen ... ok
+#10 20.16 test transactions::variable_gate::tests::reuse_er_interrupted_switch_retry_after_more_updates ... ok
+#10 20.38 test transactions::variable_gate::tests::reuse_er_stale_classification_rejects_future_and_holes ... ok
+#10 20.38 test transactions::variable_gate::tests::reuse_model_recovers_torn_reuse_after_full_inner_validation ... ok
+#10 22.55 test transactions::variable_gate::tests::reuse_negative_nested_crc_does_not_bind_inner_sequence ... ok
+#10 22.55 test transactions::variable_gate::tests::reuse_phases ... ignored, explicit bounded persistence timing experiment
+#10 22.55 test transactions::variable_gate::tests::reuse_speed ... ignored, explicit bounded persistence timing experiment
+#10 22.55 test transactions::variable_gate::tests::reuse_st_repeated_long_short_records_capacity_and_epoch_exhaustion ... ok
+#10 22.64 test transactions::variable_gate::tests::st_selector_prefixes_keep_variable_checkpoint_across_reuse ... ok
+#10 24.09 test transactions::work_elision_bench::work_elision_points_and_export ... ignored, explicit work-elision production experiment
+#10 24.09
+#10 24.09 test result: ok. 100 passed; 0 failed; 22 ignored; 0 measured; 0 filtered out; finished in 19.01s
+#10 24.09
+#10 24.10      Running unittests src/main.rs (target/release/deps/catdb-d0c0723327d1dcd8)
+#10 24.10
+#10 24.10 running 0 tests
+#10 24.10
+#10 24.10 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+#10 24.10
+#10 24.10      Running unittests src/bin/catdb-server.rs (target/release/deps/catdb_server-256f2baaf1bc4426)
+#10 24.10
+#10 24.10 running 1 test
+#10 24.10 test tests::bv_resource_budgets_reject_zero_invalid_and_overflow ... ok
+#10 24.10
+#10 24.10 test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+#10 24.10
+#10 24.10      Running unittests src/bin/reclamation-bench.rs (target/release/deps/reclamation_bench-54dd3b10450eb6f1)
+#10 24.10
+#10 24.10 running 0 tests
+#10 24.10
+#10 24.10 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+#10 24.10
+#10 24.10      Running unittests src/bin/reopen-bench.rs (target/release/deps/reopen_bench-d1757953d337dc8b)
+#10 24.10
+#10 24.10 running 0 tests
+#10 24.10
+#10 24.10 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+#10 24.10
+#10 24.10      Running unittests src/bin/scan-bench.rs (target/release/deps/scan_bench-71e61c29f627aeae)
+#10 24.10
+#10 24.10 running 0 tests
+#10 24.10
+#10 24.10 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+#10 24.10
+#10 24.10      Running unittests src/bin/solo-update-bench.rs (target/release/deps/solo_update_bench-9bde64bee0455fae)
+#10 24.10
+#10 24.10 running 0 tests
+#10 24.10
+#10 24.10 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+#10 24.10
+#10 24.10      Running unittests src/bin/tx-bench.rs (target/release/deps/tx_bench-bf1638bec04dad1b)
+#10 24.10
+#10 24.10 running 0 tests
+#10 24.10
+#10 24.10 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+#10 24.10
+#10 24.10    Doc-tests newdbms
+#10 24.16
+#10 24.16 running 0 tests
+#10 24.16
+#10 24.16 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+#10 24.16
+#10 DONE 24.2s
+
+#11 [checks 6/7] RUN cargo build --locked --release --features service --lib --bin catdb-server
+#11 0.354    Compiling catdb v0.1.0 (/build)
+#11 0.629     Finished `release` profile [optimized] target(s) in 0.33s
+#11 DONE 1.1s
+
+#12 [checks 7/7] RUN cargo build --locked --release --no-default-features --features service,inline-latest --lib --target-dir target/rollback
+#12 0.971    Compiling libc v0.2.191
+#12 0.971    Compiling cfg_aliases v0.2.2
+#12 0.971    Compiling serde_core v1.0.229
+#12 0.971    Compiling zmij v1.0.23
+#12 0.972    Compiling cfg-if v1.0.5
+#12 0.972    Compiling bitflags v2.13.2
+#12 0.973    Compiling serde_json v1.0.154
+#12 0.973    Compiling itoa v1.0.18
+#12 0.973    Compiling memchr v2.8.3
+#12 0.994    Compiling nix v0.31.3
+#12 2.593    Compiling ctrlc v3.5.2
+#12 3.208    Compiling catdb v0.1.0 (/build)
+#12 5.035     Finished `release` profile [optimized] target(s) in 4.13s
+#12 DONE 5.1s
+
+#13 [stage-1 2/8] COPY --from=checks /build/target/release/libnewdbms.so /default.so
+#13 DONE 0.1s
+
+#14 [stage-1 3/8] COPY --from=checks /build/target/release/catdb-server /default-server
+#14 DONE 0.1s
+
+#15 [stage-1 4/8] COPY --from=checks /build/target/rollback/release/libnewdbms.so /rollback.so
+#15 DONE 0.1s
+
+#16 [stage-1 5/8] RUN cmp /default.so /usr/local/lib/libnewdbms.so && cmp /default-server /usr/local/bin/catdb-server
+#16 DONE 0.2s
+
+#17 [stage-1 6/8] RUN python -m unittest discover -s tests -p '*ffi_checks.py'
+#17 0.294 ...................................
+#17 0.755 ----------------------------------------------------------------------
+#17 0.755 Ran 35 tests in 0.467s
+#17 0.755
+#17 0.755 OK
+#17 DONE 0.8s
+
+#18 [stage-1 7/8] RUN python tests/service_protocol.py
+#18 0.311 test_bv_connection_cap_and_slot_reuse (__main__.ServiceTests.test_bv_connection_cap_and_slot_reuse) ... ok
+#18 0.343 test_bv_invalid_frames_and_limits_do_not_mutate (__main__.ServiceTests.test_bv_invalid_frames_and_limits_do_not_mutate) ... ok
+#18 0.381 test_bv_request_frame_accepts_exact_maximum_and_previous_byte (__main__.ServiceTests.test_bv_request_frame_accepts_exact_maximum_and_previous_byte) ... ok
+#18 0.405 test_bv_resource_arguments_reject_invalid_values_without_touching_database (__main__.ServiceTests.test_bv_resource_arguments_reject_invalid_values_without_touching_database) ... ok
+#18 0.439 test_bv_retained_admission_boundary_and_reopen_refusal_preserve_values (__main__.ServiceTests.test_bv_retained_admission_boundary_and_reopen_refusal_preserve_values) ... ok
+#18 0.518 test_bv_single_requests_limits_leave_connection_and_data_intact (__main__.ServiceTests.test_bv_single_requests_limits_leave_connection_and_data_intact) ... ok
+#18 0.548 test_bv_slow_partial_frame_times_out (__main__.ServiceTests.test_bv_slow_partial_frame_times_out) ... ok
+#18 1.859 test_bv_transaction_deadline_is_not_reset_by_requests (__main__.ServiceTests.test_bv_transaction_deadline_is_not_reset_by_requests) ... ok
+#18 3.080 test_cc_four_writers_acknowledged_commits_survive_kill (__main__.ServiceTests.test_cc_four_writers_acknowledged_commits_survive_kill) ... ok
+#18 3.185 test_eq_empty_value_missing_update_delete_and_restart (__main__.ServiceTests.test_eq_empty_value_missing_update_delete_and_restart) ... ok
+#18 3.227 test_eq_single_requests_crud_pages_ping_and_reopen (__main__.ServiceTests.test_eq_single_requests_crud_pages_ping_and_reopen) ... ok
+#18 3.272 test_er_buffer_refusal_does_not_break_following_reads (__main__.ServiceTests.test_er_buffer_refusal_does_not_break_following_reads) ... ok
+#18 3.307 test_er_remote_bind_requires_explicit_opt_in_and_token_file_is_bounded (__main__.ServiceTests.test_er_remote_bind_requires_explicit_opt_in_and_token_file_is_bounded) ... ok
+#18 3.316 test_er_second_owner_and_corrupt_existing_file_refused (__main__.ServiceTests.test_er_second_owner_and_corrupt_existing_file_refused) ... ok
+#18 3.328 test_er_single_request_acknowledgements_survive_process_exit (__main__.ServiceTests.test_er_single_request_acknowledgements_survive_process_exit) ... ok
+#18 3.405 test_er_wrong_auth_and_protocol_are_rejected (__main__.ServiceTests.test_er_wrong_auth_and_protocol_are_rejected) ... ok
+#18 3.428 test_st_dependency_limit_refusal_releases_on_rollback (__main__.ServiceTests.test_st_dependency_limit_refusal_releases_on_rollback) ... ok
+#18 3.444 test_st_disconnect_discards_staged_values (__main__.ServiceTests.test_st_disconnect_discards_staged_values) ... ok
+#18 3.461 test_st_old_generation_read_and_same_key_conflicts (__main__.ServiceTests.test_st_old_generation_read_and_same_key_conflicts) ... ok
+#18 3.499 test_st_range_conflict_and_paged_snapshot_across_checkpoint (__main__.ServiceTests.test_st_range_conflict_and_paged_snapshot_across_checkpoint) ... ok
+#18 3.555 test_st_read_only_snapshot_rejects_mutations_and_survives_updates (__main__.ServiceTests.test_st_read_only_snapshot_rejects_mutations_and_survives_updates) ... ok
+#18 3.582 test_st_single_requests_reject_active_transaction_without_discarding_it (__main__.ServiceTests.test_st_single_requests_reject_active_transaction_without_discarding_it) ... ok
+#18 3.599 test_st_staged_limit_refusal_preserves_prior_changes_and_releases_budget (__main__.ServiceTests.test_st_staged_limit_refusal_preserves_prior_changes_and_releases_budget) ... ok
+#18 3.622
+#18 3.622 ----------------------------------------------------------------------
+#18 3.622 Ran 23 tests in 3.312s
+#18 3.622
+#18 3.622 OK
+#18 DONE 3.7s
+
+#19 [stage-1 8/8] RUN python tests/key_storage_transition.py /rollback.so /default.so
+#19 0.895 PASS: 2 directions, 8 full-content checks, WAL and checkpoint interchange
+#19 DONE 0.9s
+
+#20 exporting to image
+#20 exporting layers
+#20 exporting layers 0.2s done
+#20 writing image sha256:28db5395a2cacb81b1a0ec90f6688d15583a40bd2e54b592b177b66e864ad2df done
+#20 naming to docker.io/library/catdb-inline-qualification:default done
+#20 DONE 0.2s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/l924dvbqv8s9tjrsibuw0ok85

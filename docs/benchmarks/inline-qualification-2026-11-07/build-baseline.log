@@ -1,0 +1,94 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 985B 0.0s done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/rust:1.89-bookworm
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/catdb-comparison:local
+#3 DONE 0.0s
+
+#4 [build 1/6] FROM docker.io/library/rust:1.89-bookworm
+#4 DONE 0.0s
+
+#5 [stage-1 1/6] FROM docker.io/library/catdb-comparison:local
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 483.02kB 0.1s done
+#6 DONE 0.1s
+
+#5 [stage-1 1/6] FROM docker.io/library/catdb-comparison:local
+#5 CACHED
+
+#7 [build 2/6] WORKDIR /build
+#7 CACHED
+
+#8 [build 3/6] COPY Cargo.toml Cargo.lock ./
+#8 CACHED
+
+#9 [build 4/6] COPY src ./src
+#9 DONE 0.1s
+
+#10 [build 5/6] RUN cargo build --locked --release --features service --lib --bin catdb-server && cp target/release/catdb-server /tmp/server && cp target/release/libnewdbms.so /tmp/libnewdbms.so
+#10 ...
+
+#11 [stage-1 2/6] COPY benchmarks /bench
+#11 DONE 0.3s
+
+#12 [stage-1 3/6] COPY scripts/catdb-client.py /bench/catdb_client.py
+#12 DONE 0.1s
+
+#10 [build 5/6] RUN cargo build --locked --release --features service --lib --bin catdb-server && cp target/release/catdb-server /tmp/server && cp target/release/libnewdbms.so /tmp/libnewdbms.so
+#10 0.473     Updating crates.io index
+#10 0.865  Downloading crates ...
+#10 1.001   Downloaded bitflags v2.13.2
+#10 1.011   Downloaded ctrlc v3.5.2
+#10 1.017   Downloaded serde_core v1.0.229
+#10 1.022   Downloaded cfg_aliases v0.2.2
+#10 1.024   Downloaded cfg-if v1.0.5
+#10 1.028   Downloaded itoa v1.0.18
+#10 1.032   Downloaded zmij v1.0.23
+#10 1.049   Downloaded libc v0.2.191
+#10 1.174   Downloaded serde_json v1.0.154
+#10 1.187   Downloaded memchr v2.8.3
+#10 1.200   Downloaded nix v0.31.3
+#10 1.254    Compiling cfg_aliases v0.2.2
+#10 1.254    Compiling libc v0.2.191
+#10 1.255    Compiling serde_core v1.0.229
+#10 1.255    Compiling zmij v1.0.23
+#10 1.255    Compiling cfg-if v1.0.5
+#10 1.255    Compiling bitflags v2.13.2
+#10 1.256    Compiling serde_json v1.0.154
+#10 1.257    Compiling itoa v1.0.18
+#10 1.257    Compiling memchr v2.8.3
+#10 1.312    Compiling nix v0.31.3
+#10 2.918    Compiling ctrlc v3.5.2
+#10 3.561    Compiling catdb v0.1.0 (/build)
+#10 5.682     Finished `release` profile [optimized] target(s) in 5.33s
+#10 DONE 5.8s
+
+#13 [build 6/6] RUN cargo build --locked --release --features service,history-metrics,allocation-metrics --bin key-allocation-bench
+#13 0.305    Compiling catdb v0.1.0 (/build)
+#13 2.439     Finished `release` profile [optimized] target(s) in 2.15s
+#13 DONE 2.5s
+
+#14 [stage-1 4/6] COPY --from=build /tmp/libnewdbms.so /usr/local/lib/libnewdbms.so
+#14 DONE 0.1s
+
+#15 [stage-1 5/6] COPY --from=build /tmp/server /usr/local/bin/catdb-server
+#15 DONE 0.1s
+
+#16 [stage-1 6/6] COPY --from=build /build/target/release/key-allocation-bench /usr/local/bin/key-allocation-bench
+#16 DONE 0.1s
+
+#17 exporting to image
+#17 exporting layers
+#17 exporting layers 0.2s done
+#17 writing image sha256:62f4b29c979f9d555d80e6af2f76535101e488acaf6c22b35115b49706342603 done
+#17 naming to docker.io/library/catdb-inline-qualification:baseline done
+#17 DONE 0.2s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/d49f72buw8mkps3x0zb270nkj

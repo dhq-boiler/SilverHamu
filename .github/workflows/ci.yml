@@ -13,6 +13,12 @@ jobs:
         features: ["service,wire-buffer,wire-metrics", "service,inline-key,history-metrics", service, "service,retirement-timing", "service,history-metrics,allocation-metrics,skip-unneeded-history", "service,fixed-log,skip-unneeded-history", "service,history-metrics,allocation-metrics,inline-latest", "service,fixed-log,inline-latest", "service,history-metrics,allocation-metrics", "service,fixed-log", "service,wal-direct", "service,wal-prepare", "service,fixed-log,wal-prepare", "service,single-client-commit,lock-timing,benchmark-metrics", "service,backlog-batch,benchmark-metrics,sync-stall,lock-timing"]
         include:
           - os: ubuntu-latest
+            features: service,inline-latest
+            cargo_args: --no-default-features
+          - os: windows-latest
+            features: service,inline-latest
+            cargo_args: --no-default-features
+          - os: ubuntu-latest
             features: service,fixed-log,history-metrics
             cargo_args: --no-default-features
           - os: windows-latest
@@ -72,6 +78,7 @@ jobs:
           CATDB_EXPECT_METRICS: ${{ contains(matrix.features, 'benchmark-metrics') && '1' || '0' }}
       - run: python benchmarks/commit-tail/test_collector.py
       - run: python benchmarks/commit-tail/test_attribution.py
+      - run: python benchmarks/inline-qualification/test_fixture.py
       - run: python tests/service_protocol.py
       - run: python tests/service_protocol.py
         env:
@@ -85,9 +92,13 @@ jobs:
       - if: matrix.features == 'service'
         run: cargo build --locked --release --no-default-features --lib --target-dir target/compat-deque
       - if: matrix.features == 'service' && runner.os == 'Linux'
-        run: python tests/storage_transition.py target/compat-deque/release/libnewdbms.so target/release/libnewdbms.so
+        run: |
+          python tests/storage_transition.py target/compat-deque/release/libnewdbms.so target/release/libnewdbms.so
+          python tests/key_storage_transition.py target/compat-deque/release/libnewdbms.so target/release/libnewdbms.so
       - if: matrix.features == 'service' && runner.os == 'Windows'
-        run: python tests/storage_transition.py target/compat-deque/release/newdbms.dll target/release/newdbms.dll
+        run: |
+          python tests/storage_transition.py target/compat-deque/release/newdbms.dll target/release/newdbms.dll
+          python tests/key_storage_transition.py target/compat-deque/release/newdbms.dll target/release/newdbms.dll
 
       - run: cargo clippy --locked ${{ matrix.cargo_args }} --features "${{ matrix.features }}" --lib --bin catdb-server -- -D warnings
       - if: contains(matrix.features, 'history-metrics')

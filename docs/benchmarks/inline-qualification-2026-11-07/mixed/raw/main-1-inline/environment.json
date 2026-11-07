@@ -1,0 +1,46 @@
+{
+  "commit": "716bf84583d74b4afd33902df48eb82c2463e809",
+  "image": "sha256:455c142113dd9d5f85c6c38d0c512cb1bd54f675c481f32508bafb9691b9d220",
+  "utc": "2026-11-07T01:01:17.962338+00:00",
+  "arguments": {
+    "read_ramp": false,
+    "out": "C:\\Git\\NewDBMS\\artifacts\\inline-qualification-results\\mixed\\raw\\main-1-inline",
+    "rows": [
+      1000000
+    ],
+    "cpus": [
+      1
+    ],
+    "memory": [
+      512
+    ],
+    "reps": 1,
+    "ops": 8000,
+    "sample": 1,
+    "rate": 1000.0,
+    "recover_memory": null,
+    "retained_bytes": 671088640,
+    "image": "catdb-inline-qualification:inline",
+    "age_seed": true,
+    "safety_probe": true,
+    "staged_bytes": 4096,
+    "diagnostics": false,
+    "pin_reader": 1,
+    "kernel_mode": null,
+    "storage_mode": null,
+    "bind_root": null,
+    "preparation_budget": null,
+    "batch_limit": null,
+    "stall_scenario": "normal",
+    "key_shape": "mixed"
+  },
+  "docker": {
+    "ServerVersion": "29.9.2",
+    "NCPU": 32,
+    "MemTotal": 67380625408,
+    "Driver": "overlay2",
+    "OSType": "linux",
+    "Architecture": "x86_64",
+    "KernelVersion": "6.18.54.1-microsoft-standard-WSL2"
+  }
+}

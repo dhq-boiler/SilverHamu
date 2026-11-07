@@ -1,0 +1,7 @@
+{
+  "default_and_explicit_library_sha256": "78523c6de15964f4629f8afb781ccfb19870ac7e68b89c0bcdfa943ca349f63a",
+  "default_and_explicit_server_sha256": "6489b2cc4b4867ba47e223548d2500b42e93c7aeb753a6759c2a032ee9274198",
+  "rollback_library_sha256": "b44d17bb6c812ac39c369f4eccd66581239d84b5365021702a29d4e062f7310f",
+  "method": "cmp plus sha256sum in catdb-inline-qualification:default; both files independently built",
+  "platform": "Linux x86_64, Rust 1.89"
+}

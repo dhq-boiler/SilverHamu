@@ -1,0 +1,12 @@
+{
+  "Cargo.toml": "d88671568b8629ef77bbf04be6f9bcb9532459f2d8b2b7d5efef5eafb5553ed2",
+  "src/transactions.rs": "bcd03dbd83436c1ad84e3e247bb3f5fe16a8bfe2ad154cfd212e08e6a08a9811",
+  "src/group_commit.rs": "6bbaa29158dfb225e0762ec7eae93a206bc5329cf59edc1180d573bf7438a9a0",
+  "src/service.rs": "0ceffb37886a1e778b9a4e9f885661dc93620cc91c30c0379e850a11943d4875",
+  "benchmarks/resource-envelope/run.py": "e0f828182862092daa5573dc4cbbbb10f19191ca39972ca4eb62075ae1e54d35",
+  "benchmarks/resource-envelope/client.py": "225d967ad09de176a2f0d7c8ba9c47a990b7b1d60ffcb453ec61f32a10c94efa",
+  "benchmarks/aged-service/age_seed.py": "4ef57e91cab0ef3e4fdfcc897d14eafd1457cf898ca0e560fc4271403a6f12d2",
+  "benchmarks/inline-qualification/run.py": "848e30cd684724820f5f7c805a31b7a021e900964674990269f8d4d461da553e",
+  "benchmarks/runner.py": "b3df25c3e101351a93a77dd7ae12c593b894d224869876a0632f53258ddfe0e7",
+  "src/inline_key.rs": "18def0f38e73d07e23d587142df13c977e6dc59444657dacc353235e62775522"
+}

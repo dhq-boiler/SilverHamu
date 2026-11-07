@@ -8,8 +8,14 @@ OPS = int(os.environ.get('BENCH_OPS', '8000'))
 PASSWORD = os.environ['BENCH_PASSWORD']
 TOKEN = os.environ['BENCH_TOKEN']
 
-def key(i): return i.to_bytes(8, 'big')
-def value(i, stamp=0): return key(i) + int(stamp).to_bytes(8, 'big') + b'x' * 240
+KEY_SHAPE = os.environ.get('BENCH_KEY_SHAPE', 'short')
+assert KEY_SHAPE in ('short', 'mixed')
+
+def key(i):
+    prefix = i.to_bytes(8, 'big')
+    return prefix + (bytes(range(24)) if KEY_SHAPE == 'mixed' and i % 2 else b'')
+
+def value(i, stamp=0): return i.to_bytes(8, 'big') + int(stamp).to_bytes(8, 'big') + b'x' * 240
 
 class Native:
     lib = None

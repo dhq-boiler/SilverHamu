@@ -1,5 +1,10 @@
 # Optional inline index keys
 
+Historical experiment: run this recipe at its recorded pre-adoption revision.
+Current defaults include inline-key; for a controlled Vec/inline comparison use
+[the qualification recipe](../inline-qualification/README.md), which freezes the
+measured Cargo manifest so both variants do not accidentally enable inline keys.
+
 Scope: only persistent State.rows keys, not transaction writes or history_keys.
 Bytes of length 0..15 live in the key object; longer keys use Box<[u8]>.
 Ordering and borrowed lookup use byte slices, never enum discriminants. No unsafe

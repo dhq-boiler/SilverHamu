@@ -58,7 +58,7 @@ def measure(work,ops,rate,capacity,pin_reader=True,before_start=None):
                         with lock: changes[str(k)]=seq+1
                     else:
                         b=bytes.fromhex(require(c.request(op='get_latest',key=key(k).hex()))['value'])
-                        assert len(b)==256 and b[:8]==key(k) and b[16:]==b'x'*240
+                        assert len(b)==256 and b[:8]==k.to_bytes(8,'big') and b[16:]==b'x'*240
                         stamp=int.from_bytes(b[8:16],'big')
                         assert stamp==initial.get(str(k),0) or (work=='mixed' and (stamp-1)%5==0 and (stamp-1)//5==k)
                 except Exception as e: rec.update(status='error',error=str(e))

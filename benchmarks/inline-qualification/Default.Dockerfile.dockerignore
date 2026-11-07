@@ -1,0 +1,11 @@
+**
+!Cargo.toml
+!Cargo.lock
+!src/
+!src/**
+!benchmarks/
+!benchmarks/**
+!tests/
+!tests/**
+!scripts/
+!scripts/**

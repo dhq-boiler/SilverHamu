@@ -6,6 +6,22 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Inline short keys are now the default
+
+At aged 1M rows /1 CPU /512MiB, short-key RSS falls **420.12 → 390.46 MiB (-7.1%)**.
+With half 8-byte and half 32-byte keys, RSS falls **426.48 → 411.90 MiB (-3.4%)**;
+update p99 worsens **6.324 → 6.514 ms (+3.0%)**, within the agreed 5% tolerance.
+Short-key update p99 is 6.044 → 6.019 ms. All 192,000 requests and the integrity,
+old-reader, crash-reopen and API checks pass. `inline-key` now joins `inline-latest`
+in defaults; file formats and durability are unchanged.
+
+This adoption is for memory efficiency. Mixed-key warm reopen readiness worsens
+**2.417 → 2.718 seconds**; unfavorable trials remain published. The default-built
+service and library are byte-identical to the measured explicit candidate.
+[All trials, limits, safety and rollback](docs/benchmarks/inline-qualification-2026-11-07/README.md).
+
+![Inline-key qualification including mixed keys](docs/benchmarks/inline-qualification-2026-11-07/comparison.svg)
+
 ## Bounded log-capacity tradeoff
 
 With real synchronization after every update, moving from 4 to 16 to 64 log slots
@@ -157,13 +173,14 @@ capacity improvement; `wire-buffer` remains opt-in and defaults are unchanged.
 
 ![Wire buffering comparison](docs/benchmarks/wire-buffer-2026-11-07/comparison.svg)
 
-## Optional short-key storage experiment
+## Short-key storage: initial optional experiment
 
 At 1M rows /1 CPU /512MiB, storing short index keys inline reduced median RSS
 **420.11 → 390.51 MiB (-7.0%)**. Separate diagnostics eliminated 2M open-time
 allocation calls and 8MB of retained requested memory. However, mixed read p99
 was 0.349 → 0.363ms and update p99 5.321 → 5.507ms; this is not a universal speedup.
-The `inline-key` feature remains optional; defaults and persistence are unchanged.
+At that experiment `inline-key` remained optional. See the later
+[default qualification](#inline-short-keys-are-now-the-default) for its current setting; persistence remains unchanged.
 [All trials, long-key comparison, safety and limitations](docs/benchmarks/inline-key-2026-11-07/README.md).
 
 ![Inline-key comparison](docs/benchmarks/inline-key-2026-11-07/comparison.svg)

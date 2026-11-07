@@ -1,0 +1,10 @@
+START main-1-baseline
+prepare seed 1000
+r1-n1000-c1-m512 start
+r1-n1000-c1-m512 passed
+END main-1-baseline
+START main-1-inline
+prepare seed 1000
+r1-n1000-c1-m512 start
+r1-n1000-c1-m512 passed
+END main-1-inline

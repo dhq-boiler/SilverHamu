@@ -5,6 +5,7 @@ struct MvccPages {
     direct: bool,
     packed: bool,
     linear: bool,
+    combine: bool,
     profile: bool,
     disk: Mutex<Dirty>,
     turns: TurnQueue,
@@ -53,9 +54,13 @@ impl MvccPages {
         direct: bool,
     ) -> crate::transactions::Result<Database> {
         let mut disk = disk;
-        let linear = direct
-            && (std::env::var_os("CATDB_TEST_LINEAR").is_some()
-                || std::env::var("SCALED_VARIANT").as_deref() == Ok("linear"));
+        let combine = direct
+            && (std::env::var_os("CATDB_TEST_COMBINE").is_some()
+                || std::env::var("SCALED_VARIANT").as_deref() == Ok("combine"));
+        let linear = combine
+            || direct
+                && (std::env::var_os("CATDB_TEST_LINEAR").is_some()
+                    || std::env::var("SCALED_VARIANT").as_deref() == Ok("linear"));
         let reuse = linear
             || direct
                 && (std::env::var_os("CATDB_TEST_REUSE").is_some()
@@ -69,6 +74,7 @@ impl MvccPages {
             disk: Mutex::new(disk),
             turns: TurnQueue::default(),
             linear,
+            combine,
             packed: reuse
                 || direct
                     && (std::env::var_os("CATDB_TEST_PACK").is_some()
@@ -138,6 +144,7 @@ impl TestPersistence for MvccPages {
             Phase::begin(self.profile);
             if self.linear {
                 let mut page = LinearPage::new();
+                page.combine = self.combine;
                 disk.switch_sources(&mut |s| self.signal(s), |lo, hi, emit| {
                     Self::collect_pages(&reader, lo, hi, &mut page, &mut |start, page| {
                         emit(start, PageSource::Linear(page))
@@ -158,9 +165,14 @@ impl TestPersistence for MvccPages {
         };
         let phase_times = Phase::finish();
         if let Some(ns) = phase_times {
+            println!("PAGE_CRC,{version},{},{}", ns[5], ns[6]);
             println!(
                 "CHECKPOINT_PHASE,{version},{},{},{},{},{}",
-                ns[0], ns[1], ns[2], ns[3], ns[4]
+                ns[0],
+                ns[1],
+                ns[2] + ns[5] + ns[6],
+                ns[3],
+                ns[4]
             );
         }
         if let Err(e) = switched {

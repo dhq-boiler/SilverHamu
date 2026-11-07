@@ -48,11 +48,14 @@ def main():
     parser.add_argument("raw",type=Path);parser.add_argument("out",type=Path)
     parser.add_argument("--reuse",action="store_true")
     parser.add_argument("--linear",action="store_true")
+    parser.add_argument("--combine",action="store_true")
     args=parser.parse_args();args.out.mkdir(parents=True,exist_ok=True)
     modes=MODES+(("reuse",) if args.reuse else ())
     names=NAMES+(("Pack + reuse",) if args.reuse else ())
     if args.linear:
         modes=("reuse","linear");names=("Page map","Linear")
+    if args.combine:
+        modes=("linear","combine");names=("Full scan","Combine")
     groups={}
     for stage in ("diagnostic","1m"):
         raw=args.raw/stage
@@ -63,6 +66,17 @@ def main():
             v=summarize(raw,r)
             v.update(overlap_rows(raw,r));rows.append(v)
         write(args.out/(stage+".csv"),rows)
+        if stage=="diagnostic" and args.combine:
+            counters=[]
+            for r in runs:
+                file=raw/(r["label"]+".log")
+                entries=[tuple(map(int,line.split("PAGE_CRC,")[1].split(","))) for line in file.read_text().splitlines() if "PAGE_CRC," in line]
+                entries=[e for e in entries if e[0] in (256,512,768)]
+                assert [e[0] for e in entries]==[256,512,768]
+                for (seq,inner,outer),phase in zip(entries,phase_rows(raw,r)):
+                    assert (inner+outer)/1e6 <= phase["assemble_ms"]
+                    counters.append(dict(mode=r["mode"],sequence=seq,body_ms=inner/1e6,outer_ms=outer/1e6))
+            write(args.out/"crc.csv",counters)
         if stage=="diagnostic":write(args.out/"phases.csv",[v for r in runs for v in phase_rows(raw,r)])
         else:groups={m:[r for r in rows if r["mode"]==m] for m in modes}
     svg=['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 460" role="img"><title>Checkpoint scan and copy comparison</title><rect width="960" height="460" fill="white"/><g fill="#17283b" font-family="sans-serif">']

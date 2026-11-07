@@ -30,6 +30,7 @@ fn linear_pages_are_byte_identical_across_generations_boundaries_and_splits() {
         payload: vec![],
     };
     let mut page = LinearPage::new();
+    page.combine = true;
     let address = page.bytes.as_ptr();
     for mut reader in [old, db.begin_read().unwrap()] {
         for (lo, hi) in [

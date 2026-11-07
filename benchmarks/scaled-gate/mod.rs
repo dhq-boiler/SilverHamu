@@ -71,30 +71,33 @@ impl Record {
         b
     }
     fn fill_header(&self, b: &mut [u8], payload: &[u8]) {
-        b[..8].copy_from_slice(b"CATBIG01");
-        for (at, value) in [
-            (8, self.kind),
-            (12, self.bank),
-            (32, self.index),
-            (36, payload.len() as u32),
-            (40, self.previous),
-            (44, self.config.checkpoints),
-            (48, self.config.logs),
-            (52, self.chunks),
-            (64, self.chain),
-            (76, !(payload.len() as u32)),
-        ] {
-            b[at..at + 4].copy_from_slice(&value.to_le_bytes());
-        }
-        for (at, value) in [(16, self.epoch), (24, self.seq), (56, self.records)] {
-            b[at..at + 8].copy_from_slice(&value.to_le_bytes());
-        }
         // A CRC over a complete inner CRC frame can have a constant residue.
         let digest = if self.kind == 2 {
             crate::crc32(&[])
         } else {
             crate::crc32(&payload[..payload.len() - TRAILER_BYTES])
         };
+        self.fill_header_with_digest(b, payload.len(), digest);
+    }
+    fn fill_header_with_digest(&self, b: &mut [u8], length: usize, digest: u32) {
+        b[..8].copy_from_slice(b"CATBIG01");
+        for (at, value) in [
+            (8, self.kind),
+            (12, self.bank),
+            (32, self.index),
+            (36, length as u32),
+            (40, self.previous),
+            (44, self.config.checkpoints),
+            (48, self.config.logs),
+            (52, self.chunks),
+            (64, self.chain),
+            (76, !(length as u32)),
+        ] {
+            b[at..at + 4].copy_from_slice(&value.to_le_bytes());
+        }
+        for (at, value) in [(16, self.epoch), (24, self.seq), (56, self.records)] {
+            b[at..at + 8].copy_from_slice(&value.to_le_bytes());
+        }
         b[72..76].copy_from_slice(&digest.to_le_bytes());
         let checksum = crate::crc32(&b[..80]);
         b[80..84].copy_from_slice(&checksum.to_le_bytes());

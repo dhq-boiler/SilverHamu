@@ -6,6 +6,14 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Reusing the body checksum in checkpoint pages
+
+Combining CRCs in the 64 KiB MVCC checkpoint writer measured **44.6 ms update p99** and a **84.6 ms worst request**, at 296.3 transactions/s and 413.2 MiB RSS. With the previous full scan of the envelope payload the same workload measured 51.1 ms, 104.1 ms, 302.2 transactions/s and 414.8 MiB.
+
+[CRC timings, recovery checks and all trials](docs/benchmarks/combined-crc-2026-11-07/README.md).
+
+![Comparison of checkpoint checksum strategies](docs/benchmarks/combined-crc-2026-11-07/comparison.svg)
+
 ## Encoding sorted MVCC rows directly
 
 Direct encoding of sorted MVCC rows measured **52.0 ms update p99**, a **103.4 ms** worst request, and 293.8 transactions/s at 414.5 MiB end RSS. The previous page-map encoder measured 66.4 ms, 111.2 ms and 292.3 transactions/s at 414.6 MiB.

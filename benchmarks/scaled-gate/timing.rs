@@ -123,7 +123,7 @@ fn compare() {
     let mode = std::env::var("SCALED_VARIANT").unwrap();
     assert!(matches!(
         mode.as_str(),
-        "wal" | "dual" | "dirty" | "mvcc" | "direct" | "packed" | "reuse" | "linear"
+        "wal" | "dual" | "dirty" | "mvcc" | "direct" | "packed" | "reuse" | "linear" | "combine"
     ));
     assert!(n >= 1000 && ops >= cap as usize * 3 && ops <= 8192);
     let cfg = Config {
@@ -136,7 +136,10 @@ fn compare() {
     let mut store = None;
     let mut db = None;
     let mut dirty = None;
-    if matches!(mode.as_str(), "direct" | "packed" | "reuse" | "linear") {
+    if matches!(
+        mode.as_str(),
+        "direct" | "packed" | "reuse" | "linear" | "combine"
+    ) {
         db = Some(MvccPages::create_direct(
             &p,
             cfg,
@@ -345,3 +348,5 @@ include!("pack.rs");
 include!("pack_checks.rs");
 
 include!("linear_checks.rs");
+
+include!("combine_checks.rs");

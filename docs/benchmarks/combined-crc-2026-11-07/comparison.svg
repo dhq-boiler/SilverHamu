@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 460" role="img"><title>Checkpoint scan and copy comparison</title><rect width="960" height="460" fill="white"/><g fill="#17283b" font-family="sans-serif">
+<text x="16" y="32" font-size="23">MVCC checkpoint reads: one million rows and four writers</text>
+<text x="16" y="56" font-size="14">Two CPUs, 4 GiB. Trial medians except worst request across all trials. Independent scales.</text>
+<text x="16" y="88" font-size="17">Update p99 (ms)</text>
+<text x="16" y="117" font-size="12">Full scan</text>
+<rect x="88" y="105" width="142.00" height="13" fill="#526c88"/>
+<text x="236.0" y="117" font-size="12">51.08</text>
+<text x="16" y="150" font-size="12">Combine</text>
+<rect x="88" y="138" width="123.93" height="13" fill="#a54c31"/>
+<text x="217.93092923122128" y="150" font-size="12">44.58</text>
+<text x="332" y="88" font-size="17">Worst update (ms)</text>
+<text x="332" y="117" font-size="12">Full scan</text>
+<rect x="404" y="105" width="142.00" height="13" fill="#526c88"/>
+<text x="552.0" y="117" font-size="12">104.11</text>
+<text x="332" y="150" font-size="12">Combine</text>
+<rect x="404" y="138" width="115.36" height="13" fill="#a54c31"/>
+<text x="525.3566021867518" y="150" font-size="12">84.57</text>
+<text x="648" y="88" font-size="17">Transactions / second</text>
+<text x="648" y="117" font-size="12">Full scan</text>
+<rect x="720" y="105" width="142.00" height="13" fill="#526c88"/>
+<text x="868.0" y="117" font-size="12">302.17</text>
+<text x="648" y="150" font-size="12">Combine</text>
+<rect x="720" y="138" width="139.24" height="13" fill="#a54c31"/>
+<text x="865.2391143598641" y="150" font-size="12">296.29</text>
+<text x="16" y="272" font-size="17">End RSS (MiB)</text>
+<text x="16" y="301" font-size="12">Full scan</text>
+<rect x="88" y="289" width="142.00" height="13" fill="#526c88"/>
+<text x="236.0" y="301" font-size="12">414.77</text>
+<text x="16" y="334" font-size="12">Combine</text>
+<rect x="88" y="322" width="141.47" height="13" fill="#a54c31"/>
+<text x="235.47174609154266" y="334" font-size="12">413.22</text>
+<text x="332" y="272" font-size="17">Checkpoint (ms)</text>
+<text x="332" y="301" font-size="12">Full scan</text>
+<rect x="404" y="289" width="142.00" height="13" fill="#526c88"/>
+<text x="552.0" y="301" font-size="12">48.32</text>
+<text x="332" y="334" font-size="12">Combine</text>
+<rect x="404" y="322" width="113.20" height="13" fill="#a54c31"/>
+<text x="523.2012449142992" y="334" font-size="12">38.52</text>
+<text x="648" y="272" font-size="17">p99 outside checkpoints (ms)</text>
+<text x="648" y="301" font-size="12">Full scan</text>
+<rect x="720" y="289" width="124.52" height="13" fill="#526c88"/>
+<text x="850.5213608418585" y="301" font-size="12">23.08</text>
+<text x="648" y="334" font-size="12">Combine</text>
+<rect x="720" y="322" width="142.00" height="13" fill="#a54c31"/>
+<text x="868.0" y="334" font-size="12">26.32</text>
+</g></svg>

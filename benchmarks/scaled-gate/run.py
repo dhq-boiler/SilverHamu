@@ -5,10 +5,11 @@ def call(*args,timeout=600):
     p=subprocess.run(list(map(str,args)),capture_output=True,text=True,encoding='utf-8',errors='replace',timeout=timeout)
     if p.returncode:raise RuntimeError(p.stdout[-2000:]+p.stderr[-2000:])
     return p.stdout.strip()
-def main(include_dirty=False):
+def main(include_dirty=False, four=False):
     p=argparse.ArgumentParser();p.add_argument('--out',type=pathlib.Path,required=True);p.add_argument('--stage',choices=['pilot','100k','1m'],required=True);a=p.parse_args()
     n,ops,cap,reps={'pilot':(10000,64,16,1),'100k':(100000,1024,256,3),'1m':(1000000,1024,256,3)}[a.stage]
     image='catdb-dirty-gate' if include_dirty else 'catdb-scaled-gate'
+    if four: image='catdb-four-gate'
     orders=([('wal','dual','dirty'),('dual','dirty','wal'),('dirty','wal','dual')] if include_dirty else [('wal','dual'),('dual','wal'),('wal','dual')])
     root=a.out.resolve();root.mkdir(parents=True,exist_ok=False);results=[]
     files=['Cargo.toml','Cargo.lock','src/transactions.rs','src/lib.rs',*[str(p.relative_to(ROOT)).replace('\\','/') for p in (ROOT/'benchmarks/scaled-gate').glob('*.rs')]]
@@ -19,6 +20,7 @@ def main(include_dirty=False):
             results.append(row);(root/'runs.json').write_text(json.dumps(results,indent=2));print('START',a.stage,label,flush=True)
             call('docker','volume','create',volume)
             command=['docker','run','--name',uid,'--network','none','--cpus','2','--memory','4g','--memory-swap','4g','-v',volume+':/data','-e','SCALED_ROOT=/data','-e',f'SCALED_ROWS={n}','-e',f'SCALED_OPS={ops}','-e',f'SCALED_CAP={cap}','-e',f'SCALED_VARIANT={mode}',image,'cargo','test','--locked','--release','--lib','transactions::scaled_gate::checks::timing::compare','--','--ignored','--exact','--nocapture','--test-threads=1']
+            if four: command[command.index('-v'):command.index('-v')]=['-e','SCALED_FOUR=1']
             row['command']=command;start=time.monotonic()
             try:
                 p=subprocess.run(command,capture_output=True,text=True,encoding='utf-8',errors='replace',timeout=600)

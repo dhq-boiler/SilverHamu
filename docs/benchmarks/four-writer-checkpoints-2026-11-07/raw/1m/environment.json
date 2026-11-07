@@ -1,0 +1,25 @@
+{
+  "commit": "1478c8122398c07e38cd9a0d580d8a91b0d24878",
+  "image": "sha256:6b3cab3ddd11bd430cd48465fe44242ae7dc1fcfb2c7e21c908726259f461097",
+  "stage": "1m",
+  "rows": 1000000,
+  "ops": 1024,
+  "log_capacity": 256,
+  "cpu": 2,
+  "memory_bytes": 4294967296,
+  "swap_bytes": 0,
+  "utc": "2026-11-07T08:21:52.140262+00:00",
+  "hashes": {
+    "Cargo.toml": "7e581f07edefa30f8b145cc883c3b83d37d2bb27e500060766ec99b476fc3049",
+    "Cargo.lock": "df9a4a2f931c9a3e3d2d1076aea9650b9297334ec81f574cb2f333d77dc5bef6",
+    "src/transactions.rs": "9ca76cb745f67adf2eafd385de04aae59c67f3383ead895c7401d98c74d9e4ae",
+    "src/lib.rs": "c82e49ece09308bb6890850b5cab81aafff6bbe6fa167cf0c496f7be54f44ce5",
+    "benchmarks/scaled-gate/checks.rs": "02e94e2048bface2e9d8482fab040014388761706187b3df00af345f2ca610ab",
+    "benchmarks/scaled-gate/dirty.rs": "ca5b314ff0928d8df80b69b0bf9577c0f6431da161615c7b2cd21fd4fe802f3a",
+    "benchmarks/scaled-gate/dirty_checks.rs": "3994e82503be29fb9102f84fac961b3d1ef7ecde26ac87e2bf0cf38058ba7d39",
+    "benchmarks/scaled-gate/four.rs": "cbdde8194c45c1322bc3cbe326e2ef802d1a0fb898f5fd36f974e014a3663207",
+    "benchmarks/scaled-gate/four_checks.rs": "97da09849392ef17746fb38a9c3859b435c36dd6ef25d1a7d741c2d501066142",
+    "benchmarks/scaled-gate/mod.rs": "3fd7f1a808583913945db2fb4f0e743aac0984ebec42374b8cd1cd411ba0ff7c",
+    "benchmarks/scaled-gate/timing.rs": "95ff42e71ef74f3fbaafa77fde8bfc9177d3d50e35d61d0a8fba7e2ab9db8879"
+  }
+}

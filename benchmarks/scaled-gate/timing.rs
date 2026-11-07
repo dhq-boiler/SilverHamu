@@ -163,6 +163,16 @@ fn compare() {
     let old_map = store.as_ref().map(Store::snapshot);
     let mut old_tx = db.as_ref().map(|d| d.begin_read().unwrap());
     let pin_ns = pin.elapsed().as_nanos();
+    if std::env::var_os("SCALED_FOUR").is_some() {
+        let backend = if let Some(d) = db {
+            Backend::Wal(d)
+        } else if let Some(s) = store {
+            Backend::Full(s)
+        } else {
+            Backend::Pages(dirty.unwrap())
+        };
+        return four_run(backend, &p, cfg, &mode, n, ops, old_tx, old_map, pinned);
+    }
     let mem_before = memory();
     let mut wal_written = 0_u64;
     let mut expected_wal = db.as_ref().map_or(0, |d| d.state().unwrap().wal_bytes);
@@ -308,3 +318,6 @@ fn compare() {
         println!("SCALED_REQUEST,{mode},{n},{i},{total},{append},{switch}");
     }
 }
+
+include!("four.rs");
+include!("four_checks.rs");

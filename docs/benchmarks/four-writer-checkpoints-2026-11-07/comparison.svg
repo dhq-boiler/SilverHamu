@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" role="img"><title>Four-writer checkpoint comparison</title><rect width="960" height="420" fill="white"/><g fill="#18293d" font-family="sans-serif">
+<text x="16" y="30" font-size="23">One million rows, four writers, two CPUs and 4 GiB</text>
+<text x="16" y="55" font-size="14">Median of three runs, except worst request across all runs. Each panel has an independent scale.</text>
+<text x="16" y="90" font-size="16">Transactions / second</text>
+<text x="16" y="121" font-size="12">WAL</text>
+<rect x="86" y="109" width="99.36" height="13" fill="#396494"/>
+<text x="190.3637853237807" y="121" font-size="12">212.61</text>
+<text x="16" y="154" font-size="12">Full dual</text>
+<rect x="86" y="142" width="79.29" height="13" fill="#a54c31"/>
+<text x="170.2880929556697" y="154" font-size="12">169.66</text>
+<text x="16" y="187" font-size="12">64 KiB delta</text>
+<rect x="86" y="175" width="145.00" height="13" fill="#28795d"/>
+<text x="236.0" y="187" font-size="12">310.26</text>
+<text x="332" y="90" font-size="16">Request p99 (ms)</text>
+<text x="332" y="121" font-size="12">WAL</text>
+<rect x="402" y="109" width="90.98" height="13" fill="#396494"/>
+<text x="497.9763138707308" y="121" font-size="12">534.73</text>
+<text x="332" y="154" font-size="12">Full dual</text>
+<rect x="402" y="142" width="145.00" height="13" fill="#a54c31"/>
+<text x="552.0" y="154" font-size="12">852.27</text>
+<text x="332" y="187" font-size="12">64 KiB delta</text>
+<rect x="402" y="175" width="49.87" height="13" fill="#28795d"/>
+<text x="456.8664747569683" y="187" font-size="12">293.10</text>
+<text x="648" y="90" font-size="16">Worst request (ms)</text>
+<text x="648" y="121" font-size="12">WAL</text>
+<rect x="718" y="109" width="47.72" height="13" fill="#396494"/>
+<text x="770.7221191882466" y="121" font-size="12">2,370.48</text>
+<text x="648" y="154" font-size="12">Full dual</text>
+<rect x="718" y="142" width="145.00" height="13" fill="#a54c31"/>
+<text x="868.0" y="154" font-size="12">7,202.52</text>
+<text x="648" y="187" font-size="12">64 KiB delta</text>
+<rect x="718" y="175" width="45.15" height="13" fill="#28795d"/>
+<text x="768.152865256692" y="187" font-size="12">2,242.86</text>
+<text x="16" y="250" font-size="16">Checkpoint (ms)</text>
+<text x="16" y="281" font-size="12">WAL</text>
+<rect x="86" y="269" width="88.16" height="13" fill="#396494"/>
+<text x="179.15916549371752" y="281" font-size="12">536.32</text>
+<text x="16" y="314" font-size="12">Full dual</text>
+<rect x="86" y="302" width="145.00" height="13" fill="#a54c31"/>
+<text x="236.0" y="314" font-size="12">882.11</text>
+<text x="16" y="347" font-size="12">64 KiB delta</text>
+<rect x="86" y="335" width="18.23" height="13" fill="#28795d"/>
+<text x="109.23246918263385" y="347" font-size="12">110.92</text>
+<text x="332" y="250" font-size="16">Conflict retries / run</text>
+<text x="332" y="281" font-size="12">WAL</text>
+<rect x="402" y="269" width="145.00" height="13" fill="#396494"/>
+<text x="552.0" y="281" font-size="12">7.00</text>
+<text x="332" y="314" font-size="12">Full dual</text>
+<rect x="402" y="302" width="145.00" height="13" fill="#a54c31"/>
+<text x="552.0" y="314" font-size="12">7.00</text>
+<text x="332" y="347" font-size="12">64 KiB delta</text>
+<rect x="402" y="335" width="124.29" height="13" fill="#28795d"/>
+<text x="531.2857142857143" y="347" font-size="12">6.00</text>
+<text x="648" y="250" font-size="16">Requests overlapping a checkpoint</text>
+<text x="648" y="281" font-size="12">WAL</text>
+<rect x="718" y="269" width="145.00" height="13" fill="#396494"/>
+<text x="868.0" y="281" font-size="12">10.00</text>
+<text x="648" y="314" font-size="12">Full dual</text>
+<rect x="718" y="302" width="130.50" height="13" fill="#a54c31"/>
+<text x="853.5" y="314" font-size="12">9.00</text>
+<text x="648" y="347" font-size="12">64 KiB delta</text>
+<rect x="718" y="335" width="130.50" height="13" fill="#28795d"/>
+<text x="853.5" y="347" font-size="12">9.00</text>
+</g></svg>

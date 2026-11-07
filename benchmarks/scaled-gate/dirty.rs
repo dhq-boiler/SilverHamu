@@ -7,6 +7,7 @@ const PAIR: u64 = (2 * BLOCK) as u64;
 type Directory = BTreeMap<Vec<u8>, Arc<Address>>;
 
 struct Address {
+    rows: usize,
     slot: u32,
     generation: u64,
     digest: u32,
@@ -66,6 +67,11 @@ impl Dirty {
         })
     }
     fn append(&mut self, w: &WriteSet, hook: Hook<'_>) -> io::Result<()> {
+        self.append_log(w, hook)?;
+        apply(&mut self.rows, w.clone());
+        Ok(())
+    }
+    fn append_log(&mut self, w: &WriteSet, hook: Hook<'_>) -> io::Result<()> {
         if self.failed {
             return Err(err("reopen required"));
         }
@@ -86,10 +92,31 @@ impl Dirty {
         for k in w.keys() {
             self.dirty.insert(fence(&self.pages, k));
         }
-        apply(&mut self.rows, w.clone());
+
         Ok(())
     }
     fn switch(&mut self, hook: Hook<'_>) -> io::Result<()> {
+        let rows = std::mem::take(&mut self.rows);
+        let result = self.switch_from(hook, |lower, upper, emit| {
+            for (k, v) in
+                rows.range::<[u8], _>((Included(lower), upper.map_or(Unbounded, Excluded)))
+            {
+                emit(k, v)?;
+            }
+            Ok(())
+        });
+        self.rows = rows;
+        result
+    }
+    fn switch_from(
+        &mut self,
+        hook: Hook<'_>,
+        mut visit: impl FnMut(
+            &[u8],
+            Option<&[u8]>,
+            &mut dyn FnMut(&[u8], &[u8]) -> io::Result<()>,
+        ) -> io::Result<()>,
+    ) -> io::Result<()> {
         if self.failed || self.control.poisoned {
             return Err(err("reopen required"));
         }
@@ -107,16 +134,12 @@ impl Dirty {
                 .pages
                 .range::<[u8], _>((Excluded(lower.as_slice()), Unbounded))
                 .next()
-                .map(|(k, _)| Excluded(k.as_slice()))
-                .unwrap_or(Unbounded);
+                .map(|(k, _)| k.as_slice());
             next.remove(lower);
             let mut entries = WriteSet::new();
             let mut bytes = 140;
             let mut start = lower.clone();
-            for (k, v) in self
-                .rows
-                .range::<[u8], _>((Included(lower.as_slice()), upper))
-            {
+            visit(lower, upper, &mut |k, v| {
                 let size = 9 + k.len() + v.len();
                 if 140 + size > BLOCK {
                     return Err(err("row exceeds page"));
@@ -132,14 +155,15 @@ impl Dirty {
                         &entries,
                         hook,
                     )?;
-                    next.insert(start, page);
-                    start = k.clone();
+                    next.insert(std::mem::take(&mut start), page);
+                    start = k.to_vec();
                     entries.clear();
                     bytes = 140;
                 }
-                entries.insert(k.clone(), Some(v.to_vec()));
+                entries.insert(k.to_vec(), Some(v.to_vec()));
                 bytes += size;
-            }
+                Ok(())
+            })?;
             if !entries.is_empty() {
                 let page = save(
                     &mut self.pool,
@@ -175,13 +199,26 @@ impl Dirty {
         Ok(())
     }
     fn open(path: &Path, cfg: Config, hook: Hook<'_>) -> io::Result<Self> {
+        let mut rows = Data::new();
+        let mut disk = Self::open_into(path, cfg, hook, |_, w| {
+            apply(&mut rows, w);
+            Ok(())
+        })?;
+        disk.rows = rows;
+        Ok(disk)
+    }
+    fn open_into(
+        path: &Path,
+        cfg: Config,
+        hook: Hook<'_>,
+        mut accept: impl FnMut(u64, WriteSet) -> io::Result<()>,
+    ) -> io::Result<Self> {
         let mut pool = OpenOptions::new()
             .read(true)
             .write(true)
             .open(path.with_extension("pages"))?;
         pool.try_lock().map_err(|e| err(&e.to_string()))?;
         let mut control = Store::open(path, cfg, BUFFER_BUDGET, hook)?;
-        let mut rows = Data::new();
         let mut pages = Directory::new();
         let mut live = HashMap::new();
         let mut dirty = BTreeSet::new();
@@ -193,15 +230,12 @@ impl Dirty {
                 .ok_or_else(|| err("empty tagged key"))?;
             if tag == 1 {
                 dirty.insert(fence(&pages, k));
-                match b.split_first() {
-                    Some((0, [])) => {
-                        rows.remove(k);
-                    }
-                    Some((1, v)) => {
-                        rows.insert(k.to_vec(), Arc::from(v));
-                    }
+                let value = match b.split_first() {
+                    Some((0, [])) => None,
+                    Some((1, v)) => Some(v.to_vec()),
                     _ => return Err(err("overlay")),
-                }
+                };
+                accept(control.seq, [(k.to_vec(), value)].into())?;
                 continue;
             }
             if tag != 0
@@ -210,14 +244,15 @@ impl Dirty {
             {
                 return Err(err("manifest order"));
             }
-            let page = Arc::new(Address {
+            let mut page = Address {
+                rows: 0,
                 slot: u32::from_le_bytes(b[..4].try_into().unwrap()),
                 generation: u64::from_le_bytes(b[4..12].try_into().unwrap()),
                 digest: u32::from_le_bytes(b[12..].try_into().unwrap()),
-            });
+            };
             if page.generation > control.root.epoch
                 || (u64::from(page.slot) + 1) * PAIR > length
-                || live.insert(page.slot, Arc::downgrade(&page)).is_some()
+                || live.contains_key(&page.slot)
             {
                 return Err(err("manifest address"));
             }
@@ -250,7 +285,10 @@ impl Dirty {
                 return Err(err("page key bounds"));
             }
             last = w.last_key_value().map(|(key, _)| key.clone());
-            apply(&mut rows, w);
+            page.rows = w.len();
+            let page = Arc::new(page);
+            live.insert(page.slot, Arc::downgrade(&page));
+            accept(control.seq, w)?;
             for (lane, r) in copies.iter().enumerate() {
                 if r.is_none() {
                     write_record(
@@ -270,7 +308,7 @@ impl Dirty {
         Ok(Self {
             control,
             pool,
-            rows,
+            rows: Data::new(),
             pages,
             live,
             dirty,
@@ -320,6 +358,7 @@ fn save(
         )?;
     }
     let address = Arc::new(Address {
+        rows: w.len(),
         slot,
         generation,
         digest: r.checksum(),

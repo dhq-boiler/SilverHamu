@@ -121,7 +121,10 @@ fn compare() {
     let ops: usize = std::env::var("SCALED_OPS").unwrap().parse().unwrap();
     let cap: u32 = std::env::var("SCALED_CAP").unwrap().parse().unwrap();
     let mode = std::env::var("SCALED_VARIANT").unwrap();
-    assert!(matches!(mode.as_str(), "wal" | "dual" | "dirty" | "mvcc"));
+    assert!(matches!(
+        mode.as_str(),
+        "wal" | "dual" | "dirty" | "mvcc" | "direct"
+    ));
     assert!(n >= 1000 && ops >= cap as usize * 3 && ops <= 8192);
     let cfg = Config {
         checkpoints: (n / 3000 + 4) as u32,
@@ -133,7 +136,14 @@ fn compare() {
     let mut store = None;
     let mut db = None;
     let mut dirty = None;
-    if mode == "mvcc" {
+    if mode == "direct" {
+        db = Some(MvccPages::create_direct(
+            &p,
+            cfg,
+            (0..n).map(|i| (key(i), value(i, 0))),
+            None,
+        ));
+    } else if mode == "mvcc" {
         db = Some(MvccPages::create(&p, cfg, data(n), None));
     } else if mode == "dirty" {
         dirty = Some(Dirty::create(&p, cfg, data(n)).unwrap());
@@ -326,3 +336,6 @@ include!("four_checks.rs");
 
 include!("mvcc_pages.rs");
 include!("mvcc_checks.rs");
+
+include!("direct_pages.rs");
+include!("direct_checks.rs");

@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" role="img"><title>Four-writer checkpoint comparison</title><rect width="960" height="420" fill="white"/><g fill="#18293d" font-family="sans-serif">
+<text x="16" y="30" font-size="23">One million rows, four writers, two CPUs and 4 GiB</text>
+<text x="16" y="55" font-size="14">Median of three runs, except worst request across all runs. Each panel has an independent scale.</text>
+<text x="16" y="90" font-size="16">End RSS (MiB)</text>
+<text x="16" y="121" font-size="12">WAL</text>
+<rect x="86" y="109" width="77.28" height="13" fill="#396494"/>
+<text x="168.28146657724122" y="121" font-size="12">409.75</text>
+<text x="16" y="154" font-size="12">Dual index</text>
+<rect x="86" y="142" width="145.00" height="13" fill="#a54c31"/>
+<text x="236.0" y="154" font-size="12">768.80</text>
+<text x="16" y="187" font-size="12">Direct</text>
+<rect x="86" y="175" width="77.94" height="13" fill="#28795d"/>
+<text x="168.93937869642093" y="187" font-size="12">413.24</text>
+<text x="332" y="90" font-size="16">Reopen peak RSS (MiB)</text>
+<text x="332" y="121" font-size="12">WAL</text>
+<rect x="402" y="109" width="73.87" height="13" fill="#396494"/>
+<text x="480.86895475819034" y="121" font-size="12">406.91</text>
+<text x="332" y="154" font-size="12">Dual index</text>
+<rect x="402" y="142" width="145.00" height="13" fill="#a54c31"/>
+<text x="552.0" y="154" font-size="12">798.75</text>
+<text x="332" y="187" font-size="12">Direct</text>
+<rect x="402" y="175" width="78.09" height="13" fill="#28795d"/>
+<text x="485.0938873918593" y="187" font-size="12">430.19</text>
+<text x="648" y="90" font-size="16">Transactions / second</text>
+<text x="648" y="121" font-size="12">WAL</text>
+<rect x="718" y="109" width="110.34" height="13" fill="#396494"/>
+<text x="833.3353942815482" y="121" font-size="12">219.12</text>
+<text x="648" y="154" font-size="12">Dual index</text>
+<rect x="718" y="142" width="145.00" height="13" fill="#a54c31"/>
+<text x="868.0" y="154" font-size="12">287.96</text>
+<text x="648" y="187" font-size="12">Direct</text>
+<rect x="718" y="175" width="141.39" height="13" fill="#28795d"/>
+<text x="864.3938215760371" y="187" font-size="12">280.80</text>
+<text x="16" y="250" font-size="16">Request p99 (ms)</text>
+<text x="16" y="281" font-size="12">WAL</text>
+<rect x="86" y="269" width="145.00" height="13" fill="#396494"/>
+<text x="236.0" y="281" font-size="12">479.80</text>
+<text x="16" y="314" font-size="12">Dual index</text>
+<rect x="86" y="302" width="25.46" height="13" fill="#a54c31"/>
+<text x="116.45651011321985" y="314" font-size="12">84.23</text>
+<text x="16" y="347" font-size="12">Direct</text>
+<rect x="86" y="335" width="29.30" height="13" fill="#28795d"/>
+<text x="120.29885047443173" y="347" font-size="12">96.95</text>
+<text x="332" y="250" font-size="16">Worst request (ms)</text>
+<text x="332" y="281" font-size="12">WAL</text>
+<rect x="402" y="269" width="145.00" height="13" fill="#396494"/>
+<text x="552.0" y="281" font-size="12">2,851.48</text>
+<text x="332" y="314" font-size="12">Dual index</text>
+<rect x="402" y="302" width="6.66" height="13" fill="#a54c31"/>
+<text x="413.66241737936883" y="314" font-size="12">131.02</text>
+<text x="332" y="347" font-size="12">Direct</text>
+<rect x="402" y="335" width="7.30" height="13" fill="#28795d"/>
+<text x="414.2976903540791" y="347" font-size="12">143.51</text>
+<text x="648" y="250" font-size="16">Checkpoint (ms)</text>
+<text x="648" y="281" font-size="12">WAL</text>
+<rect x="718" y="269" width="145.00" height="13" fill="#396494"/>
+<text x="868.0" y="281" font-size="12">524.59</text>
+<text x="648" y="314" font-size="12">Dual index</text>
+<rect x="718" y="302" width="22.21" height="13" fill="#a54c31"/>
+<text x="745.2123737604405" y="314" font-size="12">80.36</text>
+<text x="648" y="347" font-size="12">Direct</text>
+<rect x="718" y="335" width="26.52" height="13" fill="#28795d"/>
+<text x="749.5207742777237" y="347" font-size="12">95.95</text>
+</g></svg>

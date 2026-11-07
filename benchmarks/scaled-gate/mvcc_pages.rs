@@ -2,6 +2,7 @@ use crate::transactions::{Budget, CheckpointInfo, State, TestPersistence, legacy
 type Fault = Option<Arc<dyn Fn(&str) -> io::Result<()> + Send + Sync>>;
 
 struct MvccPages {
+    direct: bool,
     disk: Mutex<Dirty>,
     turns: TurnQueue,
     fault: Fault,
@@ -14,7 +15,7 @@ impl MvccPages {
             None => Ok(()),
         }
     }
-    fn attach(path: &Path, disk: Dirty, fault: Fault) -> crate::transactions::Result<Database> {
+    fn empty_state(path: &Path) -> crate::transactions::Result<State> {
         let limits = ResourceLimits {
             max_transactions: 64,
             max_staged_bytes: 32 * PAGE,
@@ -23,11 +24,14 @@ impl MvccPages {
             max_buffer_bytes: 64 * PAGE,
         };
         // A read-only inert descriptor makes an accidental fallback write fail.
-        let mut state = State::new(
+        Ok(State::new(
             legacy_wal_file(File::open("/dev/null")?),
             path.to_owned(),
             Budget::new(limits),
-        );
+        ))
+    }
+    fn attach(path: &Path, disk: Dirty, fault: Fault) -> crate::transactions::Result<Database> {
+        let mut state = Self::empty_state(path)?;
         let generation = disk.control.seq;
         let mut chunk = WriteSet::new();
         for (k, v) in &disk.rows {
@@ -37,10 +41,19 @@ impl MvccPages {
             }
         }
         state.apply(generation, chunk)?;
+        Self::attach_state(state, disk, fault, false)
+    }
+    fn attach_state(
+        state: State,
+        disk: Dirty,
+        fault: Fault,
+        direct: bool,
+    ) -> crate::transactions::Result<Database> {
         let lease = disk.pool.try_clone()?;
         let db = Database::from_state(state, [87; 16], lease);
         db.set_group_commit(false);
         let backend = Arc::new(Self {
+            direct,
             disk: Mutex::new(disk),
             turns: TurnQueue::default(),
             fault,
@@ -49,9 +62,20 @@ impl MvccPages {
         Ok(db)
     }
     fn create(path: &Path, cfg: Config, rows: Data, fault: Fault) -> Database {
+        if std::env::var_os("CATDB_TEST_DIRECT").is_some() {
+            return Self::create_direct(
+                path,
+                cfg,
+                rows.into_iter().map(|(k, v)| (k, v.to_vec())),
+                fault,
+            );
+        }
         Self::attach(path, Dirty::create(path, cfg, rows).unwrap(), fault).unwrap()
     }
     fn open(path: &Path, cfg: Config, fault: Fault) -> Database {
+        if std::env::var_os("CATDB_TEST_DIRECT").is_some() {
+            return Self::open_direct(path, cfg, fault);
+        }
         Self::attach(path, Dirty::open(path, cfg, &mut noop).unwrap(), fault).unwrap()
     }
 }
@@ -65,7 +89,11 @@ impl TestPersistence for MvccPages {
             if disk.control.seq.checked_add(1) != Some(seq) {
                 return Err(err("MVCC and disk generation differ"));
             }
-            disk.append(&w, &mut |stage| self.signal(stage))
+            if self.direct {
+                disk.append_log(&w, &mut |stage| self.signal(stage))
+            } else {
+                disk.append(&w, &mut |stage| self.signal(stage))
+            }
         })
     }
     fn checkpoint(&self, db: &Database) -> crate::transactions::Result<CheckpointInfo> {
@@ -80,14 +108,29 @@ impl TestPersistence for MvccPages {
             Ok(s.control.file.metadata()?.len() + s.pool.metadata()?.len())
         };
         let before_bytes = bytes(&disk)?;
-        if let Err(e) = disk.switch(&mut |s| self.signal(s)) {
+        let switched = if self.direct {
+            let mut reader = db.begin_read()?;
+            if reader.version() != version {
+                return Err(TxError::Invalid("checkpoint snapshot"));
+            }
+            disk.switch_from(&mut |s| self.signal(s), |lo, hi, emit| {
+                Self::visit_range(&mut reader, lo, hi, emit)
+            })
+        } else {
+            disk.switch(&mut |s| self.signal(s))
+        };
+        if let Err(e) = switched {
             db.state()?.poisoned = true;
             return Err(TxError::CommitUncertain(e));
         }
         db.state()?.wal_bytes = crate::transactions::HEADER_BYTES as u64;
         Ok(CheckpointInfo {
             version,
-            records: disk.rows.len(),
+            records: if self.direct {
+                disk.pages.values().map(|p| p.rows).sum()
+            } else {
+                disk.rows.len()
+            },
             before_bytes,
             after_bytes: bytes(&disk)?,
         })

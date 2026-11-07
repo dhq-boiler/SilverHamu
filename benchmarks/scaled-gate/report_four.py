@@ -36,9 +36,19 @@ def main():
     parser.add_argument("raw",type=Path)
     parser.add_argument("out",type=Path)
     parser.add_argument("--mvcc",action="store_true")
+    parser.add_argument("--direct",action="store_true")
     args=parser.parse_args()
     rows=[summarize(args.raw,run) for run in json.loads((args.raw/"runs.json").read_text())]
     modes=("wal","mvcc") if args.mvcc else ("wal","dual","dirty")
+    if args.direct:
+        modes=("wal","mvcc","direct")
+        for row in rows:
+            log=(args.raw/f"{row['rep']}-{row['mode']}.log").read_text()
+            samples=[line for line in log.splitlines() if "REOPEN_MEMORY," in line]
+            assert len(samples)==1
+            initial,at_ready,peak=map(int,samples[0].split("REOPEN_MEMORY,")[1].split(","))
+            assert 0<initial<=peak and 0<at_ready<=peak
+            row.update(reopen_start_MiB=initial/2**20,reopen_ready_MiB=at_ready/2**20,reopen_peak_MiB=peak/2**20)
     assert sorted((r["mode"],r["rep"]) for r in rows)==sorted((m,i) for m in modes for i in (1,2,3))
     args.out.mkdir(parents=True,exist_ok=True)
     with (args.out/"trials.csv").open("w",newline="") as f:
@@ -50,6 +60,9 @@ def main():
              ("max_ms","Worst request (ms)"),("checkpoint_ms","Checkpoint (ms)"),
              ("conflicts","Conflict retries / run"),("overlap","Requests overlapping a checkpoint")]
     names=("WAL","FIFO delta") if args.mvcc else ("WAL","Full dual","64 KiB delta")
+    if args.direct:
+        names=("WAL","Dual index","Direct")
+        metrics=[("rss_MiB","End RSS (MiB)"),("reopen_peak_MiB","Reopen peak RSS (MiB)"),("tx_s","Transactions / second"),("p99_ms","Request p99 (ms)"),("max_ms","Worst request (ms)"),("checkpoint_ms","Checkpoint (ms)")]
     svg=['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" role="img"><title>Four-writer checkpoint comparison</title><rect width="960" height="420" fill="white"/><g fill="#18293d" font-family="sans-serif">']
     def label(x,y,s,size):
         svg.append(f'<text x="{x}" y="{y}" font-size="{size}">{s}</text>')

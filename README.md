@@ -6,6 +6,14 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Reading checkpoint ranges directly from MVCC
+
+Reading changed ranges directly from MVCC reduced end-of-loop RSS from **768.8 to 413.2 MiB**. WAL used 409.8 MiB. The direct path measured 280.8 transactions/s, p99 96.9 ms and a worst request of 143.5 ms. WAL measured 219.1 transactions/s, 479.8 ms and 2851.5 ms respectively. Against the previous dual-index prototype, direct reading reduced end RSS by 355.6 MiB (46.2%), with p99 increasing from 84.2 to 96.9 ms and throughput falling 2.5%.
+
+[Per-trial results, recovery memory and safety checks](docs/benchmarks/direct-mvcc-2026-11-07/README.md).
+
+![Direct MVCC checkpoint comparison](docs/benchmarks/direct-mvcc-2026-11-07/comparison.svg)
+
 ## FIFO delta checkpoints on native MVCC
 
 With native MVCC on both paths, FIFO delta persistence measured **293.2 transactions/s**, p99 **84.2 ms**, and worst request **149.7 ms**. WAL measured 203.4 transactions/s, 579.1 ms and 1,511.1 ms. End RSS was 769 MiB for the prototype and 409 MiB for WAL.

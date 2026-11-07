@@ -317,9 +317,40 @@ fn four_run(
     drop(pin);
     drop(backend);
     drop(run.wal);
+    if std::env::var_os("CATDB_REOPEN_RSS").is_some() {
+        let child = Command::new(std::env::current_exe().unwrap())
+            .args([
+                "transactions::scaled_gate::checks::timing::direct_reopen_memory",
+                "--ignored",
+                "--exact",
+                "--nocapture",
+            ])
+            .env("CATDB_RECOVER_FILE", p)
+            .env(
+                "CATDB_EXPECT_SEQUENCE",
+                ordered.last().unwrap().seq.to_string(),
+            )
+            .output()
+            .unwrap();
+        assert!(
+            child.status.success(),
+            "{}",
+            String::from_utf8_lossy(&child.stderr)
+        );
+        let output = String::from_utf8(child.stdout).unwrap();
+        let line = output
+            .lines()
+            .find_map(|l| l.find("REOPEN_MEMORY,").map(|i| &l[i..]))
+            .unwrap();
+        println!("{line}");
+    }
     match mode {
-        "mvcc" => {
-            let recovered = MvccPages::open(p, cfg, None);
+        "mvcc" | "direct" => {
+            let recovered = if mode == "direct" {
+                MvccPages::open_direct(p, cfg, None)
+            } else {
+                MvccPages::open(p, cfg, None)
+            };
             let mut reader = recovered.begin_read().unwrap();
             assert_eq!(reader.version(), ordered.last().unwrap().seq);
             check_tx(&mut reader, n, &expected);

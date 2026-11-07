@@ -111,7 +111,9 @@ impl Publication {
         Ok(Some(next))
     }
 }
+include!("wait_trace.rs");
 struct Sample {
+    trace: Option<Trace>,
     id: usize,
     lane: usize,
     seq: u64,
@@ -120,6 +122,9 @@ struct Sample {
     retries: usize,
 }
 struct Four {
+    turn: Option<TurnQueue>,
+    diagnostic: bool,
+    lite: bool,
     publication: Mutex<Publication>,
     wal: Option<Database>,
     epoch: AtomicU64,
@@ -136,6 +141,10 @@ impl Four {
             _ => None,
         };
         Self {
+            turn: std::env::var_os("SCALED_FIFO").map(|_| TurnQueue::default()),
+            diagnostic: std::env::var_os("SCALED_TRACE").is_some()
+                || std::env::var_os("SCALED_LITE").is_some(),
+            lite: std::env::var_os("SCALED_LITE").is_some(),
             publication: Mutex::new(Publication {
                 backend,
                 changed: BTreeMap::new(),
@@ -151,6 +160,7 @@ impl Four {
     }
     fn run_one(&self, id: usize, lane: usize, n: usize, first: Option<&Barrier>) -> Sample {
         let start = self.clock.elapsed().as_nanos();
+        let mut trace = self.diagnostic.then(|| Trace::start(self.clock, self.lite));
         let w = changes(id, n);
         let mut retries = 0;
         loop {
@@ -169,6 +179,7 @@ impl Four {
                     barrier.wait();
                 }
             }
+            Trace::end(&mut trace, self.clock, "prepare");
             let _permit = loop {
                 let guard = self.admission.read().unwrap();
                 if self
@@ -192,6 +203,7 @@ impl Four {
                     self.remaining.store(self.cap, Ordering::Release);
                 }
             };
+            Trace::end(&mut trace, self.clock, "admission");
             let seq = if let Some(t) = tx {
                 match t.commit() {
                     Ok(seq) => Some(seq),
@@ -199,9 +211,10 @@ impl Four {
                     Err(e) => panic!("{e:?}"),
                 }
             } else {
-                self.publication
-                    .lock()
-                    .unwrap()
+                let _turn = self.turn.as_ref().map(TurnQueue::enter);
+                let mut publisher = self.publication.lock().unwrap();
+                Trace::end(&mut trace, self.clock, "writer");
+                publisher
                     .publish(
                         &self.epoch,
                         snapshot,
@@ -211,8 +224,10 @@ impl Four {
                     )
                     .unwrap()
             };
+            Trace::end(&mut trace, self.clock, "commit");
             if let Some(seq) = seq {
                 return Sample {
+                    trace,
                     id,
                     lane,
                     seq,
@@ -240,16 +255,27 @@ fn four_run(
 ) {
     let run = Four::new(backend, cfg.logs as usize);
     let first = Barrier::new(4);
+    let lane_bounds = Mutex::new(Vec::new());
     let samples = std::thread::scope(|scope| {
         let threads: Vec<_> = (0..4)
             .map(|lane| {
                 let engine = &run;
                 let first = &first;
+                let bounds = &lane_bounds;
                 scope.spawn(move || {
-                    (lane..ops)
+                    let before = engine.lite.then(|| Stamp::capture(engine.clock));
+                    let samples = (lane..ops)
                         .step_by(4)
                         .map(|id| engine.run_one(id, lane, n, (id < 4).then_some(first)))
-                        .collect::<Vec<_>>()
+                        .collect::<Vec<_>>();
+                    if let Some(a) = before {
+                        let b = Stamp::capture(engine.clock);
+                        bounds
+                            .lock()
+                            .unwrap()
+                            .push((lane, b.cpu - a.cpu, b.runnable - a.runnable));
+                    }
+                    samples
                 })
             })
             .collect();
@@ -311,7 +337,23 @@ fn four_run(
     for (i, (a, b)) in cp.iter().enumerate() {
         println!("FOUR_CHECKPOINT,{i},{a},{b}");
     }
+    for (lane, cpu, ready) in lane_bounds.into_inner().unwrap() {
+        println!("WAIT_LANE,{lane},{cpu},{ready}");
+    }
     for s in samples {
+        if let Some(t) = s.trace {
+            for v in t.spans {
+                println!(
+                    "WAIT_SPAN,{},{},{},{},{},{}",
+                    s.id,
+                    v.stage,
+                    v.a.wall,
+                    v.b.wall,
+                    v.b.cpu - v.a.cpu,
+                    v.b.runnable - v.a.runnable
+                );
+            }
+        }
         println!(
             "SCALED_REQUEST,{mode},{},{},{},{},{},{}",
             s.id, s.lane, s.seq, s.start, s.end, s.retries

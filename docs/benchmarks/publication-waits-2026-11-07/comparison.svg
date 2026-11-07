@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 970 245" role="img"><title>Four writers and checkpoint stalls</title><rect width="970" height="245" fill="white"/><g font-family="sans-serif" fill="#18293d">
+<text x="16" y="32" font-size="23">Waiting for a publication turn under four concurrent writers</text>
+<text x="16" y="58" font-size="14">1M rows, 2 CPUs, 4 GiB. Worst across three trials. Throughput and p99 are medians of trial statistics.</text>
+<text x="16" y="94" font-size="17">Worst request (ms)</text>
+<text x="16" y="130" font-size="12">WAL</text>
+<rect x="98" y="118" width="145.00" height="13" fill="#396494"/>
+<text x="249.0" y="130" font-size="12">2,951.91</text>
+<text x="16" y="168" font-size="12">Delta: mutex</text>
+<rect x="98" y="156" width="139.59" height="13" fill="#a54c31"/>
+<text x="243.59310288242185" y="168" font-size="12">2,841.84</text>
+<text x="16" y="206" font-size="12">Delta: FIFO</text>
+<rect x="98" y="194" width="8.08" height="13" fill="#28795d"/>
+<text x="112.07773059435517" y="206" font-size="12">164.45</text>
+<text x="337" y="94" font-size="17">Request p99 (ms)</text>
+<text x="337" y="130" font-size="12">WAL</text>
+<rect x="419" y="118" width="145.00" height="13" fill="#396494"/>
+<text x="570.0" y="130" font-size="12">207.51</text>
+<text x="337" y="168" font-size="12">Delta: mutex</text>
+<rect x="419" y="156" width="139.78" height="13" fill="#a54c31"/>
+<text x="564.7774801360051" y="168" font-size="12">200.03</text>
+<text x="337" y="206" font-size="12">Delta: FIFO</text>
+<rect x="419" y="194" width="76.72" height="13" fill="#28795d"/>
+<text x="501.7237484141962" y="206" font-size="12">109.80</text>
+<text x="658" y="94" font-size="17">Transactions per second</text>
+<text x="658" y="130" font-size="12">WAL</text>
+<rect x="740" y="118" width="109.82" height="13" fill="#396494"/>
+<text x="855.824100884386" y="130" font-size="12">208.26</text>
+<text x="658" y="168" font-size="12">Delta: mutex</text>
+<rect x="740" y="156" width="145.00" height="13" fill="#a54c31"/>
+<text x="891.0" y="168" font-size="12">274.96</text>
+<text x="658" y="206" font-size="12">Delta: FIFO</text>
+<rect x="740" y="194" width="143.17" height="13" fill="#28795d"/>
+<text x="889.1688230618744" y="206" font-size="12">271.49</text>
+</g></svg>

@@ -1,0 +1,6 @@
+test transactions::scaled_gate::checks::timing::compare ... ignored, explicit staged large-data comparison
+test transactions::scaled_gate::checks::timing::concurrent_point_range_and_write_dependencies_survive_switch ... ok
+test transactions::scaled_gate::checks::timing::four_acked_commits_recover_across_sync_and_publication ... ok
+test transactions::scaled_gate::checks::timing::four_child ... ignored, child process for four-writer durability
+test transactions::scaled_gate::checks::timing::ticket_handoff_drains_in_registration_order ... ok
+test result: ok. 102 passed; 0 failed; 24 ignored; 0 measured; 0 filtered out; finished in 28.64s

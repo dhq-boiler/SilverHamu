@@ -6,6 +6,14 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## FIFO publication under four writers
+
+FIFO publication completed 271.5 transactions/s at p99 109.8 ms. The worst request across three runs fell from 2,841.8 ms with the original delta mutex to **164.4 ms**. WAL measured 208.3 transactions/s, p99 207.5 ms and a 2,951.9 ms worst request. The original delta path was slightly faster on throughput (275.0 transactions/s).
+
+[Attribution, measurement overhead, safety checks and trial data](docs/benchmarks/publication-waits-2026-11-07/README.md).
+
+![Publication wait comparison](docs/benchmarks/publication-waits-2026-11-07/comparison.svg)
+
 ## Four writers with incremental checkpoints
 
 At four writers the worst request measured **2,242.9 ms** with incremental pages, **2,370.5 ms** with the current WAL and **7,202.5 ms** with full dual records. Incremental throughput was 310.3 transactions/s versus 212.6 for WAL. The corresponding p99 values, including conflict retries and admission wait, were 293.10 and 534.73 ms.

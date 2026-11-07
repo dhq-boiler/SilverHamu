@@ -1,4 +1,9 @@
-fn four_config() -> Config { Config { logs: 8, ..config() } }
+fn four_config() -> Config {
+    Config {
+        logs: 8,
+        ..config()
+    }
+}
 fn prototype(mode: &str, p: &Path) -> Backend {
     if mode == "dual" {
         Backend::Full(Store::create(p, four_config(), data(500), BUFFER_BUDGET, &mut noop).unwrap())
@@ -76,15 +81,18 @@ fn four_child() {
             let event = &event;
             s.spawn(move || {
                 let w = [(key(1000 + lane), Some(vec![lane as u8]))].into();
+                let turn = run.turn.as_ref().map(TurnQueue::enter);
                 run.publication
                     .lock()
                     .unwrap()
                     .publish(&run.epoch, 0, &w, &Dependencies::default(), &mut noop)
                     .unwrap()
                     .unwrap();
+                drop(turn);
                 fs::write(p.with_extension(format!("ack{lane}")), b"ok").unwrap();
                 barrier.wait();
                 if lane == 0 {
+                    let _turn = run.turn.as_ref().map(TurnQueue::enter);
                     let mut g = run.publication.lock().unwrap();
                     let mut stop = |n: &str| {
                         if n == event {

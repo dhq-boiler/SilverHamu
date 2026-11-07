@@ -27,12 +27,12 @@ def classify(markers, facts, waits, journal, begin, end):
         return completed, "observed_end"
     return completed, "unresolved"
 
-def identity(folder):
+def identity(folder, extra_probes=()):
     meta = json.loads((folder / "meta.json").read_text())
     tag = meta["tag"]
-    assert len(meta["probe_profile"]) == 2
+    assert len(meta["probe_profile"]) == 2 + len(extra_probes)
     assert all(int(line.split()[-1]) == 0 for line in meta["probe_profile"])
-    assert {line.split()[0] for line in meta["probe_profile"]} == {"target_"+tag, "waiting_"+tag}
+    assert {line.split()[0] for line in meta["probe_profile"]} == {prefix+"_"+tag for prefix in ("target", "waiting", *extra_probes)}
     events = normalize(folder, tag, 5)
     calls = syscall_segments(events)
     app = (folder / "app.log").read_text()

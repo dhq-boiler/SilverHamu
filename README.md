@@ -6,6 +6,14 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Checkpoint data volume around ext4 journal commits
+
+In a fixed 10 ms window before each WAL-targeted commit, 1 standard and 0 FIFO epochs saw exclusively different-target checkpoint submissions across three runs per lock (49,152 and 49,152 attributed WAL waits). The per-run figure includes group sizes and also shows overlap during the commit. [Results, observer overhead, attribution limits and per-epoch data](docs/benchmarks/ext4-checkpoint-bytes-2026-11-08/README.md).
+
+![Journal duration by checkpoint data volume](docs/benchmarks/ext4-checkpoint-bytes-2026-11-08/dose.svg)
+
+![Update latency and throughput](docs/benchmarks/ext4-checkpoint-bytes-2026-11-08/performance.svg)
+
 ## Do WAL and checkpoints wait for the same ext4 journal commit?
 
 Across three million-row trials per lock, the FIFO-minus-standard difference was **+8.283 s/run** in WAL journal sleep. The difference in sleep in calls proven to wait for the same journal commit as a checkpoint was **+0.002 s/run**. [Per-call evidence, throughput, p99, maximum latency and trace overhead](docs/benchmarks/journal-identity-2026-11-07/README.md).

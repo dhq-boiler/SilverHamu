@@ -1,0 +1,5 @@
+mode,rep,kernel,device,buffers,max_probe_misses,ring_loss,cleaned
+fifo,1,6.18.54.1-microsoft-standard-WSL2,"8,64",32,0,0,True
+standard,1,6.18.54.1-microsoft-standard-WSL2,"8,64",32,0,0,True
+fifo,2,6.18.54.1-microsoft-standard-WSL2,"8,64",32,0,0,True
+standard,2,6.18.54.1-microsoft-standard-WSL2,"8,64",32,0,0,True

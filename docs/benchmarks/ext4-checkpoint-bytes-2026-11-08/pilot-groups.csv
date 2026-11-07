@@ -1,0 +1,29 @@
+mode,rep,window,exposure,n,mean_ms,median_ms,p99_ms,max_ms
+fifo,1,prior,mixed/same/unknown,1,7.148,7.148,7.148,7.148
+fifo,1,prior,zero,511,7.066502935420743,6.672,12.685,15.204
+fifo,1,during,mixed/same/unknown,14,8.245142857142858,8.195,10.857,10.857
+fifo,1,during,zero,498,7.033532128514056,6.6495,12.736,15.204
+fifo,1,first5,mixed/same/unknown,14,3.245142857142857,3.1950000000000003,5.857,5.857
+fifo,1,first5,zero,498,2.0335321285140564,1.6495,7.736,10.204
+standard,1,prior,mixed/same/unknown,1,5.906,5.906,5.906,5.906
+standard,1,prior,zero,511,6.647252446183953,6.689,10.94,14.491
+standard,1,during,mixed/same/unknown,3,7.820666666666667,7.953,8.345,8.345
+standard,1,during,other >=1 MiB,1,7.009,7.009,7.009,7.009
+standard,1,during,zero,508,6.63815157480315,6.686,10.94,14.491
+standard,1,first5,mixed/same/unknown,3,2.820666666666667,2.953,3.345,3.345
+standard,1,first5,zero,509,1.6388801571709233,1.687,5.94,9.491
+fifo,2,prior,other <1 MiB,16,3.4088125000000002,3.6020000000000003,3.789,3.789
+fifo,2,prior,other >=1 MiB,16,3.5879375,3.6055,5.274,5.274
+fifo,2,prior,zero,480,3.379179166666667,3.4924999999999997,5.549,12.363
+fifo,2,during,mixed/same/unknown,15,4.2068,4.244,5.38,5.38
+fifo,2,during,zero,497,3.3618752515090544,3.495,5.549,12.363
+fifo,2,first5,mixed/same/unknown,1,0.38,0.38,0.38,0.38
+fifo,2,first5,zero,9,1.456888888888889,0.549,7.363,7.363
+standard,2,prior,mixed/same/unknown,3,3.7503333333333333,3.827,4.619,4.619
+standard,2,prior,other <1 MiB,8,3.505375,3.6165000000000003,4.532,4.532
+standard,2,prior,other >=1 MiB,9,3.34,3.514,3.911,3.911
+standard,2,prior,zero,492,3.404630081300813,3.5275,5.495,6.728
+standard,2,during,mixed/same/unknown,5,4.0478000000000005,4.141,4.65,4.65
+standard,2,during,other >=1 MiB,2,4.179,4.179,4.669,4.669
+standard,2,during,zero,505,3.3976930693069307,3.522,5.455,6.728
+standard,2,first5,zero,9,0.5658888888888889,0.495,1.728,1.728

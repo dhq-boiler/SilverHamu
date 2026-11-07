@@ -1,0 +1,55 @@
+mode,rep,window,exposure,n,median_MiB,median_ms
+fifo,1,during,0-8 MiB,2,3.46875,5.0625
+fifo,1,during,32+ MiB,25,48.0,7.599
+fifo,1,during,8-32 MiB,21,16.0,6.851
+fifo,1,during,zero,16263,0.0,6.664
+fifo,1,first5,0-8 MiB,5,6.94140625,1.617
+fifo,1,first5,32+ MiB,10,32.0,5.926
+fifo,1,first5,8-32 MiB,12,16.0,2.46
+fifo,1,first5,zero,13004,0.0,1.895
+fifo,1,prior,zero,16303,0.0,6.664
+fifo,2,during,0-8 MiB,3,3.4765625,3.678
+fifo,2,during,32+ MiB,21,51.5,7.484
+fifo,2,during,8-32 MiB,13,16.0,6.785
+fifo,2,during,zero,16251,0.0,6.183
+fifo,2,first5,32+ MiB,7,38.96875,21.896
+fifo,2,first5,8-32 MiB,13,16.0,2.147
+fifo,2,first5,zero,10022,0.0,1.863
+fifo,2,prior,zero,16277,0.0,6.181
+fifo,3,during,0-8 MiB,3,3.46875,7.461
+fifo,3,during,32+ MiB,27,43.5625,7.006
+fifo,3,during,8-32 MiB,17,19.578125,6.332
+fifo,3,during,zero,16260,0.0,6.617
+fifo,3,first5,0-8 MiB,1,3.46875,2.629
+fifo,3,first5,32+ MiB,12,32.0,9.2805
+fifo,3,first5,8-32 MiB,18,16.0,1.629
+fifo,3,first5,zero,13986,0.0,1.738
+fifo,3,prior,zero,16304,0.0,6.617
+standard,1,during,0-8 MiB,3,3.47265625,6.237
+standard,1,during,32+ MiB,24,65.70703125,8.83
+standard,1,during,8-32 MiB,16,17.75,5.024
+standard,1,during,zero,16270,0.0,5.7555
+standard,1,first5,0-8 MiB,4,6.931640625,2.1109999999999998
+standard,1,first5,32+ MiB,11,36.40625,7.407
+standard,1,first5,8-32 MiB,12,19.46875,1.9164999999999999
+standard,1,first5,zero,8696,0.0,1.723
+standard,1,prior,zero,16308,0.0,5.759
+standard,2,during,0-8 MiB,2,3.859375,3.233
+standard,2,during,32+ MiB,31,56.0,7.358
+standard,2,during,8-32 MiB,16,17.73828125,6.612500000000001
+standard,2,during,zero,16263,0.0,6.527
+standard,2,first5,0-8 MiB,3,3.46875,2.0
+standard,2,first5,32+ MiB,14,38.203125,9.312000000000001
+standard,2,first5,8-32 MiB,15,16.0,1.851
+standard,2,first5,zero,12430,0.0,1.789
+standard,2,prior,zero,16307,0.0,6.528
+standard,3,during,0-8 MiB,3,6.921875,2.961
+standard,3,during,32+ MiB,24,62.125,7.8045
+standard,3,during,8-32 MiB,19,19.46875,6.204
+standard,3,during,zero,16245,0.0,3.945
+standard,3,first5,0-8 MiB,2,5.197265625,1.5655000000000001
+standard,3,first5,32+ MiB,8,32.0,7.166499999999999
+standard,3,first5,8-32 MiB,11,16.0,2.707
+standard,3,first5,zero,7502,0.0,1.801
+standard,3,prior,8-32 MiB,1,19.578125,7.293
+standard,3,prior,zero,16293,0.0,3.951

@@ -1,0 +1,1239 @@
+{
+  "utc": "2026-11-07T13:23:07.328316+00:00",
+  "rows": 100000,
+  "value_bytes": 256,
+  "ops_per_case": 1024,
+  "reps": 3,
+  "single_request": true,
+  "git_commit": "706b0765d0b974ea39464b2f9d7b55255827c2f9",
+  "docker": {
+    "ServerVersion": "29.9.2",
+    "NCPU": 32,
+    "MemTotal": 67380625408,
+    "Driver": "overlay2",
+    "OSType": "linux",
+    "Architecture": "x86_64",
+    "KernelVersion": "6.18.54.1-microsoft-standard-WSL2"
+  },
+  "images": {
+    "catdb-embedded": "sha256:1ab8e2ff4619759f99a4a910d2db2079271f5987020eb8af534a098cd187b9f4",
+    "sqlite": "sha256:1ab8e2ff4619759f99a4a910d2db2079271f5987020eb8af534a098cd187b9f4",
+    "catdb-service": "sha256:1ab8e2ff4619759f99a4a910d2db2079271f5987020eb8af534a098cd187b9f4",
+    "postgres": [
+      "postgres@sha256:3a4264520e121176619f54ff867d12774bc81e95e7b84db58d63bccdb6144b81"
+    ],
+    "mysql": [
+      "mysql@sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902"
+    ],
+    "oracle": [
+      "container-registry.oracle.com/database/free@sha256:cf540c3fa190d7cffad08c491652ac07fc70314e510f6b87890449517d565e94"
+    ]
+  },
+  "source_sha256": {
+    "runner.py": "12dbbb878762cec5eb02c0c4b14d4f16d058b8e75420dc5c46740e4ec31d1a0c",
+    "run.py": "f4e1c0cbe299d1c0409d0f6b2c4766902b9dae7d90c8318eddc45bead1223c6e",
+    "Dockerfile": "7a283c8505d8691c72ae602b6697b819d4e45eea5e8c3050379295f68eec47cf"
+  },
+  "runs": [
+    {
+      "engine": "catdb-embedded",
+      "rep": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+          "expected_sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+          "updated_keys": 1019,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+          "expected_sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+          "updated_keys": 1019,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "version": "0.1.0",
+        "group_commit": true,
+        "sync_before_ack": true
+      }
+    },
+    {
+      "engine": "sqlite",
+      "rep": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+          "expected_sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+          "updated_keys": 1019,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+          "expected_sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+          "updated_keys": 1019,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "select sqlite_version()": [
+          [
+            "3.40.1"
+          ]
+        ],
+        "pragma journal_mode": [
+          [
+            "wal"
+          ]
+        ],
+        "pragma synchronous": [
+          [
+            2
+          ]
+        ],
+        "pragma cache_size": [
+          [
+            -65536
+          ]
+        ]
+      }
+    },
+    {
+      "engine": "catdb-service",
+      "rep": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+          "expected_sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+          "updated_keys": 1019,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+          "expected_sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+          "updated_keys": 1019,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "version": "0.1.0",
+        "group_commit": true,
+        "sync_before_ack": true
+      }
+    },
+    {
+      "engine": "postgres",
+      "rep": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+          "expected_sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+          "updated_keys": 1019,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+          "expected_sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+          "updated_keys": 1019,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "select version()": [
+          [
+            "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit"
+          ]
+        ],
+        "show fsync": [
+          [
+            "on"
+          ]
+        ],
+        "show synchronous_commit": [
+          [
+            "on"
+          ]
+        ],
+        "show shared_buffers": [
+          [
+            "128MB"
+          ]
+        ],
+        "show transaction_isolation": [
+          [
+            "serializable"
+          ]
+        ]
+      }
+    },
+    {
+      "engine": "mysql",
+      "rep": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+          "expected_sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+          "updated_keys": 1019,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+          "expected_sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+          "updated_keys": 1019,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "select version()": [
+          [
+            "8.4.13"
+          ]
+        ],
+        "select @@innodb_flush_log_at_trx_commit,@@sync_binlog,@@log_bin,@@transaction_isolation,@@innodb_buffer_pool_size": [
+          [
+            1,
+            1,
+            1,
+            "SERIALIZABLE",
+            134217728
+          ]
+        ]
+      }
+    },
+    {
+      "engine": "oracle",
+      "rep": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+          "expected_sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+          "updated_keys": 1019,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+          "expected_sha256": "98f06975e8efe427b1d600d5a337547243bfa89ae5d62b43d4650604aea329f3",
+          "updated_keys": 1019,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "select banner_full from v$version": [
+          [
+            "Oracle AI Database 26ai Free Release 23.26.3.0.0 - Develop, Learn, and Run for Free\nVersion 23.26.3.0.0"
+          ]
+        ],
+        "select sys_context('USERENV','DB_NAME') from dual": [
+          [
+            "FREEPDB1"
+          ]
+        ]
+      }
+    },
+    {
+      "engine": "oracle",
+      "rep": 2,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+          "expected_sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+          "updated_keys": 1020,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+          "expected_sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+          "updated_keys": 1020,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "select banner_full from v$version": [
+          [
+            "Oracle AI Database 26ai Free Release 23.26.3.0.0 - Develop, Learn, and Run for Free\nVersion 23.26.3.0.0"
+          ]
+        ],
+        "select sys_context('USERENV','DB_NAME') from dual": [
+          [
+            "FREEPDB1"
+          ]
+        ]
+      }
+    },
+    {
+      "engine": "mysql",
+      "rep": 2,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+          "expected_sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+          "updated_keys": 1020,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+          "expected_sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+          "updated_keys": 1020,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "select version()": [
+          [
+            "8.4.13"
+          ]
+        ],
+        "select @@innodb_flush_log_at_trx_commit,@@sync_binlog,@@log_bin,@@transaction_isolation,@@innodb_buffer_pool_size": [
+          [
+            1,
+            1,
+            1,
+            "SERIALIZABLE",
+            134217728
+          ]
+        ]
+      }
+    },
+    {
+      "engine": "postgres",
+      "rep": 2,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+          "expected_sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+          "updated_keys": 1020,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+          "expected_sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+          "updated_keys": 1020,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "select version()": [
+          [
+            "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit"
+          ]
+        ],
+        "show fsync": [
+          [
+            "on"
+          ]
+        ],
+        "show synchronous_commit": [
+          [
+            "on"
+          ]
+        ],
+        "show shared_buffers": [
+          [
+            "128MB"
+          ]
+        ],
+        "show transaction_isolation": [
+          [
+            "serializable"
+          ]
+        ]
+      }
+    },
+    {
+      "engine": "catdb-service",
+      "rep": 2,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+          "expected_sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+          "updated_keys": 1020,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+          "expected_sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+          "updated_keys": 1020,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "version": "0.1.0",
+        "group_commit": true,
+        "sync_before_ack": true
+      }
+    },
+    {
+      "engine": "sqlite",
+      "rep": 2,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+          "expected_sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+          "updated_keys": 1020,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+          "expected_sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+          "updated_keys": 1020,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "select sqlite_version()": [
+          [
+            "3.40.1"
+          ]
+        ],
+        "pragma journal_mode": [
+          [
+            "wal"
+          ]
+        ],
+        "pragma synchronous": [
+          [
+            2
+          ]
+        ],
+        "pragma cache_size": [
+          [
+            -65536
+          ]
+        ]
+      }
+    },
+    {
+      "engine": "catdb-embedded",
+      "rep": 2,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+          "expected_sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+          "updated_keys": 1020,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+          "expected_sha256": "8a34b70e1355f4f4224061363bfe2e6b968e02a875c4c3dfd8c77028fa544c52",
+          "updated_keys": 1020,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "version": "0.1.0",
+        "group_commit": true,
+        "sync_before_ack": true
+      }
+    },
+    {
+      "engine": "catdb-service",
+      "rep": 3,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+          "expected_sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+          "updated_keys": 1020,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+          "expected_sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+          "updated_keys": 1020,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "version": "0.1.0",
+        "group_commit": true,
+        "sync_before_ack": true
+      }
+    },
+    {
+      "engine": "postgres",
+      "rep": 3,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+          "expected_sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+          "updated_keys": 1020,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+          "expected_sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+          "updated_keys": 1020,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "select version()": [
+          [
+            "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit"
+          ]
+        ],
+        "show fsync": [
+          [
+            "on"
+          ]
+        ],
+        "show synchronous_commit": [
+          [
+            "on"
+          ]
+        ],
+        "show shared_buffers": [
+          [
+            "128MB"
+          ]
+        ],
+        "show transaction_isolation": [
+          [
+            "serializable"
+          ]
+        ]
+      }
+    },
+    {
+      "engine": "mysql",
+      "rep": 3,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+          "expected_sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+          "updated_keys": 1020,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+          "expected_sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+          "updated_keys": 1020,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "select version()": [
+          [
+            "8.4.13"
+          ]
+        ],
+        "select @@innodb_flush_log_at_trx_commit,@@sync_binlog,@@log_bin,@@transaction_isolation,@@innodb_buffer_pool_size": [
+          [
+            1,
+            1,
+            1,
+            "SERIALIZABLE",
+            134217728
+          ]
+        ]
+      }
+    },
+    {
+      "engine": "oracle",
+      "rep": 3,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+          "expected_sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+          "updated_keys": 1020,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+          "expected_sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+          "updated_keys": 1020,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "select banner_full from v$version": [
+          [
+            "Oracle AI Database 26ai Free Release 23.26.3.0.0 - Develop, Learn, and Run for Free\nVersion 23.26.3.0.0"
+          ]
+        ],
+        "select sys_context('USERENV','DB_NAME') from dual": [
+          [
+            "FREEPDB1"
+          ]
+        ]
+      }
+    },
+    {
+      "engine": "catdb-embedded",
+      "rep": 3,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+          "expected_sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+          "updated_keys": 1020,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+          "expected_sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+          "updated_keys": 1020,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "version": "0.1.0",
+        "group_commit": true,
+        "sync_before_ack": true
+      }
+    },
+    {
+      "engine": "sqlite",
+      "rep": 3,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+          "expected_sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+          "updated_keys": 1020,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+          "expected_sha256": "02eaf68081027d6b59a1fc2b0e96964f424a7bd9bf93124371e6947282940e5a",
+          "updated_keys": 1020,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "select sqlite_version()": [
+          [
+            "3.40.1"
+          ]
+        ],
+        "pragma journal_mode": [
+          [
+            "wal"
+          ]
+        ],
+        "pragma synchronous": [
+          [
+            2
+          ]
+        ],
+        "pragma cache_size": [
+          [
+            -65536
+          ]
+        ]
+      }
+    }
+  ],
+  "skipped": {
+    "sql-server": "SQL Server 2022 Developer/Express/Evaluation license section 5 requires prior written permission for disclosure; permission not obtained, not measured."
+  }
+}

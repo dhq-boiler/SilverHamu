@@ -1,0 +1,34 @@
+ Downloading crates ...
+  Downloaded bitflags v2.13.2
+  Downloaded itoa v1.0.18
+  Downloaded serde_core v1.0.229
+  Downloaded zmij v1.0.23
+  Downloaded cfg_aliases v0.2.2
+  Downloaded cfg-if v1.0.5
+  Downloaded serde_json v1.0.154
+  Downloaded memchr v2.8.3
+  Downloaded ctrlc v3.5.2
+  Downloaded nix v0.31.3
+  Downloaded libc v0.2.191
+   Compiling libc v0.2.191
+   Compiling cfg_aliases v0.2.2
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.154
+   Compiling cfg-if v1.0.5
+   Compiling bitflags v2.13.2
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling nix v0.31.3
+   Compiling ctrlc v3.5.2
+   Compiling catdb v0.1.0 (/build)
+    Finished `release` profile [optimized] target(s) in 10.29s
+     Running unittests src/lib.rs (target/release/deps/newdbms-278445c39e1417db)
+
+running 4 tests
+test transactions::fifo_writer::tests::panic_poisons_the_lock_and_wakes_every_queued_worker ... ok
+test transactions::fifo_writer::tests::queued_workers_are_admitted_in_registration_order ... ok
+test transactions::scaled_gate::checks::timing::mvcc_fifo_revalidates_and_publishes_only_after_sync ... ok
+test transactions::tests::fifo_orders_a_single_commit_checkpoint_cutover_and_group_commit ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 201 filtered out; finished in 0.07s

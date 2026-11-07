@@ -12,6 +12,7 @@ def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("raw",type=Path)
     parser.add_argument("out",type=Path)
+    parser.add_argument("--fifo",action="store_true")
     args=parser.parse_args()
     env=json.loads((args.raw/"environment.json").read_text())
     assert (env["rows"],env["ops_per_case"],env["reps"])==(100000,1024,3)
@@ -24,6 +25,9 @@ def main():
     assert len(digest)==3 and all(len(v)==1 for v in digest.values())
     data=json.loads((args.raw/"results.json").read_text())
     names={"catdb-embedded":"catdb C ABI","sqlite":"SQLite","catdb-service":"catdb service","postgres":"PostgreSQL","mysql":"MySQL","oracle":"Oracle Free"}
+    if args.fifo:
+        names["catdb-embedded"]="catdb FIFO C ABI"
+        names["catdb-service"]="catdb FIFO service"
     assert sorted((r["engine"],r["rep"]) for r in data)==sorted((k,i) for k in names for i in (1,2,3))
     for r in data:
         assert (r["clients"],r["workload"],r["completed"],len(r["errors"]))==(4,"update",1024,0)

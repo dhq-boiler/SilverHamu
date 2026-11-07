@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 380" role="img"><title>Wall time of the slowest update in each trial</title><rect width="950" height="380" fill="white"/><g font-family="sans-serif" fill="#213248">
+<text x="16" y="30" font-size="22">Where the slowest update in each trial spent its time</text>
+<text x="16" y="55" font-size="14">Absolute wall time; each millisecond is assigned to one segment.</text>
+<rect x="16" y="75" width="12" height="12" fill="#355d93"/>
+<text x="33" y="86" font-size="13">Wait: peer sync</text>
+<rect x="199" y="75" width="12" height="12" fill="#ce7d32"/>
+<text x="216" y="86" font-size="13">Wait: checkpoint lock</text>
+<rect x="382" y="75" width="12" height="12" fill="#92a5ba"/>
+<text x="399" y="86" font-size="13">Other lock wait</text>
+<rect x="565" y="75" width="12" height="12" fill="#22715c"/>
+<text x="582" y="86" font-size="13">Own sync</text>
+<rect x="748" y="75" width="12" height="12" fill="#c1cbc3"/>
+<text x="765" y="86" font-size="13">Remaining request</text>
+<text x="16" y="120" font-size="14">Standard / 1</text>
+<rect x="113.00" y="106" width="636.28" height="18" fill="#355d93"/>
+<rect x="749.28" y="106" width="0.00" height="18" fill="#ce7d32"/>
+<rect x="749.28" y="106" width="6.30" height="18" fill="#92a5ba"/>
+<rect x="755.58" y="106" width="0.94" height="18" fill="#22715c"/>
+<rect x="756.51" y="106" width="0.02" height="18" fill="#c1cbc3"/>
+<text x="764.5343943912942" y="120" font-size="14">3,823.0 ms</text>
+<text x="16" y="159" font-size="14">FIFO / 1</text>
+<rect x="113.00" y="145" width="66.34" height="18" fill="#355d93"/>
+<rect x="179.34" y="145" width="0.00" height="18" fill="#ce7d32"/>
+<rect x="179.34" y="145" width="0.05" height="18" fill="#92a5ba"/>
+<rect x="179.39" y="145" width="6.69" height="18" fill="#22715c"/>
+<rect x="186.08" y="145" width="0.02" height="18" fill="#c1cbc3"/>
+<text x="194.09776699214473" y="159" font-size="14">434.2 ms</text>
+<text x="16" y="198" font-size="14">Standard / 2</text>
+<rect x="113.00" y="184" width="632.27" height="18" fill="#355d93"/>
+<rect x="745.27" y="184" width="0.00" height="18" fill="#ce7d32"/>
+<rect x="745.27" y="184" width="6.95" height="18" fill="#92a5ba"/>
+<rect x="752.22" y="184" width="1.03" height="18" fill="#22715c"/>
+<rect x="753.25" y="184" width="0.06" height="18" fill="#c1cbc3"/>
+<text x="761.3090695267349" y="198" font-size="14">3,803.8 ms</text>
+<text x="16" y="237" font-size="14">FIFO / 2</text>
+<rect x="113.00" y="223" width="86.78" height="18" fill="#355d93"/>
+<rect x="199.78" y="223" width="0.00" height="18" fill="#ce7d32"/>
+<rect x="199.78" y="223" width="0.05" height="18" fill="#92a5ba"/>
+<rect x="199.82" y="223" width="2.89" height="18" fill="#22715c"/>
+<rect x="202.71" y="223" width="0.02" height="18" fill="#c1cbc3"/>
+<text x="210.73164285655474" y="237" font-size="14">533.1 ms</text>
+<text x="16" y="276" font-size="14">Standard / 3</text>
+<rect x="113.00" y="262" width="690.74" height="18" fill="#355d93"/>
+<rect x="803.74" y="262" width="0.00" height="18" fill="#ce7d32"/>
+<rect x="803.74" y="262" width="8.13" height="18" fill="#92a5ba"/>
+<rect x="811.87" y="262" width="1.11" height="18" fill="#22715c"/>
+<rect x="812.98" y="262" width="0.02" height="18" fill="#c1cbc3"/>
+<text x="821.0" y="276" font-size="14">4,158.4 ms</text>
+<text x="16" y="315" font-size="14">FIFO / 3</text>
+<rect x="113.00" y="301" width="62.39" height="18" fill="#355d93"/>
+<rect x="175.39" y="301" width="0.00" height="18" fill="#ce7d32"/>
+<rect x="175.39" y="301" width="0.07" height="18" fill="#92a5ba"/>
+<rect x="175.46" y="301" width="4.27" height="18" fill="#22715c"/>
+<rect x="179.73" y="301" width="0.06" height="18" fill="#c1cbc3"/>
+<text x="187.794471557886" y="315" font-size="14">396.8 ms</text>
+</g></svg>

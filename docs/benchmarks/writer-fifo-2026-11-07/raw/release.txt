@@ -1,0 +1,2 @@
+   Compiling catdb v0.1.0 (/build)
+    Finished `release` profile [optimized] target(s) in 1.78s

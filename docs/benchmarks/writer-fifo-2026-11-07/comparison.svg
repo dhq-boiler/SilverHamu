@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 380" role="img"><title>Independent production checkpoints</title><rect width="920" height="380" fill="white"/><g font-family="sans-serif" fill="#213248">
+<text x="16" y="30" font-size="22">FIFO writer handoff with independent checkpoints</text>
+<text x="16" y="58" font-size="14">One million rows, two CPUs, 4 GiB. Trial medians except maximum across all three runs.</text>
+<text x="16" y="93" font-size="17">Update p99 (ms)</text>
+<text x="16" y="125" font-size="14">Standard</text>
+<rect x="91" y="113" width="202.00" height="14" fill="#536982"/>
+<text x="299.0" y="125" font-size="14">613.68</text>
+<text x="16" y="158" font-size="14">FIFO</text>
+<rect x="91" y="146" width="60.93" height="14" fill="#297465"/>
+<text x="157.92927581885544" y="158" font-size="14">185.11</text>
+<text x="471" y="93" font-size="17">Worst update (ms)</text>
+<text x="471" y="125" font-size="14">Standard</text>
+<rect x="546" y="113" width="202.00" height="14" fill="#536982"/>
+<text x="754.0" y="125" font-size="14">4,158.40</text>
+<text x="471" y="158" font-size="14">FIFO</text>
+<rect x="546" y="146" width="25.89" height="14" fill="#297465"/>
+<text x="577.8939883671773" y="158" font-size="14">533.06</text>
+<text x="16" y="233" font-size="17">Updates / second</text>
+<text x="16" y="265" font-size="14">Standard</text>
+<rect x="91" y="253" width="202.00" height="14" fill="#536982"/>
+<text x="299.0" y="265" font-size="14">136.59</text>
+<text x="16" y="298" font-size="14">FIFO</text>
+<rect x="91" y="286" width="193.31" height="14" fill="#297465"/>
+<text x="290.3080216839744" y="298" font-size="14">130.72</text>
+<text x="471" y="233" font-size="17">Logical KiB / update, including drain</text>
+<text x="471" y="265" font-size="14">Standard</text>
+<rect x="546" y="253" width="176.67" height="14" fill="#536982"/>
+<text x="728.6690999655193" y="265" font-size="14">938.77</text>
+<text x="471" y="298" font-size="14">FIFO</text>
+<rect x="546" y="286" width="202.00" height="14" fill="#297465"/>
+<text x="754.0" y="298" font-size="14">1,073.37</text>
+</g></svg>

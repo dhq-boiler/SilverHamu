@@ -159,3 +159,52 @@ fn prefix_preserves_fixed_capacity_and_commits_after_the_snapshot() {
         Some(b"durable".to_vec())
     );
 }
+
+#[cfg(feature = "fifo-writer")]
+#[test]
+fn fifo_orders_a_single_commit_checkpoint_cutover_and_group_commit() {
+    let path = Fixture::new();
+    let db = Database::create(&path.0, [41; 16]).unwrap();
+    let mut seed = db.begin().unwrap();
+    seed.put(b"seed", b"v").unwrap();
+    seed.commit().unwrap();
+    let mut old = db.begin_read().unwrap();
+    let mut prefix = db.prepare_checkpoint_prefix(1).unwrap();
+    let mut first = db.begin().unwrap();
+    first.put(b"first", b"1").unwrap();
+    let mut last = db.begin().unwrap();
+    last.put(b"last", b"2").unwrap();
+    let held = db.inner.writer.lock().unwrap();
+    std::thread::scope(|scope| {
+        let a = scope.spawn(move || first.commit().unwrap());
+        db.inner.writer.wait_queued(1);
+        let database = &db;
+        let cutover = scope.spawn(move || {
+            database
+                .finish_checkpoint(prefix.draft.take(), false, None, |stage| {
+                    if stage == CheckpointStage::TailCopied {
+                        assert_eq!(database.state().unwrap().sequence, 2);
+                    }
+                    Ok(())
+                })
+                .unwrap();
+        });
+        db.inner.writer.wait_queued(2);
+        db.set_group_commit(true);
+        let b = scope.spawn(move || last.commit().unwrap());
+        db.inner.writer.wait_queued(3);
+        drop(held);
+        assert_eq!(a.join().unwrap(), 2);
+        cutover.join().unwrap();
+        assert_eq!(b.join().unwrap(), 3);
+    });
+    assert!(old.get(b"first").unwrap().is_none());
+    assert!(old.get(b"last").unwrap().is_none());
+    drop(old);
+    drop(db);
+    let reopened = Database::open(&path.0).unwrap();
+    let mut r = reopened.begin_read().unwrap();
+    assert_eq!(r.version(), 3);
+    assert_eq!(r.get(b"first").unwrap(), Some(b"1".to_vec()));
+    assert_eq!(r.get(b"last").unwrap(), Some(b"2".to_vec()));
+}

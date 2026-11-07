@@ -6,6 +6,18 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## FIFO handoff for concurrent writers
+
+Keeping checkpoint prewrite enabled in both arms, the production writer lock measured **4,158.40 ms worst wait with the standard mutex and 533.06 ms with FIFO**. Median p99 changed by **-69.8%** and throughput by **-4.3%**. FIFO is an opt-in Rust build feature. [Per-trial results, recovery checks and reproduction](docs/benchmarks/writer-fifo-2026-11-07/README.md).
+
+![Standard and FIFO writer locks](docs/benchmarks/writer-fifo-2026-11-07/comparison.svg)
+
+![Slowest requests by phase](docs/benchmarks/writer-fifo-2026-11-07/attribution.svg)
+
+![Embedded updates](docs/benchmarks/writer-fifo-2026-11-07/embedded.svg)
+
+![Service updates](docs/benchmarks/writer-fifo-2026-11-07/service.svg)
+
 ## Independent checkpoints with continuous writer admission
 
 Across three one-million-row runs per mode, update p99 measured **741.46 ms off / 679.87 ms on** and the worst update **4,166.76 ms off / 5,455.66 ms on**. Each mode received 63 triggers per trial; busy-worker coalescing produced 44–55 and 42–58 publications respectively. [Throughput, write traffic and request-level attribution](docs/benchmarks/independent-2026-11-07/README.md).

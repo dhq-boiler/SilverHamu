@@ -1,0 +1,9 @@
+{
+  "rows": 1000000,
+  "ops": 16384,
+  "cap": 256,
+  "image": "sha256:ab206448cf1f715974da34c8b8c39d3af8676aa53de7c5bded2badb47dae69df",
+  "cpus": 2,
+  "memory": 4294967296,
+  "fifo_comparison": true
+}

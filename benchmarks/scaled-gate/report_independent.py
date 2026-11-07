@@ -85,12 +85,22 @@ def analyze(log,mode,rep,ops,cap):
 def main():
     p=argparse.ArgumentParser();p.add_argument("raw",type=Path);p.add_argument("out",type=Path);a=p.parse_args()
     cfg=json.loads((a.raw/"environment.json").read_text());runs=json.loads((a.raw/"runs.json").read_text())
+    fifo=cfg.get("fifo_comparison",False)
     assert sorted((r['mode'],r['rep']) for r in runs)==[(m,i) for m in ('off','on') for i in (1,2,3)]
     trials=[];phases=[];events=[]
     for r in runs:
         path=a.raw/f"{r['rep']}-{r['mode']}.log"
         data=path.read_text() if path.exists() else gzip.decompress(path.with_suffix(".log.gz").read_bytes()).decode()
         row,parts,windows=analyze(data,r['mode'],r['rep'],cfg['ops'],cfg['cap'])
+        if fifo:
+            waits=defaultdict(int)
+            for id,_,_,_,lock,acquired,*_ in records(data,"ATTEMPT"):
+                waits[id]+=acquired-lock
+            assert len(waits)==cfg["ops"]
+            row.update(lock_p99_ms=sorted(waits.values())[math.ceil(len(waits)*.99)-1]/1e6,
+                       lock_max_ms=max(waits.values())/1e6,
+                       lock_over_100ms=sum(v>100_000_000 for v in waits.values()),
+                       lock_over_1s=sum(v>1_000_000_000 for v in waits.values()))
         trials.append(row);phases.extend(parts);events.extend(windows)
     a.out.mkdir(exist_ok=True,parents=True)
     save(a.out/"trials.csv",trials);save(a.out/"request-phases.csv",phases);save(a.out/"checkpoints.csv",events)
@@ -102,11 +112,11 @@ def main():
     save(a.out/"summary.csv",summary)
     svg=['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 380" role="img"><title>Independent production checkpoints</title><rect width="920" height="380" fill="white"/><g font-family="sans-serif" fill="#213248">']
     def label(x,y,s,size):svg.append(f'<text x="{x}" y="{y}" font-size="{size}">{s}</text>')
-    label(16,30,"Independent checkpoints with four continuously admitted writers",22)
+    label(16,30,"FIFO writer handoff with independent checkpoints" if fifo else "Independent checkpoints with four continuously admitted writers",22)
     label(16,58,"One million rows, two CPUs, 4 GiB. Trial medians except maximum across all three runs.",14)
     for i,(key,title) in enumerate([('p99_ms','Update p99 (ms)'),('max_ms','Worst update (ms)'),('updates_s','Updates / second'),('KiB_per_update','Logical KiB / update, including drain')]):
         x,y=16+i%2*455,93+i//2*140;label(x,y,title,17)
-        for j,(r,name,color) in enumerate(zip(summary,('Off','Prefix on'),('#536982','#297465'))):
+        for j,(r,name,color) in enumerate(zip(summary,(('Standard','FIFO') if fifo else ('Off','Prefix on')),('#536982','#297465'))):
             yy=y+32+j*33;width=202*r[key]/max(row[key] for row in summary)
             label(x,yy,name,14);svg.append(f'<rect x="{x+75}" y="{yy-12}" width="{width:.2f}" height="14" fill="{color}"/>');label(x+81+width,yy,f"{r[key]:,.2f}",14)
     (a.out/"comparison.svg").write_text("\n".join(svg+["</g></svg>",""]))
@@ -124,7 +134,8 @@ def main():
     high=max(r["total_ms"] for r in worst)
     for i,r in enumerate(worst):
         y=120+39*i
-        caption(16,y,f"Prefix {r['mode']} / {r['rep']}")
+        name=("FIFO" if r["mode"]=="on" else "Standard") if fifo else f"Prefix {r['mode']}"
+        caption(16,y,f"{name} / {r['rep']}")
         parts=[r[k] for k in ("writer_wait_peer_sync_ms","writer_wait_cp_hold_ms","writer_wait_unattributed_ms","own_sync_ms")]
         parts.append(r["total_ms"]-sum(parts))
         assert min(parts)>=-1e-6

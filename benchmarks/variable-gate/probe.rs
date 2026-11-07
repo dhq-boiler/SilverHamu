@@ -165,7 +165,7 @@ impl Store {
         let (r,capacity,length)=pack(3,self.state.last.bank,self.state.last.epoch,seq,self.state.last.checksum(),writes)?;
         let mut next=(*self.visible).clone();apply(&mut next,writes);
         self.costs.frame_capacity_peak=self.costs.frame_capacity_peak.max(capacity);self.costs.frame_length_peak=self.costs.frame_length_peak.max(length);
-        let slot=self.state.used+1;self.poisoned=true;
+        let slot=self.state.used+1;self.poisoned=true;hook("append.prepared")?;
         for lane in 0..2 {self.put(at(r.bank,slot,lane),&r.encode(),"append",&format!("append-{lane}"),hook)?;}
         self.sync("append",hook)?;self.state.last=r;self.state.used=slot;self.visible=Arc::new(next);hook("append.published")?;self.poisoned=false;Ok(())
     }
@@ -178,14 +178,14 @@ impl Store {
         let writes:WriteSet=self.visible.iter().map(|(k,v)|(k.clone(),Some(v.clone()))).collect();
         let (r,capacity,length)=pack(1,new,epoch,self.state.last.seq,0,&writes)?;
         self.costs.frame_capacity_peak=self.costs.frame_capacity_peak.max(capacity);self.costs.frame_length_peak=self.costs.frame_length_peak.max(length);
-        self.costs.checkpoint_clone_bytes=self.visible.iter().map(|(k,v)|k.len()+v.len()).sum();self.poisoned=true;
+        self.costs.checkpoint_clone_bytes=self.visible.iter().map(|(k,v)|k.len()+v.len()).sum();self.poisoned=true;hook("switch.prepared")?;
         if clear {for slot in 0..=CAP {for lane in 0..2 {self.put(at(new,slot,lane),&[0;N],"switch-data","switch-clear",hook)?;}}}
         for lane in 0..2 {self.put(at(new,0,lane),&r.encode(),"switch-data",&format!("switch-data-{lane}"),hook)?;}
         self.sync("switch-data",hook)?;
         for lane in 0..2 {self.put(root(epoch,lane),&r.selector().encode(),"switch-selector",&format!("switch-selector-{lane}"),hook)?;}
         self.sync("switch-selector",hook)?;self.state=Recovered{selector:r.selector(),last:r,used:0,repairs:Vec::new(),rows:Data::new()};hook("switch.published")?;
         // Clearing the old bank before both selectors are synced could destroy the only restart target.
-        if clear {for slot in 0..=CAP {for lane in 0..2 {self.put(at(old,slot,lane),&[0;N],"reclaim","reclaim",hook)?;}}
+        if clear {hook("switch.reclaim-start")?;for slot in 0..=CAP {for lane in 0..2 {self.put(at(old,slot,lane),&[0;N],"reclaim","reclaim",hook)?;}}
             self.sync("reclaim",hook)?;}
         self.poisoned=false;Ok(())
     }
@@ -357,6 +357,36 @@ mod tests {
         let mut reopen=Vec::with_capacity(100);for i in 0..100{let t=Instant::now();let s=Store::open(&p,&mut noop).unwrap();let ns=t.elapsed().as_nanos();assert_eq!(*s.visible,expected);assert!(s.costs.categories.is_empty());drop(s);reopen.push((i,ns));}
         println!("SPEED_SUMMARY,{mode},{trial},{elapsed},{bytes},{syncs},2000,500,100,true");
         for(i,total,append,switch)in rows{println!("SPEED_UPDATE,{mode},{trial},{i},{total},{append},{switch}");}for(i,ns)in reopen{println!("SPEED_REOPEN,{mode},{trial},{i},{ns}");}
+    }
+
+    struct PhaseTrace { enabled:bool, origin:Instant, points:[(u128,usize);16], len:usize, finished:bool }
+    impl PhaseTrace {
+        fn new(enabled:bool,origin:Instant)->Self{Self{enabled,origin,points:[(0,0);16],len:1,finished:false}}
+        fn mark(&mut self,ns:u128,phase:usize)->io::Result<()>{if self.finished || phase>4 || self.len==16 || ns<self.points[self.len-1].0{return Err(err("invalid or full phase trace"));}self.points[self.len]=(ns,phase);self.len+=1;Ok(())}
+        fn hook(&mut self,name:&str)->io::Result<()>{if !self.enabled{return Ok(());}let phase=match name{"append.prepared"|"switch.prepared"|"switch-data.synced"|"switch.reclaim-start"=>1,"append.before-sync"|"switch-data.before-sync"|"switch-selector.before-sync"|"reclaim.before-sync"=>2,"append.synced"|"switch-selector.synced"|"reclaim.synced"=>3,_=>return Ok(())};self.mark(self.origin.elapsed().as_nanos(),phase)}
+        fn finish(&mut self,end:Instant,expected:usize)->[u128;4]{if !self.enabled{return [0;4];}self.mark(end.duration_since(self.origin).as_nanos(),4).unwrap();self.finished=true;assert_eq!(self.len,expected);let mut out=[0;4];for w in self.points[..self.len].windows(2){out[w[0].1]+=w[1].0-w[0].0;}assert_eq!(out.iter().sum::<u128>(),end.duration_since(self.origin).as_nanos());out}
+    }
+    #[test]
+    fn phase_trace_order_bound_and_failure_records(){
+        let mut t=PhaseTrace::new(true,Instant::now());t.mark(10,1).unwrap();assert!(t.mark(9,2).is_err());assert!(t.mark(11,5).is_err());while t.len<16{t.mark(10,1).unwrap();}assert!(t.mark(10,2).is_err());assert_eq!(t.len,16);
+        let mut t=PhaseTrace::new(true,Instant::now());let start=t.origin;t.mark(10,1).unwrap();t.mark(20,2).unwrap();t.mark(50,3).unwrap();let out=t.finish(start+Duration::from_nanos(60),5);assert_eq!(out,[10,10,30,10]);assert!(t.mark(70,1).is_err());
+        for clear in [true,false]{let(p,mut s)=fixture();let old=s.visible.clone();let start=Instant::now();let mut t=PhaseTrace::new(true,start);s.switch_policy(clear,&mut |n|t.hook(n)).unwrap();let end=Instant::now();t.finish(end,if clear{10}else{7});assert_eq!(*s.visible,*old);drop(s);assert_eq!(*Store::open(&p,&mut noop).unwrap().visible,*old);}
+        let(p,mut s)=fixture();let old=s.visible.clone();let mut t=PhaseTrace::new(true,Instant::now());let result=s.append(&change(),&mut |n|{t.hook(n)?;if n=="append.before-sync"{Err(err("injected phase failure"))}else{Ok(())}});assert!(result.is_err());assert_eq!(t.points[t.len-1].1,2);assert_eq!(*s.visible,*old);assert!(s.append(&change(),&mut noop).is_err());drop(s);let got=Store::open(&p,&mut noop).unwrap();let mut next=(*old).clone();apply(&mut next,&change());assert!(*got.visible==*old || *got.visible==next);
+    }
+
+    #[test]
+    #[ignore = "explicit bounded persistence timing experiment"]
+    fn reuse_phases(){
+        let enabled=std::env::var("PHASE_ENABLED").unwrap()=="1";let count:usize=std::env::var("PHASE_COUNT").unwrap().parse().unwrap();assert!(count>0 && count<=2000 && count%4==0);let mode=std::env::var("REUSE_SPEED_MODE").unwrap();assert!(mode=="clear" || mode=="reuse");let clear=mode=="clear";let trial:usize=std::env::var("REUSE_SPEED_TRIAL").unwrap().parse().unwrap();
+        let root=PathBuf::from(std::env::var_os("REUSE_SPEED_ROOT").unwrap());let dir=root.join(format!("{}-{}-{}",mode,trial,std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()));fs::create_dir(&dir).unwrap();let p=dir.join("timed.log");let mut s=Store::create(&p).unwrap();s.append(&writes(),&mut noop).unwrap();s.append(&change(),&mut noop).unwrap();let old=s.visible.clone();let original=(*old).clone();
+        let mut updates=Vec::new();for i in 0..32{let mut w=change();w.get_mut(&vec![]).unwrap().as_mut().unwrap()[0]=i;updates.push(w);}
+        for i in 0..34{if s.state.used==CAP{s.switch_policy(clear,&mut noop).unwrap();}s.append(&updates[i%updates.len()],&mut noop).unwrap();}
+        assert_eq!(s.state.used,CAP);let mut expected=(*s.visible).clone();let mut rows=Vec::with_capacity(count);let before_bytes:u64=s.costs.categories.values().map(|v|v.0).sum();let before_syncs:u64=s.costs.categories.values().map(|v|v.1).sum();
+        let phase=Instant::now();for i in 0..count{let start=Instant::now();let mut switch_ns=0;let mut sp=[0;4];if s.state.used==CAP{let t=Instant::now();let mut trace=PhaseTrace::new(enabled,t);s.switch_policy(clear,&mut |n|trace.hook(n)).unwrap();let end=Instant::now();switch_ns=end.duration_since(t).as_nanos();sp=trace.finish(end,if clear{10}else{7});}let t=Instant::now();let mut trace=PhaseTrace::new(enabled,t);s.append(&updates[i%updates.len()],&mut |n|trace.hook(n)).unwrap();let end=Instant::now();let append_ns=end.duration_since(t).as_nanos();let ap=trace.finish(end,5);let total_ns=start.elapsed().as_nanos();rows.push((i,total_ns,append_ns,switch_ns,ap,sp,start.duration_since(phase).as_nanos()));}let elapsed=phase.elapsed().as_nanos();
+        for i in 0..count{apply(&mut expected,&updates[i%updates.len()]);}assert_eq!(*s.visible,expected);assert_eq!(*old,original);let bytes:u64=s.costs.categories.values().map(|v|v.0).sum::<u64>()-before_bytes;let syncs:u64=s.costs.categories.values().map(|v|v.1).sum::<u64>()-before_syncs;assert_eq!(rows.iter().filter(|r|r.3>0).count(),count/4);assert_eq!(syncs,(count+count/4*if clear{3}else{2}) as u64);drop(s);
+        let mut reopen=Vec::with_capacity(100);for i in 0..100{let t=Instant::now();let s=Store::open(&p,&mut noop).unwrap();let ns=t.elapsed().as_nanos();assert_eq!(*s.visible,expected);assert!(s.costs.categories.is_empty());drop(s);reopen.push((i,ns));}
+        println!("PHASE_SUMMARY,{mode},{trial},{enabled},{count},{elapsed},{bytes},{syncs},true");
+        for(i,total,append,switch,ap,sp,start)in rows{println!("PHASE_ROW,{mode},{trial},{enabled},{i},{start},{total},{append},{switch},{},{},{},{},{},{},{},{}",ap[0],ap[1],ap[2],ap[3],sp[0],sp[1],sp[2],sp[3]);}for(i,ns)in reopen{println!("PHASE_REOPEN,{mode},{trial},{i},{ns}");}
     }
 
 }

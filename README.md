@@ -6,6 +6,21 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## Bounded reuse: locating long requests
+
+Matched request-phase diagnostics place **94.39–94.59%** of summed request time
+inside synchronization envelopes. The slowest clear-mode request is **29.505 ms**,
+including **29.194 ms** of sync envelopes; reuse reaches **11.599 ms**, including
+**11.499 ms** of append sync. Preparation/publication did not dominate these events.
+
+![Same-request phase attribution and observer pilot](docs/benchmarks/reuse-phases-2026-11-07/phases.svg)
+
+Sync envelopes include scheduling and storage waits, not just physical disk I/O.
+This does not explain the earlier uninstrumented 18.214-ms event or prove a tail fix.
+Observer cost remains uncertain after short on/off pilots. 15,200 measured updates,
+old maps and 1,400 warm reopen checks pass; production/defaults are unchanged.
+[Every trial, interval definitions, delayed episode and observer limits](docs/benchmarks/reuse-phases-2026-11-07/README.md).
+
 ## Bounded epoch-reuse timing
 
 Three short single-writer trials per mode show median throughput including

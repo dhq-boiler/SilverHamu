@@ -1,0 +1,16 @@
+param([ValidateSet('pilot','main')][string]$Stage='pilot')
+$ErrorActionPreference='Stop'
+$volume='catdb-reuse-phases-20261107'
+docker volume create $volume | Out-File artifacts/reuse-phases/volume.txt
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+if ($Stage -eq 'pilot') {
+ $count=400;$cases=@(@('clear',0,1),@('clear',1,1),@('reuse',0,1),@('reuse',1,1),@('reuse',1,2),@('reuse',0,2),@('clear',1,2),@('clear',0,2))
+} else {
+ $count=2000;$cases=@(@('clear',1,3),@('reuse',1,3),@('reuse',1,4),@('clear',1,4),@('clear',1,5),@('reuse',1,5))
+}
+foreach ($case in $cases) {
+ $mode=$case[0];$enabled=$case[1];$trial=$case[2];$out="artifacts/reuse-phases/$Stage-$mode-$enabled-$trial.log"
+ docker run --rm --cpus=2 --memory=4g --mount "type=volume,source=$volume,target=/data" -e "REUSE_SPEED_MODE=$mode" -e "REUSE_SPEED_TRIAL=$trial" -e REUSE_SPEED_ROOT=/data -e "PHASE_ENABLED=$enabled" -e "PHASE_COUNT=$count" catdb-reuse-phases cargo test --locked --release --lib transactions::variable_gate::tests::reuse_phases -- --exact --ignored --nocapture --test-threads=1 2>&1 | Out-File -Encoding utf8 $out
+ if ($LASTEXITCODE -ne 0) { Get-Content $out -Tail 25; exit $LASTEXITCODE }
+ Get-Content $out | Select-String 'PHASE_SUMMARY|test result:'
+}

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 268" role="img"><title>Service updates through Python drivers</title><rect width="900" height="268" fill="white"/><g font-family="sans-serif" fill="#17283b">
+<text x="12" y="27" font-size="21">Service updates through Python drivers</text>
+<text x="12" y="50" font-size="14">100k rows, 256 B, four clients, 1,024 durable updates; median of three trials.</text>
+<text x="200" y="78" font-size="16">Updates / second</text>
+<text x="12" y="111" font-size="14">catdb service</text>
+<rect x="200" y="99" width="172.48" height="14" fill="#346a91"/>
+<text x="378.47927646443736" y="111" font-size="13">841.04</text>
+<text x="12" y="150" font-size="14">PostgreSQL</text>
+<rect x="200" y="138" width="225.00" height="14" fill="#346a91"/>
+<text x="431.0" y="150" font-size="13">1,097.14</text>
+<text x="12" y="189" font-size="14">MySQL</text>
+<rect x="200" y="177" width="63.14" height="14" fill="#346a91"/>
+<text x="269.138780095209" y="189" font-size="13">307.88</text>
+<text x="12" y="228" font-size="14">Oracle Free</text>
+<rect x="200" y="216" width="202.18" height="14" fill="#346a91"/>
+<text x="408.1781120386057" y="228" font-size="13">985.86</text>
+<text x="545" y="78" font-size="16">p99 (ms)</text>
+<rect x="545" y="99" width="70.91" height="14" fill="#286f59"/>
+<text x="621.9133113568734" y="111" font-size="13">6.60</text>
+<rect x="545" y="138" width="63.27" height="14" fill="#286f59"/>
+<text x="614.2700060270353" y="150" font-size="13">5.89</text>
+<rect x="545" y="177" width="225.00" height="14" fill="#286f59"/>
+<text x="776.0" y="189" font-size="13">20.95</text>
+<rect x="545" y="216" width="67.69" height="14" fill="#286f59"/>
+<text x="618.6868606477552" y="228" font-size="13">6.30</text>
+</g></svg>

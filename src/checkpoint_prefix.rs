@@ -1,7 +1,13 @@
 use super::*;
 
+#[cfg(all(test, target_os = "linux", target_pointer_width = "64"))]
+#[path = "../benchmarks/range-writeback/range.rs"]
+mod range_writeback;
+
 pub(super) struct CheckpointCursor {
     pub(super) pinned: Transaction,
+    #[cfg(all(test, target_os = "linux", target_pointer_width = "64"))]
+    writeback: Option<range_writeback::Pending>,
     last_key: Option<Vec<u8>>,
     after_key: Option<Vec<u8>>,
     chunk_limit: usize,
@@ -81,6 +87,8 @@ impl Database {
         );
         let mut draft = CheckpointDraft {
             cursor: CheckpointCursor {
+                #[cfg(all(test, target_os = "linux", target_pointer_width = "64"))]
+                writeback: range_writeback::Pending::configured(),
                 pinned,
                 last_key,
                 chunk_limit,
@@ -153,7 +161,14 @@ impl Database {
         }
         hook(CheckpointStage::ChunkCopied)?;
         if !pending.is_empty() {
-            output.write_all(&encode_frame(cursor.pinned.snapshot, &pending))?;
+            let frame = encode_frame(cursor.pinned.snapshot, &pending);
+            output.write_all(&frame)?;
+            #[cfg(all(test, target_os = "linux", target_pointer_width = "64"))]
+            if let Some(writeback) = &mut cursor.writeback {
+                writeback.written(frame.len(), |offset, len| {
+                    range_writeback::submit(output, offset, len)
+                })?;
+            }
             cursor.records += pending.len();
             cursor.chunks = cursor
                 .chunks

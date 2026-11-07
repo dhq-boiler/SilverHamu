@@ -208,3 +208,4 @@ fn fifo_orders_a_single_commit_checkpoint_cutover_and_group_commit() {
     assert_eq!(r.get(b"first").unwrap(), Some(b"1".to_vec()));
     assert_eq!(r.get(b"last").unwrap(), Some(b"2".to_vec()));
 }
+include!("../benchmarks/range-writeback/recovery.rs");

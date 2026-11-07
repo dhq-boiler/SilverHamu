@@ -23,7 +23,7 @@ def byte_bins(events, times, lo, hi, tx):
         else: unknown+=size
     return same,other,unknown
 
-def run(folder):
+def run(folder, on_submission=None):
     meta=json.loads((folder/"meta.json").read_text())
     log=(folder/"app.log").read_text()
     stats,calls=identity(folder,("bio",))
@@ -66,6 +66,7 @@ def run(folder):
         i=bisect.bisect_right(beginnings,t)-1
         if i>=0 and t<ranges[i][1] and ino==inodes[i]:
             target=syncs[i]["tx"] if t<=syncs[i]["end"] else tails[i]
+            if on_submission is not None: on_submission(i,t,size)
             events.append((t,size,tid,target));volumes[i]+=size
     times=[x[0] for x in events]
     wt=[x[0] for x in writes]

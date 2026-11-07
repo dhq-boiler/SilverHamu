@@ -6,6 +6,16 @@
 
 catdb is a Rust key-value database that runs either **embedded, without a service**, or as an **optional service process**, including in a Docker container. Both modes use the same transaction engine.
 
+## 8 MiB checkpoint writeback on ext4
+
+On one million rows with four writers and 63 independent publications, the median per-publication peak fell from 136.0 to 8.5 MiB per 10 ms with the current lock and from 136.0 to 8.3 MiB with FIFO. Across three paired runs per lock: standard p99 592.5 → 457.7 ms and throughput 130.1 → 152.7 updates/s, fifo p99 152.2 → 77.2 ms and throughput 133.2 → 142.4 updates/s. [Latency, publication time, bytes, safety checks and trial data](docs/benchmarks/range-writeback-2026-11-08/README.md).
+
+![Paired update performance](docs/benchmarks/range-writeback-2026-11-08/performance.svg)
+
+![Checkpoint writeback and journal timing](docs/benchmarks/range-writeback-2026-11-08/writeback.svg)
+
+[Separate released-interface product comparison](docs/benchmarks/range-writeback-2026-11-08/README.md#separate-released-interface-comparison)
+
 ## Checkpoint data volume around ext4 journal commits
 
 In a fixed 10 ms window before each WAL-targeted commit, 1 standard and 0 FIFO epochs saw exclusively different-target checkpoint submissions across three runs per lock (49,152 and 49,152 attributed WAL waits). The per-run figure includes group sizes and also shows overlap during the commit. [Results, observer overhead, attribution limits and per-epoch data](docs/benchmarks/ext4-checkpoint-bytes-2026-11-08/README.md).

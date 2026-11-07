@@ -6,7 +6,7 @@ def call(*cmd,timeout=600):
     r=subprocess.run(list(map(str,cmd)),capture_output=True,text=True,timeout=timeout)
     if r.returncode:raise RuntimeError(r.stderr[-2000:]+r.stdout[-1000:])
     return r.stdout.strip()
-def one(out,rep,mode,trace,pilot,calibration=False):
+def one(out,rep,mode,trace,pilot,calibration=False, image='catdb-journal-identity', range_writeback=False):
     tag=uuid.uuid4().hex[:10]
     name=f"{rep}-{mode}-"+("trace" if trace else "plain");folder=out/name;folder.mkdir()
     vol="catdb-os-"+tag;obs=vol+"-observer"
@@ -29,7 +29,8 @@ def one(out,rep,mode,trace,pilot,calibration=False):
         cmd=["docker","run","--rm","--name",vol+"-db","--network","none","--cpus","2","--memory","4g","--memory-swap","4g","-v",vol+":/data"]
         for k,v in dict(SCALED_ROOT="/data",SCALED_VARIANT="prefix-on",SCALED_ROWS=n,SCALED_OPS=ops,SCALED_CAP=cap,EXACT_PUBLICATIONS=1,JOURNAL_WORKER_TAG=tag,SYNC_OS_TAG=tag).items():
             cmd+=["-e",f"{k}={v}"]
-        cmd+=["catdb-journal-identity","cargo","test","--locked","--release"]
+        if range_writeback:cmd+=["-e","CATDB_TEST_RANGE_WRITEBACK=1"]
+        cmd+=[image,"cargo","test","--locked","--release"]
         if mode=="fifo":cmd+=["--features","fifo-writer"]
         cmd+=["--lib","transactions::scaled_gate::checks::timing::independent_campaign","--","--ignored","--exact","--nocapture"]
         print("START",name,flush=True)

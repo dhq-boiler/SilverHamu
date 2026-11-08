@@ -1,0 +1,22 @@
+{
+  "name": "catdb-client",
+  "version": "0.1.0",
+  "description": "Node.js client for the catdb TCP service",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dhq-boiler/catdb.git",
+    "directory": "clients/node"
+  },
+  "homepage": "https://github.com/dhq-boiler/catdb/tree/main/clients/node#readme",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    }
+  },
+  "types": "./index.d.ts",
+  "files": ["index.js", "index.d.ts", "LICENSE"],
+  "engines": { "node": ">=18" },
+  "license": "MIT"
+}

@@ -1,4 +1,6 @@
-# Experimental service v1
+# Experimental catdb service
+
+For individual logins and database-scoped permissions, use [TLS service accounts](accounts.md). The shared-token configuration below describes the v1 listener.
 
 The service is opt-in (`--features service`) and uses the same database implementation as embedded clients. A process exclusively owns a transaction store; multiple connections share that owner. This is not a server for immutable snapshot files or application-specific archives.
 
@@ -18,7 +20,7 @@ catdb-server --db PATH --token-file PATH [--init]
 
 Parent directories must already exist. Without `--init`, a missing database is an error. Existing corrupt files are rejected, not replaced. Non-loopback binding requires explicit `--allow-remote`. Docker uses it inside the container; Compose limits host publication to loopback.
 
-The token file must contain 32–256 UTF-8 bytes, with optional trailing CR/LF. All clients sharing the token have full read/write/checkpoint access. Protect this file. There is no role separation or built-in transport encryption.
+The token file must contain 32–256 UTF-8 bytes, with optional trailing CR/LF. All clients sharing the token have full read/write/checkpoint access. Protect this file. The v1 token listener has no role separation or built-in transport encryption.
 
 ```text
 catdb-server --healthcheck --token-file PATH [--bind 127.0.0.1:7400]

@@ -1,19 +1,33 @@
 """Experimental catdb v1 client. Requests are JSON lines on stdin; values are hex."""
 import argparse
+import getpass
 import json
 import pathlib
 import socket
+import ssl
 import struct
 import sys
 
 
 class Client:
-    def __init__(self, host, port, token, timeout=10):
+    def __init__(self, host, port, token=None, timeout=10, *, username=None, password=None,
+                 database="main", cafile=None):
+        if (token is None) == (username is None):
+            raise ValueError("choose token or account authentication")
+        if token is not None and (password is not None or cafile is not None or database != "main"):
+            raise ValueError("TLS account options cannot be used with a token")
         self.socket = socket.create_connection((host, port), timeout)
         try:
-            response = self.request(op="auth", version=1, token=token)
+            if username is not None:
+                context = ssl.create_default_context(cafile=cafile)
+                self.socket = context.wrap_socket(self.socket, server_hostname=host)
+                response = self.request(op="auth", version=2, database=database,
+                                        username=username, password=password)
+            else:
+                response = self.request(op="auth", version=1, token=token)
             if not response.get("ok"):
                 raise RuntimeError("catdb authentication failed")
+            self.account_id = response.get("account_id")
         except BaseException:
             self.close()
             raise
@@ -51,10 +65,42 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=7400)
-    parser.add_argument("--token-file", type=pathlib.Path, required=True)
+    auth = parser.add_mutually_exclusive_group(required=True)
+    auth.add_argument("--token-file", type=pathlib.Path)
+    auth.add_argument("--user")
+    parser.add_argument("--password-file", type=pathlib.Path)
+    parser.add_argument("--ca-file")
+    parser.add_argument("--database", default="main")
+    parser.add_argument("--create-user")
+    parser.add_argument("--role", choices=("reader","writer","admin"))
     args = parser.parse_args()
-    token = args.token_file.read_text(encoding="utf-8").rstrip("\r\n")
-    with Client(args.host, args.port, token) as client:
+    if args.password_file and not args.user:
+        parser.error("--password-file requires --user")
+    if bool(args.create_user) != bool(args.role) or (args.create_user and not args.user):
+        parser.error("--create-user and --role require account authentication and each other")
+    token = args.token_file.read_text(encoding="utf-8").rstrip("\r\n") if args.token_file else None
+    password = None
+    if args.user:
+        if args.password_file:
+            with args.password_file.open("rb") as source:
+                secret = source.read(1027)
+            if len(secret) > 1026:
+                raise ValueError("password file too large")
+            password = secret.decode("utf-8")
+            if password.endswith("\n"):
+                password = password[:-1].removesuffix("\r")
+        else:
+            password = getpass.getpass("Account password: ")
+    with Client(args.host, args.port, token, username=args.user, password=password,
+                database=args.database, cafile=args.ca_file) as client:
+        if args.create_user:
+            new_password = getpass.getpass("New user's password: ")
+            if new_password != getpass.getpass("Confirm new password: "):
+                raise ValueError("passwords differ")
+            response = client.request(op="create_user", username=args.create_user,
+                                      password=new_password, role=args.role)
+            print(json.dumps(response))
+            return 0 if response.get("ok") else 1
         for line in sys.stdin:
             if not line.strip():
                 continue

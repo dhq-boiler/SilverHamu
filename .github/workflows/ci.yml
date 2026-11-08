@@ -80,6 +80,8 @@ jobs:
       - run: python benchmarks/commit-tail/test_attribution.py
       - run: python benchmarks/inline-qualification/test_fixture.py
       - run: python tests/service_protocol.py
+      - if: matrix.features == 'service'
+        run: python tests/service_accounts.py
       - run: python tests/service_protocol.py
         env:
           CATDB_BACKGROUND_RECLAMATION: '1'

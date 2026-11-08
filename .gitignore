@@ -4,6 +4,9 @@
 /data/
 .env
 *.ndb
+*.accounts
+*.accounts.owner
+*.account-owner
 *.wal
 __pycache__/
 *.pyc

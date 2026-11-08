@@ -32,7 +32,7 @@ python scripts/create-catdb-token.py
 docker compose up --build -d
 ```
 
-Connect to `127.0.0.1:7400` with the generated token. `docker compose down` stops the service and retains its data volume. [Service configuration and client protocol](docs/service.md)
+Connect to `127.0.0.1:7400` with the generated token. For individual logins and per-database permissions, see [TLS service accounts](docs/accounts.md). `docker compose down` retains the data volume. [Service configuration and client protocol](docs/service.md)
 
 ## Benchmark results
 

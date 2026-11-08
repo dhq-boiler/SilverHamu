@@ -8,6 +8,12 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
+#[path = "service_accounts.rs"]
+mod accounts;
+#[path = "service_tls.rs"]
+mod tls;
+pub use accounts::AccountOptions;
+use accounts::{Accounts, Role};
 
 pub const MAX_REQUEST: usize = 1024 * 1024;
 pub const MAX_RESPONSE: usize = 2 * 1024 * 1024 + 8192;
@@ -27,12 +33,16 @@ pub struct Config {
 
 impl Config {
     pub fn validate(&self) -> io::Result<()> {
+        self.validate_mode(false)
+    }
+    fn validate_mode(&self, accounts: bool) -> io::Result<()> {
         if !self.bind.ip().is_loopback() && !self.allow_remote {
             return Err(io::Error::other(
                 "non-loopback bind requires --allow-remote; use an encrypted tunnel outside the host",
             ));
         }
-        if !(32..=256).contains(&self.token.len())
+        if (accounts && !self.token.is_empty())
+            || (!accounts && !(32..=256).contains(&self.token.len()))
             || !(1..=256).contains(&self.max_connections)
             || self.request_timeout.is_zero()
             || self.transaction_timeout.is_zero()
@@ -46,6 +56,7 @@ impl Config {
 }
 
 pub struct Server {
+    accounts: Option<Arc<Accounts>>,
     config: Arc<Config>,
     db: Database,
     listener: TcpListener,
@@ -65,7 +76,36 @@ impl Server {
         config: Config,
         limits: ResourceLimits,
     ) -> Result<Self, Box<dyn std::error::Error>> {
-        config.validate()?;
+        Self::open(config, limits, None)
+    }
+
+    pub fn bind_accounts(
+        config: Config,
+        limits: ResourceLimits,
+        accounts: AccountOptions,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
+        Self::open(config, limits, Some(accounts))
+    }
+
+    fn open(
+        config: Config,
+        limits: ResourceLimits,
+        options: Option<AccountOptions>,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
+        config.validate_mode(options.is_some())?;
+        if config
+            .database
+            .extension()
+            .is_some_and(|ext| ext.eq_ignore_ascii_case("accounts"))
+        {
+            return Err("reserved account catalog path".into());
+        }
+        if options.is_none()
+            && (accounts::catalog_path(&config.database).try_exists()?
+                || accounts::owner_path(&config.database).try_exists()?)
+        {
+            return Err("this database is configured for TLS accounts".into());
+        }
         let limits = limits.validate()?;
         let range_writeback = match std::env::var_os("CATDB_EXT4_CHECKPOINT_WRITEBACK") {
             None => false,
@@ -78,7 +118,10 @@ impl Server {
         let db = if config.database.try_exists()? {
             Database::open_with_limits(&config.database, limits)?
         } else if config.initialize {
-            let parent = config.database.parent().filter(|p| !p.as_os_str().is_empty())
+            let parent = config
+                .database
+                .parent()
+                .filter(|p| !p.as_os_str().is_empty())
                 .unwrap_or_else(|| std::path::Path::new("."));
             if range_writeback {
                 Database::check_range_writeback_path(parent)?;
@@ -130,7 +173,11 @@ impl Server {
         }
         db.set_group_commit(true);
         db.set_group_commit_wake_on_four(true);
+        let accounts = options
+            .map(|opts| Accounts::open(&config, &db, limits, opts).map(Arc::new))
+            .transpose()?;
         Ok(Self {
+            accounts,
             config: Arc::new(config),
             db,
             listener,
@@ -168,6 +215,7 @@ impl Server {
                     let db = self.db.clone();
                     let config = Arc::clone(&self.config);
                     let stopping = Arc::clone(&stop);
+                    let accounts = self.accounts.clone();
                     match thread::Builder::new()
                         .name(client_thread_name())
                         .spawn(move || {
@@ -178,7 +226,7 @@ impl Server {
                                 }
                             }
                             let _permit = Permit(count);
-                            let _ = connection(stream, db, &config, &stopping);
+                            let _ = connection(stream, db, &config, &stopping, accounts.as_deref());
                         }) {
                         Ok(worker) => workers.push(worker),
                         Err(error) => {
@@ -407,31 +455,74 @@ impl Wire {
 }
 
 fn connection(
-    mut stream: TcpStream,
+    stream: TcpStream,
     db: Database,
     config: &Config,
     stop: &AtomicBool,
+    accounts: Option<&Accounts>,
 ) -> io::Result<()> {
-    let mut wire = Wire::default();
     stream.set_nodelay(true)?;
     stream.set_read_timeout(Some(Duration::from_millis(100)))?;
     stream.set_write_timeout(Some(Duration::from_millis(100)))?;
     let deadline = Instant::now() + config.request_timeout.min(Duration::from_secs(5));
-    let auth = wire.receive(&mut stream, deadline, stop)?;
-    let token = auth.get("token").and_then(Value::as_str).unwrap_or("");
-    if auth.get("op").and_then(Value::as_str) != Some("auth")
-        || auth.get("version").and_then(Value::as_u64) != Some(1)
-        || !same_token(token.as_bytes(), &config.token)
-    {
-        wire.send(&mut stream, &error("unauthorized"), deadline, stop)?;
-        return Ok(());
+    let clock = std::cell::Cell::new(deadline);
+    if let Some(accounts) = accounts {
+        let peer = stream.peer_addr()?.ip();
+        let conn = rustls::ServerConnection::new(accounts.tls.clone()).map_err(io::Error::other)?;
+        let socket = tls::TimedSocket {
+            socket: stream,
+            deadline: &clock,
+            stop,
+        };
+        return session(
+            rustls::StreamOwned::new(conn, socket),
+            db,
+            config,
+            stop,
+            Some((accounts, peer)),
+            &clock,
+        );
     }
-    wire.send(
-        &mut stream,
-        &json!({"ok":true,"protocol":1}),
-        deadline,
-        stop,
-    )?;
+    session(stream, db, config, stop, None, &clock)
+}
+
+fn session(
+    mut stream: impl Read + Write,
+    mut db: Database,
+    config: &Config,
+    stop: &AtomicBool,
+    accounts: Option<(&Accounts, std::net::IpAddr)>,
+    clock: &std::cell::Cell<Instant>,
+) -> io::Result<()> {
+    let deadline = clock.get();
+    let mut wire = Wire::default();
+    let auth = wire.receive(&mut stream, deadline, stop)?;
+    let mut principal = if let Some((accounts, peer)) = accounts {
+        let Some((selected, principal)) = accounts.login(&auth, peer) else {
+            wire.send(&mut stream, &error("unauthorized"), deadline, stop)?;
+            stream.flush()?;
+            return Ok(());
+        };
+        db = selected;
+        Some(principal)
+    } else {
+        let token = auth.get("token").and_then(Value::as_str).unwrap_or("");
+        if auth.get("op").and_then(Value::as_str) != Some("auth")
+            || auth.get("version").and_then(Value::as_u64) != Some(1)
+            || !same_token(token.as_bytes(), &config.token)
+        {
+            wire.send(&mut stream, &error("unauthorized"), deadline, stop)?;
+            return Ok(());
+        }
+        None
+    };
+    drop(auth);
+    let authenticated = match principal.as_ref() {
+        Some(user) => json!({"ok":true,"protocol":2,"account_id":hex(&user.id)}),
+        None => json!({"ok":true,"protocol":1}),
+    };
+    wire.send(&mut stream, &authenticated, deadline, stop)?;
+    stream.flush()?;
     #[cfg(feature = "lock-timing")]
     let buffered = std::env::var("CATDB_DIAGNOSTICS").as_deref() == Ok("buffer");
     #[cfg(feature = "lock-timing")]
@@ -453,9 +544,37 @@ fn connection(
         if let Some(expiry) = expires {
             deadline = deadline.min(expiry);
         }
-        let request = wire.receive(&mut stream, deadline, stop)?;
+        clock.set(deadline);
+        let mut request = wire.receive(&mut stream, deadline, stop)?;
         if Instant::now() >= deadline || stop.load(Ordering::Acquire) {
             break;
+        }
+        if let (Some((accounts, _)), Some(user)) = (accounts, principal.as_mut()) {
+            if !accounts.current(&db, user) {
+                wire.send(&mut stream, &error("unauthorized"), deadline, stop)?;
+                stream.flush()?;
+                break;
+            }
+            let op = request["op"].as_str().unwrap_or("");
+            let response = if !user.role.permits(op) || request.get("database").is_some() {
+                Some(error("forbidden"))
+            } else if matches!(op, "create_user" | "set_role") {
+                Some(if transaction.is_some() {
+                    error("invalid_request")
+                } else {
+                    accounts.manage(&db, user, &request)
+                })
+            } else {
+                None
+            };
+            if let Some(response) = response {
+                wire.send(&mut stream, &response, deadline, stop)?;
+                stream.flush()?;
+                continue;
+            }
+            if op == "begin" && user.role == Role::Reader {
+                request["op"] = json!("begin_read");
+            }
         }
         #[cfg(feature = "lock-timing")]
         {
@@ -546,12 +665,10 @@ fn connection(
         } else {
             response
         };
-        wire.send(
-            &mut stream,
-            &response,
-            Instant::now() + config.request_timeout,
-            stop,
-        )?;
+        let response_deadline = Instant::now() + config.request_timeout;
+        clock.set(response_deadline);
+        wire.send(&mut stream, &response, response_deadline, stop)?;
+        stream.flush()?;
         #[cfg(feature = "lock-timing")]
         if buffered
             && matches!(

@@ -11,6 +11,7 @@ pub(super) struct CheckpointCursor {
     last_key: Option<Vec<u8>>,
     after_key: Option<Vec<u8>>,
     chunk_limit: usize,
+    maintenance: bool,
     pub(super) chunks: u32,
     pub(super) records: usize,
 }
@@ -90,6 +91,10 @@ impl Database {
     }
 
     pub(super) fn start_checkpoint(&self, epoch: u64) -> Result<CheckpointDraft> {
+        self.start_checkpoint_for(epoch, false)
+    }
+
+    pub(super) fn start_checkpoint_for(&self, epoch: u64, maintenance: bool) -> Result<CheckpointDraft> {
         #[cfg(all(test, target_os = "linux", not(feature = "retirement-timing")))]
         let attempted = independent_trace::stamp();
         let writer = self.inner.writer.lock().map_err(|_| Error::Poisoned)?;
@@ -100,7 +105,8 @@ impl Database {
             .inner
             .range_writeback
             .load(std::sync::atomic::Ordering::Acquire);
-        let pinned = self.begin()?;
+        // All client slots may already belong to writers waiting for this checkpoint.
+        let pinned = self.begin_counted(maintenance, !maintenance)?;
         let state = self.state()?;
         let chunk_limit = MAX_TRANSACTION_BYTES.min(
             state
@@ -133,6 +139,7 @@ impl Database {
                 pinned,
                 last_key,
                 chunk_limit,
+                maintenance,
                 after_key: None,
                 chunks: 0,
                 records: 0,
@@ -183,10 +190,10 @@ impl Database {
                     visible(versions, cursor.pinned.snapshot).and_then(|v| v.value.as_deref())
                 {
                     let size = operation_size(key, Some(value));
-                    if size + 12 > cursor.chunk_limit {
+                    if size + 12 > cursor.chunk_limit && !cursor.maintenance {
                         return Err(Error::ResourceExhausted("checkpoint record"));
                     }
-                    if bytes + size > cursor.chunk_limit {
+                    if bytes + size > cursor.chunk_limit && !pending.is_empty() {
                         break;
                     }
                     if pending.is_empty() {

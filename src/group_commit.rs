@@ -40,6 +40,28 @@ fn cohort_delay(
     }
 }
 
+#[cfg(feature = "wide-cohort")]
+fn wide_target(
+    queued: usize,
+    handed_off: bool,
+    previous: Option<(Instant, usize)>,
+    now: Instant,
+) -> usize {
+    let recent = previous
+        .filter(|(ended, _)| now.saturating_duration_since(*ended) < Duration::from_millis(2))
+        .map_or(0, |(_, count)| count);
+    if queued <= 4 && recent <= 4 {
+        return 4;
+    }
+    let writers = if handed_off && queued > 4 {
+        // A queue formed during a previous sync can contain the other half of a cohort.
+        recent + queued
+    } else {
+        recent.max(queued)
+    };
+    writers.next_power_of_two().min(MAX_BATCH)
+}
+
 #[derive(Default)]
 pub(super) struct GroupCommit {
     enabled: AtomicBool,
@@ -428,12 +450,24 @@ impl GroupCommit {
             delay
         };
         #[cfg(feature = "handoff-refill")]
-        let delay = cohort_delay(
-            wake_on_four,
-            delay,
-            *self.recent_group.lock().map_err(|_| Error::Poisoned)?,
-            Instant::now(),
-        );
+        let recent = *self.recent_group.lock().map_err(|_| Error::Poisoned)?;
+        #[cfg(feature = "handoff-refill")]
+        let now = Instant::now();
+        #[cfg(feature = "handoff-refill")]
+        let delay = cohort_delay(wake_on_four, delay, recent, now);
+        #[cfg(feature = "wide-cohort")]
+        let target = if wake_on_four {
+            target.max(wide_target(pending.len(), handed_off, recent, now))
+        } else {
+            target
+        };
+        #[cfg(feature = "wide-cohort")]
+        let delay = if wake_on_four && target > 4 {
+            // A previous cohort may disperse; a missing writer must not postpone sync indefinitely.
+            Duration::from_micros(1000)
+        } else {
+            delay
+        };
         #[cfg(feature = "single-client-commit")]
         let single_client = self.single_service_client();
         #[cfg(feature = "single-client-commit")]
@@ -481,9 +515,7 @@ impl GroupCommit {
         let mut timing = start.map(|start| [start.elapsed().as_nanos() as u64, 0, 0]);
         let results = persist_group(&database, &mut requests, |file, frames| {
             let write = timing.as_ref().map(|_| Instant::now());
-            for frame in frames {
-                file.write_all(frame)?;
-            }
+            write_frames(file, frames)?;
             #[cfg(feature = "lock-timing")]
             trace_mark(5);
             self.record_sync();
@@ -593,7 +625,10 @@ impl GroupCommit {
             queued: Instant::now(),
         });
         let wake_on_four = self.wake_on_four.load(Ordering::Relaxed);
-        if wake_on_four && pending.len() == 4 {
+        let queued = pending.len();
+        let reached_target = queued == 4
+            || (cfg!(feature = "wide-cohort") && queued > 4 && queued.is_power_of_two());
+        if wake_on_four && reached_target {
             self.ready.notify_one();
         }
 
@@ -626,6 +661,44 @@ fn crash_group_at(stage: &str) {
     }
 }
 
+fn write_frames(writer: &mut impl Write, frames: &[Vec<u8>]) -> io::Result<()> {
+    if let [frame] = frames {
+        return writer.write_all(frame);
+    }
+    let mut slices = [io::IoSlice::new(&[]); MAX_BATCH];
+    for chunk in frames.chunks(MAX_BATCH) {
+        for (slice, frame) in slices.iter_mut().zip(chunk) {
+            *slice = io::IoSlice::new(frame);
+        }
+        let mut pending = &mut slices[..chunk.len()];
+        while !pending.is_empty() {
+            match writer.write_vectored(pending) {
+                Ok(0) => return Err(io::ErrorKind::WriteZero.into()),
+                Ok(count) => io::IoSlice::advance_slices(&mut pending, count),
+                Err(error) if error.kind() == io::ErrorKind::Interrupted => continue,
+                Err(error) => return Err(error),
+            }
+        }
+    }
+    Ok(())
+}
+
+fn group_error(error: &Error) -> Error {
+    let copy = |e: &io::Error| e.raw_os_error().map(io::Error::from_raw_os_error)
+        .unwrap_or_else(|| io::Error::new(e.kind(), e.to_string()));
+    match error {
+        Error::Io(e) => Error::Io(copy(e)),
+        Error::CommitUncertain(e) => Error::CommitUncertain(copy(e)),
+        Error::CheckpointUncertain(e) => Error::CheckpointUncertain(copy(e)),
+        Error::Conflict(kind) => Error::Conflict(*kind),
+        Error::Invalid(message) => Error::Invalid(message),
+        Error::Limit(message) => Error::Limit(message),
+        Error::ResourceExhausted(message) => Error::ResourceExhausted(message),
+        Error::Locked(message) => Error::Locked(message.clone()),
+        Error::Poisoned => Error::Poisoned,
+    }
+}
+
 fn persist_group(
     database: &Database,
     requests: &mut [Request],
@@ -644,16 +717,15 @@ pub(super) fn persist_entries<T>(
     take_retirement_trace();
     #[cfg(feature = "lock-timing")]
     trace_mark(2);
-    let Ok(_writer) = database.inner.writer.lock() else {
-        return requests.iter().map(|_| Err(Error::Poisoned)).collect();
+    let incoming = requests.iter_mut().map(|request| {
+        (transaction_of(request).write_bytes + PREFIX_BYTES + TRAILER_BYTES) as u64
+    }).sum();
+    let (_writer, mut state) = match database.lock_for_commit(incoming) {
+        Ok(guards) => guards,
+        Err(error) => return requests.iter().map(|_| Err(group_error(&error))).collect(),
     };
     #[cfg(feature = "retirement-timing")]
     let _writer = TimedWriter(Some(_writer));
-    #[cfg(feature = "lock-timing")]
-    trace_mark(3);
-    let Ok(mut state) = database.state() else {
-        return requests.iter().map(|_| Err(Error::Poisoned)).collect();
-    };
     #[cfg(feature = "lock-timing")]
     detail_mark(2);
     let mut results = Vec::with_capacity(requests.len());
@@ -757,6 +829,61 @@ pub(super) fn persist_entries<T>(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn grouped_writes_keep_frame_order_across_short_writes_and_interruptions() {
+        struct Sink {
+            limit: usize,
+            calls: usize,
+            bytes: Vec<u8>,
+        }
+        impl Write for Sink {
+            fn write(&mut self, _: &[u8]) -> io::Result<usize> {
+                unreachable!()
+            }
+            fn write_vectored(&mut self, slices: &[io::IoSlice<'_>]) -> io::Result<usize> {
+                self.calls += 1;
+                if self.calls == 1 {
+                    return Err(io::ErrorKind::Interrupted.into());
+                }
+                let start = self.bytes.len();
+                for slice in slices {
+                    let available = self.limit - (self.bytes.len() - start);
+                    self.bytes
+                        .extend_from_slice(&slice[..slice.len().min(available)]);
+                }
+                Ok(self.bytes.len() - start)
+            }
+            fn flush(&mut self) -> io::Result<()> {
+                Ok(())
+            }
+        }
+        let frames = [
+            b"abc".to_vec(),
+            b"d".to_vec(),
+            b"efg".to_vec(),
+            b"hi".to_vec(),
+        ];
+        for limit in [1, 2, 4, 9] {
+            let mut sink = Sink {
+                limit,
+                calls: 0,
+                bytes: Vec::new(),
+            };
+            write_frames(&mut sink, &frames).unwrap();
+            assert_eq!(sink.bytes, b"abcdefghi");
+            assert_eq!(sink.calls, 1 + 9_usize.div_ceil(limit));
+        }
+        let mut stalled = Sink {
+            limit: 0,
+            calls: 1,
+            bytes: Vec::new(),
+        };
+        assert_eq!(
+            write_frames(&mut stalled, &frames).unwrap_err().kind(),
+            io::ErrorKind::WriteZero
+        );
+    }
+
     #[cfg(feature = "retirement-timing")]
     #[test]
     fn st_group_retirement_trace_reaches_requester_after_writer_release() {
@@ -1442,6 +1569,29 @@ mod tests {
                 end + Duration::from_millis(2) - Duration::from_nanos(1)
             ),
             Duration::from_micros(1000)
+        );
+    }
+
+    #[cfg(feature = "wide-cohort")]
+    #[test]
+    fn wide_groups_require_recent_or_queued_writers_and_stay_bounded() {
+        let now = Instant::now();
+        for (queued, previous, handed_off, expected) in [
+            (1, 4, false, 4),
+            (4, 4, true, 4),
+            (5, 0, false, 8),
+            (2, 15, false, 16),
+            (8, 8, true, 16),
+            (17, 32, true, 32),
+        ] {
+            assert_eq!(
+                wide_target(queued, handed_off, Some((now, previous)), now),
+                expected
+            );
+        }
+        assert_eq!(
+            wide_target(1, false, Some((now, 32)), now + Duration::from_millis(2)),
+            4
         );
     }
 

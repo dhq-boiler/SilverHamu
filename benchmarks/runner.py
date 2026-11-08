@@ -34,7 +34,11 @@ class Native:
         if cls.db is None:
             out=c.c_uint64(); path=b'/data/catdb.wal'
             args=(path,len(path),b'catdb-benchmark1',c.byref(out)) if create else (path,len(path),c.byref(out))
-            cls.check(getattr(cls.lib,'ndb_tx_db_'+('create' if create else 'open'))(*args))
+            operation = cls.lib.ndb_tx_db_create if create else cls.lib.ndb_tx_db_open
+            if create and os.environ.get('BENCH_APPEND_FIXTURE') == '1':
+                operation = getattr(cls.lib, 'ndb_tx_db_create_append', operation)
+                operation.argtypes = cls.lib.ndb_tx_db_create.argtypes
+            cls.check(operation(*args))
             cls.db=out.value
             cls.check(cls.lib.ndb_tx_set_group_commit(cls.db,1))
     @staticmethod
@@ -68,10 +72,23 @@ class Native:
     def shutdown(cls):
         if cls.db is not None: cls.check(cls.lib.ndb_tx_db_close(cls.db));cls.db=None
 
+class SerializationConflict(RuntimeError):
+    pass
+
+def conflict_code(engine, error):
+    if engine == 'catdb-service' and isinstance(error, SerializationConflict):
+        return 'conflict'
+    if engine == 'postgres' and getattr(error, 'sqlstate', None) == '40001':
+        return '40001'
+    if engine == 'oracle' and error.args and getattr(error.args[0], 'code', None) == 8177:
+        return 'ORA-08177'
+    return None
+
 class Remote:
     def __init__(self): self.client=Client('database',7400,TOKEN,timeout=120)
     def request(self,**kw):
         r=self.client.request(**kw)
+        if not r.get('ok') and r.get('error') == 'conflict': raise SerializationConflict(str(r))
         if not r.get('ok'): raise RuntimeError(str(r))
         return r
     def begin(self):self.request(op='begin')
@@ -155,6 +172,11 @@ def initialize(engine):
         a=SQL(engine)
         types={'sqlite':'k BLOB PRIMARY KEY, v BLOB NOT NULL','postgres':'k BYTEA PRIMARY KEY, v BYTEA NOT NULL','mysql':'k BINARY(8) PRIMARY KEY, v VARBINARY(256) NOT NULL','oracle':'k RAW(8) PRIMARY KEY, v RAW(256) NOT NULL'}
         suffix=' WITHOUT ROWID' if engine=='sqlite' else ' ENGINE=InnoDB' if engine=='mysql' else ''
+        if engine == 'oracle' and os.environ.get('BENCH_ORACLE_INITRANS'):
+            slots = int(os.environ['BENCH_ORACLE_INITRANS'])
+            if not 1 <= slots <= 255:
+                raise ValueError('Oracle INITRANS must be between 1 and 255')
+            suffix = f' INITRANS {slots}'
         a.cur.execute('CREATE TABLE kv ('+types[engine]+')'+suffix);a.commit()
         a.begin();assert a.get(key(0)) is None and a.scan(key(0))==[];a.rollback()
         marks=':1,:2' if engine=='oracle' else a.mark+','+a.mark
@@ -186,25 +208,45 @@ def worker(engine,workload,worker_id,clients,rep,start,ready):
     keys=[key(rng.randrange((population-worker_id+clients-1)//clients)*clients+worker_id) for _ in range(OPS//clients)]
     # Warm connections and query plans outside the timed interval.
     for k in keys[:50]:a.begin();a.get(k);a.rollback()
-    ready.wait();start.wait();samples=[];errors=[];changed={}
-    for sequence,k in enumerate(keys):
-        began=time.perf_counter_ns()
-        try:
-            a.begin()
-            if workload=='get':assert a.get(k) is not None
-            elif workload=='range100':
-                rows=a.scan(k);assert len(rows)==min(100,ROWS-int.from_bytes(k,'big'))
-            else:
-                stamp=rep*1000000000+clients*10000000+worker_id*OPS+sequence+1
-                a.put(k,value(int.from_bytes(k,'big'),stamp))
-            if workload=='update':a.commit();changed[str(int.from_bytes(k,'big'))]=stamp
-            else:a.rollback()
-            samples.append(time.perf_counter_ns()-began)
-        except Exception as e:
-            errors.append({'elapsed_ns':time.perf_counter_ns()-began,'error':str(e)})
-            try:a.rollback()
-            except Exception:pass
-    a.close();return samples,errors,changed
+    retry_limit = int(os.environ.get('BENCH_SERIALIZATION_RETRIES', '0'))
+    samples, errors, changed, retries = [], [], {}, []
+    ready.wait()
+    start.wait()
+    for sequence, k in enumerate(keys):
+        began = time.perf_counter_ns()
+        for attempt in range(retry_limit + 1):
+            try:
+                a.begin()
+                if workload == 'get':
+                    assert a.get(k) is not None
+                elif workload == 'range100':
+                    rows = a.scan(k)
+                    assert len(rows) == min(100, ROWS-int.from_bytes(k,'big'))
+                else:
+                    stamp = rep*1000000000 + clients*10000000 + worker_id*OPS + sequence + 1
+                    row = int.from_bytes(k,'big')
+                    a.put(k, value(row, stamp))
+                if workload == 'update':
+                    a.commit()
+                    changed[str(row)] = stamp
+                else:
+                    a.rollback()
+                samples.append(time.perf_counter_ns() - began)
+                break
+            except Exception as error:
+                code = conflict_code(engine, error)
+                try:
+                    a.rollback()
+                except Exception as rollback_error:
+                    errors.append({'elapsed_ns':time.perf_counter_ns()-began,
+                                   'error':str(error), 'rollback_error':str(rollback_error)})
+                    break
+                if not code or attempt == retry_limit:
+                    errors.append({'elapsed_ns':time.perf_counter_ns()-began, 'error':str(error)})
+                    break
+                retries.append({'worker':worker_id, 'sequence':sequence, 'attempt':attempt+1, 'code':code})
+    a.close()
+    return samples, errors, changed, retries
 
 def measure(engine,workload,clients,rep):
     if engine=='catdb-embedded':Native.connect()
@@ -215,13 +257,14 @@ def measure(engine,workload,clients,rep):
         futures=[pool.submit(worker,engine,workload,i,clients,rep,start,ready) for i in range(clients)]
         ready.wait(timeout=120);t0=time.perf_counter_ns();start.set()
         results=[f.result(timeout=600) for f in futures];elapsed=time.perf_counter_ns()-t0
-    all_samples=[s for samples,_,_ in results for s in samples];errors=[e for _,es,_ in results for e in es]
+    all_samples=[s for r in results for s in r[0]];errors=[e for r in results for e in r[1]]
+    retry_events=[event for r in results if len(r) > 3 for event in r[3]]
     changes=json.loads(pathlib.Path('/data/updated.json').read_text())
-    for _,_,cs in results:changes.update(cs)
+    for result in results:changes.update(result[2])
     pathlib.Path('/data/updated.json').write_text(json.dumps(changes))
     Native.shutdown(); ordered=sorted(all_samples)
     def percentile(p):return ordered[max(0,math.ceil(len(ordered)*p)-1)]/1e6 if ordered else None
-    return {'engine':engine,'workload':workload,'clients':clients,'rep':rep,'rows':ROWS,'value_bytes':256,'attempted':OPS,'completed':len(ordered),'errors':errors,'retries':0,'elapsed_s':elapsed/1e9,'ops_s':len(ordered)/(elapsed/1e9),'p50_ms':percentile(.5),'p95_ms':percentile(.95),'p99_ms':percentile(.99),'max_ms':max(ordered)/1e6 if ordered else None,'latencies_ns':all_samples}
+    return {'engine':engine,'workload':workload,'clients':clients,'rep':rep,'rows':ROWS,'value_bytes':256,'attempted':OPS,'completed':len(ordered),'errors':errors,'retries':len(retry_events),'retry_events':retry_events,'elapsed_s':elapsed/1e9,'ops_s':len(ordered)/(elapsed/1e9),'p50_ms':percentile(.5),'p95_ms':percentile(.95),'p99_ms':percentile(.99),'max_ms':max(ordered)/1e6 if ordered else None,'latencies_ns':all_samples}
 
 def metadata(engine):
     if engine.startswith('catdb'):return {'version':'0.1.0','group_commit':True,'sync_before_ack':True}
@@ -231,6 +274,8 @@ def metadata(engine):
     'mysql':["select version()","select @@innodb_flush_log_at_trx_commit,@@sync_binlog,@@log_bin,@@transaction_isolation,@@innodb_buffer_pool_size"],
     'oracle':["select banner_full from v$version","select sys_context('USERENV','DB_NAME') from dual"]}
     out={}
+    if engine == 'oracle' and os.environ.get('BENCH_ORACLE_INITRANS'):
+        queries['oracle'].append("SELECT ini_trans FROM user_tables WHERE table_name='KV'")
     for q in queries[engine]:a.cur.execute(q);out[q]=a.cur.fetchall()
     a.rollback();a.close();return out
 

@@ -82,9 +82,15 @@ jobs:
       - run: python tests/service_protocol.py
       - if: matrix.features == 'service'
         run: python tests/service_accounts.py
+      - if: matrix.features == 'service'
+        run: python tests/managed_wal_service.py
       - run: python tests/service_protocol.py
         env:
           CATDB_BACKGROUND_RECLAMATION: '1'
+      - if: matrix.features == 'service'
+        run: python tests/service_protocol.py
+        env:
+          CATDB_EXPERIMENTAL_REDO_LOG_BYTES: '16777216'
       - if: contains(matrix.features, 'fixed-log')
         run: python tests/service_protocol.py
         env:
@@ -114,3 +120,4 @@ jobs:
           python-version: '3.12'
       - run: docker build -t catdb:local .
       - run: python tests/service_container.py
+      - run: python benchmarks/managed-wal/run.py --image catdb:local --out artifacts/managed-smoke --clients 4 --keys 256 --passes 5 --epoch 16 --value-bytes 16384

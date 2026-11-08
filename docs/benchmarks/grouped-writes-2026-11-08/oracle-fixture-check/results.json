@@ -1,0 +1,46 @@
+[
+  {
+    "engine": "oracle",
+    "workload": "update",
+    "clients": 16,
+    "rep": 1,
+    "rows": 10000,
+    "value_bytes": 256,
+    "attempted": 8000,
+    "completed": 7994,
+    "errors": [
+      {
+        "elapsed_ns": 1636389,
+        "error": "ORA-08177: can't serialize access for this transaction\nHelp: https://docs.oracle.com/error-help/db/ora-08177/"
+      },
+      {
+        "elapsed_ns": 4144857,
+        "error": "ORA-08177: can't serialize access for this transaction\nHelp: https://docs.oracle.com/error-help/db/ora-08177/"
+      },
+      {
+        "elapsed_ns": 1768602,
+        "error": "ORA-08177: can't serialize access for this transaction\nHelp: https://docs.oracle.com/error-help/db/ora-08177/"
+      },
+      {
+        "elapsed_ns": 2417768,
+        "error": "ORA-08177: can't serialize access for this transaction\nHelp: https://docs.oracle.com/error-help/db/ora-08177/"
+      },
+      {
+        "elapsed_ns": 2027936,
+        "error": "ORA-08177: can't serialize access for this transaction\nHelp: https://docs.oracle.com/error-help/db/ora-08177/"
+      },
+      {
+        "elapsed_ns": 1803790,
+        "error": "ORA-08177: can't serialize access for this transaction\nHelp: https://docs.oracle.com/error-help/db/ora-08177/"
+      }
+    ],
+    "retries": 0,
+    "elapsed_s": 3.656954096,
+    "ops_s": 2185.9722025890037,
+    "p50_ms": 7.063471,
+    "p95_ms": 8.822169,
+    "p99_ms": 12.893896,
+    "max_ms": 69.121307,
+    "latency_file": "oracle-r1-update-c16.json.gz"
+  }
+]

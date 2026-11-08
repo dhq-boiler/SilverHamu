@@ -1,6 +1,18 @@
 use super::*;
 use std::ops::Deref;
 
+#[cfg(feature = "redo-witness")]
+#[path = "redo_witness.rs"]
+mod redo_witness;
+#[cfg(all(feature = "redo-witness", test))]
+#[path = "redo_witness_tests.rs"]
+mod redo_witness_tests;
+
+#[cfg(feature = "redo-witness")]
+pub(super) use redo_witness::{initialize_managed_redo, initialize_redo, validate_redo_capacity};
+#[cfg(feature = "redo-witness")]
+pub(super) const MAX_REDO_CAPACITY: u64 = MAX_WAL_BYTES - 4 * redo_witness::SLOT_BYTES;
+
 const SLOT: u64 = 64;
 const PAGE: u64 = 4096;
 pub(super) const METADATA_BYTES: u64 = 2 * PAGE;
@@ -10,6 +22,8 @@ const SENTINEL: u64 = PREFIX_BYTES as u64;
 pub(super) struct LogFile {
     file: File,
     fixed: Option<Fixed>,
+    #[cfg(feature = "redo-witness")]
+    repair: Option<redo_witness::Repair>,
 }
 struct Fixed {
     capacity: u64,
@@ -20,7 +34,12 @@ struct Fixed {
 }
 impl From<File> for LogFile {
     fn from(file: File) -> Self {
-        Self { file, fixed: None }
+        Self {
+            file,
+            fixed: None,
+            #[cfg(feature = "redo-witness")]
+            repair: None,
+        }
     }
 }
 impl Deref for LogFile {
@@ -31,6 +50,10 @@ impl Deref for LogFile {
 }
 impl Read for LogFile {
     fn read(&mut self, b: &mut [u8]) -> io::Result<usize> {
+        #[cfg(feature = "redo-witness")]
+        if let Some(repair) = &self.repair {
+            return repair.read(&mut self.file, b);
+        }
         self.file.read(b)
     }
 }
@@ -40,21 +63,36 @@ impl Seek for LogFile {
     }
 }
 impl Write for LogFile {
-    fn write(&mut self, b: &[u8]) -> io::Result<usize> {
+    fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
         if let Some(fixed) = &self.fixed {
-            let end = self
-                .file
-                .stream_position()?
-                .checked_add(b.len() as u64)
-                .ok_or_else(|| io::Error::other("fixed log offset overflow"))?;
-            if end > fixed.capacity - SENTINEL {
-                return Err(io::Error::other("fixed log capacity; checkpoint required"));
-            }
+            fixed.check_write(&mut self.file, bytes.len() as u64)?;
         }
-        self.file.write(b)
+        self.file.write(bytes)
+    }
+    fn write_vectored(&mut self, slices: &[io::IoSlice<'_>]) -> io::Result<usize> {
+        if let Some(fixed) = &self.fixed {
+            let bytes = slices
+                .iter()
+                .try_fold(0_u64, |total, slice| total.checked_add(slice.len() as u64))
+                .ok_or_else(|| io::Error::other("fixed log length overflow"))?;
+            fixed.check_write(&mut self.file, bytes)?;
+        }
+        self.file.write_vectored(slices)
     }
     fn flush(&mut self) -> io::Result<()> {
         self.file.flush()
+    }
+}
+impl Fixed {
+    fn check_write(&self, file: &mut File, bytes: u64) -> io::Result<()> {
+        let end = file
+            .stream_position()?
+            .checked_add(bytes)
+            .ok_or_else(|| io::Error::other("fixed log offset overflow"))?;
+        if end > self.capacity - SENTINEL {
+            return Err(io::Error::other("fixed log capacity; checkpoint required"));
+        }
+        Ok(())
     }
 }
 fn invalid() -> io::Error {
@@ -96,7 +134,15 @@ pub(super) fn validate_capacity(capacity: u64) -> Result<()> {
     Ok(())
 }
 impl LogFile {
-    pub(super) fn open(mut file: File, header: [u8; HEADER_BYTES]) -> io::Result<Self> {
+    pub(super) fn open(
+        mut file: File,
+        header: [u8; HEADER_BYTES],
+        _budget: &Arc<Budget>,
+    ) -> Result<Self> {
+        #[cfg(feature = "redo-witness")]
+        if read_u32(&header, 8) == 4 {
+            return redo_witness::open(file, header, _budget);
+        }
         if read_u32(&header, 8) != 3 {
             return Ok(file.into());
         }
@@ -123,11 +169,13 @@ impl LogFile {
                 || values[0].1 > values[1].1
                 || (values[0].0 == values[1].0 && values[0].1 != values[1].1))
         {
-            return Err(invalid());
+            return Err(invalid().into());
         }
         file.seek(SeekFrom::Start(HEADER_BYTES as u64))?;
         Ok(Self {
             file,
+            #[cfg(feature = "redo-witness")]
+            repair: None,
             fixed: Some(Fixed {
                 capacity,
                 header,
@@ -136,6 +184,29 @@ impl LogFile {
                 metrics: Mutex::new([0; 3]),
             }),
         })
+    }
+    #[cfg(feature = "redo-witness")]
+    pub(super) fn uses_redo(&self) -> bool {
+        self.fixed
+            .as_ref()
+            .is_some_and(|fixed| read_u32(&fixed.header, 8) == 4)
+    }
+
+    #[cfg(feature = "redo-witness")]
+    pub(super) fn managed_redo(&self) -> bool {
+        self.uses_redo()
+            && self
+                .fixed
+                .as_ref()
+                .is_some_and(|fixed| read_u32(&fixed.header, 40) & MANAGED_REDO_FLAG != 0)
+    }
+
+    pub(super) fn finish_recovery(&mut self, _budget: &Arc<Budget>) -> Result<()> {
+        #[cfg(feature = "redo-witness")]
+        if let Some(fixed) = self.fixed.as_ref().filter(|_| self.uses_redo()) {
+            return redo_witness::finish_recovery(&self.file, fixed, self.repair.take(), _budget);
+        }
+        Ok(self.sync_all()?)
     }
     pub(super) fn capacity(&self) -> Option<u64> {
         self.fixed.as_ref().map(|f| f.capacity)
@@ -157,6 +228,10 @@ impl LogFile {
         let Some(fixed) = &self.fixed else {
             return self.file.sync_all();
         };
+        #[cfg(feature = "redo-witness")]
+        if self.uses_redo() {
+            return redo_witness::sync(&self.file, fixed);
+        }
         let mut version = fixed.end.lock().map_err(|_| invalid())?;
         let mut file = &self.file;
         let end = file.stream_position()?;
@@ -204,28 +279,7 @@ impl LogFile {
     }
 }
 pub(super) fn initialize(file: &mut File, end: u64, capacity: u64) -> Result<()> {
-    validate_capacity(capacity)?;
-    if end.checked_add(SENTINEL).is_none_or(|n| n > capacity) {
-        return Err(Error::ResourceExhausted("fixed log capacity"));
-    }
-    phase("fixed-initialization")?;
-    file.seek(SeekFrom::Start(0))?;
-    let mut header = [0; HEADER_BYTES];
-    file.read_exact(&mut header)?;
-    header[8..12].copy_from_slice(&3u32.to_le_bytes());
-    let crc = crate::crc32(&header[..44]);
-    header[44..].copy_from_slice(&crc.to_le_bytes());
-    file.seek(SeekFrom::Start(0))?;
-    file.write_all(&header)?;
-    file.seek(SeekFrom::Start(end))?;
-    // Sparse/preallocated unwritten extents would still require metadata work on first write.
-    let zeros = [0u8; 32768];
-    let mut remaining = capacity - end;
-    while remaining > 0 {
-        let n = remaining.min(zeros.len() as u64) as usize;
-        file.write_all(&zeros[..n])?;
-        remaining -= n as u64;
-    }
+    let header = initialize_data(file, end, capacity, 3, &[0; 32768])?;
     let marker = slot(&header, 0, end, capacity);
     // Adjacent copies could be damaged by the same torn sector/page write.
     let mut page = [0u8; PAGE as usize];
@@ -234,6 +288,41 @@ pub(super) fn initialize(file: &mut File, end: u64, capacity: u64) -> Result<()>
     file.write_all(&page)?;
     file.sync_all()?;
     file.seek(SeekFrom::Start(end))?;
+    Ok(())
+}
+
+fn initialize_data(
+    file: &mut File,
+    end: u64,
+    capacity: u64,
+    format: u32,
+    zeros: &[u8],
+) -> Result<[u8; HEADER_BYTES]> {
+    validate_capacity(capacity)?;
+    if end.checked_add(SENTINEL).is_none_or(|n| n > capacity) {
+        return Err(Error::ResourceExhausted("fixed log capacity"));
+    }
+    phase("fixed-initialization")?;
+    file.seek(SeekFrom::Start(0))?;
+    let mut header = [0; HEADER_BYTES];
+    file.read_exact(&mut header)?;
+    header[8..12].copy_from_slice(&format.to_le_bytes());
+    let crc = crate::crc32(&header[..44]);
+    header[44..].copy_from_slice(&crc.to_le_bytes());
+    file.seek(SeekFrom::Start(0))?;
+    file.write_all(&header)?;
+    file.seek(SeekFrom::Start(end))?;
+    // Sparse/preallocated unwritten extents would still require metadata work on first write.
+    write_zeros(file, capacity - end, zeros)?;
+    Ok(header)
+}
+
+fn write_zeros(file: &mut File, mut remaining: u64, zeros: &[u8]) -> io::Result<()> {
+    while remaining > 0 {
+        let n = remaining.min(zeros.len() as u64) as usize;
+        file.write_all(&zeros[..n])?;
+        remaining -= n as u64;
+    }
     Ok(())
 }
 #[cfg(test)]
@@ -607,7 +696,7 @@ mod tests {
         let db = Database::open(std::env::var_os("CATDB_FIXED_PATH").unwrap()).unwrap();
         let phase = std::env::var("CATDB_FIXED_CHECKPOINT").unwrap();
         let mut updated = false;
-        let _ = db.checkpoint_impl(false, Some(32768), |stage| {
+        let _ = db.checkpoint_impl(false, Some(CheckpointLog::Fixed(32768)), |stage| {
             if stage == CheckpointStage::ChunkCopied && !updated {
                 put(&db, b"during", b"safe");
                 updated = true;

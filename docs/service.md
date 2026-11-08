@@ -105,7 +105,18 @@ Authentication failure, malformed frames/JSON, and expired deadlines close the c
 
 **A lost commit response is not evidence of rollback.** The commit may have completed. Reconnect and inspect application-level operation identifiers before retrying. Automatic deduplication is not implemented. Persistence uncertainty can require restarting the service to reopen and recover the store.
 
-The WAL has a 1 GiB limit. Checkpoint explicitly before reaching it; there is no automatic checkpoint scheduler. A full transaction store or exhausted budget is an error, not permission to drop committed data.
+### Default WAL and upgrades
+
+The standard Rust library, C ABI, server and Docker image create new databases in managed WAL format 4. A normal `cargo build --locked --release --features service --bin catdb-server` or `docker compose up --build` includes the format support. No storage-mode setting is needed. A new managed database starts with a 1 MiB data area plus four 64 KiB recovery slots.
+
+As pending updates approach 7/8 of the data area, the commit path starts a checkpoint. The replacement retains the current live records and concurrent commits. If the compacted data and waiting writes would use more than 3/4 of the capacity, the engine grows the replacement geometrically, up to 1 GiB minus the four recovery slots. At the maximum size, it attempts reclamation at the hard boundary. Once that limit or the available disk space is exhausted, writes can fail. Checkpoint publication requires temporary space for both files. The operation triggering maintenance can take longer, especially when a large live dataset must be copied. Explicit checkpoints are also available.
+
+**Existing databases retain their storage policy**, including when reopened with `--init`. To migrate an existing database to automatic management, start the standard server once with `CATDB_MIGRATE_WAL=managed` or use Rust's `Database::checkpoint_managed_log()`. A successful checkpoint publishes the converted database atomically. Remove the setting after migration; reopening an already-managed database with it is idempotent. Previous releases may be unable to open a managed database. Retain a pre-migration backup if rollback to older software is required.
+
+Explicit v3 and manually sized v4 files keep their configured capacity and checkpoint policy. The existing `CATDB_EXPERIMENTAL_FIXED_LOG_BYTES` and `CATDB_EXPERIMENTAL_REDO_LOG_BYTES` options select those explicit layouts. Set at most one of these options and the migration option. For a new file that must be interchangeable with legacy append-only builds, Rust exposes `Database::create_append` and the C ABI exposes `ndb_tx_db_create_append`.
+
+For a group of up to 65,456 encoded WAL bytes, the writer stores the original group and two checksummed copies at separate offsets in the same file, synchronizes the file, and then publishes the commits. Larger groups synchronize the payload before synchronizing the end records. Recovery checks the checkpoint and frame sequence before applying repairs, synchronizes repairs before accepting writes, and scans the unused data area for abandoned bytes. An I/O failure during persistence makes the commit outcome uncertain and requires reopening the database. The recovery copies share one device; retain independent backups for media loss.
+
 
 SIGTERM/SIGINT stop new acceptance and close idle clients, discard uncommitted changes, and wait for active storage operations. If storage stalls, graceful shutdown can take longer than the requested deadline. Docker's forced termination follows the normal crash-recovery path. Independent backups are still required.
 

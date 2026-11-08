@@ -21,7 +21,11 @@ def phase(library, path, step):
         status=getattr(n,'ndb_tx_'+name)(*args)
         assert status==0,(name,status,step)
     encoded=os.fsencode(path); db=u(); version=u()
-    if step==0: call('db_create',encoded,len(encoded),bytes(range(16)),c.byref(db))
+    if step==0:
+        create = getattr(n, 'ndb_tx_db_create_append', n.ndb_tx_db_create)
+        create.argtypes = n.ndb_tx_db_create.argtypes
+        assert create(encoded,len(encoded),bytes(range(16)),c.byref(db)) == 0
+        assert int.from_bytes(path.read_bytes()[8:12], 'little') == 2
     else: call('db_open',encoded,len(encoded),c.byref(db))
     def begin():
         tx=u(); call('begin',db,c.byref(tx),c.byref(version)); return tx

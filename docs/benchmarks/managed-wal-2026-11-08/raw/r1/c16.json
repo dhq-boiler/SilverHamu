@@ -1,0 +1,74 @@
+{
+  "clients": 16,
+  "keys": 2048,
+  "passes": 5,
+  "value_bytes": 2048,
+  "initial": {
+    "format": 4,
+    "base": 0,
+    "managed": true,
+    "file_bytes": 1310720
+  },
+  "final": {
+    "format": 4,
+    "base": 9405,
+    "managed": true,
+    "file_bytes": 8650752
+  },
+  "seed_snapshot_checks": 6,
+  "latest_sha256": "615e05031bf893add7b4036a912cdc0e17036af467c12ffc97e495be56e8bfac",
+  "growth_epochs": 3,
+  "compaction_epochs": 5,
+  "summary": {
+    "all": {
+      "completed": 10240,
+      "elapsed_s": 2.545786492,
+      "ops_s": 4022.3326002312688,
+      "p50_ms": 3.300216,
+      "p95_ms": 4.7189,
+      "p99_ms": 15.795477,
+      "max_ms": 26.661992
+    },
+    "growth": {
+      "completed": 384,
+      "elapsed_s": 0.148036884,
+      "ops_s": 2593.94814065392,
+      "p50_ms": 3.522579,
+      "p95_ms": 19.923036,
+      "p99_ms": 22.860458,
+      "max_ms": 23.46358
+    },
+    "compaction": {
+      "completed": 640,
+      "elapsed_s": 0.254001541,
+      "ops_s": 2519.6697527122483,
+      "p50_ms": 3.373059,
+      "p95_ms": 24.185644,
+      "p99_ms": 25.531373,
+      "max_ms": 26.661992
+    },
+    "none": {
+      "completed": 9216,
+      "elapsed_s": 2.143748067,
+      "ops_s": 4299.012622736513,
+      "p50_ms": 3.289314,
+      "p95_ms": 4.595301,
+      "p99_ms": 5.527964,
+      "max_ms": 13.740201
+    }
+  },
+  "server_image": "sha256:832486fca95b36570a7e2fa208f2ec78ec50e2b32610911855351814a38c4433",
+  "raw_latencies": "c16-epochs.json.gz",
+  "reopen": {
+    "header": {
+      "format": 4,
+      "base": 9405,
+      "managed": true,
+      "file_bytes": 8650752
+    },
+    "recovered_keys": 2048,
+    "sha256": "615e05031bf893add7b4036a912cdc0e17036af467c12ffc97e495be56e8bfac",
+    "following_commit": true
+  },
+  "rep": 1
+}

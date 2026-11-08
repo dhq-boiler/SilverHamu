@@ -3,7 +3,8 @@ FROM rust:1.89-bookworm AS build
 WORKDIR /build
 COPY Cargo.toml Cargo.lock ./
 COPY src ./src
-RUN cargo build --locked --release --features service --bin catdb-server
+ARG CATDB_FEATURES=service
+RUN cargo build --locked --release --features "$CATDB_FEATURES" --bin catdb-server
 
 FROM debian:bookworm-slim AS runtime
 RUN groupadd --gid 10001 catdb && useradd --uid 10001 --gid catdb --no-create-home catdb \

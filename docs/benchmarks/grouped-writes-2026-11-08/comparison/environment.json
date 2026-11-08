@@ -1,0 +1,1631 @@
+{
+  "utc": "2026-11-08T08:41:03.043606+00:00",
+  "rows": 100000,
+  "value_bytes": 256,
+  "ops_per_case": 8000,
+  "reps": 3,
+  "single_request": true,
+  "git_commit": "102dbe6252f5e4bc4d8b375ed32c77f118fb1824",
+  "docker": {
+    "ServerVersion": "29.9.2",
+    "NCPU": 32,
+    "MemTotal": 67380625408,
+    "Driver": "overlay2",
+    "OSType": "linux",
+    "Architecture": "x86_64",
+    "KernelVersion": "6.18.54.1-microsoft-standard-WSL2"
+  },
+  "images": {
+    "oracle": [
+      "container-registry.oracle.com/database/free@sha256:cf540c3fa190d7cffad08c491652ac07fc70314e510f6b87890449517d565e94"
+    ],
+    "catdb-baseline": "sha256:6bce9cdbe21264fd36ff15458d660664e4129e6a29754753d29f4fee269b8694",
+    "catdb-service": "sha256:0cf74b45a15ab0789c5039e75aa1c2546a9d03b88f6f2d2e6f92550c3df1c730",
+    "catdb-experimental": "sha256:7eff1ef419b087dbf904111418d13c5051aa6fbe081dc2545f75fcfd22a193d6",
+    "postgres": [
+      "postgres@sha256:3a4264520e121176619f54ff867d12774bc81e95e7b84db58d63bccdb6144b81"
+    ]
+  },
+  "source_sha256": {
+    "runner.py": "15e1c429fca1cf1efe3668f1bd638270b2035100171e8678edd0c1a00aa59289",
+    "run.py": "bcb06728b61afee8ccbd9791866f20e06388bf785b7e38e6dc138fc068d4a2ce",
+    "Dockerfile": "7a283c8505d8691c72ae602b6697b819d4e45eea5e8c3050379295f68eec47cf"
+  },
+  "runs": [
+    {
+      "engine": "oracle",
+      "rep": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-16",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-4",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-16",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-16",
+          "rows": 100000,
+          "sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "expected_sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "updated_keys": 14360,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-4",
+          "rows": 100000,
+          "sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "expected_sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "updated_keys": 14360,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "expected_sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "updated_keys": 14360,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "select banner_full from v$version": [
+          [
+            "Oracle AI Database 26ai Free Release 23.26.3.0.0 - Develop, Learn, and Run for Free\nVersion 23.26.3.0.0"
+          ]
+        ],
+        "select sys_context('USERENV','DB_NAME') from dual": [
+          [
+            "FREEPDB1"
+          ]
+        ],
+        "SELECT ini_trans FROM user_tables WHERE table_name='KV'": [
+          [
+            16
+          ]
+        ]
+      }
+    },
+    {
+      "engine": "catdb-baseline",
+      "rep": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-16",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-4",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-16",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-16",
+          "rows": 100000,
+          "sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "expected_sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "updated_keys": 14360,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-4",
+          "rows": 100000,
+          "sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "expected_sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "updated_keys": 14360,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "expected_sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "updated_keys": 14360,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "version": "0.1.0",
+        "group_commit": true,
+        "sync_before_ack": true
+      }
+    },
+    {
+      "engine": "catdb-service",
+      "rep": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-16",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-4",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-16",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-16",
+          "rows": 100000,
+          "sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "expected_sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "updated_keys": 14360,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-4",
+          "rows": 100000,
+          "sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "expected_sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "updated_keys": 14360,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "expected_sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "updated_keys": 14360,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "version": "0.1.0",
+        "group_commit": true,
+        "sync_before_ack": true
+      }
+    },
+    {
+      "engine": "catdb-experimental",
+      "rep": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-16",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-4",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-16",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-16",
+          "rows": 100000,
+          "sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "expected_sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "updated_keys": 14360,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-4",
+          "rows": 100000,
+          "sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "expected_sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "updated_keys": 14360,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "expected_sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "updated_keys": 14360,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "version": "0.1.0",
+        "group_commit": true,
+        "sync_before_ack": true
+      }
+    },
+    {
+      "engine": "postgres",
+      "rep": 1,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-16",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-4",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-16",
+          "rows": 100000,
+          "sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "expected_sha256": "cdf4eb6e87dc54675784a6f9461d9f84367a2b15830849bef321b14d75568f77",
+          "updated_keys": 7703,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-16",
+          "rows": 100000,
+          "sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "expected_sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "updated_keys": 14360,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-4",
+          "rows": 100000,
+          "sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "expected_sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "updated_keys": 14360,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "expected_sha256": "eeebf065e64f3c6d31ad56f26c08e1c2e95aa5e5d916c2279fb0a466771992a7",
+          "updated_keys": 14360,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "select version()": [
+          [
+            "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit"
+          ]
+        ],
+        "show fsync": [
+          [
+            "on"
+          ]
+        ],
+        "show synchronous_commit": [
+          [
+            "on"
+          ]
+        ],
+        "show shared_buffers": [
+          [
+            "128MB"
+          ]
+        ],
+        "show transaction_isolation": [
+          [
+            "serializable"
+          ]
+        ]
+      }
+    },
+    {
+      "engine": "postgres",
+      "rep": 2,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-16",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-16",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "expected_sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "updated_keys": 7660,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-16",
+          "rows": 100000,
+          "sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "expected_sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "updated_keys": 14294,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-4",
+          "rows": 100000,
+          "sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "expected_sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "updated_keys": 14294,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-4",
+          "rows": 100000,
+          "sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "expected_sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "updated_keys": 14294,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "expected_sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "updated_keys": 14294,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "select version()": [
+          [
+            "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit"
+          ]
+        ],
+        "show fsync": [
+          [
+            "on"
+          ]
+        ],
+        "show synchronous_commit": [
+          [
+            "on"
+          ]
+        ],
+        "show shared_buffers": [
+          [
+            "128MB"
+          ]
+        ],
+        "show transaction_isolation": [
+          [
+            "serializable"
+          ]
+        ]
+      }
+    },
+    {
+      "engine": "catdb-experimental",
+      "rep": 2,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-16",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-16",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "expected_sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "updated_keys": 7660,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-16",
+          "rows": 100000,
+          "sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "expected_sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "updated_keys": 14294,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-4",
+          "rows": 100000,
+          "sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "expected_sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "updated_keys": 14294,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-4",
+          "rows": 100000,
+          "sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "expected_sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "updated_keys": 14294,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "expected_sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "updated_keys": 14294,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "version": "0.1.0",
+        "group_commit": true,
+        "sync_before_ack": true
+      }
+    },
+    {
+      "engine": "catdb-service",
+      "rep": 2,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-16",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-16",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "expected_sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "updated_keys": 7660,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-16",
+          "rows": 100000,
+          "sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "expected_sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "updated_keys": 14294,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-4",
+          "rows": 100000,
+          "sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "expected_sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "updated_keys": 14294,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-4",
+          "rows": 100000,
+          "sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "expected_sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "updated_keys": 14294,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "expected_sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "updated_keys": 14294,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "version": "0.1.0",
+        "group_commit": true,
+        "sync_before_ack": true
+      }
+    },
+    {
+      "engine": "catdb-baseline",
+      "rep": 2,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-16",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-16",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "expected_sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "updated_keys": 7660,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-16",
+          "rows": 100000,
+          "sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "expected_sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "updated_keys": 14294,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-4",
+          "rows": 100000,
+          "sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "expected_sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "updated_keys": 14294,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-4",
+          "rows": 100000,
+          "sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "expected_sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "updated_keys": 14294,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "expected_sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "updated_keys": 14294,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "version": "0.1.0",
+        "group_commit": true,
+        "sync_before_ack": true
+      }
+    },
+    {
+      "engine": "oracle",
+      "rep": 2,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-16",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-16",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "expected_sha256": "652de53f457d07f7279fd467780d28259548dc14bc812b302e479fc810e1800e",
+          "updated_keys": 7660,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-16",
+          "rows": 100000,
+          "sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "expected_sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "updated_keys": 14294,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-4",
+          "rows": 100000,
+          "sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "expected_sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "updated_keys": 14294,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-4",
+          "rows": 100000,
+          "sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "expected_sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "updated_keys": 14294,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "expected_sha256": "5704222ee6da9026b4ca282bc956f0b4b7968d478e2bd0d33debc13faf5a6721",
+          "updated_keys": 14294,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "select banner_full from v$version": [
+          [
+            "Oracle AI Database 26ai Free Release 23.26.3.0.0 - Develop, Learn, and Run for Free\nVersion 23.26.3.0.0"
+          ]
+        ],
+        "select sys_context('USERENV','DB_NAME') from dual": [
+          [
+            "FREEPDB1"
+          ]
+        ],
+        "SELECT ini_trans FROM user_tables WHERE table_name='KV'": [
+          [
+            16
+          ]
+        ]
+      }
+    },
+    {
+      "engine": "catdb-service",
+      "rep": 3,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-16",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-4",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-16",
+          "rows": 100000,
+          "sha256": "4a5c9fb2c064c199c92697ac6c76bc792eadbc342fdb3600dedc75ceb9f374aa",
+          "expected_sha256": "4a5c9fb2c064c199c92697ac6c76bc792eadbc342fdb3600dedc75ceb9f374aa",
+          "updated_keys": 7696,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "expected_sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "updated_keys": 14347,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-4",
+          "rows": 100000,
+          "sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "expected_sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "updated_keys": 14347,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-16",
+          "rows": 100000,
+          "sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "expected_sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "updated_keys": 14347,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "expected_sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "updated_keys": 14347,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "version": "0.1.0",
+        "group_commit": true,
+        "sync_before_ack": true
+      }
+    },
+    {
+      "engine": "catdb-experimental",
+      "rep": 3,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-16",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-4",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-16",
+          "rows": 100000,
+          "sha256": "4a5c9fb2c064c199c92697ac6c76bc792eadbc342fdb3600dedc75ceb9f374aa",
+          "expected_sha256": "4a5c9fb2c064c199c92697ac6c76bc792eadbc342fdb3600dedc75ceb9f374aa",
+          "updated_keys": 7696,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "expected_sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "updated_keys": 14347,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-4",
+          "rows": 100000,
+          "sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "expected_sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "updated_keys": 14347,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-16",
+          "rows": 100000,
+          "sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "expected_sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "updated_keys": 14347,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "expected_sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "updated_keys": 14347,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "version": "0.1.0",
+        "group_commit": true,
+        "sync_before_ack": true
+      }
+    },
+    {
+      "engine": "postgres",
+      "rep": 3,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-16",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-4",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-16",
+          "rows": 100000,
+          "sha256": "4a5c9fb2c064c199c92697ac6c76bc792eadbc342fdb3600dedc75ceb9f374aa",
+          "expected_sha256": "4a5c9fb2c064c199c92697ac6c76bc792eadbc342fdb3600dedc75ceb9f374aa",
+          "updated_keys": 7696,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "expected_sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "updated_keys": 14347,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-4",
+          "rows": 100000,
+          "sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "expected_sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "updated_keys": 14347,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-16",
+          "rows": 100000,
+          "sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "expected_sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "updated_keys": 14347,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "expected_sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "updated_keys": 14347,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "select version()": [
+          [
+            "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit"
+          ]
+        ],
+        "show fsync": [
+          [
+            "on"
+          ]
+        ],
+        "show synchronous_commit": [
+          [
+            "on"
+          ]
+        ],
+        "show shared_buffers": [
+          [
+            "128MB"
+          ]
+        ],
+        "show transaction_isolation": [
+          [
+            "serializable"
+          ]
+        ]
+      }
+    },
+    {
+      "engine": "oracle",
+      "rep": 3,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-16",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-4",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-16",
+          "rows": 100000,
+          "sha256": "4a5c9fb2c064c199c92697ac6c76bc792eadbc342fdb3600dedc75ceb9f374aa",
+          "expected_sha256": "4a5c9fb2c064c199c92697ac6c76bc792eadbc342fdb3600dedc75ceb9f374aa",
+          "updated_keys": 7696,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "expected_sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "updated_keys": 14347,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-4",
+          "rows": 100000,
+          "sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "expected_sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "updated_keys": 14347,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-16",
+          "rows": 100000,
+          "sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "expected_sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "updated_keys": 14347,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "expected_sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "updated_keys": 14347,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "select banner_full from v$version": [
+          [
+            "Oracle AI Database 26ai Free Release 23.26.3.0.0 - Develop, Learn, and Run for Free\nVersion 23.26.3.0.0"
+          ]
+        ],
+        "select sys_context('USERENV','DB_NAME') from dual": [
+          [
+            "FREEPDB1"
+          ]
+        ],
+        "SELECT ini_trans FROM user_tables WHERE table_name='KV'": [
+          [
+            16
+          ]
+        ]
+      }
+    },
+    {
+      "engine": "catdb-baseline",
+      "rep": 3,
+      "status": "passed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-16",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-4",
+          "rows": 100000,
+          "sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "expected_sha256": "bb46e659a8a5cc7c6b8414d38bee07bf805943f66f67097700732f55a2f07775",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-16",
+          "rows": 100000,
+          "sha256": "4a5c9fb2c064c199c92697ac6c76bc792eadbc342fdb3600dedc75ceb9f374aa",
+          "expected_sha256": "4a5c9fb2c064c199c92697ac6c76bc792eadbc342fdb3600dedc75ceb9f374aa",
+          "updated_keys": 7696,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-4",
+          "rows": 100000,
+          "sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "expected_sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "updated_keys": 14347,
+          "empty_and_last": true
+        },
+        {
+          "stage": "range100-4",
+          "rows": 100000,
+          "sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "expected_sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "updated_keys": 14347,
+          "empty_and_last": true
+        },
+        {
+          "stage": "get-16",
+          "rows": 100000,
+          "sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "expected_sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "updated_keys": 14347,
+          "empty_and_last": true
+        },
+        {
+          "stage": "reopen",
+          "rows": 100000,
+          "sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "expected_sha256": "e4bda0b4564400abb9aa650ff45444d428ea8d0992892783bd721d8e19568b67",
+          "updated_keys": 14347,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "version": "0.1.0",
+        "group_commit": true,
+        "sync_before_ack": true
+      }
+    }
+  ],
+  "skipped": {
+    "sql-server": "SQL Server 2022 Developer/Express/Evaluation license section 5 requires prior written permission for disclosure; permission not obtained, not measured."
+  },
+  "cases": [
+    [
+      "get",
+      4
+    ],
+    [
+      "get",
+      16
+    ],
+    [
+      "range100",
+      4
+    ],
+    [
+      "range100",
+      16
+    ],
+    [
+      "update",
+      4
+    ],
+    [
+      "update",
+      16
+    ]
+  ],
+  "engines": [
+    "oracle",
+    "catdb-baseline",
+    "catdb-service",
+    "catdb-experimental",
+    "postgres"
+  ],
+  "oracle_initrans": 16,
+  "serialization_retries": 3
+}

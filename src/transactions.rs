@@ -10,6 +10,7 @@ use crate::inline_key::Key as StoredKey;
 type StoredKey = Vec<u8>;
 use crate::resources::{ACTIVE, Budget, BufferPermit, DEPENDENCIES, RETAINED, STAGED};
 pub use crate::resources::{ResourceLimits, ResourceUsage};
+use std::borrow::Cow;
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::fmt;
 use std::fs::{File, OpenOptions};
@@ -160,11 +161,11 @@ trait TestPersistence: Send + Sync {
 mod fifo_writer;
 #[cfg(feature = "fifo-writer")]
 use fifo_writer::WriterMutex;
-#[cfg(all(feature = "retirement-timing",feature = "fifo-writer"))]
+#[cfg(feature = "fifo-writer")]
 use fifo_writer::WriterGuard;
 #[cfg(not(feature = "fifo-writer"))]
 type WriterMutex = Mutex<()>;
-#[cfg(all(feature = "retirement-timing",not(feature = "fifo-writer")))]
+#[cfg(not(feature = "fifo-writer"))]
 type WriterGuard<'a> = std::sync::MutexGuard<'a, ()>;
 
 struct Inner {
@@ -254,6 +255,8 @@ struct State {
     path: PathBuf,
     sequence: u64,
     wal_bytes: u64,
+    #[cfg(feature = "redo-witness")]
+    compacted_at: Option<u64>,
     reservation_enabled: bool,
     reserved_bytes: u64,
     rows: BTreeMap<StoredKey, VersionChain>,
@@ -505,6 +508,7 @@ pub struct Transaction {
     database: Database,
     snapshot: u64,
     read_only: bool,
+    count_active: bool,
     reads: BTreeSet<Vec<u8>>,
     ranges: Vec<KeyRange>,
     writes: BTreeMap<Vec<u8>, Option<Vec<u8>>>,
@@ -574,6 +578,40 @@ enum CheckpointStage {
     Reclaimed,
 }
 
+#[cfg(feature = "redo-witness")]
+const MANAGED_REDO_FLAG: u32 = 1 << 31;
+#[cfg(feature = "redo-witness")]
+const INITIAL_REDO_CAPACITY: u64 = 1024 * 1024;
+
+#[derive(Clone, Copy)]
+pub(crate) enum CheckpointLog {
+    #[cfg(feature = "fixed-log")]
+    Fixed(u64),
+    #[cfg(feature = "redo-witness")]
+    Redo(u64),
+    #[cfg(feature = "redo-witness")]
+    ManagedRedo(u64),
+}
+
+#[cfg(feature = "fixed-log")]
+impl CheckpointLog {
+    #[cfg(feature = "redo-witness")]
+    pub(crate) const DEFAULT_MANAGED: Self = Self::ManagedRedo(INITIAL_REDO_CAPACITY);
+
+    fn from_file(file: &WalFile) -> Option<Self> {
+        let capacity = file.capacity()?;
+        #[cfg(feature = "redo-witness")]
+        if file.uses_redo() {
+            return Some(if file.managed_redo() {
+                Self::ManagedRedo(capacity)
+            } else {
+                Self::Redo(capacity)
+            });
+        }
+        Some(Self::Fixed(capacity))
+    }
+}
+
 impl Database {
     /// Creates a new WAL without overwriting an existing file. The ID is caller supplied.
     pub fn create(path: impl AsRef<Path>, id: [u8; 16]) -> Result<Self> {
@@ -585,6 +623,32 @@ impl Database {
         id: [u8; 16],
         limits: ResourceLimits,
     ) -> Result<Self> {
+        #[cfg(feature = "redo-witness")]
+        let layout = Some(CheckpointLog::DEFAULT_MANAGED);
+        #[cfg(not(feature = "redo-witness"))]
+        let layout = None;
+        Self::create_with_log(path, id, limits, layout)
+    }
+
+    /// Creates a variable-length append WAL compatible with older readers.
+    pub fn create_append(path: impl AsRef<Path>, id: [u8; 16]) -> Result<Self> {
+        Self::create_append_with_limits(path, id, ResourceLimits::unlimited())
+    }
+
+    pub fn create_append_with_limits(
+        path: impl AsRef<Path>,
+        id: [u8; 16],
+        limits: ResourceLimits,
+    ) -> Result<Self> {
+        Self::create_with_log(path, id, limits, None)
+    }
+
+    pub(crate) fn create_with_log(
+        path: impl AsRef<Path>,
+        id: [u8; 16],
+        limits: ResourceLimits,
+        layout: Option<CheckpointLog>,
+    ) -> Result<Self> {
         let budget = Budget::new(limits.validate()?);
         let path = database_path(path.as_ref())?;
         if path.try_exists()? {
@@ -593,19 +657,57 @@ impl Database {
             );
         }
         let owner = ownership(&path)?;
-        let mut file = OpenOptions::new()
-            .read(true)
-            .write(true)
-            .create_new(true)
-            .open(&path)?;
-        file.try_lock().map_err(|e| Error::Locked(e.to_string()))?;
-        file.write_all(&wal_header(id, 0, 0))?;
-        file.sync_all()?;
-        Ok(Self::from_state(
-            State::new(legacy_wal_file(file), path, budget),
-            id,
-            owner,
-        ))
+        let Some(layout) = layout else {
+            let mut file = OpenOptions::new()
+                .read(true)
+                .write(true)
+                .create_new(true)
+                .open(&path)?;
+            file.try_lock().map_err(|e| Error::Locked(e.to_string()))?;
+            file.write_all(&wal_header(id, 0, 0))?;
+            file.sync_all()?;
+            return Ok(Self::from_state(
+                State::new(legacy_wal_file(file), path, budget),
+                id,
+                owner,
+            ));
+        };
+        #[cfg(not(feature = "fixed-log"))]
+        match layout {}
+        #[cfg(feature = "fixed-log")]
+        {
+            let temporary = temporary_path(&path);
+            let mut file = OpenOptions::new()
+                .read(true)
+                .write(true)
+                .create_new(true)
+                .open(&temporary)?;
+            let initialized = (|| -> Result<_> {
+                file.try_lock().map_err(|e| Error::Locked(e.to_string()))?;
+                file.write_all(&wal_header(id, 0, 0))?;
+                let end = HEADER_BYTES as u64;
+                match layout {
+                    CheckpointLog::Fixed(capacity) => {
+                        fixed_log::initialize(&mut file, end, capacity)?
+                    }
+                    #[cfg(feature = "redo-witness")]
+                    CheckpointLog::Redo(capacity) => {
+                        fixed_log::initialize_redo(&mut file, end, capacity, &budget)?
+                    }
+                    #[cfg(feature = "redo-witness")]
+                    CheckpointLog::ManagedRedo(capacity) => {
+                        fixed_log::initialize_managed_redo(&mut file, end, capacity, &budget)?
+                    }
+                }
+                let file = wrap_checkpoint_file(file, end, &budget)?;
+                publish_new_file(&temporary, &path)?;
+                Ok(file)
+            })();
+            let file = initialized.inspect_err(|_| {
+                let _ = std::fs::remove_file(&temporary);
+            })?;
+            Ok(Self::from_state(State::new(file, path, budget), id, owner))
+        }
     }
 
     /// Opens an existing WAL. Incomplete final frames are removed; complete corruption is rejected.
@@ -628,7 +730,8 @@ impl Database {
         if &header[..8] != MAGIC
             || !(read_u32(&header, 8) == 1
                 || read_u32(&header, 8) == 2
-                || (cfg!(feature = "fixed-log") && read_u32(&header, 8) == 3))
+                || (cfg!(feature = "fixed-log") && read_u32(&header, 8) == 3)
+                || (cfg!(feature = "redo-witness") && read_u32(&header, 8) == 4))
             || read_u32(&header, 12) != HEADER_BYTES as u32
             || read_u32(&header, 44) != crate::crc32(&header[..44])
         {
@@ -642,11 +745,13 @@ impl Database {
             u64::from_le_bytes(header[32..40].try_into().unwrap())
         };
         let chunks = if legacy { 0 } else { read_u32(&header, 40) };
+        #[cfg(feature = "redo-witness")]
+        let chunks = if read_u32(&header, 8) == 4 { chunks & !MANAGED_REDO_FLAG } else { chunks };
         if (legacy && header[32..44] != [0; 12]) || chunks > 65536 || (base == 0 && chunks != 0) {
             return Err(Error::Invalid("WAL checkpoint header"));
         }
         #[cfg(feature = "fixed-log")]
-        let file = WalFile::open(file, header)?;
+        let file = WalFile::open(file, header, &budget)?;
         #[cfg(feature = "fixed-log")]
         let confirmed = file.confirmed_end()?;
         #[cfg(not(feature = "fixed-log"))]
@@ -755,7 +860,7 @@ impl Database {
         state.file.as_mut().unwrap().seek(SeekFrom::Start(offset))?;
         #[cfg(feature = "fixed-log")]
         if confirmed.is_some() {
-            state.file.as_ref().unwrap().sync_all()?;
+            state.file.as_mut().unwrap().finish_recovery(&state.budget)?;
         }
         state.wal_bytes = offset;
         Ok(Self::from_state(state, id, owner))
@@ -825,6 +930,53 @@ impl Database {
         Ok(state)
     }
 
+    fn lock_for_commit(&self, incoming: u64) -> Result<(WriterGuard<'_>, StateGuard<'_>)> {
+        loop {
+            let writer = self.inner.writer.lock().map_err(|_| Error::Poisoned)?;
+            #[cfg(feature = "lock-timing")]
+            trace_mark(3);
+            let state = self.state()?;
+            #[cfg(feature = "redo-witness")]
+            if state.needs_managed_checkpoint(incoming) {
+                // Checkpoint takes its mutex before the writer; reversing that order can deadlock.
+                drop(state);
+                drop(writer);
+                self.maintain_redo(incoming)?;
+                continue;
+            }
+            #[cfg(not(feature = "redo-witness"))]
+            let _ = incoming;
+            return Ok((writer, state));
+        }
+    }
+
+    #[cfg(feature = "redo-witness")]
+    fn maintain_redo(&self, incoming: u64) -> Result<()> {
+        let mut epoch = self.inner.checkpoint.lock().map_err(|_| Error::Poisoned)?;
+        let sequence = {
+            let _writer = self.inner.writer.lock().map_err(|_| Error::Poisoned)?;
+            let state = self.state()?;
+            if !state.needs_managed_checkpoint(incoming) {
+                return Ok(());
+            }
+            state.sequence
+        };
+        #[cfg(test)]
+        let hook = auto_growth_crash_tests::stage;
+        #[cfg(not(test))]
+        let hook = |_| Ok(());
+        let result = self.finish_locked_checkpoint(&mut epoch, None, false, None, incoming, hook);
+        if matches!(result, Err(Error::Limit("checkpoint bytes" | "checkpoint chunks"))
+            | Err(Error::ResourceExhausted("checkpoint exceeds maximum redo capacity"))) {
+            let _writer = self.inner.writer.lock().map_err(|_| Error::Poisoned)?;
+            let mut state = self.state()?;
+            if state.sequence == sequence {
+                state.compacted_at = Some(sequence);
+            }
+        }
+        result.map(|_| ())
+    }
+
     pub fn id(&self) -> [u8; 16] {
         self.inner.id
     }
@@ -848,8 +1000,35 @@ impl Database {
     #[cfg(feature = "fixed-log")]
     pub fn checkpoint_fixed_log(&self, capacity: u64) -> Result<CheckpointInfo> {
         fixed_log::validate_capacity(capacity)?;
-        self.checkpoint_impl(false, Some(capacity), |_| Ok(()))
+        self.checkpoint_impl(false, Some(CheckpointLog::Fixed(capacity)), |_| Ok(()))
     }
+    /// Converts the database through atomic checkpoint replacement to the redo-witness WAL.
+    #[cfg(feature = "redo-witness")]
+    pub fn checkpoint_redo_log(&self, capacity: u64) -> Result<CheckpointInfo> {
+        fixed_log::validate_redo_capacity(capacity)?;
+        self.checkpoint_impl(false, Some(CheckpointLog::Redo(capacity)), |_| Ok(()))
+    }
+
+    /// Migrates the database to an automatically sized redo WAL by atomic checkpoint replacement.
+    #[cfg(feature = "redo-witness")]
+    pub fn checkpoint_managed_log(&self) -> Result<CheckpointInfo> {
+        self.checkpoint_impl(false, Some(CheckpointLog::DEFAULT_MANAGED), |_| Ok(()))
+    }
+
+    #[cfg(all(feature = "service", feature = "redo-witness"))]
+    pub(crate) fn uses_managed_log(&self) -> Result<bool> {
+        Ok(self
+            .state()?
+            .file
+            .as_ref()
+            .is_some_and(WalFile::managed_redo))
+    }
+
+    #[cfg(all(feature = "service", feature = "redo-witness"))]
+    pub(crate) fn uses_redo_log(&self) -> Result<bool> {
+        Ok(self.state()?.file.as_ref().is_some_and(|f| f.uses_redo()))
+    }
+
     #[cfg(feature = "fixed-log")]
     pub fn fixed_log_capacity(&self) -> Result<Option<u64>> {
         Ok(self.state()?.file.as_ref().and_then(|f| f.capacity()))
@@ -910,32 +1089,41 @@ impl Database {
     fn checkpoint_impl(
         &self,
         defer_reclaim: bool,
-        _fixed_capacity: Option<u64>,
+        _requested_log: Option<CheckpointLog>,
         hook: impl FnMut(CheckpointStage) -> io::Result<()>,
     ) -> Result<CheckpointInfo> {
-        self.finish_checkpoint(None, defer_reclaim, _fixed_capacity, hook)
+        self.finish_checkpoint(None, defer_reclaim, _requested_log, hook)
     }
     fn finish_checkpoint(
         &self,
         prefix: Option<CheckpointDraft>,
         defer_reclaim: bool,
-        _fixed_capacity: Option<u64>,
+        _requested_log: Option<CheckpointLog>,
+        hook: impl FnMut(CheckpointStage) -> io::Result<()>,
+    ) -> Result<CheckpointInfo> {
+        let mut epoch = self.inner.checkpoint.lock().map_err(|_| Error::Poisoned)?;
+        self.finish_locked_checkpoint(&mut epoch, prefix, defer_reclaim, _requested_log, 0, hook)
+    }
+
+    fn finish_locked_checkpoint(
+        &self,
+        checkpoint: &mut u64,
+        prefix: Option<CheckpointDraft>,
+        defer_reclaim: bool,
+        _requested_log: Option<CheckpointLog>,
+        _incoming: u64,
         mut hook: impl FnMut(CheckpointStage) -> io::Result<()>,
     ) -> Result<CheckpointInfo> {
-        let mut checkpoint = self.inner.checkpoint.lock().map_err(|_| Error::Poisoned)?;
         let mut retirement = self.inner.retirement.lock().map_err(|_| Error::Poisoned)?;
         retirement.cleanup();
         let mut draft = match prefix {
             Some(draft) if draft.epoch == *checkpoint => draft,
             Some(_) => return Err(Error::Invalid("checkpoint prefix superseded")),
-            None => self.start_checkpoint(*checkpoint)?,
+            None => self.start_checkpoint_for(*checkpoint, _incoming != 0)?,
         };
         let sequence = draft.cursor.pinned.snapshot;
         let before_bytes = draft.before_bytes;
         let path = self.state()?.path.clone();
-        #[cfg(feature = "fixed-log")]
-        let fixed_capacity =
-            _fixed_capacity.or(self.state()?.file.as_ref().and_then(|f| f.capacity()));
         let temporary = draft.temporary.clone();
         let mut replacement = draft.file.take();
         let mut buffer = self.inner.budget.buffer();
@@ -994,22 +1182,35 @@ impl Database {
             #[cfg(feature = "lock-timing")]
             let timing_synced = std::time::Instant::now();
             #[cfg(feature = "fixed-log")]
-            if let Some(capacity) = fixed_capacity {
-                buffer.add(32768)?;
-                fixed_log::initialize(output, after, capacity)?;
+            {
+                // The active writer can temporarily own the WAL handle before cutover.
+                let current = self.state()?.file.as_ref().and_then(CheckpointLog::from_file);
+                if let Some(layout) = _requested_log.or(current) {
+                    match layout {
+                        CheckpointLog::Fixed(capacity) => {
+                            buffer.add(32768)?;
+                            fixed_log::initialize(output, after, capacity)?;
+                        }
+                        #[cfg(feature = "redo-witness")]
+                        CheckpointLog::Redo(capacity) => {
+                            fixed_log::initialize_redo(output, after, capacity, &self.inner.budget)?;
+                        }
+                        #[cfg(feature = "redo-witness")]
+                        CheckpointLog::ManagedRedo(capacity) => {
+                            fixed_log::initialize_managed_redo(output, after, managed_capacity(capacity, after, _incoming)?, &self.inner.budget)?;
+                        }
+                    }
+                }
             }
             hook(CheckpointStage::TailSynced)?;
             let charged_bytes = {
                 let state = self.state()?;
                 let bytes = state.wal_bytes.max(state.reserved_bytes);
                 #[cfg(feature = "fixed-log")]
-                let bytes = bytes.max(
-                    state
-                        .file
-                        .as_ref()
-                        .and_then(|f| f.capacity())
-                        .map_or(0, |n| n + fixed_log::METADATA_BYTES),
-                );
+                let bytes = match state.file.as_ref().filter(|f| f.capacity().is_some()) {
+                    Some(file) => bytes.max(file.metadata()?.len()),
+                    None => bytes,
+                };
                 bytes
             };
             retirement.retain(charged_bytes);
@@ -1055,14 +1256,16 @@ impl Database {
             #[cfg(feature = "checkpoint-handle-reuse")]
             {
                 let file = replacement.take().unwrap();
-                state.file = Some(wrap_checkpoint_file(file, after)?);
+                state.file = Some(wrap_checkpoint_file(file, after, &self.inner.budget)?);
             }
             #[cfg(not(feature = "checkpoint-handle-reuse"))]
             {
-                state.file = Some(wrap_checkpoint_file(file, after)?);
+                state.file = Some(wrap_checkpoint_file(file, after, &self.inner.budget)?);
             }
             state.reserved_bytes = 0;
             state.wal_bytes = after;
+            #[cfg(feature = "redo-witness")]
+            { state.compacted_at = Some(state.sequence); }
             #[cfg(feature = "lock-timing")]
             CHECKPOINT_TIMING.with(|value| {
                 value.set([
@@ -1193,10 +1396,14 @@ impl Database {
     }
 
     fn begin_mode(&self, read_only: bool) -> Result<Transaction> {
+        self.begin_counted(read_only, true)
+    }
+
+    fn begin_counted(&self, read_only: bool, count_active: bool) -> Result<Transaction> {
         let mut state = self.state()?;
         let retired = (!self.inner.reclaimer.enabled()).then(|| state.collect());
         let result = (|| {
-            state.budget.replace(ACTIVE, 0, 1)?;
+            state.budget.replace(ACTIVE, 0, usize::from(count_active))?;
             let snapshot = state.sequence;
             *state.active.entry(snapshot).or_default() += 1;
             Ok(Transaction {
@@ -1207,6 +1414,7 @@ impl Database {
                 database: self.clone(),
                 snapshot,
                 read_only,
+                count_active,
                 reads: BTreeSet::new(),
                 ranges: Vec::new(),
                 writes: BTreeMap::new(),
@@ -1659,43 +1867,39 @@ impl Transaction {
     }
 
     pub fn put(&mut self, key: &[u8], value: &[u8]) -> Result<()> {
-        if value.len() > MAX_VALUE_BYTES {
-            return Err(Error::Limit("value bytes"));
-        }
-        self.stage(key, Some(value))
+        self.stage(key.into(), Some(value.into()))
     }
 
     pub fn delete(&mut self, key: &[u8]) -> Result<()> {
-        self.stage(key, None)
+        self.stage(key.into(), None)
     }
 
-    fn stage(&mut self, key: &[u8], value: Option<&[u8]>) -> Result<()> {
+    pub(crate) fn stage(&mut self, key: Cow<'_, [u8]>, value: Option<Cow<'_, [u8]>>) -> Result<()> {
+        if value.as_ref().is_some_and(|v| v.len() > MAX_VALUE_BYTES) {
+            return Err(Error::Limit("value bytes"));
+        }
         if self.read_only {
             return Err(Error::Invalid("read-only transaction"));
         }
-        validate_key(key)?;
-        let previous = self
-            .writes
-            .get(key)
-            .map_or(0, |v| operation_size(key, v.as_deref()));
-        let size = self.write_bytes - previous + operation_size(key, value);
+        validate_key(&key)?;
+        let previous = self.writes.get(key.as_ref());
+        let previous_size = previous.map_or(0, |v| operation_size(&key, v.as_deref()));
+        let size = self.write_bytes - previous_size + operation_size(&key, value.as_deref());
         if size > MAX_TRANSACTION_BYTES {
             return Err(Error::Limit("transaction bytes"));
         }
-        if !self.writes.contains_key(key) && self.writes.len() == MAX_TRANSACTION_WRITES {
+        if previous.is_none() && self.writes.len() == MAX_TRANSACTION_WRITES {
             return Err(Error::Limit("transaction writes"));
         }
-        let previous_charge = self.writes.get(key).map_or(0, |value| {
-            128 + key.len() + value.as_ref().map_or(0, Vec::len)
-        });
-        let charge = 128 + key.len() + value.map_or(0, <[u8]>::len);
+        let previous_charge = previous.map_or(0, |v| 128 + key.len() + v.as_ref().map_or(0, Vec::len));
+        let charge = 128 + key.len() + value.as_deref().map_or(0, <[u8]>::len);
         let _buffer = self.reserve_buffer(charge)?;
         self.database
             .inner
             .budget
             .replace(STAGED, previous_charge, charge)?;
         self.staged_charge = self.staged_charge - previous_charge + charge;
-        self.writes.insert(key.to_vec(), value.map(<[u8]>::to_vec));
+        self.writes.insert(key.into_owned(), value.map(Cow::into_owned));
         self.write_bytes = size;
         Ok(())
     }
@@ -1796,16 +2000,15 @@ impl Transaction {
         independent_trace::mark(0);
         #[cfg(all(test, target_os = "linux", not(feature = "retirement-timing")))]
         let attempted = independent_trace::stamp();
-        let _writer = database.inner.writer.lock().map_err(|_| Error::Poisoned)?;
+        let incoming = (self.write_bytes + PREFIX_BYTES + TRAILER_BYTES) as u64;
+        let (_writer, mut state) = database.lock_for_commit(incoming)?;
         #[cfg(all(test, target_os = "linux", not(feature = "retirement-timing")))]
         let _writer = independent_trace::observe(attempted, _writer);
         #[cfg(all(test, target_os = "linux"))]
         independent_trace::mark(1);
         #[cfg(feature = "retirement-timing")]
         let _writer = TimedWriter(Some(_writer));
-        #[cfg(feature = "lock-timing")]
-        trace_mark(3);
-        let mut state = database.state()?;
+
         #[cfg(feature = "lock-timing")]
         detail_mark(2);
         let validation = self.validate_commit(&state, &BTreeSet::new());
@@ -1885,7 +2088,7 @@ impl Transaction {
 
 impl Drop for Transaction {
     fn drop(&mut self) {
-        self.database.inner.budget.release(ACTIVE, 1);
+        self.database.inner.budget.release(ACTIVE, usize::from(self.count_active));
         self.database
             .inner
             .budget
@@ -1975,6 +2178,57 @@ fn wal_header(id: [u8; 16], base: u64, chunks: u32) -> [u8; HEADER_BYTES] {
 
 #[cfg(windows)]
 fn replace_file(source: &Path, target: &Path) -> io::Result<()> {
+    move_file(source, target, 0x1 | 0x8)
+}
+
+#[cfg(all(windows, feature = "fixed-log"))]
+fn publish_new_file(source: &Path, target: &Path) -> io::Result<()> {
+    move_file(source, target, 0x8)
+}
+
+#[cfg(all(not(windows), feature = "fixed-log"))]
+fn publish_new_file(source: &Path, target: &Path) -> io::Result<()> {
+    #[cfg(target_os = "linux")]
+    let renamed = try_rename_new_file(source, target)?;
+    #[cfg(not(target_os = "linux"))]
+    let renamed = false;
+    if !renamed {
+        // Plain rename would overwrite a file installed after the existence check.
+        std::fs::hard_link(source, target)?;
+        std::fs::remove_file(source)?;
+    }
+    File::open(target.parent().unwrap_or_else(|| Path::new(".")))?.sync_all()
+}
+
+#[cfg(all(target_os = "linux", feature = "fixed-log"))]
+fn try_rename_new_file(source: &Path, target: &Path) -> io::Result<bool> {
+    use std::ffi::CString;
+    use std::os::unix::ffi::OsStrExt;
+    let source = CString::new(source.as_os_str().as_bytes())?;
+    let target = CString::new(target.as_os_str().as_bytes())?;
+    // The libc wrapper for renameat2 is unavailable on older glibc installations.
+    let status = unsafe {
+        libc::syscall(
+            libc::SYS_renameat2,
+            libc::AT_FDCWD,
+            source.as_ptr(),
+            libc::AT_FDCWD,
+            target.as_ptr(),
+            libc::RENAME_NOREPLACE,
+        )
+    };
+    if status == 0 {
+        return Ok(true);
+    }
+    let error = io::Error::last_os_error();
+    match error.raw_os_error() {
+        Some(libc::ENOSYS | libc::EINVAL | libc::EOPNOTSUPP | libc::EPERM) => Ok(false),
+        _ => Err(error),
+    }
+}
+
+#[cfg(windows)]
+fn move_file(source: &Path, target: &Path, flags: u32) -> io::Result<()> {
     use std::os::windows::ffi::OsStrExt;
     #[link(name = "kernel32")]
     unsafe extern "system" {
@@ -1983,7 +2237,7 @@ fn replace_file(source: &Path, target: &Path) -> io::Result<()> {
     let source: Vec<_> = source.as_os_str().encode_wide().chain(Some(0)).collect();
     let target: Vec<_> = target.as_os_str().encode_wide().chain(Some(0)).collect();
     // Cross-volume copy-and-delete cannot provide the same publication boundary.
-    if unsafe { MoveFileExW(source.as_ptr(), target.as_ptr(), 0x1 | 0x8) } == 0 {
+    if unsafe { MoveFileExW(source.as_ptr(), target.as_ptr(), flags) } == 0 {
         return Err(io::Error::last_os_error());
     }
     Ok(())
@@ -2001,6 +2255,35 @@ fn replace_file(source: &Path, target: &Path) -> io::Result<()> {
     File::open(target.parent().unwrap_or_else(|| Path::new(".")))?.sync_all()
 }
 
+#[cfg(feature = "redo-witness")]
+fn managed_capacity(current: u64, compacted: u64, incoming: u64) -> Result<u64> {
+    let end = compacted.checked_add(PREFIX_BYTES as u64)
+        .filter(|n| *n <= fixed_log::MAX_REDO_CAPACITY)
+        .ok_or(Error::ResourceExhausted("checkpoint exceeds maximum redo capacity"))?;
+    if incoming == 0 && end <= current {
+        return Ok(current);
+    }
+    let needed = end.saturating_add(incoming);
+    let mut capacity = current;
+    while needed > capacity - capacity / 4 && capacity < fixed_log::MAX_REDO_CAPACITY {
+        capacity = (2 * capacity).min(fixed_log::MAX_REDO_CAPACITY);
+    }
+    Ok(capacity)
+}
+
+#[cfg(feature = "redo-witness")]
+fn exceeds_managed_threshold(capacity: u64, used: u64, incoming: u64, already_compacted: bool) -> bool {
+    let threshold = if capacity == fixed_log::MAX_REDO_CAPACITY {
+        if already_compacted {
+            return false;
+        }
+        capacity
+    } else {
+        capacity - capacity / 8
+    };
+    used.saturating_add(incoming).saturating_add(PREFIX_BYTES as u64) > threshold
+}
+
 impl State {
     fn new(file: WalFile, path: PathBuf, budget: Arc<Budget>) -> Self {
         Self {
@@ -2008,6 +2291,8 @@ impl State {
             path,
             sequence: 0,
             wal_bytes: HEADER_BYTES as u64,
+            #[cfg(feature = "redo-witness")]
+            compacted_at: None,
             reservation_enabled: cfg!(windows),
             reserved_bytes: 0,
             rows: BTreeMap::new(),
@@ -2022,6 +2307,13 @@ impl State {
             budget,
         }
     }
+    #[cfg(feature = "redo-witness")]
+    fn needs_managed_checkpoint(&self, incoming: u64) -> bool {
+        let Some(file) = self.file.as_ref().filter(|f| f.managed_redo()) else { return false; };
+        let capacity = file.capacity().expect("managed WAL has a fixed capacity");
+        exceeds_managed_threshold(capacity, self.wal_bytes, incoming, self.compacted_at == Some(self.sequence))
+    }
+
     fn check_log_capacity(&self, _needed: u64) -> Result<()> {
         #[cfg(feature = "fixed-log")]
         if self
@@ -3448,13 +3740,14 @@ mod tests {
 
     #[test]
     fn retirement_byte_boundary_and_disabled_mode_fall_back_without_losing_data() {
-        for (enabled, cap, retained) in
-            [(true, 47, 0), (true, 48, 1), (true, 49, 1), (false, 49, 0)]
+        for (enabled, margin, retained) in
+            [(true, -1, 0), (true, 0, 1), (true, 1, 1), (false, 1, 0)]
         {
             let path = Fixture::new();
             let db = Database::create(&path.0, [57; 16]).unwrap();
             db.set_log_reservation(false).unwrap();
-            db.set_checkpoint_retirement(enabled, cap).unwrap();
+            let physical = std::fs::metadata(&path.0).unwrap().len();
+            db.set_checkpoint_retirement(enabled, physical.checked_add_signed(margin).unwrap()).unwrap();
             db.checkpoint().unwrap();
             assert_eq!(
                 db.checkpoint_retirement_status().unwrap().retained,
@@ -3607,7 +3900,12 @@ mod tests {
                     "complete" => file.write_all(frame)?,
                     _ => (),
                 }
-                file.sync_all()?;
+                if mode == "complete" {
+                    file.sync_all()?;
+                } else {
+                    // A torn device write cannot include a valid end record certifying the tear.
+                    file.sync_data()?;
+                }
                 Err(io::Error::new(
                     io::ErrorKind::StorageFull,
                     "injected storage failure",
@@ -3630,7 +3928,7 @@ mod tests {
     #[test]
     fn bv_wal_and_sequence_limits_reject_before_any_persistence() {
         let path = Fixture::new();
-        let db = Database::create(&path.0, [3; 16]).unwrap();
+        let db = Database::create_append(&path.0, [3; 16]).unwrap();
         for sequence_limit in [false, true] {
             {
                 let mut state = db.state().unwrap();
@@ -3692,7 +3990,7 @@ mod tests {
             } else {
                 frame
             })?;
-            file.sync_all()?;
+            if partial { file.sync_data()?; } else { file.sync_all()?; }
             std::process::exit(74);
         });
         panic!("crash point was not reached");
@@ -4087,7 +4385,7 @@ mod tests {
     #[test]
     fn st_version_one_log_can_be_opened_and_upgraded_by_checkpoint() {
         let path = Fixture::new();
-        let db = Database::create(&path.0, [2; 16]).unwrap();
+        let db = Database::create_append(&path.0, [2; 16]).unwrap();
         let mut tx = db.begin().unwrap();
         tx.put(b"old", b"v1").unwrap();
         tx.commit().unwrap();
@@ -4323,7 +4621,7 @@ mod reservation_tests {
             &Path::new(env!("CARGO_MANIFEST_DIR")).join("artifacts/reservation.wal"),
         );
         std::fs::create_dir_all(path.parent().unwrap()).unwrap();
-        let db = Database::create(&path, [17; 16]).unwrap();
+        let db = Database::create_append(&path, [17; 16]).unwrap();
         let mut old = db.begin().unwrap();
         for size in [32000, 32768, 33000] {
             let mut tx = db.begin().unwrap();
@@ -4370,7 +4668,7 @@ mod reservation_tests {
             &Path::new(env!("CARGO_MANIFEST_DIR")).join("artifacts/reservation-failure.wal"),
         );
         std::fs::create_dir_all(path.parent().unwrap()).unwrap();
-        let db = Database::create(&path, [18; 16]).unwrap();
+        let db = Database::create_append(&path, [18; 16]).unwrap();
         {
             let mut state = db.state().unwrap();
             let writable = state.file.take();
@@ -4504,13 +4802,13 @@ pub fn take_commit_trace() -> [u64; 8] {
     COMMIT_TRACE.with(|trace| trace.replace([0; 8]))
 }
 
-fn wrap_checkpoint_file(mut file: File, end: u64) -> io::Result<WalFile> {
+fn wrap_checkpoint_file(mut file: File, end: u64, _budget: &Arc<Budget>) -> Result<WalFile> {
     #[cfg(feature = "fixed-log")]
     {
         file.seek(SeekFrom::Start(0))?;
         let mut header = [0; HEADER_BYTES];
         file.read_exact(&mut header)?;
-        let mut file = WalFile::open(file, header)?;
+        let mut file = WalFile::open(file, header, _budget)?;
         file.seek(SeekFrom::Start(end))?;
         Ok(file)
     }
@@ -4677,3 +4975,11 @@ mod scaled_gate;
 #[cfg(all(test, target_os = "linux"))]
 #[path = "../benchmarks/scaled-gate/independent_trace.rs"]
 mod independent_trace;
+
+#[cfg(all(test, feature = "redo-witness"))]
+#[path = "managed_checkpoint_tests.rs"]
+mod managed_checkpoint_tests;
+
+#[cfg(all(test, feature = "redo-witness"))]
+#[path = "auto_growth_crash_tests.rs"]
+mod auto_growth_crash_tests;

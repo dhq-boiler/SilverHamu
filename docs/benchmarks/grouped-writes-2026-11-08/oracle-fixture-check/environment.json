@@ -1,0 +1,105 @@
+{
+  "utc": "2026-11-08T08:36:33.357795+00:00",
+  "rows": 10000,
+  "value_bytes": 256,
+  "ops_per_case": 8000,
+  "reps": 1,
+  "single_request": true,
+  "git_commit": "102dbe6252f5e4bc4d8b375ed32c77f118fb1824",
+  "docker": {
+    "ServerVersion": "29.9.2",
+    "NCPU": 32,
+    "MemTotal": 67380625408,
+    "Driver": "overlay2",
+    "OSType": "linux",
+    "Architecture": "x86_64",
+    "KernelVersion": "6.18.54.1-microsoft-standard-WSL2"
+  },
+  "images": {
+    "oracle": [
+      "container-registry.oracle.com/database/free@sha256:cf540c3fa190d7cffad08c491652ac07fc70314e510f6b87890449517d565e94"
+    ]
+  },
+  "source_sha256": {
+    "runner.py": "cd9209bce867a19009c48f48125c30087f1d2a23e8852abae61948af1a24df60",
+    "run.py": "1ca615a2f0b77bab3fb62f79928dc4dca4cdc131d6aeeb8902ce49f3eb0ff7d6",
+    "Dockerfile": "7a283c8505d8691c72ae602b6697b819d4e45eea5e8c3050379295f68eec47cf"
+  },
+  "runs": [
+    {
+      "engine": "oracle",
+      "rep": 1,
+      "status": "failed",
+      "verification": [
+        {
+          "stage": "initial",
+          "rows": 10000,
+          "sha256": "61df2dc93c64f19866e9bb2357a359c3b2e187085ae14bc629ca4b63190b6f41",
+          "expected_sha256": "61df2dc93c64f19866e9bb2357a359c3b2e187085ae14bc629ca4b63190b6f41",
+          "updated_keys": 0,
+          "empty_and_last": true
+        },
+        {
+          "stage": "update-16",
+          "rows": 10000,
+          "sha256": "19e32fb99e35aba8704d4d1a4f8645656943c931bceba4239448c76d9afcc2f0",
+          "expected_sha256": "19e32fb99e35aba8704d4d1a4f8645656943c931bceba4239448c76d9afcc2f0",
+          "updated_keys": 5538,
+          "empty_and_last": true
+        }
+      ],
+      "python_packages": [
+        "cffi==2.1.1",
+        "contourpy==1.4.0",
+        "cryptography==46.0.3",
+        "cycler==0.12.1",
+        "fonttools==4.68.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.10.7",
+        "numpy==2.5.4",
+        "oracledb==3.4.1",
+        "packaging==26.3",
+        "pillow==13.0.0",
+        "psycopg==3.2.10",
+        "psycopg-binary==3.2.10",
+        "pycparser==3.12",
+        "PyMySQL==1.1.2",
+        "pyparsing==3.3.3",
+        "python-dateutil==4.0.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.6"
+      ],
+      "metadata": {
+        "select banner_full from v$version": [
+          [
+            "Oracle AI Database 26ai Free Release 23.26.3.0.0 - Develop, Learn, and Run for Free\nVersion 23.26.3.0.0"
+          ]
+        ],
+        "select sys_context('USERENV','DB_NAME') from dual": [
+          [
+            "FREEPDB1"
+          ]
+        ],
+        "SELECT ini_trans FROM user_tables WHERE table_name='KV'": [
+          [
+            16
+          ]
+        ]
+      },
+      "error": "Workload errors; see raw results. No automatic retries."
+    }
+  ],
+  "skipped": {
+    "sql-server": "SQL Server 2022 Developer/Express/Evaluation license section 5 requires prior written permission for disclosure; permission not obtained, not measured."
+  },
+  "cases": [
+    [
+      "update",
+      16
+    ]
+  ],
+  "engines": [
+    "oracle"
+  ],
+  "oracle_initrans": 16
+}

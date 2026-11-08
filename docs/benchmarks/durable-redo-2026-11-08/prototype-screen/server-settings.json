@@ -1,0 +1,6 @@
+{
+  "candidate": {
+    "CATDB_EXPERIMENTAL_REDO_LOG_BYTES": "67108864"
+  },
+  "baseline": {}
+}

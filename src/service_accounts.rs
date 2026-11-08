@@ -165,12 +165,12 @@ impl Accounts {
             .with_single_cert(certs, key)?;
         let mut dbs = HashMap::from([(String::from("main"), primary.clone())]);
         for (name, path) in &options.attachments {
-            if !valid_name(&name)
+            if !valid_name(name)
                 || dbs.contains_key(name)
                 || path
                     .extension()
                     .is_some_and(|x| x.eq_ignore_ascii_case("accounts"))
-                || catalog_path(&path).try_exists()?
+                || catalog_path(path).try_exists()?
             {
                 return Err("invalid attachment or independent account catalog".into());
             }
@@ -189,7 +189,11 @@ impl Accounts {
             if options.bootstrap.is_none() || owner_path(&config.database).try_exists()? {
                 return Err("missing account catalog; bootstrap locally".into());
             }
-            let db = Database::create_with_limits(&path, primary.id(), ResourceLimits::default())?;
+            let db = Database::create_append_with_limits(
+                &path,
+                primary.id(),
+                ResourceLimits::default(),
+            )?;
             #[cfg(unix)]
             File::open(
                 path.parent()

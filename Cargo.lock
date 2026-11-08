@@ -60,6 +60,7 @@ dependencies = [
  "argon2",
  "ctrlc",
  "getrandom",
+ "libc",
  "rustls",
  "rustls-pemfile",
  "serde_json",

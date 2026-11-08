@@ -1,4 +1,5 @@
 """Isolated Linux container checks; never mounts an existing database."""
+import argparse
 import importlib.util
 import json
 import pathlib
@@ -22,6 +23,9 @@ def docker(*args, check=True):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--image", default="catdb:local")
+    image = parser.parse_args().image
     name = "catdb-check-" + uuid.uuid4().hex[:12]
     volume = name + "-data"
     (ROOT / "artifacts").mkdir(exist_ok=True)
@@ -33,7 +37,7 @@ def main():
     docker("volume", "create", volume)
 
     def start():
-        docker("run", "--detach", "--name", name, "--read-only", "--cap-drop", "ALL", "--security-opt", "no-new-privileges:true", "--stop-timeout", "10", "-p", "127.0.0.1::7400", "--mount", f"type=volume,source={volume},target=/data", "--mount", f"type=bind,source={secret},target=/run/secrets/catdb_token,readonly", "catdb:local")
+        docker("run", "--detach", "--name", name, "--read-only", "--cap-drop", "ALL", "--security-opt", "no-new-privileges:true", "--stop-timeout", "10", "-p", "127.0.0.1::7400", "--mount", f"type=volume,source={volume},target=/data", "--mount", f"type=bind,source={secret},target=/run/secrets/catdb_token,readonly", image)
         port = int(docker("port", name, "7400/tcp").stdout.strip().rsplit(":", 1)[1])
         deadline = time.monotonic() + 20
         while True:
@@ -54,6 +58,10 @@ def main():
     try:
         port = start()
         assert docker("exec", name, "id", "-u").stdout.strip() == "10001"
+        fmt = docker("exec", name, "od", "-An", "-t", "u4", "-j8", "-N4", "/data/state.ndb")
+        chunks = docker("exec", name, "od", "-An", "-t", "u4", "-j40", "-N4", "/data/state.ndb")
+        assert int(fmt.stdout) == 4 and int(chunks.stdout) & (1 << 31)
+        passed.append("New database uses managed WAL format 4 without environment settings")
         docker("exec", name, "catdb-server", "--healthcheck", "--token-file", "/run/secrets/catdb_token")
         state = json.loads(docker("inspect", name).stdout)[0]
         assert state["HostConfig"]["ReadonlyRootfs"]

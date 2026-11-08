@@ -22,12 +22,16 @@ rustls-pemfile = { version = "2", optional = true }
 serde_json = { version = "1", optional = true }
 ctrlc = { version = "3.5", features = ["termination"], optional = true }
 
+[target.'cfg(target_os = "linux")'.dependencies]
+libc = { version = "0.2", optional = true }
+
 [features]
-default = ["inline-latest", "inline-key"]
-service = ["dep:serde_json", "dep:ctrlc", "dep:argon2", "dep:getrandom", "dep:rustls", "dep:rustls-pemfile", "handoff-refill"]
+default = ["inline-latest", "inline-key", "redo-witness"]
+service = ["dep:serde_json", "dep:ctrlc", "dep:argon2", "dep:getrandom", "dep:rustls", "dep:rustls-pemfile", "handoff-refill", "redo-witness"]
 fifo-writer = []
 aged-writer = ["fifo-writer"]
-fixed-log = []
+fixed-log = ["dep:libc"]
+redo-witness = ["fixed-log"]
 wal-direct = []
 wal-prepare = ["wal-direct"]
 lock-timing = []
@@ -37,6 +41,7 @@ single-client-commit = []
 checkpoint-handle-reuse = []
 group-handoff = []
 handoff-refill = ["group-handoff"]
+wide-cohort = ["handoff-refill"]
 commit-window = ["group-handoff"]
 adaptive-window = ["commit-window"]
 sync-stall = []

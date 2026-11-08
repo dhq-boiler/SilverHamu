@@ -6,9 +6,16 @@ def run(*args,env=None,timeout=600):
  if r.returncode:raise RuntimeError(r.stderr[-4000:]+r.stdout[-1500:])
  return r.stdout.strip()
 def main():
- p=argparse.ArgumentParser();p.add_argument('--variant',action='append',required=True,help='name=image');p.add_argument('--out',type=pathlib.Path,required=True);p.add_argument('--reps',type=int,default=3);p.add_argument('--ops',type=int,default=8000);p.add_argument('--clients',type=int,nargs='+',default=[1,4]);p.add_argument('--workloads',nargs='+',default=['get','range100','update']);p.add_argument('--single-variants',nargs='*',default=[]);p.add_argument('--profile',action='store_true');p.add_argument('--profile-variants',nargs='*',default=[]);args=p.parse_args()
+ p=argparse.ArgumentParser();p.add_argument('--variant',action='append',required=True,help='name=image');p.add_argument('--out',type=pathlib.Path,required=True);p.add_argument('--reps',type=int,default=3);p.add_argument('--ops',type=int,default=8000);p.add_argument('--clients',type=int,nargs='+',default=[1,4]);p.add_argument('--workloads',nargs='+',default=['get','range100','update']);p.add_argument('--single-variants',nargs='*',default=[]);p.add_argument('--profile',action='store_true');p.add_argument('--profile-variants',nargs='*',default=[])
+ p.add_argument('--redo-log-bytes', type=int, help='use the redo-witness WAL in all measured variants')
+ args=p.parse_args()
+ if args.redo_log_bytes is not None:
+  capacity=args.redo_log_bytes
+  if capacity % 4096 or not 4096 <= capacity <= 2**30 - 4*65536:
+   p.error('invalid redo-log capacity')
  out=args.out.resolve();out.mkdir(parents=True,exist_ok=False);variants=dict(x.split('=',1) for x in args.variant)
  meta={'utc':__import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat(),'rows':100000,'value_bytes':256,'ops':args.ops,'reps':args.reps,'single_variants':args.single_variants,'profile':args.profile,'profile_variants':args.profile_variants,'clients':args.clients,'workloads':args.workloads,'server_cpus':2,'client_cpus':2,'memory_gib_each':4,'variants':{k:{'image':v,'id':run('docker','image','inspect',v,'--format','{{.Id}}')} for k,v in variants.items()},'source_sha256':{str(f.relative_to(ROOT)):hashlib.sha256(f.read_bytes()).hexdigest() for f in [ROOT/'benchmarks/runner.py',ROOT/'benchmarks/commit-breakdown/client.py',ROOT/'src/group_commit.rs',ROOT/'src/service.rs']},'runs':[]};results=[]
+ meta['redo_log_bytes']=args.redo_log_bytes
  def save():
   (out/'environment.json').write_text(json.dumps(meta,indent=2)+'\n',encoding='utf-8');(out/'results.json').write_text(json.dumps(results,indent=2)+'\n',encoding='utf-8')
  save()
@@ -28,6 +35,8 @@ def main():
     execute('init')
     run('docker','exec',client,'python','-c',"import os,pathlib;p=pathlib.Path('/data/token');p.write_text(os.environ['BENCH_TOKEN']);p.chmod(0o400);os.chown(p,10001,10001);os.chown('/data',10001,10001)")
     diagnostic=['-e','CATDB_DIAGNOSTICS=1'] if profile else []
+    if args.redo_log_bytes is not None:
+     diagnostic.extend(['-e',f'CATDB_EXPERIMENTAL_REDO_LOG_BYTES={args.redo_log_bytes}'])
     run('docker','run','-d','--name',server,*common,'--network-alias','database','--user','10001:10001',*diagnostic,variants[variant],'catdb-server','--db','/data/catdb.wal','--bind','0.0.0.0:7400','--allow-remote','--token-file','/data/token','--transaction-timeout-secs','3600');owned.append(server)
     for attempt in range(30):
      try:entry['checks'].append({'stage':'initial',**execute('verify')});break

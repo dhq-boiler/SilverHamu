@@ -1,0 +1,28 @@
+{
+  "image": "sha256:65af3ce9fad634ab347709199e548821c85f1e9cc1c5559480ac40d4f74c4512",
+  "server_env": {
+    "CATDB_EXPERIMENTAL_REDO_LOG_BYTES": "67108864"
+  },
+  "rounds": [
+    {
+      "connections": 4,
+      "submitted_or_staged": 190,
+      "acknowledged": 186,
+      "recovered_transactions": 189,
+      "recovered_keys": 282,
+      "uncommitted_key_absent": true,
+      "checkpoint_format": 4
+    },
+    {
+      "connections": 16,
+      "submitted_or_staged": 356,
+      "acknowledged": 340,
+      "recovered_transactions": 344,
+      "recovered_keys": 793,
+      "uncommitted_key_absent": true,
+      "checkpoint_format": 4
+    }
+  ],
+  "initial_format": 4,
+  "status": "passed"
+}

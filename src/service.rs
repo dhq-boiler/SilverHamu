@@ -1,5 +1,5 @@
 //! Experimental v1 framed JSON service over the embedded transaction engine.
-use crate::transactions::{Database, Error, ResourceLimits, ScanLimits, Transaction};
+use crate::transactions::{CheckpointLog, Database, Error, ResourceLimits, ScanLimits, Transaction};
 use serde_json::{Value, json};
 use std::io::{self, Read, Write};
 use std::net::{SocketAddr, TcpListener, TcpStream};
@@ -113,6 +113,22 @@ impl Server {
             Some(value) if value == "1" => true,
             _ => return Err("CATDB_EXT4_CHECKPOINT_WRITEBACK must be 0 or 1".into()),
         };
+        let requested_log = match (
+            std::env::var_os("CATDB_EXPERIMENTAL_FIXED_LOG_BYTES"),
+            std::env::var_os("CATDB_EXPERIMENTAL_REDO_LOG_BYTES"),
+            std::env::var_os("CATDB_MIGRATE_WAL"),
+        ) {
+            (None, None, None) => None,
+            (Some(bytes), None, None) => Some(CheckpointLog::Fixed(
+                bytes.to_str().ok_or("invalid fixed log size")?.parse()?,
+            )),
+            (None, Some(bytes), None) => Some(CheckpointLog::Redo(
+                bytes.to_str().ok_or("invalid redo log size")?.parse()?,
+            )),
+            (None, None, Some(mode)) if mode == "managed" => Some(CheckpointLog::DEFAULT_MANAGED),
+            (None, None, Some(_)) => return Err("CATDB_MIGRATE_WAL must be managed".into()),
+            _ => return Err("select one WAL format".into()),
+        };
         let listener = TcpListener::bind(config.bind)?;
         listener.set_nonblocking(true)?;
         let db = if config.database.try_exists()? {
@@ -130,7 +146,11 @@ impl Server {
                 .duration_since(UNIX_EPOCH)?
                 .as_nanos()
                 .to_le_bytes();
-            let db = Database::create_with_limits(&config.database, id, limits)?;
+            let db = if let Some(layout) = requested_log {
+                Database::create_with_log(&config.database, id, limits, Some(layout))?
+            } else {
+                Database::create_with_limits(&config.database, id, limits)?
+            };
             #[cfg(unix)]
             std::fs::File::open(parent)?.sync_all()?;
             db
@@ -141,10 +161,25 @@ impl Server {
             );
         };
         db.set_checkpoint_range_writeback(range_writeback)?;
-        if let Ok(value) = std::env::var("CATDB_EXPERIMENTAL_FIXED_LOG_BYTES") {
-            #[cfg(feature = "fixed-log")]
-            {
-                let capacity: u64 = value.parse()?;
+        match requested_log {
+            Some(CheckpointLog::ManagedRedo(_)) if !db.uses_managed_log()? => {
+                db.checkpoint_managed_log()?;
+            }
+            Some(CheckpointLog::Redo(capacity)) if db.uses_redo_log()? => {
+                if db.fixed_log_capacity()? != Some(capacity) {
+                    return Err("redo log capacity differs; use explicit checkpoint API".into());
+                }
+                if db.uses_managed_log()? {
+                    db.checkpoint_redo_log(capacity)?;
+                }
+            }
+            Some(CheckpointLog::Redo(capacity)) => {
+                db.checkpoint_redo_log(capacity)?;
+            }
+            Some(CheckpointLog::Fixed(capacity)) => {
+                if db.uses_redo_log()? {
+                    return Err("existing WAL uses redo-witness format".into());
+                }
                 match db.fixed_log_capacity()? {
                     None => {
                         db.checkpoint_fixed_log(capacity)?;
@@ -158,11 +193,7 @@ impl Server {
                     }
                 }
             }
-            #[cfg(not(feature = "fixed-log"))]
-            {
-                let _ = value;
-                return Err("experimental fixed-log build feature required".into());
-            }
+            _ => {}
         }
         if let Ok(value) = std::env::var("CATDB_BACKGROUND_RECLAMATION") {
             match value.as_str() {
@@ -730,13 +761,12 @@ fn hex_decode(value: &str, max: usize) -> Result<Vec<u8>, Error> {
             _ => Err(Error::Invalid("hex")),
         }
     }
-    value
-        .as_bytes()
-        .as_chunks::<2>()
-        .0
-        .iter()
-        .map(|c| Ok(digit(c[0])? * 16 + digit(c[1])?))
-        .collect()
+    let pairs = value.as_bytes().as_chunks::<2>().0;
+    let mut decoded = Vec::with_capacity(pairs.len());
+    for pair in pairs {
+        decoded.push(digit(pair[0])? * 16 + digit(pair[1])?);
+    }
+    Ok(decoded)
 }
 fn hex(bytes: &[u8]) -> String {
     const DIGITS: &[u8] = b"0123456789abcdef";
@@ -765,6 +795,17 @@ fn limit(v: &Value, name: &str, default: usize, max: usize) -> Result<usize, Err
             .map(|n| n as usize)
             .ok_or(Error::Limit("page limit")),
     }
+}
+
+fn stage_request(tx: Option<&mut Transaction>, v: &Value, put: bool) -> Result<(), Error> {
+    let key = bytes(v, "key", 1024)?;
+    let tx = tx.ok_or(Error::Invalid("no transaction"))?;
+    let value = if put {
+        Some(bytes(v, "value", MAX_VALUE)?.into())
+    } else {
+        None
+    };
+    tx.stage(key.into(), value)
 }
 
 fn dispatch(db: &Database, tx: &mut Option<Transaction>, v: &Value) -> Result<Value, Error> {
@@ -843,7 +884,7 @@ fn dispatch_operation(
             let mut transactions = Vec::with_capacity(decoded.len());
             for (key, value) in decoded {
                 let mut transaction = db.begin()?;
-                transaction.put(&key, &value)?;
+                transaction.stage(key.into(), Some(value.into()))?;
                 transactions.push(transaction);
             }
             let mut reopen = false;
@@ -903,23 +944,14 @@ fn dispatch_operation(
             if tx.is_some() {
                 return Err(Error::Invalid("single request requires no transaction"));
             }
-            let (operation, writes) = match op {
-                "get_latest" => ("get", false),
-                "scan_latest" => ("scan", false),
-                "put_commit" => ("put", true),
-                _ => ("delete", true),
-            };
-            let mut local = Some(if writes {
-                db.begin()?
-            } else {
-                db.begin_read()?
-            });
-            let response = dispatch_operation(db, &mut local, v, operation)?;
-            if writes {
-                let version = local.take().unwrap().commit()?;
+            if matches!(op, "put_commit" | "delete_commit") {
+                let mut local = db.begin()?;
+                stage_request(Some(&mut local), v, op == "put_commit")?;
+                let version = local.commit()?;
                 Ok(json!({"ok":true,"version":version.to_string()}))
             } else {
-                Ok(response)
+                let operation = if op == "get_latest" { "get" } else { "scan" };
+                dispatch_operation(db, &mut Some(db.begin_read()?), v, operation)
             }
         }
         "begin" | "begin_read" => {
@@ -967,13 +999,7 @@ fn dispatch_operation(
             Ok(json!({"ok":true,"value":value.as_deref().map(hex)}))
         }
         "put" | "delete" => {
-            let key = bytes(v, "key", 1024)?;
-            let t = tx.as_mut().ok_or(Error::Invalid("no transaction"))?;
-            if op == "put" {
-                t.put(&key, &bytes(v, "value", MAX_VALUE)?)?;
-            } else {
-                t.delete(&key)?;
-            }
+            stage_request(tx.as_mut(), v, op == "put")?;
             Ok(json!({"ok":true}))
         }
         "scan" => {
@@ -989,17 +1015,27 @@ fn dispatch_operation(
                 .as_mut()
                 .ok_or(Error::Invalid("no transaction"))?
                 .scan_page(&start, end.as_deref(), after.as_deref(), limits)?;
-            let rows: Vec<_> = page
-                .rows
-                .iter()
-                .map(|(k, v)| json!([hex(k), hex(v)]))
-                .collect();
-            Ok(
-                json!({"ok":true,"rows":rows,"next_after":page.next_after.as_deref().map(hex),"visited":page.visited_entries}),
-            )
+            Ok(scan_response(&page))
         }
         _ => Err(Error::Invalid("unknown operation")),
     }
+}
+
+fn scan_response(page: &crate::transactions::ScanPage) -> Value {
+    let rows: Value = page
+        .rows
+        .iter()
+        .map(|(key, value)| Value::from([hex(key), hex(value)]))
+        .collect();
+    let mut response = serde_json::Map::new();
+    response.insert("ok".into(), true.into());
+    response.insert("rows".into(), rows);
+    response.insert(
+        "next_after".into(),
+        page.next_after.as_deref().map(hex).into(),
+    );
+    response.insert("visited".into(), page.visited_entries.into());
+    Value::Object(response)
 }
 
 pub fn healthcheck(address: SocketAddr, token: &[u8]) -> io::Result<()> {
@@ -1086,6 +1122,59 @@ mod tests {
             .unwrap()
         }
     }
+    #[test]
+    #[ignore = "compile with CATDB_ELISION_ALLOC=1 for allocation measurements"]
+    fn scan_response_moves_encoded_rows_without_extra_payload_copies() {
+        use crate::work_elision_metrics as meter;
+        assert!(meter::counted(), "set CATDB_ELISION_ALLOC=1 at build time");
+        let db = Fixture::new().db();
+        let mut tx = db.begin().unwrap();
+        for id in 0..101u64 {
+            tx.put(&id.to_be_bytes(), &[id as u8; 256]).unwrap();
+        }
+        tx.commit().unwrap();
+        let page = db
+            .begin_read()
+            .unwrap()
+            .scan_page(
+                b"",
+                None,
+                None,
+                ScanLimits {
+                    max_rows: 100,
+                    ..ScanLimits::default()
+                },
+            )
+            .unwrap();
+        assert_eq!(page.rows.len(), 100);
+        assert!(page.next_after.is_some());
+
+        meter::start();
+        let rows: Vec<_> = page
+            .rows
+            .iter()
+            .map(|(key, value)| json!([hex(key), hex(value)]))
+            .collect();
+        let previous = json!({
+            "ok": true, "rows": rows,
+            "next_after": page.next_after.as_deref().map(hex), "visited": page.visited_entries
+        });
+        let (old_calls, old_bytes) = meter::stop();
+
+        meter::start();
+        let current = scan_response(&page);
+        let (new_calls, new_bytes) = meter::stop();
+        assert_eq!(
+            serde_json::to_vec(&current).unwrap(),
+            serde_json::to_vec(&previous).unwrap()
+        );
+        println!(
+            "allocations {old_calls} -> {new_calls}, requested bytes {old_bytes} -> {new_bytes}"
+        );
+        assert!(new_calls < old_calls);
+        assert!(new_bytes < old_bytes);
+    }
+
     #[test]
     fn st_single_update_waits_for_sync_and_hides_uncommitted_values() {
         let fixture = Fixture::new();

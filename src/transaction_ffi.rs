@@ -393,13 +393,33 @@ pub unsafe extern "C" fn ndb_tx_db_create(
     id: *const u8,
     out: *mut u64,
 ) -> i32 {
+    unsafe { create_db(p, n, id, out, |path, id| Database::create(path, id)) }
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn ndb_tx_db_create_append(
+    p: *const u8,
+    n: u64,
+    id: *const u8,
+    out: *mut u64,
+) -> i32 {
+    unsafe { create_db(p, n, id, out, |path, id| Database::create_append(path, id)) }
+}
+
+unsafe fn create_db(
+    p: *const u8,
+    n: u64,
+    id: *const u8,
+    out: *mut u64,
+    create: impl FnOnce(&str, [u8; 16]) -> crate::transactions::Result<Database>,
+) -> i32 {
     guard(|| {
         unsafe {
             reset(out)?;
         }
         let path = unsafe { path(p, n)? };
         let id = unsafe { bytes(id, 16, 16)? }.try_into().map_err(|_| 1)?;
-        let db = Database::create(path, id).map_err(code)?;
+        let db = create(path, id).map_err(code)?;
         let mut r = registry().lock().map_err(|_| 21)?;
         let handle = next(&mut r)?;
         r.databases.insert(handle, db);

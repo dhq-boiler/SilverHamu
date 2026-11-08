@@ -432,7 +432,7 @@ fn er_process_exit_before_and_after_commit_recovers_only_committed_changes() {
 #[test]
 fn er_every_incomplete_tail_boundary_recovers_valid_prefix_and_accepts_new_commit() {
     let f = Fixture::new();
-    let db = f.create();
+    let db = Database::create_append(&f.0, [9; 16]).unwrap();
     put(&db, b"old", b"one");
     let boundary = db.stats().unwrap().wal_bytes as usize;
     put(&db, b"new", b"two");
@@ -457,7 +457,7 @@ fn er_every_incomplete_tail_boundary_recovers_valid_prefix_and_accepts_new_commi
 #[test]
 fn er_complete_header_prefix_payload_and_seal_corruption_is_rejected_without_modifying_file() {
     let f = Fixture::new();
-    let db = f.create();
+    let db = Database::create_append(&f.0, [9; 16]).unwrap();
     put(&db, b"key", b"value");
     drop(db);
     let bytes = fs::read(&f.0).unwrap();
@@ -600,7 +600,8 @@ fn st_checkpoint_splits_more_than_one_transaction_of_live_keys() {
     assert_eq!(cp.version, 2);
     drop(db);
     let bytes = fs::read(&f.0).unwrap();
-    assert!(u32::from_le_bytes(bytes[40..44].try_into().unwrap()) >= 2);
+    let chunks = u32::from_le_bytes(bytes[40..44].try_into().unwrap()) & 0x7fff_ffff;
+    assert!(chunks >= 2);
     let db = Database::open(&f.0).unwrap();
     assert_eq!(
         db.stats().unwrap().visible_records,
@@ -657,7 +658,7 @@ fn st_checkpoint_and_parallel_updates_preserve_all_completed_writes() {
 #[test]
 fn er_truncated_checkpoint_is_not_mistaken_for_an_uncommitted_tail() {
     let f = Fixture::new();
-    let db = f.create();
+    let db = Database::create_append(&f.0, [9; 16]).unwrap();
     put(&db, b"a", b"committed");
     db.checkpoint().unwrap();
     drop(db);

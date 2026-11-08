@@ -6,7 +6,7 @@ catdb is an embedded transactional key-value database written in Rust. It stores
 
 New databases use a preallocated write-ahead log that checkpoints and grows automatically. Existing databases keep their storage policy on upgrade. [Capacity management and explicit migration](docs/service.md#default-wal-and-upgrades) · [Sustained writes across checkpoints and growth](docs/benchmarks/managed-wal-2026-11-08/README.md)
 
-Use catdb directly from Rust, C, or C#. To share a database across processes, run the optional authenticated TCP service on its own or in Docker. **Experimental:** APIs and file formats may change. Use disposable data when evaluating catdb. [MIT license](LICENSE)
+Use catdb directly from Rust, C, or C#. To share a database across processes, run the optional authenticated TCP service on its own or in Docker and connect with a [client library](#client-libraries). **Experimental:** APIs and file formats may change. Use disposable data when evaluating catdb. [MIT license](LICENSE)
 
 ## Quick start
 
@@ -35,6 +35,19 @@ docker compose up --build -d
 ```
 
 Connect to `127.0.0.1:7400` with the generated token. For individual logins and per-database permissions, see [TLS service accounts](docs/accounts.md). `docker compose down` retains the data volume. [Service configuration and client protocol](docs/service.md)
+
+## Client libraries
+
+Start a local catdb server with the [quick start](#quick-start). Choose a language below for an example that connects to the server, writes a binary key, and reads its value back.
+
+| Language and example | Runtime | Install version 0.1.0 | Package |
+| --- | --- | --- | --- |
+| [C#](https://www.nuget.org/packages/Catdb.Client/0.1.0#readme-body-tab) | .NET 10 | `dotnet package add Catdb.Client --version 0.1.0` | [NuGet](https://www.nuget.org/packages/Catdb.Client/0.1.0) |
+| [Go](clients/go/README.md) | Go 1.22+ | `go get github.com/dhq-boiler/catdb/clients/go@v0.1.0` | [Go packages](https://pkg.go.dev/github.com/dhq-boiler/catdb/clients/go@v0.1.0) |
+| [Java](clients/java/README.md) | Java 17+ | Gradle `implementation("io.github.dhq-boiler:catdb-client:0.1.0")` · [Maven POM](clients/java/README.md) | [Maven Central](https://central.sonatype.com/artifact/io.github.dhq-boiler/catdb-client/0.1.0) |
+| [JavaScript / TypeScript](clients/node/README.md) | Node.js 18+ | `npm install catdb-client@0.1.0` | [npm](https://www.npmjs.com/package/catdb-client/v/0.1.0) |
+| [Python](clients/python/README.md) | Python 3.10+ | `python -m pip install catdb-service-client==0.1.0` | [PyPI](https://pypi.org/project/catdb-service-client/0.1.0/) |
+| [Ruby](clients/ruby/README.md) | Ruby 3.1+ | `gem install catdb-client -v 0.1.0` | [RubyGems](https://rubygems.org/gems/catdb-client/versions/0.1.0) |
 
 ## Benchmark results
 

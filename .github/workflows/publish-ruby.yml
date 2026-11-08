@@ -38,7 +38,9 @@ jobs:
         run: |
           [[ "$RELEASE_VERSION" =~ ^[0-9]+([.][0-9A-Za-z]+)*$ ]]
           [[ -z "$EXPECTED_SHA" || "$EXPECTED_SHA" =~ ^[0-9a-f]{64}$ ]]
-          test "$(git rev-parse --verify "refs/tags/clients/ruby/v${RELEASE_VERSION}^{commit}")" = "$GITHUB_SHA"
+          release_commit=$(git rev-parse --verify "refs/tags/clients/ruby/v${RELEASE_VERSION}^{commit}")
+          git merge-base --is-ancestor "$release_commit" "$GITHUB_SHA"
+          git checkout --detach "$release_commit"
       - uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1.338.0
         with:
           ruby-version: '3.4.9'
@@ -95,8 +97,34 @@ jobs:
             404) echo 'push=true' >> "$GITHUB_OUTPUT" ;;
             *) echo "RubyGems returned HTTP $status" >&2; exit 1 ;;
           esac
-      - uses: rubygems/configure-rubygems-credentials@dc5a8d8553e6ee01fc26761a49e99e733d17954a # v2.1.0
+      - name: Publish the verified gem as its registered owner
         if: steps.registry.outputs.push == 'true'
-      - name: Push the verified gem
-        if: steps.registry.outputs.push == 'true'
-        run: gem push --host https://rubygems.org "dist/catdb-client-$RELEASE_VERSION.gem"
+        env:
+          RUBYGEMS_OWNER_ID: '237738'
+        shell: python
+        run: |
+          import json
+          import os
+          import subprocess
+          from urllib.request import Request, urlopen
+
+          registry = "https://rubygems.org"
+          identity_request = Request(
+              os.environ["ACTIONS_ID_TOKEN_REQUEST_URL"] + "&audience=rubygems.org",
+              headers={"Authorization": "Bearer " + os.environ["ACTIONS_ID_TOKEN_REQUEST_TOKEN"]},
+          )
+          with urlopen(identity_request, timeout=30) as response:
+              jwt = json.load(response)["value"]
+
+          # The v2.1.0 credentials action omits the owner required for a gem's first push.
+          exchange = Request(
+              registry + "/api/v1/oidc/trusted_publisher/exchange_token",
+              data=json.dumps({"jwt": jwt, "owner": os.environ["RUBYGEMS_OWNER_ID"]}).encode(),
+              headers={"Content-Type": "application/json", "Accept": "application/json"},
+          )
+          with urlopen(exchange, timeout=30) as response:
+              key = json.load(response)["rubygems_api_key"]
+
+          gem_file = "dist/catdb-client-" + os.environ["RELEASE_VERSION"] + ".gem"
+          subprocess.run(["gem", "push", "--host", registry, gem_file],
+                         env={**os.environ, "GEM_HOST_API_KEY": key}, check=True)

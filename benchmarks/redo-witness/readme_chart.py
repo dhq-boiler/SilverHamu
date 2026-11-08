@@ -49,7 +49,7 @@ for column, (metric, title, direction, limit, ticks) in enumerate(metrics):
             ax.text(value + limit * .018, y, number, ha="left", va="center", color=ink, weight=weight)
     ax.axhline(3.55, color="#dbe2e5", lw=.8)
 
-fig.text(.033, .067, "Median of 3 runs  ﾂｷ  100,000 keys  ﾂｷ  256-byte values  ﾂｷ  1 durable commit per update",
+fig.text(.033, .067, "Median of 3 runs  ·  100,000 keys  ·  256-byte values  ·  1 durable commit per update",
          fontsize=10.5, color=muted)
 fig.text(.033, .025, "catdb format 4  ·  64 MiB preallocated WAL  ·  No checkpoint during timed updates",
          fontsize=10.5, color=muted)

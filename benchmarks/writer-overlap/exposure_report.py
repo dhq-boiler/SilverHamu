@@ -55,7 +55,7 @@ def report(out, trials):
         print(rep,split(data[rep,"standard"],data[rep,"aged"]))
     svg = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 465" role="img"><title>WAL sync time by checkpoint exposure</title><rect width="860" height="465" fill="white"/><g font-family="system-ui,sans-serif" fill="#18344c">',
            '<text x="18" y="30" font-size="23">Where writers spent time in WAL sync</text>',
-           '<text x="18" y="55" font-size="14">Seconds per 16,384 updates. Exposure covers checkpoint submissions in the preceding 10 ms or during sync.</text>',
+           '<text x="18" y="55" font-size="14">aged = Aged writer priority (16 ms). Exposure covers submissions in the prior 10 ms or during sync.</text>',
            '<rect x="166" y="70" width="15" height="15" fill="#396586"/><text x="188" y="83">No observed submission</text><rect x="450" y="70" width="15" height="15" fill="#bb7938"/><text x="472" y="83">Exposed</text><text x="730" y="83">Total (s)</text>']
     for i, row in enumerate(table):
         rep,mode=row[:2];total=row[5]; quiet=row[9]; y=110+37*i

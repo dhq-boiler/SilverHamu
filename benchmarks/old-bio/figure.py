@@ -10,7 +10,7 @@ def render(out):
     def text(x,y,value,size=14):
         parts.append(f'<text x="{x}" y="{y}" font-size="{size}">{value}</text>')
     text(18,34,"Was old checkpoint I/O still pending when WAL sync began?",23)
-    text(18,60,"Each row is one million-key run with 16,384 durable updates and 63 checkpoint publications.",14)
+    text(18,60,"aged = Aged writer priority (16 ms). Each run has 16,384 updates and 63 checkpoint publications.",14)
     text(18,98,"Trial · lock");text(150,98,"Pending / quiet syncs");text(345,98,"Quiet mean sync (ms)");text(550,98,"Updates/s");text(675,98,"Update p99 (ms)");text(835,98,"Worst (ms)")
     top=max((float(r["quiet_ms"]) for r in rows if r.get("quiet_ms")),default=1)
     for idx,r in enumerate(rows):

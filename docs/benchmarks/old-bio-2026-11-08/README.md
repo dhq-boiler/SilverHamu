@@ -1,12 +1,14 @@
 # Outstanding checkpoint data at WAL sync entry
 
-The previous third pair measured mean WAL sync at 5.39 ms with the current lock and 7.36 ms with 16 ms priority on calls with no new checkpoint submission in the preceding 10 ms or during sync. Those recordings contained only submission events. These independent repetitions measure guest ext4 callback lifetimes and cannot retrospectively assign a completion time to an earlier request.
+Writer-lock legend: **Aged writer priority (16 ms)** (長時間待機優先). Trial data uses `aged`.
+
+The previous third pair measured mean WAL sync at 5.39 ms with the current lock and 7.36 ms with aged writer priority on calls with no new checkpoint submission in the preceding 10 ms or during sync. Those recordings contained only submission events. These independent repetitions measure guest ext4 callback lifetimes and cannot retrospectively assign a completion time to an earlier request.
 
 ![Outstanding checkpoint writes and update performance](pending.svg)
 
-The second 16 ms trial reached a quiet mean of **7.370 ms**. Across the 3 usable 16 ms trials, charging the full duration of every possibly exposed quiet sync contributed at most **0.111 ms** to a run's mean. Counting only the part of each sync when an old BIO could still be outstanding lowered that ceiling to **0.108 ms**. These figures bound this specific guest-level mechanism in the measured trials. The original 1.97 ms difference and the downstream cause of longer syncs remain unresolved.
+The second aged writer priority trial reached a quiet mean of **7.370 ms**. Across the 3 usable aged writer priority trials, charging the full duration of every possibly exposed quiet sync contributed at most **0.111 ms** to a run's mean. Counting only the part of each sync when an old BIO could still be outstanding lowered that ceiling to **0.108 ms**. These figures bound this specific guest-level mechanism in the measured trials. The original 1.97 ms difference and the downstream cause of longer syncs remain unresolved.
 
-The third 16 ms capture had zero probe misses and zero ring loss. It recorded 424 checkpoint BIOs with lifetimes of at least 10 ms and 19 WAL sync starts with an old BIO still pending. Among the 13,888 quiet syncs, the count was **0**, with mean sync duration **7.312 ms**.
+The third aged writer priority capture had zero probe misses and zero ring loss. It recorded 424 checkpoint BIOs with lifetimes of at least 10 ms and 19 WAL sync starts with an old BIO still pending. Among the 13,888 quiet syncs, the count was **0**, with mean sync duration **7.312 ms**.
 
 | Trial | Lock | Updates/s | Update p99 ms | Maximum ms | Quiet mean sync ms | Quiet syncs with old I/O / all quiet | Time on such calls per quiet sync, ms |
 |---:|---|---:|---:|---:|---:|---:|---:|
@@ -30,7 +32,7 @@ The last column charges the *entire* sync interval to any quiet call with an old
 
 ## Locating the original 5.39 to 7.36 ms difference
 
-Joining the original third pair's quiet request IDs to their guest fsync spans gives mean journal-commit sleep of 5.120 ms for current and 7.040 ms for 16 ms priority. The difference was +1.920 ms within the +1.975 ms change in application WAL sync. Of the journal-sleep change, +1.915 ms was between the matched JBD2 start and end events. This locates time spent sleeping while waiting for the guest journal. It does not identify what made the journal commit finish later. [Three-policy original comparison](original.csv).
+Joining the original third pair's quiet request IDs to their guest fsync spans gives mean journal-commit sleep of 5.120 ms for current and 7.040 ms for aged writer priority. The difference was +1.920 ms within the +1.975 ms change in application WAL sync. Of the journal-sleep change, +1.915 ms was between the matched JBD2 start and end events. This locates time spent sleeping while waiting for the guest journal. It does not identify what made the journal commit finish later. [Three-policy original comparison](original.csv).
 
 **Decision.** Retain the existing lock options. The slow quiet-sync mean reproduced with zero pending target BIOs in a complete capture. These results provide no measured basis for delaying checkpoint submission to stabilize throughput. No new pacing policy was benchmarked.
 

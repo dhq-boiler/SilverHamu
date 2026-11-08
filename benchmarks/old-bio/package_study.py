@@ -59,13 +59,13 @@ def build(root,out):
     def lines(v):return "\n".join(v)
     text=f"""# Outstanding checkpoint data at WAL sync entry
 
-The previous third pair measured mean WAL sync at 5.39 ms with the current lock and 7.36 ms with 16 ms priority on calls with no new checkpoint submission in the preceding 10 ms or during sync. Those recordings contained only submission events. These independent repetitions measure guest ext4 callback lifetimes and cannot retrospectively assign a completion time to an earlier request.
+The previous third pair measured mean WAL sync at 5.39 ms with the current lock and 7.36 ms with aged writer priority on calls with no new checkpoint submission in the preceding 10 ms or during sync. Those recordings contained only submission events. These independent repetitions measure guest ext4 callback lifetimes and cannot retrospectively assign a completion time to an earlier request.
 
 ![Outstanding checkpoint writes and update performance](pending.svg)
 
-The second 16 ms trial reached a quiet mean of **{sample['quiet_ms']:.3f} ms**. Across the {len(aged)} usable 16 ms trials, charging the full duration of every possibly exposed quiet sync contributed at most **{ceiling:.3f} ms** to a run's mean. Counting only the part of each sync when an old BIO could still be outstanding lowered that ceiling to **{overlap:.3f} ms**. These figures bound this specific guest-level mechanism in the measured trials. The original 1.97 ms difference and the downstream cause of longer syncs remain unresolved.
+The second aged writer priority trial reached a quiet mean of **{sample['quiet_ms']:.3f} ms**. Across the {len(aged)} usable aged writer priority trials, charging the full duration of every possibly exposed quiet sync contributed at most **{ceiling:.3f} ms** to a run's mean. Counting only the part of each sync when an old BIO could still be outstanding lowered that ceiling to **{overlap:.3f} ms**. These figures bound this specific guest-level mechanism in the measured trials. The original 1.97 ms difference and the downstream cause of longer syncs remain unresolved.
 
-The third 16 ms capture had zero probe misses and zero ring loss. It recorded {exact["long_bios"]:,} checkpoint BIOs with lifetimes of at least 10 ms and {exact["all_old"]:,} WAL sync starts with an old BIO still pending. Among the {exact["quiet"]:,} quiet syncs, the count was **{exact["quiet_old"]}**, with mean sync duration **{exact["quiet_ms"]:.3f} ms**.
+The third aged writer priority capture had zero probe misses and zero ring loss. It recorded {exact["long_bios"]:,} checkpoint BIOs with lifetimes of at least 10 ms and {exact["all_old"]:,} WAL sync starts with an old BIO still pending. Among the {exact["quiet"]:,} quiet syncs, the count was **{exact["quiet_old"]}**, with mean sync duration **{exact["quiet_ms"]:.3f} ms**.
 
 | Trial | Lock | Updates/s | Update p99 ms | Maximum ms | Quiet mean sync ms | Quiet syncs with old I/O / all quiet | Time on such calls per quiet sync, ms |
 |---:|---|---:|---:|---:|---:|---:|---:|

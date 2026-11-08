@@ -1,10 +1,12 @@
 # Did checkpoint writeback explain the 150 to 112 updates/s regression?
 
-In the slow third pair, the 16 ms policy **reduced** the number of WAL syncs preceded by checkpoint submissions. Of the extra 36.327 s inside WAL sync, 35.023 s (96.4%) accumulated across calls with zero observed target-file submissions in the preceding 10 ms and during sync. The change in submission frequency does not explain the throughput loss. Strict FIFO had the most prior exposure of the three policies in every pair and higher throughput than the 16 ms policy in every pair.
+Writer-lock legend: **Aged writer priority (16 ms)** (長時間待機優先). Trial data uses `aged`.
+
+In the slow third pair, the aged writer priority policy **reduced** the number of WAL syncs preceded by checkpoint submissions. Of the extra 36.327 s inside WAL sync, 35.023 s (96.4%) accumulated across calls with zero observed target-file submissions in the preceding 10 ms and during sync. The change in submission frequency does not explain the throughput loss. Strict FIFO had the most prior exposure of the three policies in every pair and higher throughput than the aged writer priority policy in every pair.
 
 ![WAL time with and without nearby checkpoint submissions across nine trials](overlap.svg)
 
-| Third pair, 16,384 durable updates | Current | FIFO | 16 ms priority |
+| Third pair, 16,384 durable updates | Current | FIFO | aged writer priority |
 |---|---:|---:|---:|
 | Acknowledged updates/s | 150.10 | 142.51 | 112.05 |
 | Update p99, ms | 475.26 | 69.64 | 134.92 |
@@ -21,11 +23,11 @@ Acquisition order clearly changed. In the third pair a successful update immedia
 
 ## What repeated
 
-Fixed prior exposure counts for current / 16 ms were 511 / 1,586, 706 / 884 and 2,033 / 1,100 across the three pairs. In the first two, the candidate saw *more* prior exposure while total WAL time fell by 15.30 and 3.06 s. Within each of the nine runs, mean sync time was higher for calls with prior submissions. This within-run association does not explain the change between lock policies in the slow pair.
+Fixed prior exposure counts for current / aged writer priority were 511 / 1,586, 706 / 884 and 2,033 / 1,100 across the three pairs. In the first two, the candidate saw *more* prior exposure while total WAL time fell by 15.30 and 3.06 s. Within each of the nine runs, mean sync time was higher for calls with prior submissions. This within-run association does not explain the change between lock policies in the slow pair.
 
 For the third pair, a two-group decomposition separates the changed number of exposed calls from changed mean durations in each group. Weighting the count change by the average of the two runs' group means accounts for −8.122 s. Changes in durations within groups account for +44.449 s, summing to +36.327 s. These are descriptive differences. A submission marker timestamps entry to the guest I/O path. I/O submitted earlier, unrelated activity, outstanding device work and host scheduling remain possible contributors. The nine independent runs did not manipulate any one of those factors.
 
-**Decision.** Retain 16 ms priority as an option for bounding long writer waits. The agreed condition for an additional checkpoint scheduling experiment was a reproducible increase in exposure explaining the slowdown. The observed direction reversed across pairs. No engine setting was changed or new performance gain claimed.
+**Decision.** Retain aged writer priority as an option for bounding long writer waits. The agreed condition for an additional checkpoint scheduling experiment was a reproducible increase in exposure explaining the slowdown. The observed direction reversed across pairs. No engine setting was changed or new performance gain claimed.
 
 ## Data and reproduction
 

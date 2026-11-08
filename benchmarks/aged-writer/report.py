@@ -8,7 +8,7 @@ from xml.etree.ElementTree import parse
 from xml.sax.saxutils import escape
 
 MODES=("standard","fifo","aged")
-NAMES={"standard":"Current","fifo":"FIFO","aged":"16 ms"}
+NAMES={"standard":"Current","fifo":"FIFO","aged":"Aged writer priority (16 ms)"}
 def read(path):
     with path.open(newline="") as f:return list(csv.DictReader(f))
 
@@ -85,16 +85,16 @@ def main():
     for k,sign in (("max_ms",-1),("p99_ms",-1),("updates_s",1)):
         base,candidate=[values(trials,m,k) for m in ("standard","aged")]
         paired.append(sum(sign*(y-x)>0 for x,y in zip(base,candidate)))
-    conclusion=f"The 16 ms policy improved maximum latency in {paired[0]}/3 pairs, p99 in {paired[1]}/3, and throughput in {paired[2]}/3 against the current lock. The strict FIFO comparison below shows the cost or benefit of permitting brief barging. A higher median rate alone cannot establish throughput retention in each run."
-    report=f"""# Age-based writer handoff at 16 ms
+    conclusion=f"The aged writer priority policy improved maximum latency in {paired[0]}/3 pairs, p99 in {paired[1]}/3, and throughput in {paired[2]}/3 against the current lock. The strict FIFO comparison below shows the cost or benefit of permitting brief barging. A higher median rate alone cannot establish throughput retention in each run."
+    report=f"""# Aged writer priority (16 ms)
 
-The current lock, strict FIFO and 16 ms policy sustained {sustained[0]:.2f}, {sustained[1]:.2f} and {sustained[2]:.2f} updates/s. Update p99 was {p99[0]:.2f}, {p99[1]:.2f} and {p99[2]:.2f} ms. The worst updates across three trials lasted {mx[0]:.2f}, {mx[1]:.2f} and {mx[2]:.2f} ms.
+The current lock, strict FIFO and aged writer priority policy sustained {sustained[0]:.2f}, {sustained[1]:.2f} and {sustained[2]:.2f} updates/s. Update p99 was {p99[0]:.2f}, {p99[1]:.2f} and {p99[2]:.2f} ms. The worst updates across three trials lasted {mx[0]:.2f}, {mx[1]:.2f} and {mx[2]:.2f} ms.
 
 {conclusion}
 
 ![Performance by trial](comparison.svg)
 
-| Measure | Current | FIFO | 16 ms | Change vs current | Change vs FIFO |
+| Measure | Current | FIFO | Aged writer priority (16 ms) | Change vs current | Change vs FIFO |
 |---|---:|---:|---:|---:|---:|
 {chr(10).join(table)}
 

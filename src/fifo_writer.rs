@@ -21,17 +21,26 @@ struct Queue {
 struct Waiter {
     wake: Condvar,
     #[cfg(feature = "aged-writer")]
-    queued: Enqueued,
+    priority: AgedWriterPriority,
 }
 
 #[cfg(feature = "aged-writer")]
 #[derive(Debug)]
-struct Enqueued(std::time::Instant);
+struct AgedWriterPriority(std::time::Instant);
 
 #[cfg(feature = "aged-writer")]
-impl Default for Enqueued {
+impl Default for AgedWriterPriority {
     fn default() -> Self {
         Self(std::time::Instant::now())
+    }
+}
+
+#[cfg(feature = "aged-writer")]
+impl AgedWriterPriority {
+    const THRESHOLD: std::time::Duration = std::time::Duration::from_millis(16);
+
+    fn applies(wait: std::time::Duration) -> bool {
+        wait >= Self::THRESHOLD
     }
 }
 
@@ -41,17 +50,12 @@ impl Queue {
         {
             self.waiters
                 .front()
-                .is_some_and(|head| Self::aged(head.queued.0.elapsed()))
+                .is_some_and(|head| AgedWriterPriority::applies(head.priority.0.elapsed()))
         }
         #[cfg(not(feature = "aged-writer"))]
         {
             !self.waiters.is_empty()
         }
-    }
-
-    #[cfg(feature = "aged-writer")]
-    fn aged(wait: std::time::Duration) -> bool {
-        wait >= std::time::Duration::from_millis(16)
     }
 }
 
@@ -146,9 +150,9 @@ mod tests {
     fn only_the_oldest_waiter_controls_barging_at_the_threshold() {
         use std::time::{Duration, Instant};
         let limit = Duration::from_millis(16);
-        assert!(!Queue::aged(limit - Duration::from_nanos(1)));
-        assert!(Queue::aged(limit));
-        assert!(Queue::aged(limit + Duration::from_nanos(1)));
+        assert!(!AgedWriterPriority::applies(limit - Duration::from_nanos(1)));
+        assert!(AgedWriterPriority::applies(limit));
+        assert!(AgedWriterPriority::applies(limit + Duration::from_nanos(1)));
         let lock = WriterMutex::default();
         let held = lock.lock().unwrap();
         let mut state = lock.state.lock().unwrap();
@@ -159,7 +163,7 @@ mod tests {
         let mut state = lock.state.lock().unwrap();
         Arc::get_mut(state.waiters.front_mut().unwrap())
             .unwrap()
-            .queued = Enqueued(Instant::now() - 2 * limit);
+            .priority = AgedWriterPriority(Instant::now() - 2 * limit);
         drop(state);
         assert!(matches!(lock.try_lock(), Err(TryLockError::WouldBlock)));
     }

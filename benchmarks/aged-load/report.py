@@ -9,7 +9,7 @@ from xml.sax.saxutils import escape
 
 MODES=("standard","fifo","aged")
 CASES=("single10","four20","continuous")
-NAMES=dict(standard="Current",fifo="FIFO",aged="16 ms",single10="1 writer, 10/s",four20="4 writers, 20/s",continuous="4 writers, continuous")
+NAMES=dict(standard="Current",fifo="FIFO",aged="Aged writer priority (16 ms)",single10="1 writer, 10/s",four20="4 writers, 20/s",continuous="4 writers, continuous")
 COLORS=("#426786","#8e5c31","#006c64")
 
 def load(path):
@@ -30,7 +30,7 @@ def label(x,y,t,size=13,anchor="start"):
 
 def performance(path,rows):
     title="Update performance across arrival rates"
-    s=[label(20,32,title,24),label(20,57,"Each point is one trial. Bars and labels show the median, or the worst trial for maximum latency.",14)]
+    s=[label(20,32,title,24),label(20,57,"Aged = Aged writer priority (16 ms). Points show trials. Bars show medians, or the worst trial for maximum latency.",14)]
     metrics=(("Dispatch-to-completion p99 (ms)","sent_p99_ms",median),("Planned-to-completion p99 (ms)","scheduled_p99_ms",median),
              ("Maximum planned-to-completion (ms)","max_scheduled_ms",max),("Acknowledged updates/s","updates_s",median))
     for i,(name,key,agg) in enumerate(metrics):
@@ -40,7 +40,7 @@ def performance(path,rows):
             hi=max(float(r[key]) for r in rows if r["case"]==case) or 1
             for j,m in enumerate(MODES):
                 yy=y+43+j*25; v=series(rows,case,m,key); a=agg(v);start=x+63
-                s.append(label(x,yy,NAMES[m]))
+                s.append(label(x,yy,"Aged" if m=="aged" else NAMES[m]))
                 s.append(f'<path d="M{start} {yy-4}h190" stroke="#dce3e6"/>')
                 s.append(f'<rect x="{start}" y="{yy-8}" width="{190*a/hi:.2f}" height="8" fill="{COLORS[j]}" opacity=".60"/>')
                 for k,value in enumerate(v):
@@ -51,7 +51,7 @@ def performance(path,rows):
 
 def attribution(path,old):
     title="Where the previous elapsed-time difference accumulated"
-    s=[label(20,32,title,23),label(20,57,"16 ms minus current lock, seconds per 16,384 updates. Positive values mean more elapsed time.",14)]
+    s=[label(20,32,title,23),label(20,57,"Aged writer priority (16 ms) minus current lock, seconds per 16,384 updates. Positive values mean more elapsed time.",14)]
     for i,(name,key) in enumerate((("Elapsed through last response","response_s"),("WAL sync","wal_s"),("Contended handoff envelope","handoff_s"))):
         x=22+i*340;axis=x+150;s.append(label(x,93,name,15))
         v=[float(old["aged",r][key])-float(old["standard",r][key]) for r in range(1,4)]
@@ -112,11 +112,11 @@ def main():
     elapsed=float(b["response_s"])-float(a["response_s"]);wal=float(b["wal_s"])-float(a["wal_s"]);gap=float(b["handoff_s"])-float(a["handoff_s"])
     journal=float(oswait["aged",1]["journal_sleep_s"])-float(oswait["standard",1]["journal_sleep_s"])
     during=float(oswait["aged",1]["during_commit_s"])-float(oswait["standard",1]["during_commit_s"])
-    report=f"""# Does the 16 ms lock policy hold up across arrival rates?
+    report=f"""# Does the aged writer priority policy hold up across arrival rates?
 
 {conclusion}
 
-The current lock remains the default. The 16 ms threshold is useful when reducing long writer waits takes priority. In continuous pair 3 the worst request fell from {float(hot["standard",3]["max_scheduled_ms"])/1000:.2f} to {float(hot["aged",3]["max_scheduled_ms"])/1000:.2f} s, while acknowledged throughput fell from {float(hot["standard",3]["updates_s"]):.1f} to {float(hot["aged",3]["updates_s"]):.1f} updates/s. Strict FIFO delivered higher continuous throughput than the 16 ms policy in all three runs. This study covers one ext4 environment with 8 MiB writeback enabled.
+The current lock remains the default. The 16 ms threshold is useful when reducing long writer waits takes priority. In continuous pair 3 the worst request fell from {float(hot["standard",3]["max_scheduled_ms"])/1000:.2f} to {float(hot["aged",3]["max_scheduled_ms"])/1000:.2f} s, while acknowledged throughput fell from {float(hot["standard",3]["updates_s"]):.1f} to {float(hot["aged",3]["updates_s"]):.1f} updates/s. Strict FIFO delivered higher continuous throughput than the aged writer priority policy in all three runs. This study covers one ext4 environment with 8 MiB writeback enabled.
 
 ![Measured updates at three arrival rates](load.svg)
 
@@ -156,7 +156,7 @@ The light-load check below selects calls where the previous unlock-return marker
 
 For the fresh continuous runs, the elapsed-time components below use the same clock boundaries as the earlier comparison.
 
-| Fresh pair, 16 ms minus current | Elapsed s | WAL sync s | Handoff s | Checkpoint hold s | Other writer hold s | Remaining s |
+| Fresh pair, Aged writer priority (16 ms) minus current | Elapsed s | WAL sync s | Handoff s | Checkpoint hold s | Other writer hold s | Remaining s |
 |---|---:|---:|---:|---:|---:|---:|
 {chr(10).join(fresh)}
 
@@ -164,7 +164,7 @@ The [p99 and worst request in every trial](tail.csv) separates each selected req
 
 ## Paired changes
 
-Positive means a larger value with the 16 ms policy. Pairing uses the same repetition number. See the trial data for actual arrival lag and every maximum.
+Positive means a larger value with the aged writer priority policy. Pairing uses the same repetition number. See the trial data for actual arrival lag and every maximum.
 
 | Demand | Reference | Metric | Pairs improving | Pair 1 difference | Pair 2 difference | Pair 3 difference |
 |---|---|---|---:|---:|---:|---:|

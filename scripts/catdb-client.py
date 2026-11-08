@@ -20,6 +20,7 @@ class Client:
         try:
             if username is not None:
                 context = ssl.create_default_context(cafile=cafile)
+                context.minimum_version = ssl.TLSVersion.TLSv1_3
                 self.socket = context.wrap_socket(self.socket, server_hostname=host)
                 response = self.request(op="auth", version=2, database=database,
                                         username=username, password=password)
@@ -41,15 +42,22 @@ class Client:
             chunks.extend(chunk)
         return chunks
 
-    def request(self, **request):
+    @staticmethod
+    def _encode(request):
         body = json.dumps(request, separators=(",", ":")).encode()
         if len(body) > 1024 * 1024:
             raise ValueError("request exceeds 1 MiB")
+        return body
+
+    def request(self, **request):
+        return self._exchange(self._encode(request))
+
+    def _exchange(self, body):
         self.socket.sendall(struct.pack("!I", len(body)) + body)
         size = struct.unpack("!I", self.receive_exact(4))[0]
         if not 0 < size <= 2 * 1024 * 1024 + 8192:
             raise ValueError("invalid response size")
-        return json.loads(self.receive_exact(size))
+        return json.loads(self.receive_exact(size).decode("utf-8"))
 
     def close(self):
         self.socket.close()

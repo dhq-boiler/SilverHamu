@@ -1,0 +1,26 @@
+[build-system]
+requires = ["hatchling>=1.26,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "catdb-service-client"
+version = "0.1.0"
+description = "Python client for the catdb TCP service with durable writes, transactions and TLS account authentication"
+authors = [{ name = "dhq_boiler and contributors" }]
+readme = "clients/python/README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+
+[project.urls]
+Repository = "https://github.com/dhq-boiler/catdb"
+Documentation = "https://github.com/dhq-boiler/catdb/blob/main/docs/service.md"
+
+[tool.hatch.build.targets.wheel]
+packages = ["clients/python/src/catdb_client"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"scripts/catdb-client.py" = "catdb_client/_wire.py"
+
+[tool.hatch.build.targets.sdist]
+include = ["/clients/python/src/catdb_client", "/clients/python/README.md", "/scripts/catdb-client.py", "/LICENSE", "/pyproject.toml"]

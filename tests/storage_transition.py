@@ -25,7 +25,6 @@ def phase(library, path, step):
         create = getattr(n, 'ndb_tx_db_create_append', n.ndb_tx_db_create)
         create.argtypes = n.ndb_tx_db_create.argtypes
         assert create(encoded,len(encoded),bytes(range(16)),c.byref(db)) == 0
-        assert int.from_bytes(path.read_bytes()[8:12], 'little') == 2
     else: call('db_open',encoded,len(encoded),c.byref(db))
     def begin():
         tx=u(); call('begin',db,c.byref(tx),c.byref(version)); return tx
@@ -51,6 +50,10 @@ def phase(library, path, step):
             outputs=[u() for _ in range(4)]
             call('checkpoint',db,*[c.byref(v) for v in outputs])
     call('db_close',db)
+    if step == 0:
+        with path.open('rb') as wal:
+            wal.seek(8)
+            assert int.from_bytes(wal.read(4), 'little') == 2
 
 
 def main():

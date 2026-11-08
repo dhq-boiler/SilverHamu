@@ -38,17 +38,23 @@ Connect to `127.0.0.1:7400` with the generated token. For individual logins and 
 
 ## Benchmark results
 
-With a manually sized preallocated WAL, catdb completed **1,882 durable updates/s with four clients** and **4,720/s with sixteen** in the November 8 single-key service comparison. Both throughput and p99 latency beat PostgreSQL 18.6 and Oracle 26ai Free in each of three repetitions on the same host. This measured steady-state updates after initial conversion. [Durability checks, all runs and configuration](docs/benchmarks/durable-redo-2026-11-08/README.md)
+### Durable single-key updates
 
-An earlier November 8 service comparison measured the append-WAL build against PostgreSQL 18.6 and Oracle 26ai Free. With four clients, catdb completed 1,071 durable updates/s, PostgreSQL 1,280 and Oracle Free 1,172. At sixteen clients the rates were 2,352, 1,542 and 3,664 respectively. catdb led on lookup and 100-row range throughput at both connection counts. [Full results, p99, run-to-run spread and reproduction](docs/benchmarks/grouped-writes-2026-11-08/README.md)
+With four clients, catdb completed **1,882 updates/s**, 42% more than PostgreSQL 18.6, the faster of the two peers at that concurrency. With sixteen clients, it reached **4,720 updates/s**, 20% more than Oracle 26ai Free. catdb also had the lowest p99 latency in all three runs at both client counts.
 
-In the November 7 warm-cache Python client benchmark with 100,000 keys and 256-byte values, four clients produced the following medians across three runs:
+![Durable updates per second and p99 latency. At 4 clients, catdb: 1,882 and 3.18 ms, PostgreSQL: 1,324 and 4.69 ms, Oracle Free: 1,223 and 5.43 ms. At 16 clients, catdb: 4,720 and 5.11 ms, PostgreSQL: 1,634 and 15.16 ms, Oracle Free: 3,926 and 6.98 ms.](docs/benchmarks/durable-redo-2026-11-08/readme-comparison.png)
 
-| Service | Key lookups/s | Durable updates/s | Update p99 |
-|---|---:|---:|---:|
-| catdb | 8,047 | 1,133 | 5.08 ms |
-| PostgreSQL | 2,554 | 1,298 | 5.55 ms |
-| MySQL | 2,436 | 374 | 19.08 ms |
-| Oracle Free | 6,026 | 1,280 | 5.37 ms |
+Each service ran on the same host with 100,000 keys and 256-byte values. Each trial timed 8,000 single-key updates including the request, durable commit and response. catdb used a manually sized 64 MiB format-4 WAL; no checkpoint occurred during these timed cases. [All trials, spread and reproduction](docs/benchmarks/durable-redo-2026-11-08/README.md)
 
-In the separate **embedded, single-client** test, catdb completed 303.5 durable updates/s and SQLite completed 596.5. [Comparison charts, versions, and reproduction steps](docs/benchmarks/peer-refresh-2026-11-07/README.md) · [All experiments](docs/benchmarks/)
+### Sustained writes with the product defaults
+
+A separate catdb workload included automatic checkpoints and growth. With 2 KiB values, four clients sustained **1,728 updates/s** (p99 **3.98 ms**) and sixteen sustained **4,022 updates/s** (p99 **15.76 ms**). Across six runs, the workload crossed 18 growth epochs and 30 compaction epochs. [Maintenance latency and restart checks](docs/benchmarks/managed-wal-2026-11-08/README.md)
+
+<details>
+<summary>Earlier comparisons and embedded results</summary>
+
+- [November 8 · Append-WAL service, including key lookups and 100-row ranges](docs/benchmarks/grouped-writes-2026-11-08/README.md)
+- [November 7 · Multi-product service comparison and embedded SQLite results](docs/benchmarks/peer-refresh-2026-11-07/README.md)
+- [All benchmark studies](docs/benchmarks/)
+
+</details>

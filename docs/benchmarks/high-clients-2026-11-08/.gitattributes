@@ -1,0 +1,2 @@
+# Preserve the measured driver's SHA-256 across checkouts.
+benchmarks/run.py -text whitespace=cr-at-eol

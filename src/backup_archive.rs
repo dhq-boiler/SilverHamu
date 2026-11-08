@@ -1,3 +1,6 @@
+#[cfg(any(windows, target_os = "linux"))]
+#[path = "backup_direct.rs"]
+mod backup_direct;
 use std::fs::File;
 use std::io::{self, Read, Seek, SeekFrom, Write};
 
@@ -32,32 +35,10 @@ fn check_empty(file: &mut File) -> io::Result<()> {
 pub(super) fn encode(source: &mut File, archive: &mut File) -> io::Result<()> {
     let size = source.metadata()?.len();
     let mut directory = vec![0; directory_bytes(size)?];
-    source.rewind()?;
     check_empty(archive)?;
     archive.seek(SeekFrom::Start((HEADER + directory.len()) as u64))?;
-    let mut buffer = vec![0; BATCH.min(size as usize)];
-    let mut remaining = size as usize;
     let (entries, _) = directory.as_chunks_mut::<ENTRY>();
-    for batch in entries.chunks_mut(BATCH / BLOCK) {
-        let count = remaining.min(BATCH);
-        let input = &mut buffer[..count];
-        source.read_exact(input)?;
-        for (block, entry) in input.chunks(BLOCK).zip(batch.iter_mut()) {
-            if block != &ZERO[..block.len()] {
-                entry[0] = 1;
-                entry[1..].copy_from_slice(&crc32c(block).to_le_bytes());
-            }
-        }
-        let mut offset = 0;
-        for run in batch.chunk_by(|a, b| a[0] == b[0]) {
-            let end = count.min(offset + run.len() * BLOCK);
-            if run[0][0] == 1 {
-                archive.write_all(&input[offset..end])?;
-            }
-            offset = end;
-        }
-        remaining -= count;
-    }
+    encode_payload(source, archive, entries, size as usize)?;
     let mut header = [0; HEADER];
     header[..8].copy_from_slice(MAGIC);
     header[8..12].copy_from_slice(&1u32.to_le_bytes());
@@ -69,6 +50,153 @@ pub(super) fn encode(source: &mut File, archive: &mut File) -> io::Result<()> {
     archive.rewind()?;
     archive.write_all(&header)?;
     archive.write_all(&directory)
+}
+
+fn encode_payload(
+    source: &mut File,
+    archive: &mut File,
+    entries: &mut [[u8; ENTRY]],
+    size: usize,
+) -> io::Result<()> {
+    #[cfg(any(windows, target_os = "linux"))]
+    if size >= 8 * BATCH && samples_are_dense(source, size)? {
+        let mut writer = backup_direct::PayloadWriter::new(archive)?;
+        write_dense_payload(source, &mut writer, entries.chunks_mut(BATCH / BLOCK), size)?;
+        return writer.flush();
+    }
+
+    // On Windows the positional sample reads move the shared file cursor.
+    source.rewind()?;
+    let mut buffer = vec![0; size.min(BATCH)];
+    let mut remaining = size;
+    for batch in entries.chunks_mut(BATCH / BLOCK) {
+        let count = remaining.min(BATCH);
+        let bytes = &mut buffer[..count];
+        source.read_exact(bytes)?;
+        describe_blocks(bytes, batch);
+        write_batch(archive, bytes, batch)?;
+        remaining -= count;
+    }
+    Ok(())
+}
+
+#[cfg(any(windows, target_os = "linux"))]
+fn samples_are_dense(source: &File, size: usize) -> io::Result<bool> {
+    const PAGE: usize = 4096;
+    let mut sample = [0; PAGE];
+    let mut occupied = 0;
+    for eighth in [1, 3, 5] {
+        let offset = (size / 8 * eighth) / PAGE * PAGE;
+        read_exact_at(source, &mut sample, offset as u64)?;
+        occupied += usize::from(sample != [0; PAGE]);
+    }
+    Ok(occupied >= 2)
+}
+
+fn describe_blocks(bytes: &[u8], entries: &mut [[u8; ENTRY]]) {
+    for (block, entry) in bytes.chunks(BLOCK).zip(entries) {
+        if block != &ZERO[..block.len()] {
+            entry[0] = 1;
+            entry[1..].copy_from_slice(&crc32c(block).to_le_bytes());
+        }
+    }
+}
+
+fn write_batch(archive: &mut impl Write, bytes: &[u8], entries: &[[u8; ENTRY]]) -> io::Result<()> {
+    let mut offset = 0;
+    for run in entries.chunk_by(|a, b| a[0] == b[0]) {
+        let end = bytes.len().min(offset + run.len() * BLOCK);
+        if run[0][0] == 1 {
+            archive.write_all(&bytes[offset..end])?;
+        }
+        offset = end;
+    }
+    Ok(())
+}
+
+#[cfg(windows)]
+fn read_exact_at(source: &File, mut bytes: &mut [u8], mut offset: u64) -> io::Result<()> {
+    use std::os::windows::fs::FileExt;
+    while !bytes.is_empty() {
+        match source.seek_read(bytes, offset) {
+            Ok(0) => return Err(io::ErrorKind::UnexpectedEof.into()),
+            Ok(n) => {
+                bytes = &mut bytes[n..];
+                offset += n as u64;
+            }
+            Err(error) if error.kind() == io::ErrorKind::Interrupted => continue,
+            Err(error) => return Err(error),
+        }
+    }
+    Ok(())
+}
+
+#[cfg(target_os = "linux")]
+fn read_exact_at(source: &File, bytes: &mut [u8], offset: u64) -> io::Result<()> {
+    std::os::unix::fs::FileExt::read_exact_at(source, bytes, offset)
+}
+
+#[cfg(any(windows, target_os = "linux"))]
+fn write_dense_payload(
+    source: &File,
+    archive: &mut impl Write,
+    batches: std::slice::ChunksMut<'_, [u8; ENTRY]>,
+    size: usize,
+) -> io::Result<()> {
+    use std::sync::mpsc::sync_channel;
+
+    const WORKERS: usize = 2;
+    std::thread::scope(|scope| {
+        let mut lanes = Vec::with_capacity(WORKERS);
+        for lane in 0..WORKERS {
+            let (ready, completed) = sync_channel(1);
+            let (recycle, available) = sync_channel(2);
+            // With one buffer the reader stalls until the writer finishes its preceding batch.
+            recycle.send(vec![0; BATCH]).unwrap();
+            let reader = std::thread::Builder::new().spawn_scoped(scope, move || {
+                let mut buffer = vec![0; BATCH];
+                for offset in (lane * BATCH..size).step_by(WORKERS * BATCH) {
+                    buffer.truncate((size - offset).min(BATCH));
+                    if let Err(error) = read_exact_at(source, &mut buffer, offset as u64) {
+                        let _ = ready.send(Err(error));
+                        break;
+                    }
+                    let mut entries = [[0u8; ENTRY]; BATCH / BLOCK];
+                    describe_blocks(&buffer, &mut entries);
+                    if ready.send(Ok((buffer, entries))).is_err() {
+                        break;
+                    }
+                    let Ok(next) = available.recv() else { break };
+                    buffer = next;
+                }
+            });
+            if reader.is_err() {
+                // Thread limits should not prevent an otherwise valid offline backup.
+                drop(lanes);
+                let mut buffer = vec![0; BATCH];
+                for (index, directory) in batches.enumerate() {
+                    let offset = index * BATCH;
+                    let bytes = &mut buffer[..(size - offset).min(BATCH)];
+                    read_exact_at(source, bytes, offset as u64)?;
+                    describe_blocks(bytes, directory);
+                    write_batch(archive, bytes, directory)?;
+                }
+                return Ok(());
+            }
+            lanes.push((completed, recycle));
+        }
+
+        for (index, directory) in batches.enumerate() {
+            let (ready, recycle) = &lanes[index % WORKERS];
+            let (buffer, entries) = ready
+                .recv()
+                .map_err(|_| io::Error::other("backup reader stopped"))??;
+            directory.copy_from_slice(&entries[..directory.len()]);
+            write_batch(archive, &buffer, directory)?;
+            let _ = recycle.send(buffer);
+        }
+        Ok(())
+    })
 }
 
 pub(super) fn decode(archive: &mut File, destination: &mut File) -> io::Result<()> {
@@ -336,5 +464,91 @@ mod tests {
         for len in [BLOCK - 1, BLOCK, BLOCK + 1] {
             assert_eq!(crc32c(&full[..len]), portable_crc32c(&full[..len]));
         }
+    }
+
+    #[test]
+    fn dense_archive_matches_the_v1_layout_across_holes_and_a_partial_final_block() {
+        const V1_BLOCK: usize = 64 * 1024;
+        let fixture = Fixture::new();
+        let mut input = vec![0; 256 * V1_BLOCK + 37];
+        let mut directory = Vec::new();
+        for (index, block) in input.chunks_mut(V1_BLOCK).enumerate() {
+            if (190..194).contains(&index) {
+                directory.extend_from_slice(&[0; 5]);
+            } else {
+                block.fill((index % 251 + 1) as u8);
+                block[..4].copy_from_slice(&(index as u32).to_le_bytes());
+                directory.push(1);
+                directory.extend_from_slice(&portable_crc32c(block).to_le_bytes());
+            }
+        }
+
+        let mut header = Vec::from(*b"CATDBBAK");
+        header.extend_from_slice(&1u32.to_le_bytes());
+        header.extend_from_slice(&(V1_BLOCK as u32).to_le_bytes());
+        header.extend_from_slice(&(input.len() as u64).to_le_bytes());
+        header.extend_from_slice(&crate::crc32(&directory).to_le_bytes());
+        header.extend_from_slice(&crate::crc32(&header).to_le_bytes());
+
+        let mut archive = fixture.write_archive(&input);
+        assert_eq!(&archive[..32], header);
+        let payload_start = 32 + directory.len();
+        assert_eq!(&archive[32..payload_start], directory);
+        let mut offset = payload_start;
+        for (block, entry) in input.chunks(V1_BLOCK).zip(directory.chunks_exact(5)) {
+            if entry[0] == 1 {
+                assert!(
+                    &archive[offset..offset + block.len()] == block,
+                    "payload at {offset}"
+                );
+                offset += block.len();
+            }
+        }
+        assert_eq!(offset, archive.len());
+        assert!(fixture.restore(&archive).unwrap() == input);
+
+        for damaged in [payload_start + 128 * V1_BLOCK + 19, archive.len() - 1] {
+            archive[damaged] ^= 0x40;
+            assert!(
+                matches!(fixture.restore(&archive), Err(e) if e.kind() == io::ErrorKind::InvalidData)
+            );
+            archive[damaged] ^= 0x40;
+        }
+    }
+
+    #[cfg(any(windows, target_os = "linux"))]
+    #[test]
+    fn parallel_archive_stops_all_workers_on_read_or_write_error() {
+        let fixture = Fixture::new();
+        let source_path = fixture.0.join("closed-source");
+        let output_path = fixture.0.join("output");
+        let size = 2 * BATCH + 17;
+        let mut create = File::create(&source_path).unwrap();
+        create.write_all(b"x").unwrap();
+        create.set_len(size as u64).unwrap();
+        drop(create);
+        let mut directory = vec![[0; ENTRY]; size.div_ceil(BLOCK)];
+        let mut read_only = File::open(&source_path).unwrap();
+        let source = File::open(&source_path).unwrap();
+        let result = write_dense_payload(
+            &source,
+            &mut read_only,
+            directory.chunks_mut(BATCH / BLOCK),
+            size,
+        );
+        assert!(result.is_err());
+
+        drop(source);
+        drop(read_only);
+        let truncate = File::options().write(true).open(&source_path).unwrap();
+        truncate.set_len(BATCH as u64).unwrap();
+        drop(truncate);
+        let result = write_dense_payload(
+            &File::open(&source_path).unwrap(),
+            &mut File::create(&output_path).unwrap(),
+            directory.chunks_mut(BATCH / BLOCK),
+            size,
+        );
+        assert_eq!(result.unwrap_err().kind(), io::ErrorKind::UnexpectedEof);
     }
 }

@@ -26,7 +26,11 @@ impl Profile {
                 rows: 57_344,
                 capacity: 64 * MIB,
             }),
-            _ => Err("expected spare or dense".into()),
+            "near-full" => Ok(Self {
+                rows: 63_744,
+                capacity: 64 * MIB,
+            }),
+            _ => Err("expected spare, dense or near-full".into()),
         }
     }
 

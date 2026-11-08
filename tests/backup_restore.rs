@@ -134,6 +134,26 @@ fn empty_and_nonempty_append_databases_retain_their_identity_and_layout() {
     }
 }
 
+#[cfg(feature = "redo-witness")]
+#[test]
+fn a_mostly_empty_wal_still_archives_from_the_first_byte_after_sampling() {
+    let f = Fixture::new();
+    let source = f.path("sparse.ndb");
+    let archive = f.path("sparse.catbak");
+    let restored = f.path("restored.ndb");
+    let db = Database::create_append(&source, [0xa2; 16]).unwrap();
+    let mut tx = db.begin().unwrap();
+    tx.put(b"first", b"committed").unwrap();
+    tx.commit().unwrap();
+    db.checkpoint_redo_log(16 * 1024 * 1024).unwrap();
+    drop(db);
+
+    backup(&source, &archive).unwrap();
+    assert!(fs::metadata(&archive).unwrap().len() < 1024 * 1024);
+    restore(&archive, &restored).unwrap();
+    assert!(fs::read(&source).unwrap() == fs::read(&restored).unwrap());
+}
+
 #[test]
 fn historic_v1_and_fixed_v3_restore_the_original_bytes_and_commit_sequence() {
     let id = std::array::from_fn(|i| i as u8);

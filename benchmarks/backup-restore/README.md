@@ -1,6 +1,40 @@
 # Backup and restore measurement
 
-## Results
+## Dense database backups
+
+On a closed format-4 database, the updated `catdb backup` outperformed a synchronized OS copy at both measured data densities on Windows and Linux. The table shows **median backup time** over 18 trials per method, including process startup, file synchronization and publication. Occupancy is the share of the physical database covered by nonzero 64 KiB blocks.
+
+| Environment | Occupancy | OS copy | Previous archive | Updated archive | Time saved vs. copy | Faster than copy |
+|---|---:|---:|---:|---:|---:|---:|
+| Windows / NTFS | 89.11% | 56.98 ms | 68.18 ms | 42.05 ms | 26.2% | 18/18 |
+| Windows / NTFS | 98.93% | 89.91 ms | 94.04 ms | 66.79 ms | 25.7% | 18/18 |
+| Linux / WSL2 | 89.11% | 34.00 ms | 51.90 ms | 31.49 ms | 7.4% | 15/18 |
+| Linux / WSL2 | 98.93% | 34.08 ms | 57.04 ms | 29.89 ms | 12.3% | 18/18 |
+
+The dense and near-full fixtures occupy 64.25 MiB and contain 57,344 and 63,744 live rows, respectively. Each archive has the same size and SHA-256 as the archive produced by commit `9c11ba0`. A third fixture with 1.80% occupancy exercised the sequential encoder. Its previous and updated backup medians were 50.68 and 49.44 ms on Windows, and 57.78 and 58.15 ms on Linux. [Windows trials](dense-windows-results.json) · [Linux trials](dense-linux-results.json)
+
+### Where the time went
+
+In the previous encoder, reading, processing and writing each batch ran sequentially. On the dense fixture the median times spent reading, writing and synchronizing the archive were 10.34, 11.39 and 13.72 ms on Windows, and 19.04, 11.21 and 21.80 ms on Linux. CRC32C took 1.73 and 1.83 ms respectively. These timings came from a separate instrumented build. [Phase timings](dense-profile.json)
+
+For files of at least 8 MiB, the encoder samples three 4 KiB pages to choose the I/O path. If at least two contain data, two readers prepare 1 MiB batches while the writer emits the payload in source order, using aligned 2 MiB direct writes when supported. Every block is still examined. Each stored block retains its CRC32C, the exact byte length is preserved, and the completed file is synchronized before publication.
+
+Restore uses the existing v1 decoder. Each measured restore had to match the closed source's SHA-256 before opening, pass checks for every live row, the database ID, commit version and WAL capacity, and retain a new write across a restart. In the immediate backup-then-restore sequence on Linux, median restore time **increased** from 37.05 to 47.54 ms at 89.11% occupancy, and from 35.89 to 46.01 ms at 98.93%. The benchmark uses normal filesystem caching, and the new backup writes most dense payload bytes through direct I/O. In a separate dense restore check, each CLI read the same archive after its bytes had been read fully into the filesystem cache. The medians were 34.50 ms with the previous CLI and 34.19 ms with the updated CLI (12 restores each); all output hashes matched. This is consistent with cache state contributing to the immediate-restore difference. [Restore trials with the same input and cache preparation](warm-restore-linux.json)
+
+### Reproduce the three-way comparison
+
+Build both versions into separate directories. From the updated checkout:
+
+```sh
+git worktree add --detach ../catdb-backup-reference 9c11ba0
+cargo build --manifest-path ../catdb-backup-reference/Cargo.toml --locked --release --bin catdb --target-dir ../catdb-backup-reference/target
+cargo build --locked --release --bin catdb --example backup-restore-fixture --target-dir target
+python benchmarks/backup-restore/run.py --catdb target/release/catdb --baseline-catdb ../catdb-backup-reference/target/release/catdb --fixture target/release/examples/backup-restore-fixture --work-dir artifacts/dense-work --out artifacts/dense-times.json --profiles dense near-full spare --reps 18
+```
+
+Add `.exe` to the executable paths on Windows. Each method runs once as a warm-up. The next 18 repetitions cycle through all six orders three times. Each method reads the same closed source and writes a new, synchronized destination on the same filesystem. Windows used NTFS and Rust 1.99.1. Linux used the Docker overlay filesystem on a WSL2 virtual disk with Rust 1.89.0 on the same Ryzen 9 5950X host. The OS measurements ran separately. On Windows, the OS copy and previous-archive trials used the same extended fixture source built against the reference engine (`--baseline-fixture`); Linux used one fixture executable for all three methods. Executable hashes are recorded in each result file.
+
+## Original archive results
 
 Measured on Windows build 26100, NTFS, AMD Ryzen 9 5950X, Rust 1.99.1. The reference engine was built from commit `78db7ab`. Both methods produced byte-for-byte restores in all 24 trials.
 

@@ -1,0 +1,162 @@
+{
+  "profile": "dense",
+  "precondition": "Full SHA-256 read of the same archive before each timed restore. The restored output is hashed and removed before the next trial.",
+  "source_sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1",
+  "archive_sha256": "c9d7c52312a19a082b0430f85c2f0d42d090ee5ff92fd0da95f174b6d840090a",
+  "repetitions": 12,
+  "warmup_repetitions": 1,
+  "summary": {
+    "previous": 34.4958915,
+    "catdb": 34.185249999999996
+  },
+  "executables": {
+    "previous": "ba4766a3cc34e51c2e116d78fb44ed7c466549fc2d043f6c4d25adbfcd158fe4",
+    "catdb": "3c15fcbe52499ffb329a3a11b78a0e507fcca110aee07e9d4c2773d2453f0fd6"
+  },
+  "samples": [
+    {
+      "rep": 1,
+      "method": "previous",
+      "restore_ms": 34.477136,
+      "sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1"
+    },
+    {
+      "rep": 1,
+      "method": "catdb",
+      "restore_ms": 34.317186,
+      "sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1"
+    },
+    {
+      "rep": 2,
+      "method": "catdb",
+      "restore_ms": 34.003455,
+      "sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1"
+    },
+    {
+      "rep": 2,
+      "method": "previous",
+      "restore_ms": 34.28161,
+      "sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1"
+    },
+    {
+      "rep": 3,
+      "method": "previous",
+      "restore_ms": 34.514647,
+      "sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1"
+    },
+    {
+      "rep": 3,
+      "method": "catdb",
+      "restore_ms": 34.001163,
+      "sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1"
+    },
+    {
+      "rep": 4,
+      "method": "catdb",
+      "restore_ms": 33.961025,
+      "sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1"
+    },
+    {
+      "rep": 4,
+      "method": "previous",
+      "restore_ms": 33.94898,
+      "sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1"
+    },
+    {
+      "rep": 5,
+      "method": "previous",
+      "restore_ms": 34.792654,
+      "sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1"
+    },
+    {
+      "rep": 5,
+      "method": "catdb",
+      "restore_ms": 33.4766,
+      "sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1"
+    },
+    {
+      "rep": 6,
+      "method": "catdb",
+      "restore_ms": 34.228043,
+      "sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1"
+    },
+    {
+      "rep": 6,
+      "method": "previous",
+      "restore_ms": 33.692602,
+      "sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1"
+    },
+    {
+      "rep": 7,
+      "method": "previous",
+      "restore_ms": 33.725758,
+      "sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1"
+    },
+    {
+      "rep": 7,
+      "method": "catdb",
+      "restore_ms": 36.000131,
+      "sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1"
+    },
+    {
+      "rep": 8,
+      "method": "catdb",
+      "restore_ms": 33.323937,
+      "sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1"
+    },
+    {
+      "rep": 8,
+      "method": "previous",
+      "restore_ms": 35.483021,
+      "sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1"
+    },
+    {
+      "rep": 9,
+      "method": "previous",
+      "restore_ms": 34.790316,
+      "sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1"
+    },
+    {
+      "rep": 9,
+      "method": "catdb",
+      "restore_ms": 35.110417,
+      "sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1"
+    },
+    {
+      "rep": 10,
+      "method": "catdb",
+      "restore_ms": 34.142457,
+      "sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1"
+    },
+    {
+      "rep": 10,
+      "method": "previous",
+      "restore_ms": 34.666849,
+      "sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1"
+    },
+    {
+      "rep": 11,
+      "method": "previous",
+      "restore_ms": 34.568387,
+      "sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1"
+    },
+    {
+      "rep": 11,
+      "method": "catdb",
+      "restore_ms": 34.721688,
+      "sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1"
+    },
+    {
+      "rep": 12,
+      "method": "catdb",
+      "restore_ms": 35.023616,
+      "sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1"
+    },
+    {
+      "rep": 12,
+      "method": "previous",
+      "restore_ms": 33.752725,
+      "sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1"
+    }
+  ]
+}

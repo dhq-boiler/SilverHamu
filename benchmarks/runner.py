@@ -210,6 +210,7 @@ def worker(engine,workload,worker_id,clients,rep,start,ready):
     for k in keys[:50]:a.begin();a.get(k);a.rollback()
     retry_limit = int(os.environ.get('BENCH_SERIALIZATION_RETRIES', '0'))
     samples, errors, changed, retries = [], [], {}, []
+    after_sample = getattr(a, 'after_sample', None)
     ready.wait()
     start.wait()
     for sequence, k in enumerate(keys):
@@ -231,8 +232,7 @@ def worker(engine,workload,worker_id,clients,rep,start,ready):
                     changed[str(row)] = stamp
                 else:
                     a.rollback()
-                samples.append(time.perf_counter_ns() - began)
-                break
+                elapsed = time.perf_counter_ns() - began
             except Exception as error:
                 code = conflict_code(engine, error)
                 try:
@@ -245,6 +245,11 @@ def worker(engine,workload,worker_id,clients,rep,start,ready):
                     errors.append({'elapsed_ns':time.perf_counter_ns()-began, 'error':str(error)})
                     break
                 retries.append({'worker':worker_id, 'sequence':sequence, 'attempt':attempt+1, 'code':code})
+            else:
+                samples.append(elapsed)
+                if after_sample is not None:
+                    after_sample(elapsed, worker_id, sequence)
+                break
     a.close()
     return samples, errors, changed, retries
 

@@ -2,7 +2,6 @@
 import sys,json,time,threading
 sys.path.insert(0,'/bench-src')
 import runner as base
-from worker import worker
 
 profile=False
 records=[]
@@ -10,7 +9,7 @@ lock=threading.Lock()
 dropped=0
 THRESHOLD_NS=10_000_000
 
-class Single(base.Remote):
+class Single(base.SingleRemote):
  def request(self,**kw):
   if not profile:return super().request(**kw)
   self.request_index=getattr(self,'request_index',0)+1
@@ -18,14 +17,6 @@ class Single(base.Remote):
   response=super().request(**kw)
   self.last_request_ns=time.perf_counter_ns()-started
   return response
- def begin(self):self.pending=None
- def get(self,k):
-  r=self.request(op='get_latest',key=k.hex());return bytes.fromhex(r['value']) if r.get('value') is not None else None
- def scan(self,k,rows=100):return [(bytes.fromhex(a),bytes.fromhex(b)) for a,b in self.request(op='scan_latest',start=k.hex(),rows=rows,bytes=64000,visits=65536)['rows']]
- def put(self,k,v):self.pending=(k,v)
- def commit(self):
-  k,v=self.pending;self.request(op='put_commit',key=k.hex(),value=v.hex());self.pending=None
- def rollback(self):self.pending=None
  def after_sample(self,elapsed,worker_id,sequence):
   global dropped
   if not profile:return
@@ -53,7 +44,7 @@ if __name__=='__main__':
  else:
   profile=len(sys.argv)>6 and sys.argv[6]=='1'
   assert single
-  base.Remote=Single;base.worker=worker
+  base.Remote=Single
   r=base.measure(engine,sys.argv[3],int(sys.argv[4]),int(sys.argv[5]))
  if profile:r['profile']={'records':records,'dropped':dropped,'limit':base.OPS,'threshold_ns':THRESHOLD_NS}
  print(json.dumps(r))

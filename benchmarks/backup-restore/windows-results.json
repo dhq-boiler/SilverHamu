@@ -1,0 +1,363 @@
+{
+  "system": "Windows",
+  "os_version": "10.0.26100",
+  "machine": "AMD64",
+  "catdb_sha256": "28db2fa66da58e40d68342f3a238f90fe7915c21713ca5ad1755326d94309e9b",
+  "fixture_sha256": "52320df81a78bc772b483789956a3d3d409f7e5e3421a63af615b92dfa35ab55",
+  "baseline_fixture_sha256": "7ce6bbe7eab321468b226edf7da06c2ce3ea984306d91c8041339b1e4e643d96",
+  "repetitions_per_method": 6,
+  "profiles": {
+    "spare": {
+      "source_bytes": 134479872,
+      "source_sha256": "ea6534a51afdcbed0555dbfb8d20d515ddbddf1e218dde5f5514d5cd577121cf",
+      "samples": [
+        {
+          "rep": 1,
+          "method": "copy",
+          "backup_ms": 133.5675,
+          "restore_ms": 130.0563,
+          "first_read_ms": 130.5269,
+          "restore_and_first_read_ms": 260.58320000000003,
+          "archive_bytes": 134479872
+        },
+        {
+          "rep": 1,
+          "method": "catdb",
+          "backup_ms": 119.2464,
+          "restore_ms": 134.098,
+          "first_read_ms": 34.1117,
+          "restore_and_first_read_ms": 168.2097,
+          "archive_bytes": 2435124
+        },
+        {
+          "rep": 2,
+          "method": "catdb",
+          "backup_ms": 49.6386,
+          "restore_ms": 119.483,
+          "first_read_ms": 34.5876,
+          "restore_and_first_read_ms": 154.0706,
+          "archive_bytes": 2435124
+        },
+        {
+          "rep": 2,
+          "method": "copy",
+          "backup_ms": 126.2014,
+          "restore_ms": 137.3572,
+          "first_read_ms": 111.7384,
+          "restore_and_first_read_ms": 249.0956,
+          "archive_bytes": 134479872
+        },
+        {
+          "rep": 3,
+          "method": "copy",
+          "backup_ms": 134.3696,
+          "restore_ms": 131.9346,
+          "first_read_ms": 115.0978,
+          "restore_and_first_read_ms": 247.0324,
+          "archive_bytes": 134479872
+        },
+        {
+          "rep": 3,
+          "method": "catdb",
+          "backup_ms": 47.171,
+          "restore_ms": 129.1328,
+          "first_read_ms": 34.8016,
+          "restore_and_first_read_ms": 163.9344,
+          "archive_bytes": 2435124
+        },
+        {
+          "rep": 4,
+          "method": "catdb",
+          "backup_ms": 44.4711,
+          "restore_ms": 122.4241,
+          "first_read_ms": 32.4359,
+          "restore_and_first_read_ms": 154.85999999999999,
+          "archive_bytes": 2435124
+        },
+        {
+          "rep": 4,
+          "method": "copy",
+          "backup_ms": 125.6998,
+          "restore_ms": 119.6425,
+          "first_read_ms": 101.0693,
+          "restore_and_first_read_ms": 220.71179999999998,
+          "archive_bytes": 134479872
+        },
+        {
+          "rep": 5,
+          "method": "copy",
+          "backup_ms": 119.769,
+          "restore_ms": 122.9449,
+          "first_read_ms": 101.1863,
+          "restore_and_first_read_ms": 224.1312,
+          "archive_bytes": 134479872
+        },
+        {
+          "rep": 5,
+          "method": "catdb",
+          "backup_ms": 212.9474,
+          "restore_ms": 123.5281,
+          "first_read_ms": 33.3426,
+          "restore_and_first_read_ms": 156.8707,
+          "archive_bytes": 2435124
+        },
+        {
+          "rep": 6,
+          "method": "catdb",
+          "backup_ms": 46.141,
+          "restore_ms": 123.2277,
+          "first_read_ms": 34.6002,
+          "restore_and_first_read_ms": 157.8279,
+          "archive_bytes": 2435124
+        },
+        {
+          "rep": 6,
+          "method": "copy",
+          "backup_ms": 144.9894,
+          "restore_ms": 138.2013,
+          "first_read_ms": 109.3591,
+          "restore_and_first_read_ms": 247.56040000000002,
+          "archive_bytes": 134479872
+        }
+      ],
+      "medians": {
+        "copy": {
+          "backup_ms": 129.88445000000002,
+          "restore_ms": 130.99545,
+          "first_read_ms": 110.54875,
+          "restore_and_first_read_ms": 247.2964,
+          "archive_bytes": 134479872.0
+        },
+        "catdb": {
+          "backup_ms": 48.404799999999994,
+          "restore_ms": 123.3779,
+          "first_read_ms": 34.34965,
+          "restore_and_first_read_ms": 157.3493,
+          "archive_bytes": 2435124.0
+        }
+      },
+      "ranges": {
+        "copy": {
+          "backup_ms": [
+            119.769,
+            144.9894
+          ],
+          "restore_ms": [
+            119.6425,
+            138.2013
+          ],
+          "first_read_ms": [
+            101.0693,
+            130.5269
+          ],
+          "restore_and_first_read_ms": [
+            220.71179999999998,
+            260.58320000000003
+          ],
+          "archive_bytes": [
+            134479872,
+            134479872
+          ]
+        },
+        "catdb": {
+          "backup_ms": [
+            44.4711,
+            212.9474
+          ],
+          "restore_ms": [
+            119.483,
+            134.098
+          ],
+          "first_read_ms": [
+            32.4359,
+            34.8016
+          ],
+          "restore_and_first_read_ms": [
+            154.0706,
+            168.2097
+          ],
+          "archive_bytes": [
+            2435124,
+            2435124
+          ]
+        }
+      }
+    },
+    "dense": {
+      "source_bytes": 67371008,
+      "source_sha256": "1520045fb4074b9a7c134e4230ae02b39b386faf6be8b0a92e53ede44e9e9bc1",
+      "samples": [
+        {
+          "rep": 1,
+          "method": "copy",
+          "backup_ms": 76.9364,
+          "restore_ms": 77.7272,
+          "first_read_ms": 113.008,
+          "restore_and_first_read_ms": 190.7352,
+          "archive_bytes": 67371008
+        },
+        {
+          "rep": 1,
+          "method": "catdb",
+          "backup_ms": 71.4468,
+          "restore_ms": 62.2469,
+          "first_read_ms": 104.5979,
+          "restore_and_first_read_ms": 166.8448,
+          "archive_bytes": 60036148
+        },
+        {
+          "rep": 2,
+          "method": "catdb",
+          "backup_ms": 61.5453,
+          "restore_ms": 57.7563,
+          "first_read_ms": 99.9057,
+          "restore_and_first_read_ms": 157.662,
+          "archive_bytes": 60036148
+        },
+        {
+          "rep": 2,
+          "method": "copy",
+          "backup_ms": 55.6875,
+          "restore_ms": 53.4897,
+          "first_read_ms": 112.8255,
+          "restore_and_first_read_ms": 166.3152,
+          "archive_bytes": 67371008
+        },
+        {
+          "rep": 3,
+          "method": "copy",
+          "backup_ms": 55.3884,
+          "restore_ms": 54.3579,
+          "first_read_ms": 115.7218,
+          "restore_and_first_read_ms": 170.0797,
+          "archive_bytes": 67371008
+        },
+        {
+          "rep": 3,
+          "method": "catdb",
+          "backup_ms": 59.7869,
+          "restore_ms": 62.5718,
+          "first_read_ms": 107.0974,
+          "restore_and_first_read_ms": 169.6692,
+          "archive_bytes": 60036148
+        },
+        {
+          "rep": 4,
+          "method": "catdb",
+          "backup_ms": 59.2456,
+          "restore_ms": 60.0263,
+          "first_read_ms": 102.807,
+          "restore_and_first_read_ms": 162.8333,
+          "archive_bytes": 60036148
+        },
+        {
+          "rep": 4,
+          "method": "copy",
+          "backup_ms": 51.422,
+          "restore_ms": 52.4,
+          "first_read_ms": 113.2301,
+          "restore_and_first_read_ms": 165.6301,
+          "archive_bytes": 67371008
+        },
+        {
+          "rep": 5,
+          "method": "copy",
+          "backup_ms": 54.6523,
+          "restore_ms": 61.0748,
+          "first_read_ms": 110.7445,
+          "restore_and_first_read_ms": 171.8193,
+          "archive_bytes": 67371008
+        },
+        {
+          "rep": 5,
+          "method": "catdb",
+          "backup_ms": 57.6812,
+          "restore_ms": 60.3688,
+          "first_read_ms": 103.0289,
+          "restore_and_first_read_ms": 163.3977,
+          "archive_bytes": 60036148
+        },
+        {
+          "rep": 6,
+          "method": "catdb",
+          "backup_ms": 57.3734,
+          "restore_ms": 74.1744,
+          "first_read_ms": 100.055,
+          "restore_and_first_read_ms": 174.2294,
+          "archive_bytes": 60036148
+        },
+        {
+          "rep": 6,
+          "method": "copy",
+          "backup_ms": 52.2156,
+          "restore_ms": 54.676,
+          "first_read_ms": 110.5792,
+          "restore_and_first_read_ms": 165.2552,
+          "archive_bytes": 67371008
+        }
+      ],
+      "medians": {
+        "copy": {
+          "backup_ms": 55.02034999999999,
+          "restore_ms": 54.51695,
+          "first_read_ms": 112.91675000000001,
+          "restore_and_first_read_ms": 168.19745,
+          "archive_bytes": 67371008.0
+        },
+        "catdb": {
+          "backup_ms": 59.51625,
+          "restore_ms": 61.30785,
+          "first_read_ms": 102.91794999999999,
+          "restore_and_first_read_ms": 165.12124999999997,
+          "archive_bytes": 60036148.0
+        }
+      },
+      "ranges": {
+        "copy": {
+          "backup_ms": [
+            51.422,
+            76.9364
+          ],
+          "restore_ms": [
+            52.4,
+            77.7272
+          ],
+          "first_read_ms": [
+            110.5792,
+            115.7218
+          ],
+          "restore_and_first_read_ms": [
+            165.2552,
+            190.7352
+          ],
+          "archive_bytes": [
+            67371008,
+            67371008
+          ]
+        },
+        "catdb": {
+          "backup_ms": [
+            57.3734,
+            71.4468
+          ],
+          "restore_ms": [
+            57.7563,
+            74.1744
+          ],
+          "first_read_ms": [
+            99.9057,
+            107.0974
+          ],
+          "restore_and_first_read_ms": [
+            157.662,
+            174.2294
+          ],
+          "archive_bytes": [
+            60036148,
+            60036148
+          ]
+        }
+      }
+    }
+  }
+}

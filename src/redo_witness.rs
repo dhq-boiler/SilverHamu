@@ -323,7 +323,7 @@ pub(super) fn finish_recovery(
     };
     let (_permit, mut bytes) = scratch(
         budget,
-        (fixed.capacity - end).min(8192) as usize,
+        (fixed.capacity - end).min(256 * 1024) as usize,
         seal_bytes,
     )?;
     if let Some(repair) = repair {
@@ -332,11 +332,15 @@ pub(super) fn finish_recovery(
     }
     // Old, abandoned frames beyond a torn tail could otherwise reappear after a subsequent
     // foreground append overwrites its prefix and crashes before its new sentinel reaches disk.
+    const ZERO_PAGE: [u8; 4096] = [0; 4096];
     let mut pos = end;
     while pos < fixed.capacity {
         let n = (fixed.capacity - pos).min(bytes.len() as u64) as usize;
         file.read_exact(&mut bytes[..n])?;
-        if bytes[..n].iter().any(|byte| *byte != 0) {
+        if bytes[..n]
+            .chunks(ZERO_PAGE.len())
+            .any(|page| page != &ZERO_PAGE[..page.len()])
+        {
             file.seek(SeekFrom::Start(pos))?;
             bytes[..n].fill(0);
             file.write_all(&bytes[..n])?;

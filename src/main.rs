@@ -6,10 +6,12 @@ use std::time::Instant;
 const DEMO_GENERATION: [u8; 16] = *b"synthetic-demo01";
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let args: Vec<String> = std::env::args().collect();
-    match args.get(1).map(String::as_str) {
+    let args: Vec<_> = std::env::args_os().collect();
+    match args.get(1).and_then(|s| s.to_str()) {
+        Some("backup") if args.len() == 4 => newdbms::transactions::backup(&args[2], &args[3])?,
+        Some("restore") if args.len() == 4 => newdbms::transactions::restore(&args[2], &args[3])?,
         Some("demo") if args.len() == 4 => {
-            let count: usize = args[3].parse()?;
+            let count: usize = args[3].to_str().ok_or("invalid count")?.parse()?;
             if count > 1_000_000 {
                 return Err("demo count must be at most 1000000".into());
             }
@@ -36,11 +38,13 @@ fn main() -> Result<(), Box<dyn Error>> {
             measure_read(path, 0, 100)?;
         }
         Some("read") if args.len() == 5 => {
-            measure_read(Path::new(&args[2]), args[3].parse()?, args[4].parse()?)?;
+            let start = args[3].to_str().ok_or("invalid start")?.parse()?;
+            let limit = args[4].to_str().ok_or("invalid limit")?.parse()?;
+            measure_read(Path::new(&args[2]), start, limit)?;
         }
         _ => {
             return Err(
-                "usage: catdb demo <new-file> <count> | read <demo-file> <start> <limit>".into(),
+                "usage: catdb backup <closed-db> <new-archive> | restore <archive> <new-db> | demo <new-file> <count> | read <demo-file> <start> <limit>".into(),
             );
         }
     }

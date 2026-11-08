@@ -49,6 +49,18 @@ Start a local catdb server with the [quick start](#quick-start). Choose a langua
 | [Python](clients/python/README.md) | Python 3.10+ | `python -m pip install catdb-service-client==0.1.0` | [PyPI](https://pypi.org/project/catdb-service-client/0.1.0/) |
 | [Ruby](clients/ruby/README.md) | Ruby 3.1+ | `gem install catdb-client -v 0.1.0` | [RubyGems](https://rubygems.org/gems/catdb-client/versions/0.1.0) |
 
+## Back up and restore a database
+
+Close the standalone database or stop its server. From the repository root, build the CLI and use new filenames for the archive and the restored database.
+
+```sh
+cargo build --locked --release --bin catdb
+./target/release/catdb backup state.ndb state.catbak
+./target/release/catdb restore state.catbak recovered.ndb
+```
+
+The archive omits all-zero blocks. In the benchmark with unused WAL capacity, a 128.25 MiB database produced a 2.32 MiB archive. Restore verifies the archive and writes the full database, including its reserved space. Services with TLS accounts require a coordinated copy of the data files and account catalog. [Backup, restore and Docker instructions](docs/backup.md) · [Windows and Linux measurements](benchmarks/backup-restore/README.md)
+
 ## Benchmark results
 
 ### Durable single-key updates

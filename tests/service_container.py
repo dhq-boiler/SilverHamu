@@ -36,8 +36,8 @@ def main():
     passed = []
     docker("volume", "create", volume)
 
-    def start():
-        docker("run", "--detach", "--name", name, "--read-only", "--cap-drop", "ALL", "--security-opt", "no-new-privileges:true", "--stop-timeout", "10", "-p", "127.0.0.1::7400", "--mount", f"type=volume,source={volume},target=/data", "--mount", f"type=bind,source={secret},target=/run/secrets/catdb_token,readonly", image)
+    def start(*server_args):
+        docker("run", "--detach", "--name", name, "--read-only", "--cap-drop", "ALL", "--security-opt", "no-new-privileges:true", "--stop-timeout", "10", "-p", "127.0.0.1::7400", "--mount", f"type=volume,source={volume},target=/data", "--mount", f"type=bind,source={secret},target=/run/secrets/catdb_token,readonly", image, *server_args)
         port = int(docker("port", name, "7400/tcp").stdout.strip().rsplit(":", 1)[1])
         deadline = time.monotonic() + 20
         while True:
@@ -95,6 +95,19 @@ def main():
             ok(client, op="begin")
             assert ok(client, op="scan", start="")["rows"] == [["01", "aabb"], ["03", "cc"]]
         passed.append("ER SIGKILL and recreation preserve every acknowledged value, discard staged value")
+        docker("stop", name)
+        docker("rm", name)
+        mount = f"type=volume,source={volume},target=/data"
+        for args in (("backup", "/data/state.ndb", "/data/check.catbak"),
+                     ("restore", "/data/check.catbak", "/data/restored.ndb")):
+            docker("run", "--rm", "--network", "none", "--read-only", "--cap-drop", "ALL",
+                   "--mount", mount, "--entrypoint", "catdb", image, *args)
+        port = start("--db", "/data/restored.ndb", "--bind", "0.0.0.0:7400",
+                     "--allow-remote", "--token-file", "/run/secrets/catdb_token")
+        with module.Client("127.0.0.1", port, token) as client:
+            assert ok(client, op="scan_latest", start="")["rows"] == [["01", "aabb"], ["03", "cc"]]
+            ok(client, op="put_commit", key="05", value="ee")
+        passed.append("Offline CLI archive restores the committed rows to a writable new database")
         (folder / "result.json").write_text(json.dumps({"passed":passed}, indent=2))
         print(json.dumps({"passed":passed,"record":str(folder / "result.json")}, indent=2))
     finally:

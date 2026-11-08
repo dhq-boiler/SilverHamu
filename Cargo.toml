@@ -92,3 +92,8 @@ required-features = ["service", "wire-metrics"]
 name = "solo-update-bench"
 path = "src/bin/solo-update-bench.rs"
 required-features = ["service"]
+
+[[example]]
+name = "backup-restore-fixture"
+path = "benchmarks/backup-restore/fixture.rs"
+required-features = ["redo-witness"]

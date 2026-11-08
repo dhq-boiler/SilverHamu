@@ -19,6 +19,12 @@ use std::ops::Bound::{Excluded, Included, Unbounded};
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, MutexGuard};
 
+#[path = "backup.rs"]
+mod backup;
+#[path = "backup_archive.rs"]
+mod backup_archive;
+pub use backup::{backup, restore};
+
 #[cfg(feature = "fixed-log")]
 #[path = "fixed_log.rs"]
 mod fixed_log;
@@ -727,16 +733,7 @@ impl Database {
         }
         let mut header = [0; HEADER_BYTES];
         file.read_exact(&mut header)?;
-        if &header[..8] != MAGIC
-            || !(read_u32(&header, 8) == 1
-                || read_u32(&header, 8) == 2
-                || (cfg!(feature = "fixed-log") && read_u32(&header, 8) == 3)
-                || (cfg!(feature = "redo-witness") && read_u32(&header, 8) == 4))
-            || read_u32(&header, 12) != HEADER_BYTES as u32
-            || read_u32(&header, 44) != crate::crc32(&header[..44])
-        {
-            return Err(Error::Invalid("WAL header"));
-        }
+        validate_wal_header(&header)?;
         let id = header[16..32].try_into().unwrap();
         let legacy = read_u32(&header, 8) == 1;
         let base = if legacy {
@@ -2176,21 +2173,36 @@ fn wal_header(id: [u8; 16], base: u64, chunks: u32) -> [u8; HEADER_BYTES] {
     header
 }
 
+fn validate_wal_header(header: &[u8; HEADER_BYTES]) -> Result<()> {
+    let version = read_u32(header, 8);
+    let supported = matches!(version, 1 | 2)
+        || (cfg!(feature = "fixed-log") && version == 3)
+        || (cfg!(feature = "redo-witness") && version == 4);
+    if !supported
+        || &header[..8] != MAGIC
+        || read_u32(header, 12) != HEADER_BYTES as u32
+        || read_u32(header, 44) != crate::crc32(&header[..44])
+    {
+        return Err(Error::Invalid("WAL header"));
+    }
+    Ok(())
+}
+
 #[cfg(windows)]
 fn replace_file(source: &Path, target: &Path) -> io::Result<()> {
     move_file(source, target, 0x1 | 0x8)
 }
 
-#[cfg(all(windows, feature = "fixed-log"))]
+#[cfg(windows)]
 fn publish_new_file(source: &Path, target: &Path) -> io::Result<()> {
     move_file(source, target, 0x8)
 }
 
-#[cfg(all(not(windows), feature = "fixed-log"))]
+#[cfg(not(windows))]
 fn publish_new_file(source: &Path, target: &Path) -> io::Result<()> {
-    #[cfg(target_os = "linux")]
+    #[cfg(all(target_os = "linux", feature = "fixed-log"))]
     let renamed = try_rename_new_file(source, target)?;
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(all(target_os = "linux", feature = "fixed-log")))]
     let renamed = false;
     if !renamed {
         // Plain rename would overwrite a file installed after the existence check.

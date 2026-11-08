@@ -4,12 +4,13 @@ WORKDIR /build
 COPY Cargo.toml Cargo.lock ./
 COPY src ./src
 ARG CATDB_FEATURES=service
-RUN cargo build --locked --release --features "$CATDB_FEATURES" --bin catdb-server
+RUN cargo build --locked --release --features "$CATDB_FEATURES" --bin catdb-server --bin catdb
 
 FROM debian:bookworm-slim AS runtime
 RUN groupadd --gid 10001 catdb && useradd --uid 10001 --gid catdb --no-create-home catdb \
     && mkdir /data && chown catdb:catdb /data
 COPY --from=build /build/target/release/catdb-server /usr/local/bin/catdb-server
+COPY --from=build /build/target/release/catdb /usr/local/bin/catdb
 USER 10001:10001
 WORKDIR /data
 VOLUME ["/data"]

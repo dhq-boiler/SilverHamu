@@ -520,7 +520,29 @@ pub struct Transaction {
     writes: BTreeMap<Vec<u8>, Option<Vec<u8>>>,
     write_bytes: usize,
     staged_charge: usize,
+    savepoints: Option<Box<Savepoints>>,
     dependency_charge: usize,
+}
+
+#[derive(Default)]
+struct Savepoints {
+    marks: Vec<Savepoint>,
+    undo: Vec<StagedUndo>,
+    undo_charge: usize,
+}
+
+struct StagedUndo {
+    key: Vec<u8>,
+    // None means the key had no staged write; Some(None) was a staged deletion.
+    previous: Option<Option<Vec<u8>>>,
+}
+
+struct Savepoint {
+    name: String,
+    undo_len: usize,
+    undo_charge: usize,
+    write_bytes: usize,
+    staged_charge: usize,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1427,6 +1449,7 @@ impl Database {
                 writes: BTreeMap::new(),
                 write_bytes: 12,
                 staged_charge: 0,
+                savepoints: None,
                 dependency_charge: 0,
             })
         })();
@@ -1877,6 +1900,67 @@ impl Transaction {
         self.stage(key.into(), Some(value.into()))
     }
 
+    /// Marks the current write set. Reusing a name shadows its preceding mark.
+    pub fn savepoint(&mut self, name: &str) -> Result<()> {
+        if name.is_empty() || name.len() > 512 {
+            return Err(Error::Invalid("invalid savepoint name"));
+        }
+        let history = self.savepoints.get_or_insert_with(Default::default);
+        if history.marks.len() >= 128 {
+            return Err(Error::Limit("too many savepoints"));
+        }
+        history.marks.push(Savepoint {
+            name: name.to_owned(),
+            undo_len: history.undo.len(),
+            undo_charge: history.undo_charge,
+            write_bytes: self.write_bytes,
+            staged_charge: self.staged_charge,
+        });
+        Ok(())
+    }
+
+    fn savepoint_index(&self, name: &str) -> Result<usize> {
+        self.savepoints
+            .as_ref()
+            .and_then(|history| history.marks.iter().rposition(|mark| mark.name == name))
+            .ok_or(Error::Invalid("unknown savepoint"))
+    }
+
+    /// Retains the mark and the transaction's original snapshot and read dependencies.
+    pub fn rollback_to_savepoint(&mut self, name: &str) -> Result<()> {
+        let index = self.savepoint_index(name)?;
+        let history = self.savepoints.as_mut().unwrap();
+        history.marks.truncate(index + 1);
+        let mark = &history.marks[index];
+        for StagedUndo { key, previous } in history.undo.drain(mark.undo_len..).rev() {
+            if let Some(value) = previous {
+                self.writes.insert(key, value);
+            } else {
+                self.writes.remove(&key);
+            }
+        }
+        history.undo.shrink_to_fit();
+        let discarded =
+            self.staged_charge + history.undo_charge - mark.staged_charge - mark.undo_charge;
+        self.database.inner.budget.release(STAGED, discarded);
+        history.undo_charge = mark.undo_charge;
+        self.staged_charge = mark.staged_charge;
+        self.write_bytes = mark.write_bytes;
+        Ok(())
+    }
+
+    /// Releases the named mark along with all marks created after it.
+    pub fn release_savepoint(&mut self, name: &str) -> Result<()> {
+        let index = self.savepoint_index(name)?;
+        if index == 0 {
+            let history = self.savepoints.take().unwrap();
+            self.database.inner.budget.release(STAGED, history.undo_charge);
+        } else {
+            self.savepoints.as_mut().unwrap().marks.truncate(index);
+        }
+        Ok(())
+    }
+
     pub fn delete(&mut self, key: &[u8]) -> Result<()> {
         self.stage(key.into(), None)
     }
@@ -1901,12 +1985,29 @@ impl Transaction {
         let previous_charge = previous.map_or(0, |v| 128 + key.len() + v.as_ref().map_or(0, Vec::len));
         let charge = 128 + key.len() + value.as_deref().map_or(0, <[u8]>::len);
         let _buffer = self.reserve_buffer(charge)?;
+        let undo_charge = if let Some(history) = &self.savepoints {
+            let entry_charge = previous_charge.max(128 + key.len());
+            if history.undo_charge + entry_charge > MAX_TRANSACTION_BYTES {
+                return Err(Error::Limit("savepoint undo bytes"));
+            }
+            entry_charge
+        } else {
+            0
+        };
         self.database
             .inner
             .budget
-            .replace(STAGED, previous_charge, charge)?;
+            .replace(STAGED, previous_charge, charge + undo_charge)?;
         self.staged_charge = self.staged_charge - previous_charge + charge;
-        self.writes.insert(key.into_owned(), value.map(Cow::into_owned));
+        let key = key.into_owned();
+        let value = value.map(Cow::into_owned);
+        if let Some(history) = &mut self.savepoints {
+            let previous = self.writes.insert(key.clone(), value);
+            history.undo.push(StagedUndo { key, previous });
+            history.undo_charge += undo_charge;
+        } else {
+            self.writes.insert(key, value);
+        }
         self.write_bytes = size;
         Ok(())
     }
@@ -2096,10 +2197,8 @@ impl Transaction {
 impl Drop for Transaction {
     fn drop(&mut self) {
         self.database.inner.budget.release(ACTIVE, usize::from(self.count_active));
-        self.database
-            .inner
-            .budget
-            .release(STAGED, self.staged_charge);
+        let undo_charge = self.savepoints.as_ref().map_or(0, |s| s.undo_charge);
+        self.database.inner.budget.release(STAGED, self.staged_charge + undo_charge);
         self.database
             .inner
             .budget

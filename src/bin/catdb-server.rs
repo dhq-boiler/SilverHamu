@@ -19,6 +19,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     let mut sql_host = None;
     let mut read_role = None;
     let mut read_token_file = None;
+    let mut allow_role_writes = false;
     let mut cert = None;
     let mut key = None;
     let mut admin = None;
@@ -36,6 +37,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         match arg.as_str() {
             "--sql-host" => sql_host = Some(args.next().ok_or("missing SQL host path")?.into()),
             "--read-role" => read_role = Some(args.next().ok_or("missing read role name")?),
+            "--allow-role-writes" => allow_role_writes = true,
             "--read-token-file" => {
                 read_token_file = Some(args.next().ok_or("missing read token path")?)
             }
@@ -84,7 +86,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                     "Account service: --db PATH --tls-cert CERT.pem --tls-key KEY.pem [--attach NAME=EXISTING_DB] [--bootstrap-admin NAME --bootstrap-password-file FILE]"
                 );
                 println!(
-                    "catdb-server --db PATH --token-file PATH [--init] [--bind 127.0.0.1:7400] [--allow-remote] [--max-connections 32] [--request-timeout-secs 30] [--transaction-timeout-secs 60] [--max-retained-bytes 134217728] [--max-staged-bytes 33554432] [--max-dependency-bytes 16777216] [--max-buffer-bytes 16777216]\ncatdb-server --healthcheck --token-file PATH [--bind 127.0.0.1:7400]\nOptional SQL: --sql-host ABSOLUTE_EXE [--read-role NAME --read-token-file FILE] (view tokens in token mode only). Remote transport requires an encrypted tunnel."
+                    "catdb-server --db PATH --token-file PATH [--init] [--bind 127.0.0.1:7400] [--allow-remote] [--max-connections 32] [--request-timeout-secs 30] [--transaction-timeout-secs 60] [--max-retained-bytes 134217728] [--max-staged-bytes 33554432] [--max-dependency-bytes 16777216] [--max-buffer-bytes 16777216]\ncatdb-server --healthcheck --token-file PATH [--bind 127.0.0.1:7400]\nOptional SQL: --sql-host ABSOLUTE_EXE [--read-role NAME --read-token-file FILE [--allow-role-writes]] (view tokens in token mode only). Remote transport requires an encrypted tunnel."
                 );
                 return Ok(());
             }
@@ -140,7 +142,10 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         return Err("--token-file or TLS account configuration required".into());
     };
     let read_role = match (read_role, read_token_file) {
-        (None, None) => None,
+        (None, None) if !allow_role_writes => None,
+        (None, None) => {
+            return Err("--allow-role-writes requires --read-role and --read-token-file".into());
+        }
         (Some(name), Some(file)) if !secure && sql_host.is_some() => Some(ReadRole {
             name,
             token: read_token(file)?,
@@ -183,9 +188,13 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         transaction_timeout: Duration::from_secs(transaction_timeout),
     };
     let server = match (sql_host, accounts) {
-        (Some(host), accounts) => {
-            Server::bind_with_sql(config, limits, accounts, SqlOptions { host, read_role })?
-        }
+        (Some(host), accounts) => Server::bind_with_sql_role_access(
+            config,
+            limits,
+            accounts,
+            SqlOptions { host, read_role },
+            allow_role_writes,
+        )?,
         (None, Some(accounts)) => Server::bind_accounts(config, limits, accounts)?,
         (None, None) => Server::bind_with_limits(config, limits)?,
     };

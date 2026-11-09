@@ -2,7 +2,7 @@ using System.Text;
 
 namespace Catdb.Sql;
 
-public sealed class SqlParser
+public sealed partial class SqlParser
 {
     private sealed record Token(string Text, string Kind, int Position);
     private readonly List<Token> tokens;
@@ -20,6 +20,7 @@ public sealed class SqlParser
         {
             if (parser.Match(";")) continue;
             parser.conditionCount = 0;
+            parser.compoundCount = 0;
             statements.Add(parser.Statement());
             if (!parser.End) parser.Expect(";");
             if (statements.Count > 100) throw new SqlException("1回の実行は100文までです。");
@@ -36,15 +37,26 @@ public sealed class SqlParser
         {
             var grant = Match("GRANT");
             if (!grant) Expect("REVOKE");
-            Expect("SELECT"); Expect("ON");
+            ViewAccess access = 0;
+            do
+            {
+                if (Match("SELECT")) access |= ViewAccess.Select;
+                else if (Match("INSERT")) access |= ViewAccess.Insert;
+                else if (Match("UPDATE")) access |= ViewAccess.Update;
+                else if (Match("DELETE")) access |= ViewAccess.Delete;
+                else throw Error("SELECT、INSERT、UPDATE、DELETE のいずれかを指定してください。");
+            } while (Match(","));
+            Expect("ON");
             var view = Name();
             Expect(grant ? "TO" : "FROM");
-            return new ViewPrivilege(view, Name(), grant);
+            return new ViewPrivilege(view, Name(), grant) { Access = access };
         }
         if (Match("ALTER"))
         {
             Expect("TABLE"); var table = Name();
             if (Match("ADD")) { Match("COLUMN"); return new AddColumn(table, ColumnDefinition()); }
+            if (Match("DROP")) { Match("COLUMN"); return new DropColumn(table, Name()); }
+            if (Match("ALTER")) return ColumnAlteration(table);
             Expect("RENAME"); Expect("COLUMN"); var column = Name(); Expect("TO");
             return new RenameColumn(table, column, Name());
         }
@@ -63,17 +75,25 @@ public sealed class SqlParser
             return kind == "VIEW" ? new DropView(name, optional) : new DropTable(name, optional);
         }
         if (Match("INSERT")) return Insert();
-        if (Match("SELECT")) return Select();
+        if (Match("MERGE")) return Merge();
+        if (Is("SELECT") || Is("WITH")) return QueryExpression();
         if (Match("UPDATE"))
         {
-            var table = Name(); Expect("SET"); var values = new Dictionary<string, SqlValue>(StringComparer.OrdinalIgnoreCase);
-            do { var name = Name(); Expect("="); if (!values.TryAdd(name, Literal())) throw Error("同じ列が複数回指定されています。"); } while (Match(","));
-            return new UpdateRows(table, values, Match("WHERE") ? Expression() : null);
+            var table = Name(); Expect("SET"); var values = Assignments();
+            return UpdateRows.FromAssignments(table, values, Match("WHERE") ? Expression() : null);
         }
         if (Match("DELETE")) { Expect("FROM"); var table = Name(); return new DeleteRows(table, Match("WHERE") ? Expression() : null); }
         if (Match("BEGIN")) { Match("TRANSACTION"); return new TransactionStatement("begin"); }
+        if (Match("START")) { Expect("TRANSACTION"); return new TransactionStatement("begin"); }
+        if (Match("SAVEPOINT")) return new TransactionStatement("savepoint", Name());
+        if (Match("RELEASE")) { Match("SAVEPOINT"); return new TransactionStatement("release_savepoint", Name()); }
         if (Match("COMMIT")) { Match("TRANSACTION"); return new TransactionStatement("commit"); }
-        if (Match("ROLLBACK")) { Match("TRANSACTION"); return new TransactionStatement("rollback"); }
+        if (Match("ROLLBACK"))
+        {
+            Match("TRANSACTION");
+            if (!Match("TO")) return new TransactionStatement("rollback");
+            Match("SAVEPOINT"); return new TransactionStatement("rollback_to", Name());
+        }
         if (Match("SHOW")) { if (Match("VIEWS")) return new ShowViews(); Expect("TABLES"); return new ShowTables(); }
         throw Error("未対応のSQL文です。");
     }
@@ -113,14 +133,20 @@ public sealed class SqlParser
         {
             Expect("AS");
             var start = Peek.Position;
-            Expect("SELECT");
-            var select = Select(allowSubquery: false);
+            var select = QueryExpression();
+            if (select.HasQuerySources) throw Error("A published view definition must use base tables directly.");
             if (select.Table is null) throw Error("VIEWのFROMには元テーブルを指定してください。");
             return new CreateView(objectName, select, source[start..(End ? source.Length : Peek.Position)], optional);
         }
+        if (Match("AS")) return new CreateTableAs(objectName, null, QueryExpression(), optional);
+        if (HasColumnListBeforeAs())
+        {
+            var names = OptionalColumnList(); Expect("AS");
+            return new CreateTableAs(objectName, names, QueryExpression(), optional);
+        }
         Expect("("); var columns = new List<SqlColumn>();
         var checks = new List<string>();
-        var references = new Dictionary<string, SqlReference>(StringComparer.OrdinalIgnoreCase);
+        var references = new List<SqlForeignKey>();
         List<string>? primaryColumns = null;
         do
         {
@@ -145,8 +171,8 @@ public sealed class SqlParser
             }
             if (Is("FOREIGN") && current + 1 < tokens.Count && tokens[current + 1].Text.Equals("KEY", StringComparison.OrdinalIgnoreCase))
             {
-                Expect("FOREIGN"); Expect("KEY"); Expect("("); var child = Name(); Expect(")"); Expect("REFERENCES");
-                if (!references.TryAdd(child, ReferenceDefinition())) throw Error("同じ列の外部キーが重複しています。");
+                Expect("FOREIGN"); Expect("KEY"); var children = ForeignKeyColumns(); Expect("REFERENCES");
+                references.Add(ReferenceDefinition(children));
                 continue;
             }
             var column = ColumnDefinition();
@@ -156,13 +182,14 @@ public sealed class SqlParser
         } while (Match(","));
         Expect(")");
         if (columns.Count == 0) throw Error("テーブルには1列以上必要です。");
-        foreach (var (child, reference) in references)
+        foreach (var key in references.Where(fk => fk.Columns.Count == 1))
         {
-            var pos = columns.FindIndex(c => c.Name.Equals(child, StringComparison.OrdinalIgnoreCase));
-            if (pos < 0) throw Error($"外部キーの列 '{child}' は存在しません。");
+            var pos = columns.FindIndex(c => c.Name.Equals(key.Columns[0], StringComparison.OrdinalIgnoreCase));
+            if (pos < 0) throw Error($"外部キーの列 '{key.Columns[0]}' は存在しません。");
             if (columns[pos].Reference is not null) throw Error("同じ列の外部キーが重複しています。");
-            columns[pos] = columns[pos] with { Reference = reference };
+            columns[pos] = columns[pos] with { Reference = new(key.Table, key.Targets[0], key.DeleteCascade, key.UpdateCascade) };
         }
+        references.RemoveAll(key => key.Columns.Count == 1);
         if (columns.Count(x => x.PrimaryKey) + (primaryColumns is null ? 0 : 1) > 1) throw Error("主キーは1つだけ指定してください。");
         if (primaryColumns is not null)
         {
@@ -175,20 +202,48 @@ public sealed class SqlParser
                 primaryColumns[i] = column.Name;
             }
         }
-        return new CreateTable(objectName, columns, optional, checks.Count == 0 ? null : checks, primaryColumns is { Count: > 1 } ? primaryColumns : null);
+        return new CreateTable(objectName, columns, optional, checks.Count == 0 ? null : checks,
+            primaryColumns is { Count: > 1 } ? primaryColumns : null, references.Count == 0 ? null : references);
     }
 
-    private SqlReference ReferenceDefinition()
+    private List<string> ForeignKeyColumns()
     {
-        var table = Name(); Expect("("); var column = Name(); Expect(")");
-        return new(table, column);
+        Expect("(");
+        var names = new List<string>();
+        do
+        {
+            var name = Name();
+            if (names.Contains(name, StringComparer.OrdinalIgnoreCase) || names.Count == 64)
+                throw Error("外部キーには重複のない64列以下を指定してください。");
+            names.Add(name);
+        } while (Match(","));
+        Expect(")");
+        return names;
+    }
+
+    private SqlForeignKey ReferenceDefinition(List<string> children)
+    {
+        var table = Name();
+        var targets = ForeignKeyColumns();
+        if (children.Count != targets.Count) throw Error("外部キーの列数が参照先と一致しません。");
+        bool? delete = null, update = null;
+        while (Match("ON"))
+        {
+            var isDelete = Match("DELETE");
+            if (!isDelete) Expect("UPDATE");
+            if ((isDelete ? delete : update).HasValue) throw Error("外部キーの参照アクションが重複しています。");
+            var cascade = Match("CASCADE");
+            if (!cascade && !Match("RESTRICT")) { Expect("NO"); Expect("ACTION"); }
+            if (isDelete) delete = cascade; else update = cascade;
+        }
+        return new(children, table, targets, delete == true, update == true);
     }
 
     private string CheckDefinition()
     {
         Expect("(");
         var start = Peek.Position;
-        Expression();
+        if (SqlNestedQuery.Contains(Expression())) throw Error("CHECK cannot read another relation.");
         var end = Peek.Position;
         Expect(")");
         return source[start..end];
@@ -198,17 +253,45 @@ public sealed class SqlParser
     {
         var parser = new SqlParser(text);
         var expression = parser.Expression();
+        if (SqlNestedQuery.Contains(expression)) throw parser.Error("CHECK cannot read another relation.");
         if (!parser.End) throw parser.Error("CHECK式が不正です。");
         return expression;
     }
 
-    private SqlColumn ColumnDefinition()
+    private (string Type, int? MaxLength) ColumnType()
     {
-        var name = Name(); var type = Name().ToUpperInvariant();
+        var type = Name().ToUpperInvariant();
         type = type switch { "INT" or "BIGINT" => "INTEGER", "VARCHAR" or "NVARCHAR" or "STRING" => "TEXT", "FLOAT" or "DOUBLE" or "DECIMAL" => "REAL", "BOOL" => "BOOLEAN", "VARBINARY" => "BLOB", _ => type };
         if (type is not ("INTEGER" or "REAL" or "TEXT" or "BOOLEAN" or "BLOB")) throw Error($"型 '{type}' は未対応です。INTEGER / REAL / TEXT / BOOLEAN / BLOBを使用してください。");
         int? maxLength = null;
         if (Match("(")) { if (type is not ("TEXT" or "BLOB")) throw Error("長さ指定はTEXT / BLOBのみ対応します。"); maxLength = Integer(1, 65536); Expect(")"); }
+        return (type, maxLength);
+    }
+
+    private AlterColumn ColumnAlteration(string table)
+    {
+        Match("COLUMN");
+        var name = Name();
+        if (Match("SET"))
+        {
+            if (Match("DEFAULT")) return new(table, name, SqlColumnAlteration.SetDefault, Default: Literal());
+            if (Match("NOT")) { Expect("NULL"); return new(table, name, SqlColumnAlteration.SetNotNull); }
+            Expect("DATA"); Expect("TYPE");
+        }
+        else if (Match("DROP"))
+        {
+            if (Match("DEFAULT")) return new(table, name, SqlColumnAlteration.DropDefault);
+            Expect("NOT"); Expect("NULL"); return new(table, name, SqlColumnAlteration.DropNotNull);
+        }
+        else Match("TYPE");
+        var (type, maxLength) = ColumnType();
+        return new(table, name, SqlColumnAlteration.Type, type, maxLength);
+    }
+
+    private SqlColumn ColumnDefinition()
+    {
+        var name = Name();
+        var (type, maxLength) = ColumnType();
         bool notNull = false, unique = false, primary = false; SqlValue? defaultValue = null;
         SqlReference? reference = null;
         var checks = new List<string>();
@@ -222,7 +305,8 @@ public sealed class SqlParser
             else if (Match("REFERENCES"))
             {
                 if (reference is not null) throw Error("同じ列の外部キーが重複しています。");
-                reference = ReferenceDefinition();
+                var fk = ReferenceDefinition([name]);
+                reference = new(fk.Table, fk.Targets[0], fk.DeleteCascade, fk.UpdateCascade);
             }
             else if (Match("CHECK")) checks.Add(CheckDefinition());
             else break;
@@ -230,64 +314,85 @@ public sealed class SqlParser
         return new(name, type, notNull, unique, primary, defaultValue, maxLength, reference, checks.Count == 0 ? null : checks);
     }
 
-    private InsertRows Insert()
+    private SqlStatement Insert()
     {
-        Expect("INTO"); var table = Name(); List<string>? columns = null;
-        if (Match("(")) { columns = []; do { columns.Add(Name()); } while (Match(",")); Expect(")"); if (columns.Distinct(StringComparer.OrdinalIgnoreCase).Count() != columns.Count) throw Error("INSERTの列名が重複しています。"); }
+        Expect("INTO"); var table = Name(); var columns = OptionalColumnList();
+        if (Is("SELECT") || Is("WITH")) return new InsertSelect(table, columns, QueryExpression());
         Expect("VALUES"); var rows = new List<List<SqlValue>>();
         do { Expect("("); var values = new List<SqlValue>(); do { values.Add(Literal()); } while (Match(",")); Expect(")"); rows.Add(values); if (rows.Count > 4096) throw Error("1文の挿入は4096行までです。"); } while (Match(","));
-        return new(table, columns, rows);
+        return new InsertRows(table, columns, rows);
     }
 
-    private SelectRows Select(bool allowSubquery = true)
+    private SelectRows SelectCore()
     {
+        var distinct = Match("DISTINCT");
         int? limit = null;
         if (Match("TOP")) { var parentheses = Match("("); limit = Integer(0, 4096); if (parentheses) Expect(")"); }
         var projections = new List<SqlProjection>();
         do
         {
             if (Match("*")) projections.Add(new(null, null, Star: true));
+            else if (WindowProjectionStart()) projections.Add(ParseWindowProjection());
             else if (QualifiedStart && current + 2 < tokens.Count && tokens[current + 2] is { Kind: "symbol", Text: "*" })
             {
                 var qualifier = Name(); Expect("."); Expect("*");
                 projections.Add(new(null, null, Star: true, Qualifier: qualifier));
             }
-            else if (Is("COUNT") && current + 1 < tokens.Count && tokens[current + 1] is { Kind: "symbol", Text: "(" })
+            else
             {
-                Expect("COUNT"); Expect("("); Expect("*"); Expect(")");
-                projections.Add(new(null, Match("AS") ? Name() : "count", Count: true));
+                var expression = Expression();
+                var name = Match("AS") ? Name() : expression switch
+                {
+                    SqlField field => field.Name,
+                    SqlAggregate aggregate => aggregate.Function.ToLowerInvariant(),
+                    _ => "value"
+                };
+                projections.Add(expression is SqlAggregate { Function: "COUNT", Argument: null }
+                    ? new(null, name, Count: true) : new(expression, name));
             }
-            else if ((Is("SUM") || Is("AVG")) && current + 1 < tokens.Count && tokens[current + 1] is { Kind: "symbol", Text: "(" })
-            {
-                var function = Name().ToUpperInvariant();
-                Expect("("); var column = Field(); Expect(")");
-                projections.Add(new(column, Match("AS") ? Name() : function.ToLowerInvariant(),
-                    Aggregate: function == "SUM" ? NumericAggregate.Sum : NumericAggregate.Average));
-            }
-            else { var expression = Atom(); projections.Add(new(expression, Match("AS") ? Name() : expression is SqlField field ? field.Name : "value")); }
             if (projections.Count > 64) throw Error("結果列は64列以下にしてください。");
         } while (Match(","));
+        var derived = new Dictionary<string, SqlDerivedTable>(StringComparer.OrdinalIgnoreCase);
         string? table = null, alias = null;
         SqlJoin? join = null;
         List<SqlJoin>? additionalJoins = null;
         if (Match("FROM"))
         {
-            table = Name(); alias = TableAlias();
-            while (Is("JOIN") || Is("INNER") || Is("LEFT") || Is("RIGHT") || Is("FULL"))
+            (table, alias) = QuerySource(derived);
+            while (Is("JOIN") || Is("INNER") || Is("LEFT") || Is("RIGHT") || Is("FULL") || Is("CROSS") || Is("NATURAL"))
             {
+                var natural = Match("NATURAL");
                 var kind = SqlJoinKind.Inner;
-                if (Match("LEFT")) kind = SqlJoinKind.Left;
+                if (!natural && Match("CROSS")) kind = SqlJoinKind.Cross;
+                else if (Match("LEFT")) kind = SqlJoinKind.Left;
                 else if (Match("RIGHT")) kind = SqlJoinKind.Right;
                 else if (Match("FULL")) kind = SqlJoinKind.Full;
                 else Match("INNER");
-                if (kind != SqlJoinKind.Inner) Match("OUTER");
+                if (kind is SqlJoinKind.Left or SqlJoinKind.Right or SqlJoinKind.Full) Match("OUTER");
                 Expect("JOIN");
-                var other = Name(); var otherAlias = TableAlias();
-                Expect("ON");
-                var left = Field(); Expect("="); var right = Field();
-                if (left.Qualifier is null || right.Qualifier is null)
-                    throw Error("ONの両辺をテーブル名または別名で修飾してください。");
-                var next = new SqlJoin(other, otherAlias, left, right, kind);
+                var (other, otherAlias) = QuerySource(derived);
+                var next = new SqlJoin(other, otherAlias, null, null, kind) { Natural = natural };
+                if (!natural && kind != SqlJoinKind.Cross)
+                {
+                    if (Match("USING"))
+                    {
+                        Expect("(");
+                        var keys = new List<string>();
+                        do { keys.Add(Name()); } while (Match(","));
+                        Expect(")");
+                        if (keys.Distinct(StringComparer.OrdinalIgnoreCase).Count() != keys.Count)
+                            throw Error("Duplicate column in JOIN USING.");
+                        next = next with { Using = keys };
+                    }
+                    else
+                    {
+                        Expect("ON");
+                        var left = Field(); Expect("="); var right = Field();
+                        if (left.Qualifier is null || right.Qualifier is null)
+                            throw Error("ONの両辺をテーブル名または別名で修飾してください。");
+                        next = next with { Left = left, Right = right };
+                    }
+                }
                 if (join is null) join = next;
                 else
                 {
@@ -298,17 +403,6 @@ public sealed class SqlParser
             }
         }
         var where = Match("WHERE") ? Expression() : null;
-        if (Match("IN"))
-        {
-            if (!allowSubquery || where is not SqlField field) throw Error("IN 副問い合わせは SELECT の WHERE 列名に指定してください。");
-            Expect("("); Expect("SELECT");
-            var inner = Select(allowSubquery: false);
-            Expect(")");
-            if (inner.Table is null || inner.Join is not null || inner.IsGrouped ||
-                inner.Projections is not [{ Expression: SqlField }])
-                throw Error("IN の副問い合わせには1つの表またはビューから1列を指定してください。");
-            where = new SqlInSubquery(field, inner);
-        }
         List<SqlField>? groupBy = null;
         if (Match("GROUP"))
         {
@@ -319,11 +413,31 @@ public sealed class SqlParser
                 if (groupBy.Count > 64) throw Error("GROUP BYは64列以下にしてください。");
             } while (Match(","));
         }
+        var having = Match("HAVING") ? Expression() : null;
+        return new SelectRows(table, projections, where, [], limit, 0, alias, join, groupBy, additionalJoins) { Having = having, Distinct = distinct, DerivedSources = derived };
+    }
+
+    private SelectRows QueryTail(SelectRows query)
+    {
+        var limit = query.Limit;
         var order = new List<SqlOrder>();
         if (Match("ORDER")) { Expect("BY"); do { var field = Field(); var descending = Match("DESC"); if (!descending) Match("ASC"); order.Add(new(field.Name, descending, field.Qualifier)); } while (Match(",")); }
         if (Match("LIMIT")) { if (limit is not null) throw Error("TOPとLIMITは併用できません。"); limit = Integer(0, 4096); }
-        var offset = Match("OFFSET") ? Integer(0, 4096) : 0;
-        return new(table, projections, where, order, limit, offset, alias, join, groupBy, additionalJoins);
+        var offset = 0;
+        if (Match("OFFSET"))
+        {
+            offset = Integer(0, 4096);
+            if (!Match("ROW")) Match("ROWS");
+        }
+        if (Match("FETCH"))
+        {
+            if (limit.HasValue) throw Error("FETCH cannot be combined with TOP or LIMIT.");
+            if (!Match("FIRST")) Expect("NEXT");
+            limit = Peek.Kind == "number" ? Integer(0, 4096) : 1;
+            if (!Match("ROW")) Expect("ROWS");
+            Expect("ONLY");
+        }
+        return query with { Order = order, Limit = limit, Offset = offset };
     }
 
     private string? TableAlias()
@@ -334,8 +448,9 @@ public sealed class SqlParser
         if (Peek.Kind != "word") return null;
         return Peek.Text.ToUpperInvariant() switch
         {
-            "INNER" or "JOIN" or "ON" or "WHERE" or "GROUP" or "ORDER" or "LIMIT" or "OFFSET" or
-            "LEFT" or "RIGHT" or "FULL" or "OUTER" or "NATURAL" or "CROSS" => null,
+            "INNER" or "JOIN" or "ON" or "WHERE" or "HAVING" or "GROUP" or "ORDER" or "LIMIT" or "OFFSET" or
+            "LEFT" or "RIGHT" or "FULL" or "OUTER" or "NATURAL" or "CROSS" or "USING" or
+            "WITH" or "UNION" or "ALL" or "INTERSECT" or "EXCEPT" or "FETCH" or "WHEN" => null,
             _ => Name()
         };
     }
@@ -350,8 +465,8 @@ public sealed class SqlParser
         {
             if (Match(";")) continue;
             if (End) throw Error("プロシージャーのENDが必要です。");
-            if (!(Is("SELECT") || Is("INSERT") || Is("UPDATE") || Is("DELETE")))
-                throw Error("プロシージャー内に指定できるのはSELECT・INSERT・UPDATE・DELETEです。");
+            if (!(Is("SELECT") || Is("WITH") || Is("INSERT") || Is("MERGE") || Is("UPDATE") || Is("DELETE")))
+                throw Error("プロシージャー内にはクエリまたは行の変更を指定してください。");
             conditionCount = 0;
             Statement();
             if (++count > 100) throw Error("1つのプロシージャーは100文までです。");
@@ -371,37 +486,14 @@ public sealed class SqlParser
         return Match(".") ? new SqlField(Name(), first) : new SqlField(first);
     }
 
-    private SqlExpression Expression(int depth = 0)
-    {
-        if (depth > 32) throw Error("条件式の括弧が深すぎます。");
-        var expression = And(depth);
-        while (Match("OR")) expression = new SqlBinary(expression, "OR", And(depth));
-        return expression;
-    }
-    private SqlExpression And(int depth)
-    {
-        var expression = Condition(depth);
-        while (Match("AND")) expression = new SqlBinary(expression, "AND", Condition(depth));
-        return expression;
-    }
-    private SqlExpression Condition(int depth)
-    {
-        if (++conditionCount > 128) throw Error("条件式は128個以下にしてください。");
-        if (Match("(")) { var expression = Expression(depth + 1); Expect(")"); return expression; }
-        var left = Atom();
-        if (Match("IS")) { var negated = Match("NOT"); Expect("NULL"); return new SqlIsNull(left, negated); }
-        foreach (var op in new[] { "=", "<>", "!=", "<=", ">=", "<", ">", "LIKE" })
-            if (Match(op)) return new SqlBinary(left, op, Atom());
-        return left;
-    }
-    private SqlExpression Atom()
-    {
-        if (QualifiedStart) return Field();
-        return Peek.Kind is "string" or "number" || Is("NULL") || Is("TRUE") || Is("FALSE") || (Is("X") || Is("N")) && current + 1 < tokens.Count && tokens[current + 1].Kind == "string"
-            ? new SqlLiteral(Literal()) : Field();
-    }
     private SqlValue Literal()
     {
+        if (Is("+") || Is("-"))
+        {
+            var sign = tokens[current++].Text;
+            if (Peek.Kind != "number") throw Error("A sign must be followed by a numeric literal.");
+            return SqlValue.Number(sign + tokens[current++].Text);
+        }
         if (Match("NULL")) return SqlValue.Null;
         if (Match("TRUE")) return SqlValue.Boolean(true);
         if (Match("FALSE")) return SqlValue.Boolean(false);
@@ -456,8 +548,8 @@ public sealed class SqlParser
                 tokens.Add(new(value.ToString(), c == '\'' ? "string" : "identifier", start));
             }
             else if (char.IsLetter(c) || c == '_') { i++; while (i < sql.Length && (char.IsLetterOrDigit(sql[i]) || sql[i] == '_')) i++; tokens.Add(new(sql[start..i], "word", start)); }
-            else if (char.IsDigit(c) || c is '+' or '-') { i++; while (i < sql.Length && (char.IsDigit(sql[i]) || sql[i] is '.' or 'e' or 'E' || sql[i] is '+' or '-' && sql[i - 1] is 'e' or 'E')) i++; tokens.Add(new(sql[start..i], "number", start)); }
-            else if ("(),;.*=<>!".Contains(c)) { i++; if (i < sql.Length && (c is '<' or '>' or '!' && sql[i] == '=' || c == '<' && sql[i] == '>')) i++; tokens.Add(new(sql[start..i], "symbol", start)); }
+            else if (char.IsDigit(c) || c == '.' && i + 1 < sql.Length && char.IsDigit(sql[i + 1])) { i++; while (i < sql.Length && (char.IsDigit(sql[i]) || sql[i] is '.' or 'e' or 'E' || sql[i] is '+' or '-' && sql[i - 1] is 'e' or 'E')) i++; tokens.Add(new(sql[start..i], "number", start)); }
+            else if ("(),;.*=<>!+-/%".Contains(c)) { i++; if (i < sql.Length && (c is '<' or '>' or '!' && sql[i] == '=' || c == '<' && sql[i] == '>')) i++; tokens.Add(new(sql[start..i], "symbol", start)); }
             else throw new SqlException($"SQL位置 {i + 1}: 未対応の文字 '{c}' です。");
             if (tokens.Count > 50000) throw new SqlException("SQLの要素数が上限を超えています。");
         }

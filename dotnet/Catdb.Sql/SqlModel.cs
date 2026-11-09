@@ -31,29 +31,49 @@ public sealed record SqlValue(string Kind, string? Text)
     }
 }
 
-public sealed record SqlReference(string Table, string Column);
+public sealed record SqlReference(string Table, string Column, bool DeleteCascade = false, bool UpdateCascade = false);
+public sealed record SqlForeignKey(List<string> Columns, string Table, List<string> Targets, bool DeleteCascade, bool UpdateCascade);
 public sealed record SqlColumn(string Name, string Type, bool NotNull, bool Unique, bool PrimaryKey, SqlValue? Default, int? MaxLength, SqlReference? Reference = null, List<string>? Checks = null);
 public sealed record SqlIndex(string Name, string Column, List<string>? Columns = null)
 {
     // A missing list identifies the original single-column hash index.
     [JsonIgnore] public IReadOnlyList<string> ColumnNames => Columns ?? [Column];
 }
-public sealed record SqlTable(string Name, List<SqlColumn> Columns, string? ViewQuery = null, string? SourceTable = null, bool PrimaryIndex = false, List<SqlIndex>? Indexes = null, List<string>? Checks = null, List<string>? SelectRoles = null, List<string>? JoinSources = null, List<string>? CompositePrimaryKey = null);
+public sealed record SqlTable(string Name, List<SqlColumn> Columns, string? ViewQuery = null, string? SourceTable = null, bool PrimaryIndex = false, List<SqlIndex>? Indexes = null, List<string>? Checks = null, List<string>? SelectRoles = null, List<string>? JoinSources = null, List<string>? CompositePrimaryKey = null)
+{
+    public Dictionary<string, List<string>>? WriteRoles { get; init; }
+    public List<SqlForeignKey>? ForeignKeys { get; init; }
+}
 public sealed record SqlRow(string StorageKey, Dictionary<string, SqlValue> Values);
-public sealed record SqlResult(IReadOnlyList<string> Columns, IReadOnlyList<SqlValue[]> Rows, string Message);
+public sealed record SqlResult(IReadOnlyList<string> Columns, IReadOnlyList<SqlValue[]> Rows, string Message)
+{
+    public IReadOnlyList<string>? ColumnTypes { get; init; }
+}
 
 public abstract record SqlStatement;
-public sealed record CreateTable(string Table, List<SqlColumn> Columns, bool IfNotExists, List<string>? Checks = null, List<string>? CompositePrimaryKey = null) : SqlStatement;
+public sealed record CreateTable(string Table, List<SqlColumn> Columns, bool IfNotExists, List<string>? Checks = null, List<string>? CompositePrimaryKey = null, List<SqlForeignKey>? ForeignKeys = null) : SqlStatement;
 public sealed record DropTable(string Table, bool IfExists) : SqlStatement;
 public sealed record AddColumn(string Table, SqlColumn Column) : SqlStatement;
 public sealed record RenameColumn(string Table, string Column, string NewName) : SqlStatement;
+public sealed record DropColumn(string Table, string Column) : SqlStatement;
+public enum SqlColumnAlteration { Type, SetDefault, DropDefault, SetNotNull, DropNotNull }
+public sealed record AlterColumn(string Table, string Column, SqlColumnAlteration Operation,
+    string? Type = null, int? MaxLength = null, SqlValue? Default = null) : SqlStatement;
 public sealed record ReindexTable(string Table) : SqlStatement;
 public sealed record CreateIndex(string Name, string Table, List<string> Columns, bool IfNotExists) : SqlStatement;
 public sealed record DropIndex(string Name, string Table, bool IfExists) : SqlStatement;
-public sealed record InsertRows(string Table, List<string>? Columns, List<List<SqlValue>> Rows) : SqlStatement;
-public sealed record SelectRows(string? Table, List<SqlProjection> Projections, SqlExpression? Where, List<SqlOrder> Order, int? Limit, int Offset, string? TableAlias = null, SqlJoin? Join = null, List<SqlField>? GroupBy = null, List<SqlJoin>? AdditionalJoins = null) : SqlStatement
+public sealed record InsertRows(string Table, List<string>? Columns, List<List<SqlValue>> Rows) : SqlStatement
 {
-    public bool IsGrouped => GroupBy is { Count: > 0 } || Projections.Any(p => p.IsAggregate);
+    internal IReadOnlyList<string>? SourceTypes { get; init; }
+}
+public sealed record InsertSelect(string Table, List<string>? Columns, SelectRows Query) : SqlStatement;
+public sealed record CreateTableAs(string Table, List<string>? Columns, SelectRows Query, bool IfNotExists) : SqlStatement;
+public sealed partial record SelectRows(string? Table, List<SqlProjection> Projections, SqlExpression? Where, List<SqlOrder> Order, int? Limit, int Offset, string? TableAlias = null, SqlJoin? Join = null, List<SqlField>? GroupBy = null, List<SqlJoin>? AdditionalJoins = null) : SqlStatement
+{
+    public bool Distinct { get; init; }
+    public SqlExpression? Having { get; init; }
+    public bool IsGrouped => Having is not null || GroupBy is { Count: > 0 } ||
+        Projections.Any(p => p.IsAggregate || p.Window?.Argument?.ContainsAggregate() == true);
     public IEnumerable<SqlJoin> Joins()
     {
         if (Join is not null) yield return Join;
@@ -61,14 +81,35 @@ public sealed record SelectRows(string? Table, List<SqlProjection> Projections, 
             foreach (var join in AdditionalJoins) yield return join;
     }
 }
-public enum SqlJoinKind { Inner, Left, Right, Full }
-public sealed record SqlJoin(string Table, string? Alias, SqlField Left, SqlField Right, SqlJoinKind Kind = SqlJoinKind.Inner);
-public sealed record UpdateRows(string Table, Dictionary<string, SqlValue> Values, SqlExpression? Where) : SqlStatement;
+public enum SqlJoinKind { Inner, Left, Right, Full, Cross }
+public sealed record SqlJoin(string Table, string? Alias, SqlField? Left, SqlField? Right, SqlJoinKind Kind = SqlJoinKind.Inner)
+{
+    public List<string>? Using { get; init; }
+    public bool Natural { get; init; }
+}
+public sealed record UpdateRows(string Table, Dictionary<string, SqlValue> Values, SqlExpression? Where) : SqlStatement
+{
+    private Dictionary<string, SqlExpression>? expressions;
+    public IReadOnlyDictionary<string, SqlExpression> Assignments =>
+        expressions ?? Values.ToDictionary(p => p.Key, p => (SqlExpression)new SqlLiteral(p.Value), StringComparer.OrdinalIgnoreCase);
+
+    internal static UpdateRows FromAssignments(string table, Dictionary<string, SqlExpression> assignments, SqlExpression? where)
+    {
+        var literals = assignments.Where(p => p.Value is SqlLiteral)
+            .ToDictionary(p => p.Key, p => ((SqlLiteral)p.Value).Value, StringComparer.OrdinalIgnoreCase);
+        return new(table, literals, where) { expressions = literals.Count == assignments.Count ? null : assignments };
+    }
+}
 public sealed record DeleteRows(string Table, SqlExpression? Where) : SqlStatement;
-public sealed record TransactionStatement(string Operation) : SqlStatement;
+public sealed record TransactionStatement(string Operation, string? Savepoint = null) : SqlStatement;
 public sealed record ShowTables : SqlStatement;
 public sealed record ShowViews : SqlStatement;
-public sealed record ViewPrivilege(string View, string Role, bool Grant) : SqlStatement;
+[Flags]
+public enum ViewAccess { Select = 1, Insert = 2, Update = 4, Delete = 8 }
+public sealed record ViewPrivilege(string View, string Role, bool Grant) : SqlStatement
+{
+    public ViewAccess Access { get; init; } = ViewAccess.Select;
+}
 public sealed record CreateProcedure(string Name, string Body, bool IfNotExists) : SqlStatement;
 public sealed record ExecuteProcedure(string Name) : SqlStatement;
 public sealed record DropProcedure(string Name, bool IfExists) : SqlStatement;
@@ -77,14 +118,27 @@ public sealed record DropView(string Name, bool IfExists) : SqlStatement;
 public enum NumericAggregate { Sum, Average }
 public sealed record SqlProjection(SqlExpression? Expression, string? Alias, bool Star = false, bool Count = false, string? Qualifier = null, NumericAggregate? Aggregate = null)
 {
-    public bool IsAggregate => Count || Aggregate.HasValue;
+    public SqlWindow? Window { get; init; }
+    public bool IsAggregate => Window is null && (Count || Aggregate.HasValue || Expression?.ContainsAggregate() == true);
 }
 public sealed record SqlOrder(string Column, bool Descending, string? Qualifier = null, int? OutputIndex = null);
 
 public abstract record SqlExpression
 {
+    public SqlExpression Rewrite(Func<SqlExpression, SqlExpression?> replace) =>
+        replace(this) ?? MapChildren(child => child.Rewrite(replace));
+
+    internal bool ContainsAggregate()
+    {
+        bool found = false;
+        Rewrite(node => { if (node is SqlAggregate) found = true; return found ? node : null; });
+        return found;
+    }
+
     public abstract SqlValue Evaluate(IReadOnlyDictionary<string, SqlValue> row);
-    public virtual void Validate(IEnumerable<SqlColumn> columns) { }
+    public virtual SqlExpression MapChildren(Func<SqlExpression, SqlExpression> map) => this;
+    public virtual void Validate(IEnumerable<SqlColumn> columns) =>
+        MapChildren(child => { child.Validate(columns); return child; });
 }
 public sealed record SqlLiteral(SqlValue Value) : SqlExpression
 {
@@ -101,6 +155,7 @@ public sealed record SqlField(string Name, string? Qualifier = null) : SqlExpres
 }
 public sealed record SqlBinary(SqlExpression Left, string Operator, SqlExpression Right) : SqlExpression
 {
+    public override SqlExpression MapChildren(Func<SqlExpression, SqlExpression> map) => this with { Left = map(Left), Right = map(Right) };
     public override void Validate(IEnumerable<SqlColumn> columns) { Left.Validate(columns); Right.Validate(columns); }
     public override SqlValue Evaluate(IReadOnlyDictionary<string, SqlValue> row)
     {
@@ -112,6 +167,8 @@ public sealed record SqlBinary(SqlExpression Left, string Operator, SqlExpressio
             return left.IsTrue || right.IsTrue ? SqlValue.Boolean(true) : left.IsNull || right.IsNull ? SqlValue.Null : SqlValue.Boolean(false);
         }
         if (left.IsNull || right.IsNull) return SqlValue.Null;
+        if (Operator is "+" or "-" or "*" or "/" or "%")
+            return SqlNumbers.Calculate(left, Operator, right);
         if (Operator == "LIKE")
         {
             if (left.Kind != "TEXT" || right.Kind != "TEXT") throw new SqlException("LIKEはTEXT列に使用してください。");
@@ -129,6 +186,7 @@ public sealed record SqlBinary(SqlExpression Left, string Operator, SqlExpressio
 }
 public sealed record SqlIsNull(SqlExpression Expression, bool Negated) : SqlExpression
 {
+    public override SqlExpression MapChildren(Func<SqlExpression, SqlExpression> map) => this with { Expression = map(Expression) };
     public override void Validate(IEnumerable<SqlColumn> columns) => Expression.Validate(columns);
     public override SqlValue Evaluate(IReadOnlyDictionary<string, SqlValue> row) => SqlValue.Boolean(Expression.Evaluate(row).IsNull != Negated);
 }

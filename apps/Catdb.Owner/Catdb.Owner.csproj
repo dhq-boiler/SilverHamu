@@ -19,6 +19,7 @@
   <ItemGroup>
     <MauiIcon Include="Resources\AppIcon\appicon.svg" Color="#102029" />
     <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#102029" BaseSize="128,128" />
+    <MauiFont Include="Resources\Fonts\*" />
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
   </ItemGroup>

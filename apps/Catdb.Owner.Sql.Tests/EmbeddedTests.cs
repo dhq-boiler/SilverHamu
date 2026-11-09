@@ -14,6 +14,26 @@ public sealed class EmbeddedTests : IDisposable
     private static SqlDatabase Sql(EmbeddedCatdbStore store) => new(store.RequestAsync, () => store.InTransaction);
 
     [Fact]
+    public async Task Savepoints_restore_rows_indexes_and_catalog_across_SQL_calls()
+    {
+        using var db = await CatdbSqlConnection.OpenAsync(DbPath(), create: true);
+        await db.ExecuteAsync("CREATE TABLE t(id INT PRIMARY KEY); START TRANSACTION; INSERT INTO t VALUES (1); SAVEPOINT Mark");
+        await db.ExecuteAsync("INSERT INTO t VALUES (2); SAVEPOINT [途中]; DROP TABLE t");
+        await db.ExecuteAsync("ROLLBACK TO SAVEPOINT mArk");
+        Assert.True(db.InTransaction);
+        Assert.Equal("1", Assert.Single((await db.ExecuteAsync("SELECT id FROM t WHERE id=1"))[0].Rows)[0].Display);
+        Assert.Empty((await db.ExecuteAsync("SELECT id FROM t WHERE id=2"))[0].Rows);
+        await Assert.ThrowsAsync<CatdbRequestException>(() => db.ExecuteAsync("RELEASE SAVEPOINT [途中]"));
+        await db.ExecuteAsync("DELETE FROM t; ROLLBACK TO mark; RELEASE SAVEPOINT mark; COMMIT");
+        Assert.False(db.InTransaction);
+        Assert.Single((await db.ExecuteAsync("SELECT id FROM t"))[0].Rows);
+        await Assert.ThrowsAsync<SqlException>(() => db.ExecuteAsync("SAVEPOINT outside"));
+        await db.ExecuteAsync("START TRANSACTION");
+        await Assert.ThrowsAsync<CatdbRequestException>(() => db.ExecuteAsync("ROLLBACK TO mark"));
+        await db.ExecuteAsync("ROLLBACK");
+    }
+
+    [Fact]
     public async Task Core_session_and_owner_share_the_same_committed_schema_rows_and_indexes()
     {
         var path = DbPath();
@@ -163,11 +183,15 @@ public sealed class EmbeddedTests : IDisposable
             await Assert.ThrowsAsync<SqlException>(() => db.QueryPublishedViewAsync(sql, ["shelf"]));
         await Assert.ThrowsAsync<SqlException>(() => db.QueryPublishedViewAsync("SELECT * FROM books", ["books"]));
         foreach (var sql in new[] { "SELECT secret FROM shelf", "SELECT book FROM shelf WHERE secret IS NULL",
-                     "UPDATE shelf SET book=3", "INSERT INTO shelf VALUES (3)", "DELETE FROM shelf",
+                     "UPDATE shelf SET secret='private'", "INSERT INTO shelf(secret) VALUES ('private')", "DELETE FROM shelf WHERE visible=FALSE",
                      "DROP TABLE shelf", "DROP TABLE books", "CREATE TABLE shelf(id INT)", "CREATE VIEW books AS SELECT id FROM books",
                      "CREATE VIEW invalid AS SELECT id,id FROM books", "CREATE VIEW invalid AS SELECT missing FROM books" })
             await Assert.ThrowsAsync<SqlException>(() => db.ExecuteAsync(sql));
 
+        await db.ExecuteAsync("BEGIN; UPDATE shelf SET book=3; INSERT INTO shelf VALUES (4); DELETE FROM shelf WHERE book=3;");
+        var remaining = (await db.ExecuteAsync("SELECT id FROM books ORDER BY id")).Single().Rows;
+        Assert.Equal(["2", "4"], remaining.Select(row => row[0].Display).ToArray());
+        await db.ExecuteAsync("ROLLBACK");
         await db.ExecuteAsync("BEGIN; DROP VIEW shelf; ROLLBACK; UPDATE books SET visible=TRUE WHERE id=2;");
         Assert.Equal("2", (await db.ExecuteAsync("SELECT COUNT(*) FROM shelf"))[0].Rows[0][0].Display);
         await db.ExecuteAsync("DROP VIEW shelf; DROP TABLE books;");

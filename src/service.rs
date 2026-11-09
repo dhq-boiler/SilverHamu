@@ -17,6 +17,7 @@ mod tls;
 pub use accounts::AccountOptions;
 mod sql;
 use accounts::{Accounts, Role};
+use sql::ConfiguredSql;
 pub use sql::{ReadRole, SqlOptions};
 
 pub const MAX_REQUEST: usize = 1024 * 1024;
@@ -60,7 +61,7 @@ impl Config {
 }
 
 pub struct Server {
-    sql: Option<Arc<SqlOptions>>,
+    sql: Option<Arc<ConfiguredSql>>,
     accounts: Option<Arc<Accounts>>,
     config: Arc<Config>,
     db: Database,
@@ -99,15 +100,33 @@ impl Server {
         accounts: Option<AccountOptions>,
         sql: SqlOptions,
     ) -> Result<Self, Box<dyn std::error::Error>> {
+        Self::bind_with_sql_role_access(config, limits, accounts, sql, false)
+    }
+
+    /// The role token may perform granted SQL writes only when explicitly enabled.
+    pub fn bind_with_sql_role_access(
+        config: Config,
+        limits: ResourceLimits,
+        accounts: Option<AccountOptions>,
+        sql: SqlOptions,
+        allow_role_writes: bool,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
         sql.validate(&config.token, accounts.is_some())?;
-        Self::open(config, limits, accounts, Some(Arc::new(sql)))
+        if allow_role_writes && sql.read_role.is_none() {
+            return Err("role writes require a configured SQL role token".into());
+        }
+        let configured = ConfiguredSql {
+            options: sql,
+            allow_role_writes,
+        };
+        Self::open(config, limits, accounts, Some(Arc::new(configured)))
     }
 
     fn open(
         config: Config,
         limits: ResourceLimits,
         options: Option<AccountOptions>,
-        sql: Option<Arc<SqlOptions>>,
+        sql: Option<Arc<ConfiguredSql>>,
     ) -> Result<Self, Box<dyn std::error::Error>> {
         config.validate_mode(options.is_some())?;
         if config
@@ -530,7 +549,7 @@ fn connection(
     config: &Config,
     stop: &AtomicBool,
     accounts: Option<&Accounts>,
-    sql: Option<&SqlOptions>,
+    sql: Option<&ConfiguredSql>,
 ) -> io::Result<()> {
     stream.set_nodelay(true)?;
     stream.set_read_timeout(Some(Duration::from_millis(100)))?;
@@ -565,7 +584,7 @@ fn session(
     stop: &AtomicBool,
     accounts: Option<(&Accounts, std::net::IpAddr)>,
     clock: &std::cell::Cell<Instant>,
-    sql: Option<&SqlOptions>,
+    sql: Option<&ConfiguredSql>,
 ) -> io::Result<()> {
     let deadline = clock.get();
     let mut wire = Wire::default();
@@ -583,7 +602,7 @@ fn session(
         let token = auth.get("token").and_then(Value::as_str).unwrap_or("");
         let admin = same_token(token.as_bytes(), &config.token);
         view_role = sql
-            .and_then(|s| s.read_role.as_ref())
+            .and_then(|s| s.options.read_role.as_ref())
             .filter(|role| same_token(token.as_bytes(), &role.token))
             .map(|role| role.name.as_str());
         if auth.get("op").and_then(Value::as_str) != Some("auth")
@@ -1072,6 +1091,16 @@ fn dispatch_operation(
                 .commit()?;
             Ok(json!({"ok":true,"version":version.to_string()}))
         }
+        "savepoint" | "rollback_to" | "release_savepoint" => {
+            let name = text(v, "name")?;
+            let tx = tx.as_mut().ok_or(Error::Invalid("no transaction"))?;
+            match op {
+                "savepoint" => tx.savepoint(name)?,
+                "rollback_to" => tx.rollback_to_savepoint(name)?,
+                _ => tx.release_savepoint(name)?,
+            }
+            Ok(json!({"ok":true}))
+        }
         "rollback" => {
             tx.take()
                 .ok_or(Error::Invalid("no transaction"))?
@@ -1526,7 +1555,11 @@ mod tests {
             }),
         };
         options.validate(&config.token, false).unwrap();
-        let run = |token: &str, requests: &[Value]| {
+        let mut options = ConfiguredSql {
+            options,
+            allow_role_writes: false,
+        };
+        let run = |options: &ConfiguredSql, token: &str, requests: &[Value]| {
             let mut bytes = Vec::new();
             let stop = AtomicBool::new(false);
             let deadline = Instant::now() + Duration::from_secs(30);
@@ -1551,7 +1584,7 @@ mod tests {
                 &stop,
                 None,
                 &std::cell::Cell::new(deadline),
-                Some(&options),
+                Some(options),
             )
             .unwrap_err();
             assert_eq!(error.kind(), io::ErrorKind::UnexpectedEof);
@@ -1561,18 +1594,24 @@ mod tests {
                 .collect::<Vec<_>>()
         };
         let admin = run(
+            &options,
             &"x".repeat(32),
             &[
-                json!({"op":"sql","sql":"CREATE TABLE t(id INT); INSERT INTO t VALUES (1); CREATE VIEW v AS SELECT id FROM t; GRANT SELECT ON v TO published"}),
+                json!({"op":"sql","sql":"CREATE TABLE t(id INT); INSERT INTO t VALUES (1); CREATE VIEW v AS SELECT id FROM t; GRANT SELECT, INSERT, UPDATE ON v TO published"}),
                 json!({"op":"begin"}),
                 json!({"op":"sql","sql":"INSERT INTO t VALUES (2)"}),
                 json!({"op":"rollback"}),
+                json!({"op":"sql","sql":"START TRANSACTION; SAVEPOINT keep_t"}),
+                json!({"op":"sql","sql":"DELETE FROM t"}),
+                json!({"op":"sql","sql":"ROLLBACK TO SAVEPOINT keep_t"}),
+                json!({"op":"sql","sql":"RELEASE SAVEPOINT keep_t; COMMIT"}),
             ],
         );
         assert!(admin.iter().all(|r| r["ok"] == true), "{admin:?}");
         assert_eq!(admin[0]["sql"], true);
         assert_eq!(admin[3]["in_transaction"], true);
         let reader = run(
+            &options,
             &"r".repeat(32),
             &[
                 json!({"op":"get_latest","key":""}),
@@ -1581,6 +1620,7 @@ mod tests {
                 json!({"op":"sql","role":"admin","sql":"SELECT id FROM t"}),
                 json!({"op":"sql","sql":"SELECT id FROM v"}),
                 json!({"op":"sql","sql":"SHOW VIEWS"}),
+                json!({"op":"sql","sql":"INSERT INTO v VALUES (8)","allow_role_writes":true}),
             ],
         );
         assert_eq!(reader[0]["read_role"], "published");
@@ -1593,6 +1633,49 @@ mod tests {
             json!([[{"Kind":"NUMBER","Text":"1"}]])
         );
         assert_eq!(reader[6]["results"][0]["Rows"][0][0]["Text"], "v");
+        assert_eq!(reader[7]["ok"], false);
+        options.allow_role_writes = true;
+        let writer = run(
+            &options,
+            &"r".repeat(32),
+            &[
+                json!({"op":"sql","sql":"INSERT INTO v VALUES (7)"}),
+                json!({"op":"sql","sql":"UPDATE v SET id=9 WHERE id=7"}),
+                json!({"op":"sql","sql":"DELETE FROM v"}),
+                json!({"op":"sql","sql":"UPDATE t SET id=2"}),
+                json!({"op":"sql","sql":"SELECT id FROM v ORDER BY id"}),
+            ],
+        );
+        assert!(
+            writer[1]["ok"] == true && writer[2]["ok"] == true,
+            "{writer:?}"
+        );
+        assert!(
+            writer[3]["ok"] == false && writer[4]["ok"] == false,
+            "{writer:?}"
+        );
+        assert_eq!(
+            writer[5]["results"][0]["Rows"],
+            json!([
+                [{"Kind":"NUMBER","Text":"1"}], [{"Kind":"NUMBER","Text":"9"}]
+            ])
+        );
+        let grant = run(
+            &options,
+            &"x".repeat(32),
+            &[json!({"op":"sql","sql":"GRANT DELETE ON t TO published"})],
+        );
+        assert_eq!(grant[1]["ok"], true);
+        let direct = run(
+            &options,
+            &"r".repeat(32),
+            &[
+                json!({"op":"sql","sql":"DELETE FROM t WHERE id=9"}),
+                json!({"op":"sql","sql":"SELECT id FROM t"}),
+            ],
+        );
+        assert_eq!(direct[1]["ok"], true);
+        assert_eq!(direct[2]["ok"], false);
     }
 
     #[test]

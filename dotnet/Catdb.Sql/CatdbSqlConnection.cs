@@ -42,6 +42,10 @@ public sealed class CatdbSqlConnection : IDisposable
     public Task<SqlResult> QueryRoleViewAsync(string statement, string role) =>
         RunAsync(() => sql.QueryRoleViewAsync(statement, role));
 
+    /// <summary>Queries a published view or writes to a granted table or view, using a role supplied by the authenticated host.</summary>
+    public Task<SqlResult> ExecuteRoleAsync(string statement, string role) =>
+        RunAsync(() => sql.ExecuteRoleAsync(statement, role));
+
     public Task<IReadOnlyList<string>> ListRoleViewsAsync(string role) =>
         RunAsync(() => sql.ListRoleViewsAsync(role));
 

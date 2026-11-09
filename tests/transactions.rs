@@ -61,6 +61,32 @@ fn value(db: &Database, key: &[u8]) -> Option<Vec<u8>> {
 }
 
 #[test]
+fn savepoint_undo_preserves_snapshot_and_releases_staging_budget() {
+    let fixture = Fixture::new();
+    let db = fixture.create();
+    put(&db, b"stable", b"old");
+    let mut tx = db.begin().unwrap();
+    tx.put(b"first", b"before").unwrap();
+    let baseline = db.resource_usage().unwrap().current[1];
+    tx.savepoint("s").unwrap();
+    tx.delete(b"first").unwrap();
+    tx.put(b"new", b"after").unwrap();
+    tx.savepoint("s").unwrap();
+    tx.put(b"first", b"temporary").unwrap();
+    tx.rollback_to_savepoint("s").unwrap();
+    assert_eq!(tx.get(b"first").unwrap(), None);
+    tx.release_savepoint("s").unwrap();
+    put(&db, b"stable", b"concurrent");
+    tx.rollback_to_savepoint("s").unwrap();
+    assert_eq!(db.resource_usage().unwrap().current[1], baseline);
+    assert_eq!(tx.get(b"new").unwrap(), None);
+    assert_eq!(tx.get(b"first").unwrap().as_deref(), Some(&b"before"[..]));
+    assert_eq!(tx.get(b"stable").unwrap().as_deref(), Some(&b"old"[..]));
+    assert!(matches!(tx.commit(), Err(Error::Conflict(_))));
+    assert_eq!(db.resource_usage().unwrap().current[1], 0);
+}
+
+#[test]
 fn eq_binary_empty_values_and_deleted_values_are_distinct_and_durable() {
     let f = Fixture::new();
     let db = f.create();

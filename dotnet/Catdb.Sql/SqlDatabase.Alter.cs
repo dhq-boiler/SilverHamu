@@ -8,58 +8,109 @@ public sealed partial class SqlDatabase
         List<(string Key, byte[]? Value)> changes)
     {
         SqlTable updated;
-        SqlColumn column;
-        string? oldName = null;
-        if (statement is AddColumn add)
+        Action<SqlRow>? transform = null;
+        switch (statement)
         {
-            column = add.Column;
-            if (table.Columns.Count >= 64) throw new SqlException("列数は64以下にしてください。");
-            if (column.PrimaryKey && (table.CompositePrimaryKey is not null || table.Columns.Any(c => c.PrimaryKey))) throw new SqlException("主キーは既に存在します。");
-            if (column.Default is not null) Coerce(column, column.Default);
-            updated = table with { Columns = [.. table.Columns, column], PrimaryIndex = table.PrimaryIndex || column.PrimaryKey };
-        }
-        else
-        {
-            var rename = (RenameColumn)statement;
-            var original = Column(table, rename.Column);
-            oldName = original.Name;
-            await RestrictReferencedSchemaAsync(table, oldName);
-            column = original with { Name = rename.NewName };
-            updated = table with
-            {
-                Columns = table.Columns.Select(c => c == original ? column : c).ToList(),
-                CompositePrimaryKey = table.CompositePrimaryKey?.Select(c => c == oldName ? column.Name : c).ToList(),
-                Indexes = table.Indexes?.Select(i => i with
+            case AddColumn add:
+                var added = add.Column;
+                if (table.Columns.Count >= 64) throw new SqlException("列数は64以下にしてください。");
+                if (table.Columns.Any(c => SameTable(c.Name, added.Name))) throw new SqlException($"列 '{added.Name}' は既に存在します。");
+                if (added.PrimaryKey && (table.CompositePrimaryKey is not null || table.Columns.Any(c => c.PrimaryKey)))
+                    throw new SqlException("主キーは既に存在します。");
+                updated = table with { Columns = [.. table.Columns, added], PrimaryIndex = table.PrimaryIndex || added.PrimaryKey };
+                transform = row =>
                 {
-                    Column = i.Column == oldName ? column.Name : i.Column,
-                    Columns = i.Columns?.Select(c => c == oldName ? column.Name : c).ToList()
-                }).ToList()
-            };
+                    var value = added.Default ?? SqlValue.Null;
+                    row.Values.Add(added.Name, value);
+                    if (added.PrimaryKey && !value.IsNull)
+                        changes.Add((IndexKey(updated, value), Encoding.UTF8.GetBytes(row.StorageKey)));
+                };
+                break;
+            case RenameColumn rename:
+                var original = Column(table, rename.Column);
+                var oldName = original.Name;
+                var newName = rename.NewName;
+                await RestrictReferencedSchemaAsync(table, oldName);
+                if (table.Columns.Any(c => c != original && SameTable(c.Name, newName))) throw new SqlException($"列 '{newName}' は既に存在します。");
+                string Renamed(string c) => SameTable(c, oldName) ? newName : c;
+                updated = table with
+                {
+                    Columns = table.Columns.Select(c => c == original ? c with { Name = newName } : c).ToList(),
+                    CompositePrimaryKey = table.CompositePrimaryKey?.Select(Renamed).ToList(),
+                    Indexes = table.Indexes?.Select(i => i with { Column = Renamed(i.Column), Columns = i.Columns?.Select(Renamed).ToList() }).ToList(),
+                    ForeignKeys = table.ForeignKeys?.Select(fk => fk with { Columns = fk.Columns.Select(Renamed).ToList() }).ToList()
+                };
+                transform = row =>
+                {
+                    var value = row.Values[oldName];
+                    row.Values.Remove(oldName);
+                    row.Values.Add(newName, value);
+                };
+                break;
+            case DropColumn drop:
+                var removed = Column(table, drop.Column);
+                if (table.Columns.Count == 1) throw new SqlException("テーブルには1列以上必要です。");
+                await RestrictReferencedSchemaAsync(table, removed.Name);
+                bool UsesColumn(IEnumerable<string> columns) => columns.Contains(removed.Name, StringComparer.OrdinalIgnoreCase);
+                if (table.CompositePrimaryKey is { } pk && UsesColumn(pk) ||
+                    ForeignKeys(table).Any(fk => fk.Columns.Count > 1 && UsesColumn(fk.Columns)))
+                    throw new SqlException("複合キーの一部の列を削除できません。");
+                foreach (var index in (table.Indexes ?? []).Where(i => UsesColumn(i.ColumnNames)))
+                    foreach (var entry in await ScanAsync(SecondaryPrefix(table, index), MaxRows)) changes.Add((entry.Key, null));
+                if (removed.PrimaryKey && table.PrimaryIndex)
+                    foreach (var entry in await ScanAsync(IndexPrefix(table.Name), MaxRows)) changes.Add((entry.Key, null));
+                updated = table with
+                {
+                    Columns = table.Columns.Where(c => c != removed).ToList(),
+                    PrimaryIndex = table.PrimaryIndex && !removed.PrimaryKey,
+                    Indexes = table.Indexes?.Where(i => !UsesColumn(i.ColumnNames)).ToList(),
+                    ForeignKeys = table.ForeignKeys?.Where(fk => !UsesColumn(fk.Columns)).ToList()
+                };
+                transform = row => row.Values.Remove(removed.Name);
+                break;
+            case AlterColumn alter:
+                var column = Column(table, alter.Column);
+                if (alter.Operation == SqlColumnAlteration.DropNotNull && (column.PrimaryKey ||
+                    table.CompositePrimaryKey?.Contains(column.Name, StringComparer.OrdinalIgnoreCase) == true))
+                    throw new SqlException("主キーのNOT NULLを削除できません。");
+                var replacement = alter.Operation switch
+                {
+                    SqlColumnAlteration.Type => column with { Type = alter.Type!, MaxLength = alter.MaxLength },
+                    SqlColumnAlteration.SetDefault => column with { Default = alter.Default },
+                    SqlColumnAlteration.DropDefault => column with { Default = null },
+                    SqlColumnAlteration.SetNotNull => column with { NotNull = true },
+                    SqlColumnAlteration.DropNotNull => column with { NotNull = false },
+                    _ => throw new SqlException("未対応の列変更です。")
+                };
+                updated = table with { Columns = table.Columns.Select(c => c == column ? replacement : c).ToList() };
+                if (ComparisonType(column) != ComparisonType(replacement))
+                    await RestrictReferencedSchemaAsync(table, column.Name);
+                break;
+            default:
+                throw new SqlException("未対応の列変更です。");
         }
-        if (table.Columns.Any(c => c.Name != oldName && c.Name.Equals(column.Name, StringComparison.OrdinalIgnoreCase)))
-            throw new SqlException($"列 '{column.Name}' は既に存在します。");
-
+        foreach (var column in updated.Columns)
+            if (column.Default is { } value) Coerce(column, value);
         foreach (var view in await GetViewsAsync())
         {
             if (!ViewUsesTable(view, table.Name)) continue;
             var query = (SelectRows)SqlParser.Parse(view.ViewQuery!).Single();
-            var description = await DescribeViewAsync(new(view.Name, query, view.ViewQuery!, false), updated);
+            var definition = new CreateView(view.Name, query, view.ViewQuery!, false);
+            var description = await DescribeViewAsync(definition, updated);
             if (!view.Columns.SequenceEqual(description.Columns))
-                throw new SqlException($"ビュー '{view.Name}' の公開列が変わります。先にビューを再定義してください。");
+            {
+                // Earlier catalogs reported numeric literals as REAL. Compare both schemas
+                // with today's binder before attributing a type change to this ALTER.
+                var before = await DescribeViewAsync(definition, table);
+                if (!before.Columns.SequenceEqual(description.Columns))
+                    throw new SqlException($"ビュー '{view.Name}' の公開列が変わります。先にビューを再定義してください。");
+            }
         }
-        long budget = 0;
         foreach (var row in rows)
         {
-            var value = column.Default ?? SqlValue.Null;
-            if (oldName is not null) { value = row.Values[oldName]; row.Values.Remove(oldName); }
-            row.Values[column.Name] = value;
+            transform?.Invoke(row);
             ValidateRow(updated, row.Values);
-            var bytes = Serialize(row.Values);
-            budget += bytes.Length + Encoding.UTF8.GetByteCount(row.StorageKey);
-            if (budget > MaxReadBytes) throw new SqlException("列変更の書き換えが8 MiBを超えています。");
-            changes.Add((row.StorageKey, bytes));
-            if (oldName is null && column.PrimaryKey)
-                changes.Add((IndexKey(updated, value), Encoding.UTF8.GetBytes(row.StorageKey)));
+            if (transform is not null) changes.Add((row.StorageKey, Serialize(row.Values)));
         }
         ValidateUnique(updated, rows);
         ValidateChecks(updated, rows);

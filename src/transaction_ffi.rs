@@ -549,6 +549,20 @@ pub unsafe extern "C" fn ndb_tx_delete(id: u64, key: *const u8, key_len: u64) ->
         Ok(0)
     })
 }
+/// Operation 0 creates a mark, 1 rolls back to it, and 2 releases it. Names are UTF-8 bytes.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn ndb_tx_savepoint(id: u64, operation: u32, name: *const u8, len: u64) -> i32 {
+    guard(|| {
+        let name = str::from_utf8(unsafe { bytes(name, len, 512)? }).map_err(|_| 1)?;
+        with_transaction(id, |tx| match operation {
+            0 => tx.savepoint(name),
+            1 => tx.rollback_to_savepoint(name),
+            2 => tx.release_savepoint(name),
+            _ => Err(Error::Invalid("unknown savepoint operation")),
+        })?;
+        Ok(0)
+    })
+}
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn ndb_tx_scan(
     id: u64,

@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <CatdbNativePath Condition="'$(CatdbNativePath)' == ''">$(MSBuildThisFileDirectory)..\target\owner-native\release\newdbms.dll</CatdbNativePath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)..\dotnet\NewDbmsDatabase.cs" Link="Native\NewDbmsDatabase.cs" />
+    <Content Include="$(CatdbNativePath)" Link="newdbms.dll" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <Target Name="RequireCatdbNative" BeforeTargets="PrepareForBuild" Condition="!Exists('$(CatdbNativePath)')">
+    <Error Text="catdb native DLL is missing. Run scripts/build-owner-native.ps1 first, or set CatdbNativePath to a compatible x64 newdbms.dll." />
+  </Target>
+</Project>

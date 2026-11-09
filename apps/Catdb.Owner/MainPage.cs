@@ -29,9 +29,6 @@ public sealed partial class MainPage : ContentPage
     private readonly Entry host = Input("Host", "127.0.0.1");
     private readonly Entry port = Input("Port", "7400");
     private readonly SecretEntry token = new() { AutomationId = "Token", HeightRequest = 38 };
-    private readonly Picker loginMode = new() { AutomationId = "LoginMode", Items = { "TLS アカウント", "共有トークン" }, SelectedIndex = 0 };
-    private readonly Entry username = Input("AccountName", "");
-    private readonly Entry databaseName = Input("AccountDatabase", "main");
     private readonly Label connectionError = Text("", 12, color: Color.FromArgb("#FFB4A9"));
     private readonly Entry filter = Input("KeyFilter", "");
     private readonly Grid overlay = new() { BackgroundColor = Color.FromArgb("#D010171E"), IsVisible = false, AutomationId = "ConnectionDialog" };
@@ -49,7 +46,6 @@ public sealed partial class MainPage : ContentPage
     private readonly List<Button> guarded = [];
     private CatdbClient? client;
     private bool IsReadRole => client?.ReadRole is not null;
-    private bool KvAccount => client is { AccountLogin: true, SupportsSql: false };
     private EmbeddedCatdbStore? embedded;
     private CatlinkFolder? folder;
     private FolderTable? folderSelection;
@@ -176,14 +172,8 @@ public sealed partial class MainPage : ContentPage
         panel.Add(Text("catdb-server の接続先を指定してください。", 13, color: Muted));
         panel.Add(Text("ホスト", 12)); panel.Add(host);
         panel.Add(Text("ポート", 12)); panel.Add(port);
-        panel.Add(loginMode);
-        var accountFields = new VerticalStackLayout { Spacing = 6 };
-        accountFields.Add(Text("アカウント名", 12)); accountFields.Add(username);
-        accountFields.Add(Text("データベース名", 12)); accountFields.Add(databaseName);
-        panel.Add(accountFields);
-        var secretLabel = Text("", 12);
-        panel.Add(secretLabel); panel.Add(token);
-        var tokenFile = Action("トークンファイルを選択…", "TokenFile", async () =>
+        panel.Add(Text("認証トークン", 12)); panel.Add(token);
+        panel.Add(Action("トークンファイルを選択…", "TokenFile", async () =>
         {
             var path = await PickPathAsync("トークンファイルを開く", "", false);
             if (path is null) return;
@@ -193,55 +183,32 @@ public sealed partial class MainPage : ContentPage
             var length = await reader.ReadBlockAsync(buffer, 0, buffer.Length);
             if (length > 4096) throw new InvalidOperationException("トークンファイルが大きすぎます。");
             token.Text = new string(buffer, 0, length).TrimEnd('\r', '\n');
-        });
-        panel.Add(tokenFile);
-        var transportHint = Text("", 12, color: Muted);
-        panel.Add(transportHint);
-        void SetLoginMode()
-        {
-            bool account = loginMode.SelectedIndex == 0;
-            token.Text = "";
-            accountFields.IsVisible = account;
-            tokenFile.IsVisible = !account;
-            secretLabel.Text = account ? "パスワード" : "認証トークン";
-            transportHint.Text = account ? "TLS 1.3 · ホスト名と Windows が信頼する証明書を検証します。"
-                : "TCP v1 · 別ホストへの接続には暗号化トンネルを利用してください。";
-        }
-        loginMode.SelectedIndexChanged += (_, _) => SetLoginMode();
-        SetLoginMode();
+        }));
+        panel.Add(Text("TCP v1 · TLS非対応。別ホストへ接続する場合は\n暗号化トンネルを利用してください。", 12, color: Muted));
         var actions = new HorizontalStackLayout { Spacing = 8 };
         actions.Add(Action("接続する", "ConnectSubmit", ConnectAsync, true));
         actions.Add(Action("キャンセル", "ConnectCancel", () => { token.Text = ""; overlay.IsVisible = false; return Task.CompletedTask; }));
         panel.Add(actions);
         panel.Add(connectionError);
-        overlay.Add(new ScrollView { Content = panel });
+        overlay.Add(panel);
     }
 
     private async Task ConnectAsync()
     {
         if (inTransaction) throw new InvalidOperationException("接続を変更する前に COMMIT または ROLLBACK してください。");
         if (string.IsNullOrWhiteSpace(host.Text) || !int.TryParse(port.Text, out var number) || number is < 1 or > 65535 || string.IsNullOrWhiteSpace(token.Text))
-            throw new InvalidOperationException("ホスト・1～65535のポート・認証情報を入力してください。");
-        bool accountLogin = loginMode.SelectedIndex == 0;
-        if (accountLogin && (string.IsNullOrWhiteSpace(username.Text) || string.IsNullOrWhiteSpace(databaseName.Text)))
-            throw new InvalidOperationException("アカウント名とデータベース名を入力してください。");
+            throw new InvalidOperationException("ホスト・1～65535のポート・認証トークンを入力してください。");
         var candidate = new CatdbClient();
-        try
-        {
-            if (accountLogin) await candidate.ConnectAccountAsync(host.Text.Trim(), number, username.Text!.Trim(), token.Text, databaseName.Text!.Trim());
-            else await candidate.ConnectAsync(host.Text.Trim(), number, token.Text);
-        }
+        try { await candidate.ConnectAsync(host.Text.Trim(), number, token.Text); }
         catch { candidate.Dispose(); throw; }
         CloseStorage(); client = candidate;
         token.Text = "";
         overlay.IsVisible = false;
-        connection.Text = $"● {host.Text.Trim()}:{number}" + (accountLogin ? $" / {databaseName.Text!.Trim()} (TLS)" : "");
+        connection.Text = $"● {host.Text.Trim()}:{number}";
         ToolTipProperties.SetText(connection, $"サービス · {host.Text.Trim()}:{number}");
         status.Text = $"接続済み · {host.Text.Trim()}:{number}";
         result = new([], [], ""); tables.Clear(); RenderRows(); RenderExplorer();
-        Log(candidate.SupportsSql ? "認証に成功しました。SQL は catdb サーバーで実行します。"
-            : KvAccount ? "TLS アカウントで接続しました。許可されたキー値操作を利用できます。"
-            : "認証に成功しました。SQL は Owner で実行します。");
+        Log(candidate.SupportsSql ? "認証に成功しました。SQL は catdb サーバーで実行します。" : "認証に成功しました。SQL は Owner で実行します。");
         if (IsReadRole)
         {
             Log($"閲覧ロール {candidate.ReadRole} で接続しました。");
@@ -292,7 +259,7 @@ public sealed partial class MainPage : ContentPage
     private async Task BackupEmbeddedAsync()
     {
         var store = embedded ?? throw new InvalidOperationException("バックアップするローカルDBを開いてください。");
-        var suggested = Path.ChangeExtension(store.DatabasePath, ".catbak");
+        var suggested = Path.ChangeExtension(store.DatabasePath, ".backup");
         var path = await PickPathAsync("確定済みのローカルDBをバックアップ", suggested, true);
         if (path is null) return;
         await store.BackupAsync(path);
@@ -303,7 +270,7 @@ public sealed partial class MainPage : ContentPage
     {
         if (inTransaction) throw new InvalidOperationException("復元先を開く前に COMMIT または ROLLBACK してください。");
         var directory = Path.GetDirectoryName(embedded?.DatabasePath) ?? FileSystem.AppDataDirectory;
-        var source = await PickPathAsync("復元するバックアップを選択", Path.Combine(directory, "catdb.catbak"), false, browse: true);
+        var source = await PickPathAsync("復元するバックアップを選択", Path.Combine(directory, "catdb.backup"), false, browse: true);
         if (source is null) return;
         var suggested = Path.Combine(Path.GetDirectoryName(source)!, Path.GetFileNameWithoutExtension(source) + "-restored.ndb");
         var target = await PickPathAsync("復元先の新規DBを指定", suggested, true);
@@ -315,6 +282,8 @@ public sealed partial class MainPage : ContentPage
 
     private void UpdateMode()
     {
+        foreach (var button in guarded.Where(b => b.AutomationId == "Execute"))
+            button.IsEnabled = !busy;
         backupButton.IsEnabled = !busy && embedded is not null;
         restoreButton.IsEnabled = !busy && !inTransaction;
         rawKvButton.IsEnabled = !busy && CanUseRawStore;
@@ -334,13 +303,6 @@ public sealed partial class MainPage : ContentPage
             sourceNote.Text = $"閲覧ロール · {client!.ReadRole}\n許可されたビューを表示しています。";
             sqlHint.Text = "  SHOW VIEWS / SELECT · 公開ビューの読み取り専用";
         }
-        if (KvAccount)
-        {
-            sourceNote.Text = $"キー値サービス · {client!.DatabaseRole ?? "アカウント"}";
-            sqlHint.Text = "  キー・値の操作からデータを参照してください。";
-        }
-        foreach (var button in guarded.Where(b => b.AutomationId is "Execute" or "Browse"))
-            button.IsEnabled = !busy && !KvAccount;
     }
 
     private void CloseStorage()
@@ -364,7 +326,6 @@ public sealed partial class MainPage : ContentPage
 
     private async Task ExecuteAsync()
     {
-        if (KvAccount) throw new InvalidOperationException("この TLS 接続ではサーバーが SQL 実行を許可していません。");
         if (!HasConnection && folder is null) throw new InvalidOperationException("サービスへ接続するか、DBファイルを開いてください。");
         var watch = Stopwatch.StartNew();
         result = new([], [], ""); RenderRows();
@@ -393,7 +354,6 @@ public sealed partial class MainPage : ContentPage
 
     private async Task RefreshTablesAsync()
     {
-        if (KvAccount) { tables.Clear(); RenderExplorer(); return; }
         if (IsReadRole)
         {
             var visible = await ExecuteServiceSqlAsync("SHOW VIEWS");
@@ -607,7 +567,6 @@ public sealed partial class MainPage : ContentPage
         }
         explorer.Add(Text(embedded is not null ? "⌄  組み込みデータベース" : client is null ? "接続先なし" : "⌄  サービス データベース", 13, true));
         if (!HasConnection) return;
-        if (KvAccount) { explorer.Add(Text("キー値接続", 11, color: Muted)); return; }
         explorer.Add(Action("テーブル・ビュー一覧を更新", "RefreshTables", async () => { await RefreshTablesAsync(); Log($"一覧を更新しました（{tables.Count} 件）"); }));
         explorer.Add(Text($"テーブル・ビュー ({tables.Count})", 11, color: Muted));
         foreach (var table in tables)

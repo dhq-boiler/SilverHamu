@@ -20,6 +20,11 @@ pub struct SqlOptions {
     pub read_role: Option<ReadRole>,
 }
 
+pub(super) struct ConfiguredSql {
+    pub options: SqlOptions,
+    pub allow_role_writes: bool,
+}
+
 impl SqlOptions {
     pub(super) fn validate(&self, admin_token: &[u8], accounts: bool) -> io::Result<()> {
         if !self.host.is_absolute() || !self.host.is_file() {
@@ -74,6 +79,25 @@ fn failure(message: &str, tx: &Option<Transaction>) -> Value {
     json!({"ok":false,"error":message,"in_transaction":tx.is_some()})
 }
 
+fn permitted_role_callback(request: &Value, allow_writes: bool) -> bool {
+    match request["op"].as_str() {
+        Some("begin" | "rollback" | "get" | "scan") => true,
+        Some("commit") => allow_writes,
+        Some("put" | "delete") if allow_writes => request["key"]
+            .as_str()
+            .and_then(|key| super::hex_decode(key, 1024).ok())
+            .is_some_and(|key| {
+                let Some(suffix) = key.strip_prefix(b"_catdb_owner/sql/v1/") else {
+                    return false;
+                };
+                suffix.starts_with(b"row/")
+                    || suffix.starts_with(b"pk/")
+                    || suffix.starts_with(b"index/")
+            }),
+        _ => false,
+    }
+}
+
 fn send_line(output: &mut impl Write, value: &Value) -> io::Result<()> {
     serde_json::to_writer(&mut *output, value)?;
     output.write_all(b"\n")?;
@@ -96,7 +120,7 @@ pub(super) fn execute(
     db: &Database,
     tx: &mut Option<Transaction>,
     request: &Value,
-    options: &SqlOptions,
+    sql_host: &ConfiguredSql,
     view_role: Option<&str>,
     transaction_timeout: Duration,
     deadline: Instant,
@@ -112,7 +136,7 @@ pub(super) fn execute(
     if previous >= MAX_SQL_HOSTS {
         return Ok(failure("sql_host_busy", tx));
     }
-    let mut command = Command::new(&options.host);
+    let mut command = Command::new(&sql_host.options.host);
     command
         .arg("bridge")
         .stdin(Stdio::piped())
@@ -151,8 +175,10 @@ pub(super) fn execute(
             })?;
         let _finish_on_return = done;
         let mut command = json!({"sql":sql,"in_transaction":tx.is_some()});
+        let allow_role_writes = view_role.is_some() && sql_host.allow_role_writes;
         if let Some(role) = view_role {
             command["role"] = role.into();
+            command["allow_role_writes"] = allow_role_writes.into();
         }
         send_line(&mut output, &command)?;
         loop {
@@ -164,7 +190,8 @@ pub(super) fn execute(
             }
             // An older SQL host ignores the role field. Never give it access to role-bound data.
             if let Some(role) = view_role
-                && reply["read_role"].as_str() != Some(role)
+                && (reply["read_role"].as_str() != Some(role)
+                    || (allow_role_writes && reply["allow_role_writes"].as_bool() != Some(true)))
             {
                 return Err(io::Error::other(
                     "SQL host does not support role-bound queries",
@@ -174,17 +201,23 @@ pub(super) fn execute(
                 return Err(io::ErrorKind::TimedOut.into());
             }
             if let Some(op) = reply.get("request") {
-                if view_role.is_some()
-                    && !matches!(
-                        op["op"].as_str(),
-                        Some("begin" | "rollback" | "get" | "scan")
-                    )
-                {
-                    return Err(io::Error::other("invalid read-only SQL callback"));
+                if view_role.is_some() && !permitted_role_callback(op, allow_role_writes) {
+                    return Err(io::Error::other("invalid view role SQL callback"));
                 }
                 if !matches!(
                     op["op"].as_str(),
-                    Some("begin" | "commit" | "rollback" | "get" | "put" | "delete" | "scan")
+                    Some(
+                        "begin"
+                            | "commit"
+                            | "rollback"
+                            | "savepoint"
+                            | "rollback_to"
+                            | "release_savepoint"
+                            | "get"
+                            | "put"
+                            | "delete"
+                            | "scan"
+                    )
                 ) {
                     return Err(io::Error::other("invalid SQL callback"));
                 }

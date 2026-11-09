@@ -125,7 +125,7 @@ public sealed class SqlTests
     [InlineData("SELECT * FROM t LIMIT 4097;")]
     [InlineData("SELECT * FROM t LIMIT 1.5;")]
     [InlineData("SELECT TOP 1 * FROM t LIMIT 1;")]
-    [InlineData("SELECT * FROM t WHERE id IN (1,2);")]
+    [InlineData("SELECT * FROM t WHERE id IN ();")]
     [InlineData("SELECT * FROM t CROSS JOIN other ON t.id = other.id;")]
     [InlineData("CREATE TABLE a (id UNKNOWN);")]
     [InlineData("CREATE TABLE a (id INT, ID TEXT);")]

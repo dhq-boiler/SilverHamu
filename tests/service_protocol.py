@@ -85,6 +85,10 @@ class ServiceTests(unittest.TestCase):
             self.ok(admin, op="begin")
             self.assertTrue(self.ok(admin, op="sql", sql="INSERT INTO docs VALUES (2)")["in_transaction"])
             self.ok(admin, op="rollback")
+            self.ok(admin, op="sql", sql="START TRANSACTION; SAVEPOINT keep_docs")
+            self.ok(admin, op="sql", sql="DELETE FROM docs")
+            self.assertTrue(self.ok(admin, op="sql", sql="ROLLBACK TO SAVEPOINT keep_docs")["in_transaction"])
+            self.assertFalse(self.ok(admin, op="sql", sql="RELEASE SAVEPOINT keep_docs; COMMIT")["in_transaction"])
             rows = self.ok(viewer, op="sql", sql="SELECT id FROM visible")["results"][0]["Rows"]
             self.assertEqual([row[0]["Text"] for row in rows], ["1"])
             self.assertFalse(viewer.request(op="sql", role="admin", sql="SELECT id FROM docs")["ok"])

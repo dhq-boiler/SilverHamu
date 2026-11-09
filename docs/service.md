@@ -30,7 +30,7 @@ Health checks authenticate and query database state. The Docker healthcheck assu
 
 ## Wire format
 
-Every message is a four-byte big-endian unsigned length followed by that many UTF-8 JSON bytes. The first request is `{"op":"auth","version":1,"token":"..."}`. Successful authentication returns `{"ok":true,"protocol":1}`. Send one request at a time on a connection. The Python client implements the framing.
+Every message is a four-byte big-endian unsigned length followed by that many UTF-8 JSON bytes. The first request is `{"op":"auth","version":1,"token":"..."}`. Successful authentication returns `{"ok":true,"protocol":1}`. Send one request at a time on a connection. The [client libraries](clients.md) handle framing, authentication and byte encoding.
 
 | Operation | Fields | Success result (in addition to `ok: true`) |
 |---|---|---|

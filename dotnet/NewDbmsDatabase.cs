@@ -390,6 +390,24 @@ public sealed class NewDbmsTransaction : IDisposable
         }
     }
 
+    public void CreateSavepoint(string name) => ChangeSavepoint(name, 0);
+    public void RollbackToSavepoint(string name) => ChangeSavepoint(name, 1);
+    public void ReleaseSavepoint(string name) => ChangeSavepoint(name, 2);
+
+    private void ChangeSavepoint(string name, uint operation)
+    {
+        var bytes = TransactionNative.SavepointName(name);
+        lock (_gate)
+        {
+            EnsureOpen();
+            try { TransactionNative.Check(TransactionNative.ndb_tx_savepoint(_handle, operation, bytes, (ulong)bytes.Length)); }
+            catch (EntryPointNotFoundException error)
+            {
+                throw new NotSupportedException("The loaded catdb native library does not support savepoints.", error);
+            }
+        }
+    }
+
     public IReadOnlyList<NewDbmsEntry> Scan(byte[] start, byte[]? end = null)
     {
         TransactionNative.Key(start);
@@ -563,6 +581,13 @@ internal static class TransactionNative
         return Utf8.GetBytes(Path.GetFullPath(path));
     }
 
+    internal static byte[] SavepointName(string name)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(name);
+        if (Utf8.GetByteCount(name) > 512) throw new ArgumentOutOfRangeException(nameof(name));
+        return Utf8.GetBytes(name);
+    }
+
     internal static void Key(byte[] key)
     {
         ArgumentNullException.ThrowIfNull(key);
@@ -627,6 +652,8 @@ internal static class TransactionNative
     internal static extern int ndb_tx_put(TransactionHandle handle, byte[] key, ulong keyLength, byte[] value, ulong valueLength);
     [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_delete(TransactionHandle handle, byte[] key, ulong keyLength);
+    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int ndb_tx_savepoint(TransactionHandle handle, uint operation, byte[] name, ulong nameLength);
     [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_scan(TransactionHandle handle, byte[] start, ulong startLength, byte[] end, ulong endLength, uint hasEnd, [Out] byte[] buffer, ulong capacity, out ulong required, out ulong count);
     [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]

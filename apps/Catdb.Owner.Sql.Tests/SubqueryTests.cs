@@ -30,9 +30,9 @@ public sealed class SubqueryTests
         const string bypass = "SELECT id FROM v WHERE id IN (SELECT id FROM t)";
         await Assert.ThrowsAsync<SqlException>(() => db.QueryPublishedViewAsync(bypass, ["v"]));
         await Assert.ThrowsAsync<SqlException>(() => db.QueryRoleViewAsync(bypass, "reader"));
-        foreach (var sql in new[] { "CREATE VIEW vv AS " + bypass, "CREATE TABLE invalid(id INT CHECK(id IN (SELECT id FROM t)))",
-                     "SELECT * FROM t WHERE id IN (SELECT id FROM t WHERE id IN (SELECT id FROM t))",
-                     "SELECT * FROM t WHERE id IN (SELECT id,id FROM t)" })
+        foreach (var sql in new[] { "CREATE VIEW vv AS " + bypass, "CREATE TABLE invalid(id INT CHECK(id IN (SELECT id FROM t)))" })
             Assert.Throws<SqlException>(() => SqlParser.Parse(sql));
+        await Assert.ThrowsAsync<SqlException>(() => db.ExecuteAsync("SELECT * FROM t WHERE id IN (SELECT id,id FROM t)"));
+        Assert.Empty((await db.ExecuteAsync("SELECT * FROM t WHERE id IN (SELECT id FROM t WHERE id IN (SELECT id FROM t))"))[0].Rows);
     }
 }

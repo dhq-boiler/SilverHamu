@@ -78,6 +78,9 @@ public sealed class EmbeddedCatdbStore : IDisposable
                 using (pending) response["version"] = Decimal(pending.Commit());
                 break;
             case "rollback": RequireTransaction().Dispose(); transaction = null; break;
+            case "savepoint": RequireTransaction().CreateSavepoint(request["name"]!.GetValue<string>()); break;
+            case "rollback_to": RequireTransaction().RollbackToSavepoint(request["name"]!.GetValue<string>()); break;
+            case "release_savepoint": RequireTransaction().ReleaseSavepoint(request["name"]!.GetValue<string>()); break;
             case "checkpoint":
                 if (transaction is not null) throw new CatdbRequestException("チェックポイントの前にトランザクションを終了してください。");
                 var checkpoint = database.Checkpoint();

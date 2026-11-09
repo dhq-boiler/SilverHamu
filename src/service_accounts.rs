@@ -113,7 +113,7 @@ impl Role {
     pub(super) fn permits(self, op: &str) -> bool {
         match op {
             "ping" | "begin" | "begin_read" | "get" | "scan" | "get_latest" | "scan_latest"
-            | "commit" | "rollback" => true,
+            | "commit" | "rollback" | "savepoint" | "rollback_to" | "release_savepoint" => true,
             "put" | "delete" | "put_commit" | "delete_commit" | "put_batch_commit" => {
                 self >= Self::Writer
             }

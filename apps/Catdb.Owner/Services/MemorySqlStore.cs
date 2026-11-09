@@ -7,6 +7,7 @@ public sealed class MemorySqlStore
 {
     private SortedDictionary<string, string> data = new(StringComparer.Ordinal);
     private SortedDictionary<string, string>? transaction;
+    private readonly List<(string Name, SortedDictionary<string, string> Data)> savepoints = [];
     public bool InTransaction => transaction is not null;
     public Task<JsonObject> RequestAsync(JsonObject request)
     {
@@ -20,8 +21,23 @@ public sealed class MemorySqlStore
         if (transaction is null) throw new CatdbRequestException("トランザクションがありません。");
         switch (op)
         {
-            case "rollback": transaction = null; break;
-            case "commit": data = transaction; transaction = null; break;
+            case "rollback": transaction = null; savepoints.Clear(); break;
+            case "commit": data = transaction; transaction = null; savepoints.Clear(); break;
+            case "savepoint":
+                if (savepoints.Count >= 128) throw new CatdbRequestException("Too many savepoints.");
+                savepoints.Add((request["name"]!.GetValue<string>(), new(transaction, StringComparer.Ordinal)));
+                break;
+            case "rollback_to":
+            case "release_savepoint":
+                var index = savepoints.FindLastIndex(s => s.Name == request["name"]!.GetValue<string>());
+                if (index < 0) throw new CatdbRequestException("Unknown savepoint.");
+                if (op == "rollback_to")
+                {
+                    transaction = new(savepoints[index].Data, StringComparer.Ordinal);
+                    index++;
+                }
+                savepoints.RemoveRange(index, savepoints.Count - index);
+                break;
             case "get": result["value"] = transaction.GetValueOrDefault(request["key"]!.ToString().ToUpperInvariant()); break;
             case "put": transaction[request["key"]!.ToString().ToUpperInvariant()] = request["value"]!.ToString().ToUpperInvariant(); break;
             case "delete": transaction.Remove(request["key"]!.ToString().ToUpperInvariant()); break;

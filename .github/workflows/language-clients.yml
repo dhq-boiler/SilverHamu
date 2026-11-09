@@ -1,0 +1,61 @@
+name: Language clients
+on:
+  push:
+    paths:
+      - 'clients/**'
+      - 'pyproject.toml'
+      - 'scripts/catdb-client.py'
+      - 'tests/language_clients.py'
+      - 'src/**'
+      - 'Cargo.*'
+      - '.github/workflows/language-clients.yml'
+  pull_request:
+    paths:
+      - 'clients/**'
+      - 'pyproject.toml'
+      - 'scripts/catdb-client.py'
+      - 'tests/language_clients.py'
+      - 'src/**'
+      - 'Cargo.*'
+      - '.github/workflows/language-clients.yml'
+permissions:
+  contents: read
+jobs:
+  interoperation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.x'
+          cache: false
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+      - run: cargo build --locked --features service --bin catdb-server
+      - run: python -m pip install .
+      - run: python clients/python/test_client.py
+      - run: npx --yes --package typescript@5.7.3 tsc --noEmit --strict --target ES2022 --module NodeNext clients/node/example.ts
+      - run: mkdir -p artifacts
+      - working-directory: clients/go
+        run: |
+          go test ./...
+          go build -o ../../artifacts/go-smoke ./cmd/smoke
+      - run: dotnet build -c Release clients/dotnet/smoke/Smoke.csproj
+      - run: dotnet clients/dotnet/smoke/bin/Release/net10.0/Smoke.dll --check-malformed-replies
+      - run: mvn -B -f clients/java/pom.xml verify dependency:copy-dependencies
+      - run: python tests/language_clients.py

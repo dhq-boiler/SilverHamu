@@ -10,6 +10,7 @@ internal sealed class SqlBridge(Stream input, Stream output)
     private bool inTransaction;
     private bool transportFailed;
     private string? readRole;
+    private bool allowRoleWrites;
 
     public async Task RunAsync()
     {
@@ -21,22 +22,24 @@ internal sealed class SqlBridge(Stream input, Stream output)
             readRole = command.ContainsKey("role")
                 ? command["role"]?.GetValue<string>() ?? throw new InvalidDataException("Missing read role.")
                 : null;
+            allowRoleWrites = readRole is not null && command["allow_role_writes"]?.GetValue<bool>() == true;
             IReadOnlyList<SqlResult> results;
             try
             {
                 results = readRole is not null
-                    ? [await database.QueryRoleViewAsync(sql, readRole)]
+                    ? [allowRoleWrites ? await database.ExecuteRoleAsync(sql, readRole)
+                        : await database.QueryRoleViewAsync(sql, readRole)]
                     : await database.ExecuteAsync(sql);
             }
             catch (Exception error) when (!transportFailed)
             {
-                WriteFrame(new { error = error.Message, in_transaction = inTransaction, read_role = readRole });
+                WriteFrame(new { error = error.Message, in_transaction = inTransaction, read_role = readRole, allow_role_writes = allowRoleWrites });
                 continue;
             }
-            try { WriteFrame(new { results, in_transaction = inTransaction, read_role = readRole }); }
+            try { WriteFrame(new { results, in_transaction = inTransaction, read_role = readRole, allow_role_writes = allowRoleWrites }); }
             catch (FrameSizeException)
             {
-                WriteFrame(new { error = "SQL result exceeds the response limit. Executed statements may have taken effect; check transaction state before retrying.", in_transaction = inTransaction, read_role = readRole });
+                WriteFrame(new { error = "SQL result exceeds the response limit. Executed statements may have taken effect; check transaction state before retrying.", in_transaction = inTransaction, read_role = readRole, allow_role_writes = allowRoleWrites });
             }
         }
     }
@@ -47,7 +50,7 @@ internal sealed class SqlBridge(Stream input, Stream output)
         JsonObject response;
         try
         {
-            WriteFrame(new { request, read_role = readRole });
+            WriteFrame(new { request, read_role = readRole, allow_role_writes = allowRoleWrites });
             var envelope = ReadFrame() ?? throw new EndOfStreamException("Missing KV response.");
             inTransaction = ReadTransactionState(envelope);
             response = envelope["response"] as JsonObject ?? throw new InvalidDataException("Missing KV response.");

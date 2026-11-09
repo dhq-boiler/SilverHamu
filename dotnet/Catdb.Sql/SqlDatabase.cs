@@ -41,24 +41,40 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
     }
 
     // The role must come from the host's authentication context, never from the SQL client.
-    public async Task<SqlResult> QueryRoleViewAsync(string sql, string role)
+    public Task<SqlResult> QueryRoleViewAsync(string sql, string role) => ExecuteRoleAsync(sql, role, allowWrites: false);
+
+    public Task<SqlResult> ExecuteRoleAsync(string sql, string role) => ExecuteRoleAsync(sql, role, allowWrites: true);
+
+    private async Task<SqlResult> ExecuteRoleAsync(string sql, string role, bool allowWrites)
     {
         ValidateRole(role);
         var script = SqlParser.Parse(sql);
+        if (allowWrites && script is [InsertRows or UpdateRows or DeleteRows])
+        {
+            if (inTransaction()) throw new SqlException("ロール権限での更新には専用の接続を使用してください。");
+            if (script[0] is UpdateRows update && (!UsesOnlyViewFields(update.Where) || update.Assignments.Values.Any(v => !UsesOnlyViewFields(v))) ||
+                script[0] is DeleteRows delete && !UsesOnlyViewFields(delete.Where))
+                throw new SqlException("更新には対象のテーブルまたはビューの列を指定してください。");
+            return await ExecuteStatementAsync(script[0], role);
+        }
         if (script is [ShowViews])
         {
-            var views = await ListRoleViewsAsync(role);
+            var views = await ListRoleViewsAsync(role, allowWrites);
             return new(["view_name"], views.Select(name => new[] { SqlValue.String(name) }).ToArray(), $"{views.Count} ビュー");
         }
         return await ReadPublishedViewAsync(RequireViewSelect(script), role);
     }
 
-    public async Task<IReadOnlyList<string>> ListRoleViewsAsync(string role)
+    public Task<IReadOnlyList<string>> ListRoleViewsAsync(string role) => ListRoleViewsAsync(role, false);
+
+    private async Task<IReadOnlyList<string>> ListRoleViewsAsync(string role, bool includeWrites)
     {
         ValidateRole(role);
         if (inTransaction()) throw new SqlException("公開ビューの照会には専用の接続を使用してください。");
         var views = await ReadCatalogAsync(ViewPrefix);
-        return views.Where(view => GrantsSelect(view, role)).Select(view => view.Name).ToArray();
+        return views.Where(view => GrantsSelect(view, role) ||
+            (includeWrites && view.WriteRoles?.Values.Any(roles => roles.Contains(role, StringComparer.OrdinalIgnoreCase)) == true))
+            .Select(view => view.Name).ToArray();
     }
 
     private static void ValidateRole(string role)
@@ -71,16 +87,19 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
 
     private static SelectRows RequireViewSelect(IReadOnlyList<SqlStatement> script) =>
         script is [SelectRows { Table: not null, Join: null } query] && query.AdditionalJoins is not { Count: > 0 } &&
-            UsesOnlyViewFields(query.Where) && query.Projections.All(p => UsesOnlyViewFields(p.Expression)) ? query :
+            !query.HasQuerySources && UsesOnlyViewFields(query.Where) && UsesOnlyViewFields(query.Having) &&
+            query.Projections.All(p => UsesOnlyViewFields(p.Expression) && UsesOnlyViewFields(p.Window?.Argument)) ? query :
             throw new SqlException("許可されたビューに対するSELECTを1文だけ指定してください。");
 
-    private static bool UsesOnlyViewFields(SqlExpression? expression) => expression switch
+    private static bool UsesOnlyViewFields(SqlExpression? expression)
     {
-        null or SqlField or SqlLiteral => true,
-        SqlBinary binary => UsesOnlyViewFields(binary.Left) && UsesOnlyViewFields(binary.Right),
-        SqlIsNull test => UsesOnlyViewFields(test.Expression),
-        _ => false
-    };
+        if (expression is null or SqlField or SqlLiteral) return true;
+        if (expression is not (SqlBinary or SqlIsNull or SqlUnary or SqlCast or SqlCase or SqlInList or SqlBetween or SqlAggregate))
+            return false;
+        var allowed = true;
+        expression.MapChildren(child => { allowed &= UsesOnlyViewFields(child); return child; });
+        return allowed;
+    }
 
     private async Task<SqlResult> ReadPublishedViewAsync(SelectRows query, string? role)
     {
@@ -105,12 +124,17 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
         finally { if (ownTransaction && inTransaction()) await SendOperationAsync("rollback"); }
     }
 
-    private async Task<SqlResult> ExecuteStatementAsync(SqlStatement statement)
+    private async Task<SqlResult> ExecuteStatementAsync(SqlStatement statement, string? requiredRole = null)
     {
         if (statement is ExecuteProcedure execute) return await ExecuteProcedureAsync(execute);
         if (statement is TransactionStatement transaction)
         {
-            await SendOperationAsync(transaction.Operation);
+            if (transaction.Savepoint is { } name)
+            {
+                if (!inTransaction()) throw new SqlException("Savepoints require an active transaction.");
+                await send(new JsonObject { ["op"] = transaction.Operation, ["name"] = SqlNames.Canonical(name) });
+            }
+            else await SendOperationAsync(transaction.Operation);
             return Empty($"{transaction.Operation.ToUpperInvariant()} 完了");
         }
         var ownTransaction = !inTransaction();
@@ -118,9 +142,13 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
         var wrote = false;
         try
         {
-            if (statement is SelectRows { Where: SqlInSubquery subquery } outerQuery)
-                statement = outerQuery with { Where = await EvaluateSubqueryAsync(subquery) };
             var changes = new List<(string Key, byte[]? Value)>();
+            if (statement is InsertSelect insertQuery)
+            {
+                var input = await ReadWriteSourceAsync(insertQuery.Query);
+                statement = new InsertRows(insertQuery.Table, insertQuery.Columns, input.Rows.Select(row => row.ToList()).ToList())
+                    { SourceTypes = ResultColumnTypes(input) };
+            }
             SqlResult result;
             switch (statement)
             {
@@ -147,13 +175,18 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                 case ViewPrivilege privilege:
                     ValidateRole(privilege.Role);
                     var privilegeKey = ViewKey(privilege.View);
-                    var privilegeBytes = await GetAsync(privilegeKey) ?? throw new SqlException("SELECT権限の対象は既存のビューです。");
+                    var privilegeBytes = await GetAsync(privilegeKey);
+                    if (privilegeBytes is null)
+                    {
+                        if (privilege.Access.HasFlag(ViewAccess.Select)) throw new SqlException("SELECT権限の対象は既存のビューです。");
+                        privilegeKey = TableKey(privilege.View);
+                        privilegeBytes = await GetAsync(privilegeKey) ?? throw new SqlException("権限の対象が存在しません。");
+                    }
                     var target = Deserialize<SqlTable>(privilegeBytes);
-                    var roles = new HashSet<string>(target.SelectRoles ?? [], StringComparer.OrdinalIgnoreCase);
-                    var changed = privilege.Grant ? roles.Add(privilege.Role) : roles.Remove(privilege.Role);
-                    if (changed)
-                        changes.Add((privilegeKey, Serialize(target with { SelectRoles = roles.Order(StringComparer.OrdinalIgnoreCase).ToList() })));
-                    result = Empty(privilege.Grant ? "SELECT権限を付与しました。" : "SELECT権限を取り消しました。");
+                    var updatedPrivileges = ChangePrivilege(target, privilege);
+                    if (!ReferenceEquals(target, updatedPrivileges))
+                        changes.Add((privilegeKey, Serialize(updatedPrivileges)));
+                    result = Empty(privilege.Grant ? "権限を付与しました。" : "権限を取り消しました。");
                     break;
                 case ShowViews:
                     var views = await GetViewsAsync();
@@ -185,22 +218,28 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                     var tables = await GetTablesAsync();
                     result = new(["table_name", "columns"], tables.Select(x => new[] { SqlValue.String(x.Name), SqlValue.Number(x.Columns.Count.ToString(CultureInfo.InvariantCulture)) }).ToArray(), $"{tables.Count} テーブル");
                     break;
+                case CreateTableAs createAs:
+                    result = await CreateTableAsAsync(createAs, changes);
+                    break;
+                case MergeRows merge:
+                    result = await MergeAsync(merge, changes);
+                    break;
                 case CreateTable create:
-                    if (await GetAsync(ViewKey(create.Table)) is not null) throw new SqlException("同名のビューがあります。");
-                    if (await GetAsync(TableKey(create.Table)) is not null)
+                    if (!await CanCreateTableAsync(create.Table, create.IfNotExists))
                     {
-                        if (!create.IfNotExists) throw new SqlException($"テーブル '{create.Table}' は既に存在します。");
                         result = Empty("テーブルは既に存在します。変更なし。"); break;
                     }
-                    if ((await GetTablesAsync()).Count >= 256) throw new SqlException("テーブル数の上限256に達しています。");
                     foreach (var column in create.Columns)
                         if (column.Default is not null) Coerce(column, column.Default);
                     var created = new SqlTable(create.Table, create.Columns, PrimaryIndex: create.Columns.Any(c => c.PrimaryKey), Checks: create.Checks,
-                        CompositePrimaryKey: create.CompositePrimaryKey, Indexes: create.CompositePrimaryKey is { } keys ? [new("PRIMARY", keys[0], keys)] : null);
+                        CompositePrimaryKey: create.CompositePrimaryKey, Indexes: create.CompositePrimaryKey is { } keys ? [new("PRIMARY", keys[0], keys)] : null) { ForeignKeys = create.ForeignKeys };
                     ValidateChecks(created, []);
                     await ValidateOutgoingReferencesAsync(created, []);
                     changes.Add((TableKey(create.Table), Serialize(created)));
                     result = Empty($"テーブル '{create.Table}' を作成しました。");
+                    break;
+                case SelectRows advanced when advanced.HasQuerySources:
+                    result = await QueryRelationsAsync(advanced, name => LoadJoinSourceAsync(name, baseTablesOnly: false));
                     break;
                 case SelectRows select when select.Table is null:
                     var noTable = new SqlTable("", []);
@@ -215,22 +254,34 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                         SelectRows s => s.Table!, InsertRows s => s.Table, UpdateRows s => s.Table,
                         DeleteRows s => s.Table, DropTable s => s.Table, ReindexTable s => s.Table,
                         CreateIndex s => s.Table, DropIndex s => s.Table, AddColumn s => s.Table,
-                        RenameColumn s => s.Table, _ => throw new SqlException("未対応のSQLです。")
+                        RenameColumn s => s.Table, DropColumn s => s.Table, AlterColumn s => s.Table, _ => throw new SqlException("未対応のSQLです。")
                     };
                     var schemaBytes = await GetAsync(TableKey(tableName));
+                    SqlTable table;
                     if (schemaBytes is null)
                     {
                         var viewBytes = await GetAsync(ViewKey(tableName));
                         if (viewBytes is not null)
                         {
-                            if (statement is not SelectRows outer) throw new SqlException($"'{tableName}' は読み取り専用ビューです。削除にはDROP VIEWを使用してください。");
-                            result = await SelectViewAsync(outer, Deserialize<SqlTable>(viewBytes));
-                            break;
+                            var view = Deserialize<SqlTable>(viewBytes);
+                            if (statement is SelectRows outer)
+                            {
+                                result = await SelectViewAsync(outer, view);
+                                break;
+                            }
+                            CheckWritePrivilege(view, statement, requiredRole);
+                            table = await ReadSourceTableAsync(view.SourceTable!);
+                            statement = TranslateViewWrite(view, table, statement);
                         }
-                        if (statement is DropTable { IfExists: true }) { result = Empty("テーブルは存在しません。変更なし。"); break; }
-                        throw new SqlException($"テーブル '{tableName}' は存在しません。CREATE TABLEで作成してください。");
+                        else if (requiredRole is not null) throw new SqlException("指定されたテーブルまたはビューは利用できません。");
+                        else if (statement is DropTable { IfExists: true }) { result = Empty("テーブルは存在しません。変更なし。"); break; }
+                        else throw new SqlException($"テーブル '{tableName}' は存在しません。CREATE TABLEで作成してください。");
                     }
-                    var table = Deserialize<SqlTable>(schemaBytes);
+                    else
+                    {
+                        table = Deserialize<SqlTable>(schemaBytes);
+                        if (requiredRole is not null) CheckWritePrivilege(table, statement, requiredRole);
+                    }
                     if (statement is SelectRows lookup)
                     {
                         result = await SelectTableAsync(lookup, table);
@@ -252,7 +303,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                     var secondary = table.Indexes?.Select(i => new IndexLayout(table, i)).ToArray() ?? [];
                     switch (statement)
                     {
-                        case AddColumn or RenameColumn:
+                        case AddColumn or RenameColumn or DropColumn or AlterColumn:
                             result = await AlterTableAsync(table, statement, existingRows, changes);
                             break;
                         case ReindexTable:
@@ -278,18 +329,14 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                             result = Empty($"索引を再構築しました（{existingRows.Count} 行）。");
                             break;
                         case InsertRows insert:
-                            var columns = insert.Columns ?? table.Columns.Select(x => x.Name).ToList();
-                            foreach (var name in columns) Column(table, name);
+                            var columns = InsertColumns(table, insert.Columns);
+                            if (insert.SourceTypes is { } types) ValidateInsertTypes(columns, types);
                             if (existingRows.Count + insert.Rows.Count > MaxRows) throw new SqlException($"初版の1テーブル上限は{MaxRows}行です。");
                             foreach (var values in insert.Rows)
                             {
-                                if (values.Count != columns.Count) throw new SqlException("INSERTの列数と値の数が一致しません。");
-                                var row = new Dictionary<string, SqlValue>(StringComparer.OrdinalIgnoreCase);
-                                foreach (var column in table.Columns) row[column.Name] = Coerce(column, column.Default ?? SqlValue.Null);
-                                for (var i = 0; i < columns.Count; i++) { var column = Column(table, columns[i]); row[column.Name] = Coerce(column, values[i]); }
-                                ValidateRow(table, row);
-                                var key = RowPrefix(table.Name) + Guid.NewGuid().ToString("N");
-                                existingRows.Add(new(key, row)); changes.Add((key, Serialize(row)));
+                                var inserted = MakeInsertedRow(table, columns, values);
+                                var (key, row) = inserted;
+                                existingRows.Add(inserted); changes.Add((key, Serialize(row)));
                                 if (table.PrimaryIndex) indexChanges[IndexKey(table, row[primary!.Name])] = Encoding.UTF8.GetBytes(key);
                                 foreach (var index in secondary)
                                     index.RecordChange(key, null, row, indexChanges);
@@ -301,41 +348,26 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                             break;
                         case UpdateRows update:
                             update.Where?.Validate(table.Columns);
-                            foreach (var pair in update.Values) Coerce(Column(table, pair.Key), pair.Value);
-                            foreach (var row in existingRows.Where(x => Matches(update.Where, x.Values)))
+                            var assignments = ResolveAssignments(table, update.Assignments);
+                            var proposed = new List<SqlRow>(existingRows.Count);
+                            var affectedRows = 0;
+                            foreach (var row in existingRows)
                             {
-                                var oldPrimary = table.PrimaryIndex ? row.Values[primary!.Name] : null;
-                                var before = secondary.Length == 0 ? null : new Dictionary<string, SqlValue>(row.Values, StringComparer.OrdinalIgnoreCase);
-                                foreach (var pair in update.Values) row.Values[Column(table, pair.Key).Name] = Coerce(Column(table, pair.Key), pair.Value);
-                                ValidateRow(table, row.Values); changes.Add((row.StorageKey, Serialize(row.Values)));
-                                foreach (var index in secondary)
-                                    index.RecordChange(row.StorageKey, before, row.Values, indexChanges);
-                                if (oldPrimary is not null && SqlValue.Compare(oldPrimary, row.Values[primary!.Name]) != 0)
-                                {
-                                    indexChanges[IndexKey(table, oldPrimary)] = null;
-                                    indexChanges[IndexKey(table, row.Values[primary.Name])] = Encoding.UTF8.GetBytes(row.StorageKey);
-                                }
+                                if (!Matches(update.Where, row.Values)) { proposed.Add(row); continue; }
+                                var values = new Dictionary<string, SqlValue>(row.Values, StringComparer.OrdinalIgnoreCase);
+                                ApplyAssignments(table, values, assignments, row.Values);
+                                proposed.Add(new(row.StorageKey, values));
+                                affectedRows++;
                             }
-                            ValidateUnique(table, existingRows);
-                            ValidateChecks(table, existingRows);
-                            await ValidateOutgoingReferencesAsync(table, existingRows);
-                            await ValidateIncomingReferencesAsync(table, existingRows, update);
-                            result = Empty($"{changes.Count} 行を更新しました。");
+                            await ApplyReferentialActionsAsync(table, existingRows, proposed, changes);
+                            result = Empty($"{affectedRows} 行を更新しました。");
                             break;
                         case DeleteRows delete:
                             delete.Where?.Validate(table.Columns);
-                            var deletedRows = existingRows.Where(x => Matches(delete.Where, x.Values)).ToArray();
-                            foreach (var row in deletedRows)
-                            {
-                                changes.Add((row.StorageKey, null));
-                                if (table.PrimaryIndex) indexChanges[IndexKey(table, row.Values[primary!.Name])] = null;
-                                foreach (var index in secondary)
-                                    index.RecordChange(row.StorageKey, row.Values, null, indexChanges);
-                            }
-                            var deletedKeys = deletedRows.Select(r => r.StorageKey).ToHashSet(StringComparer.Ordinal);
-                            existingRows.RemoveAll(r => deletedKeys.Contains(r.StorageKey));
-                            await ValidateIncomingReferencesAsync(table, existingRows, null);
-                            result = Empty($"{changes.Count} 行を削除しました。"); break;
+                            var survivors = existingRows.Where(r => !Matches(delete.Where, r.Values)).ToList();
+                            await ApplyReferentialActionsAsync(table, existingRows, survivors, changes);
+                            result = Empty($"{existingRows.Count - survivors.Count} 行を削除しました。");
+                            break;
                         case DropTable:
                             await RestrictReferencedSchemaAsync(table, null);
                             var dependent = (await GetViewsAsync()).FirstOrDefault(x => ViewUsesTable(x, table.Name));
@@ -388,7 +420,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
             var bytes = await GetAsync(ProcedurePrefix + TableId(procedure.Name))
                 ?? throw new SqlException($"プロシージャー '{procedure.Name}' は存在しません。");
             var body = SqlParser.Parse(Deserialize<string>(bytes));
-            if (body.Any(s => s is not (SelectRows or InsertRows or UpdateRows or DeleteRows)))
+            if (body.Any(s => s is not (SelectRows or InsertRows or InsertSelect or MergeRows or UpdateRows or DeleteRows)))
                 throw new SqlException("保存されたプロシージャーに対応外の文があります。");
             executing = true;
             SqlResult last = Empty("");
@@ -436,20 +468,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
             query = plan.Query;
             source = plan.Schema;
         }
-        Select(query, source, []);
-        var columns = new List<SqlColumn>();
-        foreach (var projection in ExpandProjections(query, source))
-        {
-            var type = projection.Aggregate.HasValue ? "REAL" : projection.Expression switch
-            {
-                SqlField field => Column(source, field.Name).Type,
-                SqlLiteral literal => literal.Value.Kind == "NUMBER" ? "REAL" : literal.Value.Kind,
-                _ => "INTEGER" // COUNT(*)
-            };
-            var name = projection.Alias!;
-            if (columns.Any(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase))) throw new SqlException($"ビューの列名 '{name}' が重複しています。ASで別名を指定してください。");
-            columns.Add(new(name, type, false, false, false, null, null));
-        }
+        var columns = TableFromResult(view.Name, Select(query, source, [], describeOnly: true)).Columns;
         return new(view.Name, columns, view.Query, tables[0].Name, JoinSources: tables.Skip(1).Select(t => t.Name).ToList());
     }
 
@@ -475,7 +494,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
 
     private async Task<List<SqlRow>> LoadViewRowsAsync(SqlTable view)
     {
-        if (view.ViewQuery is null || SqlParser.Parse(view.ViewQuery) is not [SelectRows query] || query.Table is null || query.Where is SqlInSubquery ||
+        if (view.ViewQuery is null || SqlParser.Parse(view.ViewQuery) is not [SelectRows query] || query.Table is null || query.HasQuerySources ||
             !string.Equals(query.Table, view.SourceTable, StringComparison.OrdinalIgnoreCase) ||
             !query.Joins().Select(j => j.Table).SequenceEqual(view.JoinSources ?? [], StringComparer.OrdinalIgnoreCase))
             throw new SqlException("ビュー定義が不正です。");
@@ -487,29 +506,49 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
     private static SqlProjection[] ExpandProjections(SelectRows select, SqlTable table) =>
         select.Projections.SelectMany(x => x.Star ? table.Columns.Select(c => new SqlProjection(new SqlField(c.Name), c.Name)) : [x]).ToArray();
 
-    private static SqlResult Select(SelectRows select, SqlTable table, List<SqlRow> source)
+    private static SqlResult Select(SelectRows select, SqlTable table, List<SqlRow> source, bool describeOnly = false)
     {
-        select.Where?.Validate(table.Columns);
+        if (select.Where is { } predicate)
+        {
+            predicate.Validate(table.Columns);
+            if (predicate.ContainsAggregate()) throw new SqlException("Aggregates are not allowed in WHERE.");
+            RequireType(ExpressionType(predicate, table.Columns), "BOOLEAN");
+        }
         foreach (var projection in select.Projections) projection.Expression?.Validate(table.Columns);
         foreach (var order in select.Order.Where(o => o.OutputIndex is null)) Column(table, order.Column);
         var selected = source.Where(x => Matches(select.Where, x.Values)).ToList();
-        if (select.IsGrouped) return SelectGroups(select, table, selected);
-        if (select.Order.Count > 0)
-            selected.Sort((left, right) =>
-            {
-                foreach (var order in select.Order)
-                {
-                    var comparison = SqlValue.Compare(left.Values[order.Column], right.Values[order.Column]);
-                    if (comparison != 0) return order.Descending ? -comparison : comparison;
-                }
-                return 0;
-            });
+        if (select.IsGrouped) return SelectGroups(select, table, selected, describeOnly);
         var projections = ExpandProjections(select, table);
         if (projections.Length > 64) throw new SqlException("結果列は64列以下にしてください。");
         if (projections.Length == 0) throw new SqlException("SELECT *にはFROMでテーブルを指定してください。");
-        var page = selected.Skip(select.Offset).Take(select.Limit ?? MaxRows)
-            .Select(row => projections.Select(p => p.Expression!.Evaluate(row.Values)).ToArray()).ToArray();
-        return new(projections.Select(x => x.Alias ?? "value").ToArray(), page, $"{page.Length} 行を取得しました。");
+        var types = ProjectionTypes(projections, table);
+        var names = projections.Select(p => p.Alias ?? "value").ToArray();
+        if (describeOnly || select.Limit == 0) return new(names, [], "0 rows") { ColumnTypes = types };
+        var windows = projections.Select(p => p.Window is { } window ? WindowValues(window, selected) : null).ToArray();
+        SqlValue Project(int row, int column) => windows[column] is { } values
+            ? values[row] : projections[column].Expression!.Evaluate(selected[row].Values);
+
+        var indices = Enumerable.Range(0, selected.Count);
+        IOrderedEnumerable<int>? ordered = null;
+        var comparer = Comparer<SqlValue>.Create(SqlValue.Compare);
+        foreach (var sort in select.Order)
+        {
+            SqlValue Key(int i) => sort.OutputIndex is int alias ? Project(i, alias) : selected[i].Values[sort.Column];
+            ordered = ordered is null
+                ? (sort.Descending ? indices.OrderByDescending(Key, comparer) : indices.OrderBy(Key, comparer))
+                : (sort.Descending ? ordered.ThenByDescending(Key, comparer) : ordered.ThenBy(Key, comparer));
+        }
+        IEnumerable<int> output = ordered ?? indices;
+        if (!select.Distinct) output = output.Skip(select.Offset).Take(select.Limit ?? MaxRows);
+        var values = output.Select(i => projections.Select((_, column) => Project(i, column)).ToArray());
+        var page = select.Distinct ? PageProjectedRows(select, values) : values.ToArray();
+        return new(names, page, $"{page.Length} 行を取得しました。") { ColumnTypes = types };
+    }
+
+    private static SqlValue[][] PageProjectedRows(SelectRows select, IEnumerable<SqlValue[]> projected)
+    {
+        if (select.Distinct) projected = projected.Distinct(new GroupKeyComparer());
+        return projected.Skip(select.Offset).Take(select.Limit ?? MaxRows).ToArray();
     }
 
     private static bool Matches(SqlExpression? expression, Dictionary<string, SqlValue> row)
@@ -547,13 +586,8 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
             var tuples = new HashSet<string>(StringComparer.Ordinal);
             foreach (var row in rows)
             {
-                var tuple = new StringBuilder();
-                foreach (var column in columns)
-                {
-                    var part = UniqueIdentity(row.Values[column]);
-                    tuple.Append(part.Length).Append(':').Append(part);
-                }
-                if (!tuples.Add(tuple.ToString())) throw new SqlException("複合主キーの値が重複しています。");
+                var tuple = ReferenceIdentity(row, columns) ?? throw new SqlException("複合主キーにはNULLを指定できません。");
+                if (!tuples.Add(tuple)) throw new SqlException("複合主キーの値が重複しています。");
             }
         }
         foreach (var column in table.Columns.Where(x => x.Unique))

@@ -1,7 +1,5 @@
 using System.Buffers.Binary;
-using System.Net.Security;
 using System.Net.Sockets;
-using System.Security.Authentication;
 using Catdb.Sql;
 using System.Text.Json.Nodes;
 
@@ -10,44 +8,18 @@ namespace Catdb.Owner.Services;
 public sealed class CatdbClient : IDisposable
 {
     private readonly TcpClient socket = new();
-    private Stream? stream;
     public bool Connected => socket.Connected;
     public bool SupportsSql { get; private set; }
     public string? ReadRole { get; private set; }
     public bool SqlTransactionActive { get; private set; }
-    public bool AccountLogin { get; private set; }
-    public string? DatabaseRole { get; private set; }
 
     public async Task ConnectAsync(string host, int port, string token)
     {
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         await socket.ConnectAsync(host, port, deadline.Token);
-        stream = socket.GetStream();
         var response = await RequestAsync(new JsonObject { ["op"] = "auth", ["version"] = 1, ["token"] = token });
         SupportsSql = response["sql"]?.GetValue<bool>() == true;
         ReadRole = response["read_role"]?.GetValue<string>();
-    }
-
-    public async Task ConnectAccountAsync(string host, int port, string username, string password, string database)
-    {
-        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        await socket.ConnectAsync(host, port, deadline.Token);
-        var tls = new SslStream(socket.GetStream());
-        stream = tls;
-        await tls.AuthenticateAsClientAsync(new SslClientAuthenticationOptions
-        {
-            TargetHost = host,
-            EnabledSslProtocols = SslProtocols.Tls13
-        }, deadline.Token);
-        var response = await RequestAsync(new JsonObject
-        {
-            ["op"] = "auth", ["version"] = 2, ["username"] = username,
-            ["password"] = password, ["database"] = database
-        });
-        if (response["protocol"]?.GetValue<int>() != 2) throw new IOException("TLS アカウント認証の応答が不正です。");
-        AccountLogin = true;
-        DatabaseRole = response["role"]?.GetValue<string>();
-        SupportsSql = response["sql"]?.GetValue<bool>() == true;
     }
 
     public async Task<JsonObject> RequestAsync(JsonObject request)
@@ -59,14 +31,14 @@ public sealed class CatdbClient : IDisposable
         BinaryPrimitives.WriteInt32BigEndian(header, body.Length);
         try
         {
-            var transport = stream ?? throw new IOException("接続されていません。");
-            await transport.WriteAsync(header, deadline.Token);
-            await transport.WriteAsync(body, deadline.Token);
-            await transport.ReadExactlyAsync(header, deadline.Token);
+            var stream = socket.GetStream();
+            await stream.WriteAsync(header, deadline.Token);
+            await stream.WriteAsync(body, deadline.Token);
+            await stream.ReadExactlyAsync(header, deadline.Token);
             var size = BinaryPrimitives.ReadInt32BigEndian(header);
             if (size is <= 0 or > 2105344) throw new IOException("応答サイズが不正です。");
             var bytes = new byte[size];
-            await transport.ReadExactlyAsync(bytes, deadline.Token);
+            await stream.ReadExactlyAsync(bytes, deadline.Token);
             var result = JsonNode.Parse(bytes) as JsonObject ?? throw new IOException("応答が不正です。");
             if (request["op"]?.ToString() == "sql")
                 SqlTransactionActive = result["in_transaction"]?.GetValue<bool>() ?? throw new IOException("トランザクション状態が不明です。");
@@ -84,9 +56,7 @@ public sealed class CatdbClient : IDisposable
         }
     }
 
-    public void Dispose()
-    {
-        stream?.Dispose();
-        socket.Dispose();
-    }
+    public void Dispose() => socket.Dispose();
 }
+
+

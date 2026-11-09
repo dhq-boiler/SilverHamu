@@ -9,11 +9,14 @@
 | Open a local database without a server | Yes | Yes | One owning process per file. Rust, C and C# can embed the storage engine. |
 | Transactions and crash recovery | Yes | Yes | Snapshot reads, conflict detection, commit and rollback use the same native engine. |
 | SQL tables, indexes and constraints | Yes | Yes | The .NET 10 SQL layer supports primary and foreign keys, checks and composite indexes. SQL tables are limited to 4,096 rows each. |
+| [SQL types for IDs, amounts and time](docs/sql.md#sql-types) | Yes | Yes | Built-in types include UUID, exact decimal, date, time, local date-time, instant and duration. Named types keep values such as customer IDs and order IDs distinct in comparisons and assignments. |
+| Add amounts of the same currency | Yes | Yes | Enable addition with `ALTER TYPE JpyAmount ENABLE OPERATOR +`. Adding two `JpyAmount` columns returns a `JpyAmount` and checks its range and constraints. Mixing currency types raises an error. |
 | Joins, views and aggregates | Yes | Yes | Inner and outer joins support up to eight inputs and 4,096 intermediate rows per join step. |
-| [Standard SQL syntax](#sql-syntax-matrix) | Partial | Partial | The matrix below lists the SQL forms covered by the shared engine and its tests. |
+| [Standard SQL syntax](#sql-syntax-matrix) | Partial | Partial | Both use the same SQL subset. The matrix below gives examples of supported and unsupported queries, writes and schema operations. |
 | Query execution plans | No | No | TODO: Build an explicit plan for each query and expose it through `EXPLAIN` so users can inspect scans, index lookups and joins. |
 | Cost-based query optimizer | No | No | TODO: Estimate row counts and compare alternative access paths and join orders to choose an execution plan. |
 | Serve authenticated network clients | Yes | No | The Rust service supports shared tokens and TLS accounts. Server-side SQL requires a separately configured SQL host. |
+| [Query granted views with a view-only token](docs/sql.md#role-writes) | Yes | Yes (client) | The SQL service limits reads to granted views and denies direct key reads and scans. Once a revocation commits, the next read on the same connection is denied. |
 | Back up and restore a standalone database | Yes | Yes | Offline backup preserves the physical file. Embedded online backup captures a committed generation. Account-enrolled services require a coordinated backup. |
 | SQL editor and result grid | No | Yes | The standalone SQL CLI is also available for scripts. |
 | Replication and automatic failover | No | No | Single-owner storage; no multi-node promotion protocol. |
@@ -37,20 +40,29 @@ These labels cover common SQL forms in the shared `Catdb.Sql` engine used by cat
 | `BETWEEN`, `IN (value, ...)`, unary `NOT` | ✓ Supported | Inclusive bounds, value lists and SQL three-valued logic. |
 | `WHERE col IN (SELECT col FROM t ...)` | ✓ Supported | One-column query used as a predicate, including in compound conditions. |
 | Correlated subqueries, scalar subqueries, `EXISTS`, `FROM (SELECT ...)` | ✓ Supported | Use outer columns in nested SELECTs. A scalar query returns NULL for zero rows and raises an error for multiple rows. Derived tables require an alias. |
-| `INNER JOIN`, `LEFT`, `RIGHT` and `FULL OUTER JOIN` | ✓ Supported | Each `ON` compares two qualified columns for equality. Up to eight inputs. |
+| `INNER JOIN`, `LEFT`, `RIGHT` and `FULL OUTER JOIN` with `ON a.id = b.id` | ✓ Supported | One equality comparison between qualified columns per join. Up to eight inputs. |
+| Compound join conditions, e.g. `ON a.id = b.id AND a.region = b.region` | ✗ Unsupported | For equality on multiple columns with matching names, use `JOIN ... USING (id, region)`. |
+| Non-equality join conditions, e.g. `ON a.price < b.price` | ✗ Unsupported | The comparison operator in an `ON` clause must be `=`. |
 | `CROSS JOIN`, `NATURAL JOIN`, `JOIN ... USING` | ✓ Supported | Natural joins match all shared names. USING accepts one or more columns and exposes each shared column once in `SELECT *`. |
 | `GROUP BY` | ✓ Supported | One or more grouping columns. |
+| Grouping by an expression, e.g. `GROUP BY price * qty` | ✗ Unsupported | Grouping keys must be column references. |
 | `HAVING` | ✓ Supported | Filters groups after aggregation and before window functions. |
 | `COUNT(*)` | ✓ Supported | Counts rows after filtering. |
 | `COUNT(col)`, `COUNT(DISTINCT col)` | ✓ Supported | Ignores NULL. DISTINCT counts each distinct non-NULL value once. |
+| `COUNT(*) FILTER (WHERE ...)` | ✗ Unsupported | An aggregate cannot have its own filter clause. |
 | `SUM(col)`, `AVG(col)` | ✓ Supported | Numeric columns. |
 | `MIN(col)`, `MAX(col)` | ✓ Supported | Both ignore NULL and return NULL for an empty group. |
 | `ORDER BY col ASC/DESC` | ✓ Supported | Multiple sort columns. |
+| `ORDER BY col NULLS FIRST` or `NULLS LAST` | ✗ Unsupported | The sort clause has no explicit null placement option. |
 | `OFFSET n ROWS FETCH NEXT n ROWS ONLY` | ✓ Supported | Supports FIRST or NEXT, ROW or ROWS, and a fetch count from 0 to 4,096. |
 | `UNION`, `UNION ALL`, `INTERSECT`, `EXCEPT` | ✓ Supported | Operands need the same number of columns with compatible types. ORDER BY and pagination apply to the combined result. |
 | `WITH`, `WITH RECURSIVE` | ✓ Supported | Recursive queries use an anchor and a UNION [ALL] recursive term, with at most 4,096 rows. |
 | Window functions (`OVER`) | ✓ Supported | Ranking, navigation and aggregate functions with PARTITION BY, ORDER BY and ROWS frames. [Functions and examples](docs/sql.md#window-functions) |
+| `RANGE` or `GROUPS` window frames | ✗ Unsupported | Explicit frame bounds use `ROWS`. |
 | `CASE`, `CAST`, arithmetic such as `SELECT price * qty` | ✓ Supported | Simple and searched CASE, casts to catdb column types, and numeric operators with precedence. |
+| `SELECT subtotal + tax FROM invoice_lines` on a named numeric type | ✓ Supported | Enable `+` for the type first. Both columns and the result share that type. |
+| `EXPLAIN SELECT ...` | ✗ Unsupported | SQL cannot display a query execution plan. |
+| `SELECT ... FOR UPDATE` | ✗ Unsupported | A query cannot request a row lock with this clause. |
 
 </details>
 
@@ -62,10 +74,16 @@ These labels cover common SQL forms in the shared `Catdb.Sql` engine used by cat
 | `INSERT INTO ... VALUES` | ✓ Supported | Optional column list and multiple rows of literals. |
 | `INSERT INTO ... SELECT` | ✓ Supported | Inserts a query result into all or selected target columns, applying defaults and constraints. |
 | `MERGE` | ✓ Supported | Accepts a table, view, query or VALUES source. Matched rows can be updated or deleted and unmatched source rows can be inserted. |
+| `INSERT ... ON CONFLICT ... DO UPDATE` | ✗ Unsupported | Use `MERGE` for matched updates and unmatched inserts. |
 | `UPDATE ... SET col = literal [WHERE ...]` | ✓ Supported | One or more column assignments. |
 | `UPDATE ... SET qty = qty + 1` | ✓ Supported | Each assignment reads the original row, including when several columns change. |
 | `DELETE FROM ... [WHERE ...]` | ✓ Supported | |
+| `RETURNING` on `INSERT`, `UPDATE` or `DELETE` | ✗ Unsupported | These statements cannot return projected columns from the affected rows. |
 | `CREATE TABLE`, `DROP TABLE` | ✓ Supported | Up to 64 columns per table. |
+| `TRUNCATE TABLE` | ✗ Unsupported | Use `DELETE FROM table_name` to remove all rows. |
+| `CREATE INDEX ... ON t(col, ...)` | ✓ Supported | Index one column or a tuple of columns. |
+| `CREATE UNIQUE INDEX`; partial indexes (`CREATE INDEX ... WHERE ...`) | ✗ Unsupported | A column can declare a `UNIQUE` constraint. Standalone indexes cover all rows. |
+| `CREATE TRIGGER`; `CREATE SEQUENCE` | ✗ Unsupported | There are no SQL schema objects for triggers or sequences. |
 | `CREATE TYPE ... AS DISTINCT`, `SHOW TYPES` | ✓ Supported | Give IDs, amounts and other values distinct types with optional constraints. [SQL types and examples](docs/sql.md#sql-types) |
 | `ALTER TYPE T ENABLE OPERATOR +` | ✓ Supported | Enable addition for a named numeric type. The sum retains that type. |
 | `CREATE TABLE ... AS SELECT` | ✓ Supported | Copies query results and infers column types, including for an empty result. |
@@ -73,11 +91,12 @@ These labels cover common SQL forms in the shared `Catdb.Sql` engine used by cat
 | Single-column or composite `PRIMARY KEY` | ✓ Supported | |
 | Single-column `FOREIGN KEY ... REFERENCES` | ✓ Supported | |
 | Composite foreign keys, `ON DELETE CASCADE`, `ON UPDATE CASCADE` | ✓ Supported | Composite references target a composite primary key. Cascades propagate through dependent rows and indexes in the same transaction. |
+| Foreign key actions `SET NULL` and `SET DEFAULT` | ✗ Unsupported | The supported actions are `CASCADE`, `RESTRICT` and `NO ACTION`. |
 | `ALTER TABLE ... ADD COLUMN`, `RENAME COLUMN` | ✓ Supported | |
 | `ALTER TABLE ... DROP COLUMN`, `ALTER COLUMN` | ✓ Supported | Drop columns, change a compatible data type, or set/drop DEFAULT and NOT NULL. Dependent constraints and views are checked. |
 | `CREATE VIEW ... AS SELECT`, `DROP VIEW` | ✓ Supported | View definitions select from base tables. Join and aggregate views support reads. |
 | `INSERT`, `UPDATE` or `DELETE` through a view | ✓ Supported | Single-table views that project distinct base columns directly. UPDATE and DELETE act on rows visible through the view. |
-| `GRANT SELECT ON view`, `REVOKE SELECT ON view` | ✓ Supported | Named roles on published views. |
+| `GRANT SELECT ON view`, `REVOKE SELECT ON view` | ✓ Supported | A view-only token can query granted views. Once a revocation commits, the next query against that view is denied even on the same connection. |
 | `GRANT INSERT`, `GRANT UPDATE`, `GRANT DELETE` | ✓ Supported | Grant or revoke each write operation on a named table or view. The authenticated role needs a grant for the requested operation. |
 | `COMMIT`, `ROLLBACK` | ✓ Supported | Open a transaction with `BEGIN` or `BEGIN TRANSACTION`. |
 | `START TRANSACTION`, `SAVEPOINT`, `ROLLBACK TO SAVEPOINT` | ✓ Supported | Up to 128 named savepoints per active transaction. ROLLBACK TO retains the named savepoint. RELEASE removes it. |

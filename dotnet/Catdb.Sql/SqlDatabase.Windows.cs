@@ -115,8 +115,7 @@ public sealed partial class SqlDatabase
         var type = ExpressionType(window.Argument, columns);
         if (window.Fallback is { } fallback)
             type = CommonType(type, ExpressionType(new SqlLiteral(fallback), columns));
-        if (window.Function is "SUM" or "AVG" && type is not ("INTEGER" or "REAL" or "NULL"))
-            throw new SqlException("SUM and AVG require a numeric argument.");
+        if (window.Function is "SUM" or "AVG") RequireNumber(type);
         return window.Function switch { "COUNT" => "INTEGER", "AVG" or "SUM" => "REAL", _ => type };
     }
 

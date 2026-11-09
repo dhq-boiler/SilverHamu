@@ -8,6 +8,7 @@ public sealed partial class SqlDatabase
         switch (expression)
         {
             case SqlLiteral literal:
+                if (literal.Value.TypeName is { } name) return name;
                 return literal.Value.Kind == "NUMBER"
                     ? long.TryParse(literal.Value.Text, System.Globalization.CultureInfo.InvariantCulture, out _) ? "INTEGER" : "REAL"
                     : literal.Value.Kind;
@@ -36,15 +37,20 @@ public sealed partial class SqlDatabase
                 if (binary.Operator is "+" or "-" or "*" or "/" or "%")
                 {
                     RequireNumber(left); RequireNumber(right);
-                    return binary.Operator == "/" ? "REAL" : CommonType(left, right);
+                    // A computed value can exceed the precision or scale of either input column.
+                    return binary.Operator == "/" || SqlTypeRules.IsDecimal(left) || SqlTypeRules.IsDecimal(right)
+                        ? "REAL" : CommonType(left, right);
                 }
                 if (binary.Operator is "AND" or "OR") { RequireType(left, "BOOLEAN"); RequireType(right, "BOOLEAN"); }
                 else if (binary.Operator == "LIKE") { RequireType(left, "TEXT"); RequireType(right, "TEXT"); }
                 else CommonType(left, right);
                 return "BOOLEAN";
             case SqlCast cast:
-                TypeOf(cast.Operand);
-                return cast.Type;
+                var from = TypeOf(cast.Operand);
+                var to = cast.TargetType;
+                if (from != "NULL" && from != to && !SqlTypeRules.IsBuiltIn(from) && !SqlTypeRules.IsBuiltIn(to))
+                    throw new SqlException($"Cannot cast {from} directly to {to}.");
+                return to;
             case SqlCase conditional:
                 var caseType = conditional.Else is null ? "NULL" : TypeOf(conditional.Else);
                 var key = conditional.Operand is null ? null : TypeOf(conditional.Operand);
@@ -74,14 +80,16 @@ public sealed partial class SqlDatabase
 
     private static void RequireNumber(string type)
     {
-        if (type is not ("INTEGER" or "REAL" or "NULL")) throw new SqlException($"Expected a number, received {type}.");
+        if (type != "NULL" && !IsNumericType(type)) throw new SqlException($"Expected a number, received {type}.");
     }
+
+    private static bool IsNumericType(string type) => type is "INTEGER" or "REAL" || SqlTypeRules.IsDecimal(type);
 
     private static string CommonType(string first, string second)
     {
         if (first == second || second == "NULL") return first;
         if (first == "NULL") return second;
-        if (first is "INTEGER" or "REAL" && second is "INTEGER" or "REAL") return "REAL";
+        if (IsNumericType(first) && IsNumericType(second)) return "REAL";
         throw new SqlException($"Incompatible SQL types {first} and {second}.");
     }
 }

@@ -90,7 +90,7 @@ public sealed partial class SqlDatabase
             var rows = state.Current.Values.ToList();
             foreach (var row in rows) ValidateRow(state.Table, row.Values);
             ValidateUnique(state.Table, rows);
-            ValidateChecks(state.Table, rows);
+            await ValidateChecksAsync(state.Table, rows);
             await ValidateOutgoingReferencesAsync(state.Table, rows, states);
             RecordRowChanges(state, changes);
         }

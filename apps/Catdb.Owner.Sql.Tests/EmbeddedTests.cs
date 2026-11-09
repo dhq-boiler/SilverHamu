@@ -14,6 +14,26 @@ public sealed class EmbeddedTests : IDisposable
     private static SqlDatabase Sql(EmbeddedCatdbStore store) => new(store.RequestAsync, () => store.InTransaction);
 
     [Fact]
+    public async Task Reopening_preserves_named_types_and_binds_casts_in_saved_views_and_checks()
+    {
+        var path = DbPath();
+        using (var db = await CatdbSqlConnection.OpenAsync(path, create: true))
+        {
+            await db.ExecuteAsync("""
+                CREATE TYPE TicketId AS DISTINCT INTEGER;
+                CREATE TABLE tickets (id TicketId PRIMARY KEY, CHECK (id <> CAST(0 AS TicketId)));
+                INSERT INTO tickets VALUES (7);
+                CREATE VIEW visible AS SELECT id FROM tickets WHERE id = CAST(7 AS TicketId)
+                """);
+        }
+        using var reopened = await CatdbSqlConnection.OpenAsync(path);
+        var result = Assert.Single(await reopened.ExecuteAsync("SELECT id FROM visible"));
+        Assert.Equal("TicketId", Assert.Single(result.ColumnTypes!));
+        Assert.Equal("TicketId", Assert.Single(Assert.Single(result.Rows)).TypeName);
+        await Assert.ThrowsAsync<SqlException>(() => reopened.ExecuteAsync("INSERT INTO tickets VALUES (0)"));
+    }
+
+    [Fact]
     public async Task Savepoints_restore_rows_indexes_and_catalog_across_SQL_calls()
     {
         using var db = await CatdbSqlConnection.OpenAsync(DbPath(), create: true);

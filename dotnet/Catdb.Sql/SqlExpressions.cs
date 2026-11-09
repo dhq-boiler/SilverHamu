@@ -4,7 +4,7 @@ namespace Catdb.Sql;
 
 internal static class SqlNumbers
 {
-    internal static decimal Numeric(SqlValue value) => value.Kind == "NUMBER"
+    internal static decimal Numeric(SqlValue value) => value.Kind == "NUMBER" && value.TypeName is null
         ? decimal.Parse(value.Text!, CultureInfo.InvariantCulture)
         : throw new SqlException("Arithmetic requires numeric operands.");
 
@@ -100,38 +100,14 @@ public sealed record SqlCase(SqlExpression? Operand, IReadOnlyList<SqlWhen> Bran
 
 public sealed record SqlCast(SqlExpression Operand, string Type, int? MaxLength = null) : SqlExpression
 {
+    internal SqlTypeDefinition? DistinctType { get; set; }
+    internal string TargetType => DistinctType?.Name ?? (SqlTypeRules.IsBuiltIn(Type)
+        ? Type : throw new SqlException($"Unknown SQL type '{Type}'."));
     public override SqlExpression MapChildren(Func<SqlExpression, SqlExpression> map) => this with { Operand = map(Operand) };
     public override SqlValue Evaluate(IReadOnlyDictionary<string, SqlValue> row)
     {
         var value = Operand.Evaluate(row);
-        if (value.IsNull) return value;
-        SqlValue result;
-        switch (Type)
-        {
-            case "TEXT":
-                result = SqlValue.String(value.Text!);
-                break;
-            case "BLOB" when value.Kind is "TEXT" or "BLOB":
-                try { result = new("BLOB", Convert.ToHexString(Convert.FromHexString(value.Text!))); }
-                catch (FormatException) { throw new SqlException("CAST to BLOB requires hexadecimal text."); }
-                break;
-            case "BOOLEAN" when bool.TryParse(value.Text, out var boolean):
-                result = SqlValue.Boolean(boolean);
-                break;
-            case "INTEGER" or "REAL" when value.Kind is "NUMBER" or "TEXT" &&
-                    decimal.TryParse(value.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var number):
-                if (Type == "INTEGER")
-                {
-                    number = decimal.Truncate(number);
-                    if (number < long.MinValue || number > long.MaxValue) throw new SqlException("CAST to INTEGER overflow.");
-                }
-                result = SqlNumbers.Number(number);
-                break;
-            default: throw new SqlException($"Cannot cast {value.Kind} to {Type}.");
-        }
-        if (MaxLength is int max && (Type == "BLOB" ? result.Text!.Length / 2 : result.Text!.Length) > max)
-            throw new SqlException($"CAST result exceeds length {max}.");
-        return result;
+        return SqlTypeRules.Cast(value, TargetType, MaxLength, DistinctType);
     }
 }
 

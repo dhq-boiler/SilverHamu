@@ -21,7 +21,13 @@ public sealed partial class SqlParser
             if (parser.Match(";")) continue;
             parser.conditionCount = 0;
             parser.compoundCount = 0;
-            statements.Add(parser.Statement());
+            var statement = parser.Statement();
+            if (parser.namedCasts.Count > 0)
+            {
+                statement = statement with { NamedCasts = parser.namedCasts.ToArray() };
+                parser.namedCasts.Clear();
+            }
+            statements.Add(statement);
             if (!parser.End) parser.Expect(";");
             if (statements.Count > 100) throw new SqlException("1回の実行は100文までです。");
         }
@@ -94,7 +100,12 @@ public sealed partial class SqlParser
             if (!Match("TO")) return new TransactionStatement("rollback");
             Match("SAVEPOINT"); return new TransactionStatement("rollback_to", Name());
         }
-        if (Match("SHOW")) { if (Match("VIEWS")) return new ShowViews(); Expect("TABLES"); return new ShowTables(); }
+        if (Match("SHOW"))
+        {
+            if (Match("VIEWS")) return new ShowViews();
+            if (Match("TYPES")) return new ShowTypes();
+            Expect("TABLES"); return new ShowTables();
+        }
         throw Error("未対応のSQL文です。");
     }
 
@@ -109,6 +120,7 @@ public sealed partial class SqlParser
 
     private SqlStatement Create()
     {
+        if (Match("TYPE")) return TypeDefinition();
         var kind = SchemaObjectKind();
         var optional = Match("IF"); if (optional) { Expect("NOT"); Expect("EXISTS"); }
         var objectName = Name();
@@ -249,23 +261,63 @@ public sealed partial class SqlParser
         return source[start..end];
     }
 
-    internal static SqlExpression ParseCheck(string text)
+    internal static SqlExpression ParseCheck(string text) => ParseCheck(text, out _);
+
+    internal static SqlExpression ParseCheck(string text, out IReadOnlyList<SqlCast> namedCasts)
     {
         var parser = new SqlParser(text);
         var expression = parser.Expression();
         if (SqlNestedQuery.Contains(expression)) throw parser.Error("CHECK cannot read another relation.");
         if (!parser.End) throw parser.Error("CHECK式が不正です。");
+        namedCasts = parser.namedCasts;
         return expression;
     }
 
     private (string Type, int? MaxLength) ColumnType()
     {
-        var type = Name().ToUpperInvariant();
-        type = type switch { "INT" or "BIGINT" => "INTEGER", "VARCHAR" or "NVARCHAR" or "STRING" => "TEXT", "FLOAT" or "DOUBLE" or "DECIMAL" => "REAL", "BOOL" => "BOOLEAN", "VARBINARY" => "BLOB", _ => type };
-        if (type is not ("INTEGER" or "REAL" or "TEXT" or "BOOLEAN" or "BLOB")) throw Error($"型 '{type}' は未対応です。INTEGER / REAL / TEXT / BOOLEAN / BLOBを使用してください。");
+        var name = Name();
+        if (name.Equals("DECIMAL", StringComparison.OrdinalIgnoreCase) && Match("("))
+        {
+            var precision = Integer(1, 28);
+            Expect(",");
+            var scale = Integer(0, precision);
+            Expect(")");
+            return (FormattableString.Invariant($"DECIMAL({precision},{scale})"), null);
+        }
+        var type = BuiltInName(name) ?? name;
         int? maxLength = null;
         if (Match("(")) { if (type is not ("TEXT" or "BLOB")) throw Error("長さ指定はTEXT / BLOBのみ対応します。"); maxLength = Integer(1, 65536); Expect(")"); }
         return (type, maxLength);
+    }
+
+    private static string? BuiltInName(string name)
+    {
+        var upper = name.ToUpperInvariant();
+        return upper switch
+        {
+            "INT" or "BIGINT" => "INTEGER",
+            "VARCHAR" or "NVARCHAR" or "STRING" => "TEXT",
+            "FLOAT" or "DOUBLE" or "DECIMAL" => "REAL",
+            "BOOL" => "BOOLEAN",
+            "VARBINARY" => "BLOB",
+            _ => SqlTypeRules.IsBuiltIn(upper) ? upper : null
+        };
+    }
+
+    private CreateType TypeDefinition()
+    {
+        var optional = Match("IF");
+        if (optional) { Expect("NOT"); Expect("EXISTS"); }
+        var name = Name();
+        if (BuiltInName(name) is not null || name.ToUpperInvariant() is "NULL" or "NUMBER")
+            throw Error($"'{name}' is reserved and cannot name a distinct type.");
+        Expect("AS");
+        Expect("DISTINCT");
+        var (baseType, maxLength) = ColumnType();
+        if (!SqlTypeRules.IsBuiltIn(baseType))
+            throw Error("A distinct type requires a built-in base type.");
+        var check = Match("CHECK") ? CheckDefinition() : null;
+        return new(new(name, baseType, maxLength, check), optional);
     }
 
     private AlterColumn ColumnAlteration(string table)
@@ -318,9 +370,32 @@ public sealed partial class SqlParser
     {
         Expect("INTO"); var table = Name(); var columns = OptionalColumnList();
         if (Is("SELECT") || Is("WITH")) return new InsertSelect(table, columns, QueryExpression());
-        Expect("VALUES"); var rows = new List<List<SqlValue>>();
-        do { Expect("("); var values = new List<SqlValue>(); do { values.Add(Literal()); } while (Match(",")); Expect(")"); rows.Add(values); if (rows.Count > 4096) throw Error("1文の挿入は4096行までです。"); } while (Match(","));
-        return new InsertRows(table, columns, rows);
+        Expect("VALUES");
+        var rows = new List<List<SqlExpression>>();
+        bool hasCast = false;
+        do
+        {
+            Expect("(");
+            var values = new List<SqlExpression>();
+            do
+            {
+                if (Is("CAST"))
+                {
+                    var expression = Factor(0);
+                    var operand = expression;
+                    while (operand is SqlCast cast) operand = cast.Operand;
+                    if (operand is not SqlLiteral) throw Error("INSERT VALUES の CAST にはリテラルを指定してください。");
+                    values.Add(expression);
+                    hasCast = true;
+                }
+                else values.Add(new SqlLiteral(Literal()));
+            } while (Match(","));
+            Expect(")");
+            rows.Add(values);
+            if (rows.Count > 4096) throw Error("1文の挿入は4096行までです。");
+        } while (Match(","));
+        return hasCast ? new InsertValues(table, columns, rows)
+            : new InsertRows(table, columns, rows.Select(row => row.Cast<SqlLiteral>().Select(l => l.Value).ToList()).ToList());
     }
 
     private SelectRows SelectCore()

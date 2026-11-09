@@ -1,0 +1,24 @@
+version: 3
+title: catdb
+createdAt: 2026-11-09T15:31:25.7166025Z
+modifiedAt: 2026-11-09T15:39:38.6945393Z
+tasks:
+- id: sql-semantic-types
+  title: SQLで日時・金額・識別子の意味を保証する
+  notes: 基本型と名前付き独自型を使い分ける。異なるIDの比較・代入を拒否し、制約・型情報がSQLの読み書きと保存を通じて保たれることを終了条件とする。
+  children:
+  - id: sql-semantic-type-design
+    title: 独自型の意味と構文を設計する
+    estimateHours: 1
+    remainingHours: 0
+    notes: 型の同一性、CHECK、リテラルの代入、明示的な型変換、演算時の型を整理した。
+  - id: sql-semantic-type-engine
+    title: 基本型・独自型をSQLエンジンに実装する
+    estimateHours: 4
+    remainingHours: 0
+    notes: UUID、DECIMAL(p,s)、日時と期間、名前付き独自型、CHECK、カタログ、キャストと書き込み検証を実装した。比較・索引・ビュー・結果列にも型を引き継ぐ。FLOAT64、ユーザー定義演算子、DROP TYPE と ALTER TYPE は今回の対象外。
+  - id: sql-semantic-type-verification
+    title: 型の保証を検証し、利用例を文書化する
+    estimateHours: 2
+    remainingHours: 0
+    notes: Visual Studio 2026 の Debug ビルド成功。SQLテストはTRXで160件中160件成功。CLIで文書の例を実行し、ネイティブDBを作成後に再オープンした結果、金額1200をJpyAmount型で取得し、数値の合計1200を確認した。

@@ -52,7 +52,8 @@ public sealed partial class SqlDatabase
         var input = await ReadWriteSourceAsync(create.Query);
         var table = TableFromResult(create.Table, input, create.Columns);
         // An untyped NULL in a standalone projection has no source column declaration.
-        table = table with { Columns = table.Columns.Select(c => c.Type == "NULL" ? c with { Type = "TEXT" } : c).ToList() };
+        var columns = table.Columns.Select(c => c.Type == "NULL" ? c with { Type = "TEXT" } : c);
+        table = table with { Columns = await ResolveColumnTypesAsync(columns) };
         changes.Add((TableKey(table.Name), Serialize(table)));
         foreach (var values in input.Rows)
         {
@@ -71,6 +72,23 @@ public sealed partial class SqlDatabase
         for (int i = 0; i < columns.Count; i++) CommonType(columns[i].Type, types[i]);
     }
 
+    private static IEnumerable<IReadOnlyList<SqlValue>> InsertValuesForColumns(InsertStatement insert, IReadOnlyList<SqlColumn> columns)
+    {
+        if (insert is InsertRows literals)
+        {
+            if (literals.SourceTypes is { } types) ValidateInsertTypes(columns, types);
+            return literals.Rows;
+        }
+        var empty = new Dictionary<string, SqlValue>();
+        return ((InsertValues)insert).Rows.Select(row =>
+        {
+            if (row.Count != columns.Count) throw new SqlException("INSERT の列数と入力の列数が一致しません。");
+            for (var i = 0; i < row.Count; i++)
+                if (row[i] is SqlCast cast) CommonType(columns[i].Type, ExpressionType(cast, []));
+            return row.Select(expression => expression.Evaluate(empty)).ToArray();
+        });
+    }
+
     private static SqlRow MakeInsertedRow(SqlTable table, IReadOnlyList<SqlColumn> columns, IReadOnlyList<SqlValue> values)
     {
         if (values.Count != columns.Count) throw new SqlException("INSERT の列数と値の数が一致しません。");
@@ -82,6 +100,12 @@ public sealed partial class SqlDatabase
 
     private sealed record Assignment(SqlColumn Column, SqlExpression Expression);
 
+    private static void ValidateAssignment(SqlColumn column, SqlExpression expression, IReadOnlyList<SqlColumn> schema)
+    {
+        if (expression is SqlLiteral literal) Coerce(column, literal.Value);
+        else CommonType(column.Type, ExpressionType(expression, schema));
+    }
+
     private static Assignment[] ResolveAssignments(SqlTable table, IReadOnlyDictionary<string, SqlExpression> values)
     {
         return values.Select(pair =>
@@ -91,8 +115,7 @@ public sealed partial class SqlDatabase
                 SameTable(qualifier, table.Name) ? field with { Qualifier = null } : null);
             expression.Validate(table.Columns);
             if (expression.ContainsAggregate()) throw new SqlException("UPDATE の SET に集約関数を指定できません。");
-            CommonType(column.Type, ExpressionType(expression, table.Columns));
-            if (expression is SqlLiteral literal) Coerce(column, literal.Value);
+            ValidateAssignment(column, expression, table.Columns);
             return new Assignment(column, expression);
         }).ToArray();
     }

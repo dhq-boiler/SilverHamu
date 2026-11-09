@@ -236,5 +236,5 @@ public sealed partial class SqlDatabase
         }
     }
 
-    private static string ComparisonType(SqlColumn column) => column.Type is "INTEGER" or "REAL" ? "NUMBER" : column.Type;
+    private static string ComparisonType(SqlColumn column) => IsNumericType(column.Type) ? "NUMBER" : column.Type;
 }

@@ -9,11 +9,13 @@ public sealed class SqlException(string message) : Exception(message);
 
 public sealed record SqlValue(string Kind, string? Text)
 {
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? TypeName { get; init; }
     public static readonly SqlValue Null = new("NULL", null);
     public static SqlValue String(string text) => new("TEXT", text);
     public static SqlValue Number(string text)
     {
-        if (!decimal.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
+        if (!SqlTypeRules.TryParseExactNumber(text, out var value))
             throw new SqlException("数値が範囲外です。");
         return new("NUMBER", value.ToString(CultureInfo.InvariantCulture));
     }
@@ -24,16 +26,25 @@ public sealed record SqlValue(string Kind, string? Text)
     public static int Compare(SqlValue left, SqlValue right)
     {
         if (left.IsNull || right.IsNull) return left.IsNull ? right.IsNull ? 0 : -1 : 1;
-        if (left.Kind != right.Kind) throw new SqlException("異なる型の値は比較できません。");
-        return left.Kind == "NUMBER"
-            ? decimal.Parse(left.Text!, CultureInfo.InvariantCulture).CompareTo(decimal.Parse(right.Text!, CultureInfo.InvariantCulture))
-            : string.CompareOrdinal(left.Text, right.Text);
+        if (left.Kind != right.Kind || !string.Equals(left.TypeName, right.TypeName, StringComparison.OrdinalIgnoreCase))
+            throw new SqlException($"異なる型 {left.TypeName ?? left.Kind} と {right.TypeName ?? right.Kind} は比較できません。");
+        return left.Kind switch
+        {
+            "NUMBER" => decimal.Parse(left.Text!, CultureInfo.InvariantCulture).CompareTo(decimal.Parse(right.Text!, CultureInfo.InvariantCulture)),
+            "DURATION" => SqlTypeRules.DurationTicks(left).CompareTo(SqlTypeRules.DurationTicks(right)),
+            _ => string.CompareOrdinal(left.Text, right.Text)
+        };
     }
 }
 
 public sealed record SqlReference(string Table, string Column, bool DeleteCascade = false, bool UpdateCascade = false);
 public sealed record SqlForeignKey(List<string> Columns, string Table, List<string> Targets, bool DeleteCascade, bool UpdateCascade);
-public sealed record SqlColumn(string Name, string Type, bool NotNull, bool Unique, bool PrimaryKey, SqlValue? Default, int? MaxLength, SqlReference? Reference = null, List<string>? Checks = null);
+public sealed record SqlTypeDefinition(string Name, string BaseType, int? MaxLength, string? Check);
+public sealed record SqlColumn(string Name, string Type, bool NotNull, bool Unique, bool PrimaryKey, SqlValue? Default, int? MaxLength, SqlReference? Reference = null, List<string>? Checks = null)
+{
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public SqlTypeDefinition? DistinctType { get; init; }
+}
 public sealed record SqlIndex(string Name, string Column, List<string>? Columns = null)
 {
     // A missing list identifies the original single-column hash index.
@@ -50,7 +61,12 @@ public sealed record SqlResult(IReadOnlyList<string> Columns, IReadOnlyList<SqlV
     public IReadOnlyList<string>? ColumnTypes { get; init; }
 }
 
-public abstract record SqlStatement;
+public abstract record SqlStatement
+{
+    internal IReadOnlyList<SqlCast> NamedCasts { get; init; } = [];
+}
+public sealed record CreateType(SqlTypeDefinition Definition, bool IfNotExists) : SqlStatement;
+public sealed record ShowTypes : SqlStatement;
 public sealed record CreateTable(string Table, List<SqlColumn> Columns, bool IfNotExists, List<string>? Checks = null, List<string>? CompositePrimaryKey = null, List<SqlForeignKey>? ForeignKeys = null) : SqlStatement;
 public sealed record DropTable(string Table, bool IfExists) : SqlStatement;
 public sealed record AddColumn(string Table, SqlColumn Column) : SqlStatement;
@@ -62,9 +78,18 @@ public sealed record AlterColumn(string Table, string Column, SqlColumnAlteratio
 public sealed record ReindexTable(string Table) : SqlStatement;
 public sealed record CreateIndex(string Name, string Table, List<string> Columns, bool IfNotExists) : SqlStatement;
 public sealed record DropIndex(string Name, string Table, bool IfExists) : SqlStatement;
-public sealed record InsertRows(string Table, List<string>? Columns, List<List<SqlValue>> Rows) : SqlStatement
+public abstract record InsertStatement(string Table, List<string>? Columns) : SqlStatement
 {
+    internal abstract int RowCount { get; }
+}
+public sealed record InsertRows(string Table, List<string>? Columns, List<List<SqlValue>> Rows) : InsertStatement(Table, Columns)
+{
+    internal override int RowCount => Rows.Count;
     internal IReadOnlyList<string>? SourceTypes { get; init; }
+}
+public sealed record InsertValues(string Table, List<string>? Columns, List<List<SqlExpression>> Rows) : InsertStatement(Table, Columns)
+{
+    internal override int RowCount => Rows.Count;
 }
 public sealed record InsertSelect(string Table, List<string>? Columns, SelectRows Query) : SqlStatement;
 public sealed record CreateTableAs(string Table, List<string>? Columns, SelectRows Query, bool IfNotExists) : SqlStatement;

@@ -30,6 +30,48 @@ Keep existing TLS database grants when upgrading. A client must check the authen
 
 SQL tables have at most 64 columns and 4,096 rows. Each join step, materialized subquery, CTE and set operand has a 4,096-row limit. An oversized intermediate result raises an error, including when reading an archive. A top-level SELECT without an explicit fetch count returns up to 4,096 rows. The native key-value store has its own resource limits. Physical power-loss qualification remains a separate hardware test.
 
+### SQL types
+
+A column declaration determines how SQL validates, compares and returns its values. Choose a named type when two columns share a representation but exchanging their values would be an error.
+
+```sql
+CREATE TYPE CustomerId AS DISTINCT UUID;
+CREATE TYPE OrderId AS DISTINCT UUID;
+CREATE TYPE JpyAmount AS DISTINCT DECIMAL(18,0);
+CREATE TYPE Quantity AS DISTINCT INTEGER CHECK (VALUE > 0);
+
+CREATE TABLE customers (id CustomerId PRIMARY KEY);
+CREATE TABLE orders (
+    id OrderId PRIMARY KEY,
+    customer CustomerId NOT NULL REFERENCES customers(id),
+    paid JpyAmount NOT NULL,
+    qty Quantity NOT NULL
+);
+INSERT INTO customers VALUES ('558c5a77-75ae-41cf-abb4-e12001e8b1a4');
+INSERT INTO orders VALUES ('34e83e3e-f136-4944-9210-fe4d1deca1b2',
+    '558c5a77-75ae-41cf-abb4-e12001e8b1a4', 1200, 2);
+SELECT orders.paid FROM orders JOIN customers ON orders.customer = customers.id;
+SHOW TYPES;
+```
+
+Joining on `orders.id = customers.id` raises a type error, even with empty tables. A literal assigned to a column is checked against its declaration. In a predicate, construct a typed value explicitly, for example `WHERE qty = CAST(2 AS Quantity)`. A type's `CHECK` evaluates its base value as `VALUE` and rejects a false result. Use `NOT NULL` on the column when a value is required.
+
+Same-type assignments, comparisons and foreign keys preserve the type's identity. Arithmetic on a distinct type requires an explicit conversion. For example, `SUM(CAST(paid AS DECIMAL(18,0)))` sums yen as numbers. Cast the result back to `JpyAmount` to check its range and recover the currency type. Query results report declared names in `ColumnTypes`, including for empty results. Each non-null named value also carries `TypeName` alongside its primitive `Kind` and `Text`.
+
+| Base type | Input and guarantees |
+|---|---|
+| `INTEGER`, `REAL`, `BOOLEAN`, `TEXT`, `BLOB` | Signed 64-bit integer, legacy decimal-backed number, true/false, text and bytes. Text and binary columns can declare a maximum length. |
+| `DECIMAL(p,s)` | Exact decimal with 1–28 digits of precision and 0–p fractional digits. Excess nonzero fractional digits and overflow raise an error. Trailing zeroes may be discarded on input. Numeric arithmetic and sums use the engine's decimal evaluator. |
+| `UUID` | Hyphenated hexadecimal UUID, returned in lowercase. |
+| `DATE`, `TIME` | Calendar date such as `2024-02-29`, or local clock time such as `09:30:00`. |
+| `LOCAL_DATETIME` | Local date and time, for example `2026-11-10T09:30:00`. |
+| `INSTANT` | Date and time with an explicit offset or `Z`. Equivalent instants compare equal and are returned in UTC. |
+| `DURATION` | Signed elapsed time such as `-1.02:30:00` (one day, two hours and thirty minutes before zero). Time, timestamp and duration inputs support up to seven fractional second digits. |
+
+Type names are case-insensitive and results use the declared spelling. Up to 256 distinct types can be created per database. Definitions participate in transactions and can use a built-in base with an optional length, precision or scale. The available type DDL is `CREATE TYPE [IF NOT EXISTS] ...` and `SHOW TYPES`. A type check may refer to `VALUE` and cast to built-in types. When adopting a named type on an existing column, `ALTER TABLE ... ALTER COLUMN ... TYPE ...` validates the existing values.
+
+Existing stored rows and schemas retain their original interpretation, including bare `DECIMAL`, `FLOAT` and `DOUBLE` as aliases for `REAL`. New numeric literals that would silently lose significant digits in the decimal parser raise an error. Use matching SQL engines for all writers to a database that uses named types.
+
 ### Window functions
 
 Use `OVER (PARTITION BY ... ORDER BY ...)` with `ROW_NUMBER`, `RANK`, `DENSE_RANK`, `NTILE`, `LAG`, `LEAD`, `FIRST_VALUE`, `LAST_VALUE`, `COUNT`, `SUM`, `AVG`, `MIN` or `MAX`. Both clauses are optional and accept column names. `LAG` and `LEAD` accept a nonnegative integer offset and an optional literal default. `NTILE` takes a positive integer bucket count.

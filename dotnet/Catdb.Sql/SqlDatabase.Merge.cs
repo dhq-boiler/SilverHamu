@@ -102,7 +102,7 @@ public sealed partial class SqlDatabase
         {
             case MergeUpdate update:
                 var assignments = update.Assignments.Select(p => new Assignment(Column(table, p.Key), BindMergeExpression(scope, p.Value))).ToArray();
-                foreach (var assignment in assignments) CommonType(assignment.Column.Type, ExpressionType(assignment.Expression, schema));
+                foreach (var assignment in assignments) ValidateAssignment(assignment.Column, assignment.Expression, schema);
                 return new(true, condition, (original, values) =>
                 {
                     var row = new Dictionary<string, SqlValue>(original!.Values, StringComparer.OrdinalIgnoreCase);
@@ -112,7 +112,8 @@ public sealed partial class SqlDatabase
             case MergeInsert insert:
                 var columns = InsertColumns(table, insert.Columns);
                 var expressions = insert.Values.Select(e => BindMergeExpression(scope, e)).ToArray();
-                ValidateInsertTypes(columns, expressions.Select(e => ExpressionType(e, schema)).ToArray());
+                if (columns.Count != expressions.Length) throw new SqlException("MERGE の列数と入力の列数が一致しません。");
+                for (int i = 0; i < columns.Count; i++) ValidateAssignment(columns[i], expressions[i], schema);
                 return new(false, condition, (_, values) => MakeInsertedRow(table, columns, expressions.Select(e => e.Evaluate(values)).ToArray()));
             case MergeDelete:
                 return new(true, condition, (_, _) => null);

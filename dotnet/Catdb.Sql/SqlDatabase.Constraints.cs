@@ -4,15 +4,14 @@ public sealed partial class SqlDatabase
 {
     private static bool SameTable(string one, string other) => SqlNames.Canonical(one) == SqlNames.Canonical(other);
 
-    private static void ValidateChecks(SqlTable table, IReadOnlyList<SqlRow> rows)
+    private async Task ValidateChecksAsync(SqlTable table, IReadOnlyList<SqlRow> rows)
     {
         var definitions = (table.Checks ?? []).Concat(table.Columns.SelectMany(c => c.Checks ?? []));
         foreach (var text in definitions)
         {
-            var expression = SqlParser.ParseCheck(text);
-            expression.Validate(table.Columns);
-            if (expression.ContainsAggregate() || ExpressionType(expression, table.Columns) is not ("BOOLEAN" or "NULL"))
-                throw new SqlException("CHECKには条件式を指定してください。");
+            var expression = SqlParser.ParseCheck(text, out var casts);
+            await BindCastsAsync(casts);
+            ValidateCheckExpression(expression, table.Columns);
             foreach (var row in rows)
             {
                 var value = expression.Evaluate(row.Values);
@@ -20,6 +19,13 @@ public sealed partial class SqlDatabase
                 if (!value.IsNull && !value.IsTrue) throw new SqlException($"CHECK ({text}) に違反しています。");
             }
         }
+    }
+
+    private static void ValidateCheckExpression(SqlExpression expression, IReadOnlyList<SqlColumn> columns)
+    {
+        expression.Validate(columns);
+        if (expression.ContainsAggregate() || ExpressionType(expression, columns) is not ("BOOLEAN" or "NULL"))
+            throw new SqlException("CHECKには条件式を指定してください。");
     }
 
     private static IEnumerable<SqlForeignKey> ForeignKeys(SqlTable table)

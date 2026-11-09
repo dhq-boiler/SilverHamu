@@ -30,7 +30,7 @@ public sealed partial class SqlDatabase
     {
         var access = statement switch
         {
-            InsertRows => ViewAccess.Insert,
+            InsertStatement => ViewAccess.Insert,
             UpdateRows => ViewAccess.Update,
             DeleteRows => ViewAccess.Delete,
             _ => throw new SqlException($"'{target.Name}' に対してこの操作はできません。")
@@ -40,7 +40,7 @@ public sealed partial class SqlDatabase
             throw new SqlException("指定されたテーブルまたはビューは利用できません。");
     }
 
-    private static SqlStatement TranslateViewWrite(SqlTable view, SqlTable source, SqlStatement statement)
+    private async Task<SqlStatement> TranslateViewWriteAsync(SqlTable view, SqlTable source, SqlStatement statement)
     {
         if (view.ViewQuery is null || SqlParser.Parse(view.ViewQuery) is not [SelectRows definition] ||
             !string.Equals(definition.Table, source.Name, StringComparison.OrdinalIgnoreCase) ||
@@ -48,6 +48,7 @@ public sealed partial class SqlDatabase
             definition.Projections.Any(p => p.Window is not null) ||
             definition.Limit is not null || definition.Offset != 0)
             throw new SqlException($"ビュー '{view.Name}' は更新できません。");
+        await BindCastsAsync(definition.NamedCasts);
         var bound = BindSingleSource(definition, source);
         var columns = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         var sources = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -76,7 +77,7 @@ public sealed partial class SqlDatabase
         }
         return statement switch
         {
-            InsertRows insert => insert with { Table = source.Name, Columns = (insert.Columns ?? view.Columns.Select(c => c.Name).ToList()).Select(SourceColumn).ToList() },
+            InsertStatement insert => insert with { Table = source.Name, Columns = (insert.Columns ?? view.Columns.Select(c => c.Name).ToList()).Select(SourceColumn).ToList() },
             UpdateRows update => UpdateRows.FromAssignments(source.Name,
                 update.Assignments.ToDictionary(p => SourceColumn(p.Key), p => Translate(p.Value), StringComparer.OrdinalIgnoreCase), Filter(update.Where)),
             DeleteRows delete => delete with { Table = source.Name, Where = Filter(delete.Where) },

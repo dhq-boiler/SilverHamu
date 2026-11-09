@@ -39,6 +39,11 @@ public sealed partial class SqlDatabase
                     encoded = Convert.ToHexString(biased.ToByteArray(isUnsigned: true, isBigEndian: true)).PadLeft(48, '0');
                     break;
                 case "TEXT":
+                case "UUID":
+                case "DATE":
+                case "TIME":
+                case "LOCAL_DATETIME":
+                case "INSTANT":
                     // SQL compares UTF-16 code units ordinally, including surrogates.
                     var chars = new StringBuilder(width + 3);
                     foreach (var ch in text.AsSpan(0, Math.Min(text.Length, (width + 3) / 4)))
@@ -47,6 +52,10 @@ public sealed partial class SqlDatabase
                     break;
                 case "BOOLEAN": encoded = value.IsTrue ? "1" : "0"; break;
                 case "BLOB": encoded = text; break;
+                case "DURATION":
+                    var ticks = SqlTypeRules.DurationTicks(value);
+                    encoded = (unchecked((ulong)ticks) ^ (1UL << 63)).ToString("X16", CultureInfo.InvariantCulture);
+                    break;
                 default: throw new SqlException("索引列の型が不正です。");
             }
             return "1" + encoded[..Math.Min(encoded.Length, width)] + "/";
@@ -74,25 +83,40 @@ public sealed partial class SqlDatabase
     private sealed record IndexCondition(string Column, string Operator, SqlValue Value);
     private sealed record IndexRange(IndexLayout Layout, string Start, string End, int MatchedColumns);
 
+    private static SqlValue? IndexLiteral(SqlExpression expression) => expression switch
+    {
+        SqlLiteral literal => literal.Value,
+        SqlCast { Operand: SqlLiteral } cast => cast.Evaluate(new Dictionary<string, SqlValue>()),
+        _ => null
+    };
+
+    private static bool MatchesIndexType(SqlColumn column, SqlValue value) =>
+        ComparisonType(column) == (value.TypeName ?? value.Kind);
+
+    private static IndexCondition? LiteralComparison(SqlExpression? expression, SqlTable table)
+    {
+        if (expression is not SqlBinary cmp || cmp.Operator is not ("=" or "<" or "<=" or ">" or ">=")) return null;
+        var op = cmp.Operator;
+        var field = cmp.Left as SqlField;
+        SqlValue? value;
+        if (field is not null) value = IndexLiteral(cmp.Right);
+        else
+        {
+            field = cmp.Right as SqlField;
+            value = field is null ? null : IndexLiteral(cmp.Left);
+            op = op switch { ">" => "<", "<" => ">", ">=" => "<=", "<=" => ">=", _ => op };
+        }
+        if (field is null || value is null) return null;
+        var column = Column(table, field.Name);
+        return MatchesIndexType(column, value) ? new(column.Name, op, value) : null;
+    }
+
     private static bool CollectIndexConditions(SqlExpression? expression, SqlTable table, List<IndexCondition> conditions)
     {
         if (expression is SqlBinary { Operator: "AND" } and)
             return CollectIndexConditions(and.Left, table, conditions) && CollectIndexConditions(and.Right, table, conditions);
-        if (expression is not SqlBinary cmp || cmp.Operator is not ("=" or "<" or "<=" or ">" or ">=")) return false;
-        var op = cmp.Operator;
-        var field = cmp.Left as SqlField;
-        var literal = cmp.Right as SqlLiteral;
-        if (field is null || literal is null)
-        {
-            field = cmp.Right as SqlField;
-            literal = cmp.Left as SqlLiteral;
-            op = op switch { ">" => "<", "<" => ">", ">=" => "<=", "<=" => ">=", _ => op };
-        }
-        if (field is null || literal is null) return false;
-        var column = Column(table, field.Name);
-        var kind = column.Type is "INTEGER" or "REAL" ? "NUMBER" : column.Type;
-        if (kind != literal.Value.Kind) return false;
-        conditions.Add(new(column.Name, op, literal.Value));
+        if (LiteralComparison(expression, table) is not { } term) return false;
+        conditions.Add(term);
         return true;
     }
 

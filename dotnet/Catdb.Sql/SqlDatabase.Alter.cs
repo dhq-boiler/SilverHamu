@@ -9,10 +9,11 @@ public sealed partial class SqlDatabase
     {
         SqlTable updated;
         Action<SqlRow>? transform = null;
+        List<SqlRow>? beforeTypeChange = null;
         switch (statement)
         {
             case AddColumn add:
-                var added = add.Column;
+                var added = await ResolveColumnTypeAsync(add.Column);
                 if (table.Columns.Count >= 64) throw new SqlException("列数は64以下にしてください。");
                 if (table.Columns.Any(c => SameTable(c.Name, added.Name))) throw new SqlException($"列 '{added.Name}' は既に存在します。");
                 if (added.PrimaryKey && (table.CompositePrimaryKey is not null || table.Columns.Any(c => c.PrimaryKey)))
@@ -75,22 +76,33 @@ public sealed partial class SqlDatabase
                     throw new SqlException("主キーのNOT NULLを削除できません。");
                 var replacement = alter.Operation switch
                 {
-                    SqlColumnAlteration.Type => column with { Type = alter.Type!, MaxLength = alter.MaxLength },
+                    SqlColumnAlteration.Type => column with { Type = alter.Type!, MaxLength = alter.MaxLength, DistinctType = null },
                     SqlColumnAlteration.SetDefault => column with { Default = alter.Default },
                     SqlColumnAlteration.DropDefault => column with { Default = null },
                     SqlColumnAlteration.SetNotNull => column with { NotNull = true },
                     SqlColumnAlteration.DropNotNull => column with { NotNull = false },
                     _ => throw new SqlException("未対応の列変更です。")
                 };
+                replacement = await ResolveColumnTypeAsync(replacement);
                 updated = table with { Columns = table.Columns.Select(c => c == column ? replacement : c).ToList() };
                 if (ComparisonType(column) != ComparisonType(replacement))
                     await RestrictReferencedSchemaAsync(table, column.Name);
+                if (alter.Operation == SqlColumnAlteration.Type)
+                {
+                    beforeTypeChange = rows;
+                    rows = rows.Select(row =>
+                    {
+                        var value = Coerce(replacement, row.Values[column.Name]);
+                        if (value == row.Values[column.Name]) return row;
+                        var values = new Dictionary<string, SqlValue>(row.Values, StringComparer.OrdinalIgnoreCase)
+                            { [column.Name] = value };
+                        return new SqlRow(row.StorageKey, values);
+                    }).ToList();
+                }
                 break;
             default:
                 throw new SqlException("未対応の列変更です。");
         }
-        foreach (var column in updated.Columns)
-            if (column.Default is { } value) Coerce(column, value);
         foreach (var view in await GetViewsAsync())
         {
             if (!ViewUsesTable(view, table.Name)) continue;
@@ -113,8 +125,10 @@ public sealed partial class SqlDatabase
             if (transform is not null) changes.Add((row.StorageKey, Serialize(row.Values)));
         }
         ValidateUnique(updated, rows);
-        ValidateChecks(updated, rows);
+        await ValidateChecksAsync(updated, rows);
         await ValidateOutgoingReferencesAsync(updated, rows);
+        if (beforeTypeChange is not null)
+            RecordRowChanges(new RowSet(updated, beforeTypeChange, rows), changes);
         changes.Add((TableKey(table.Name), Serialize(updated)));
         return Empty($"テーブル '{table.Name}' の列定義を変更しました。");
     }

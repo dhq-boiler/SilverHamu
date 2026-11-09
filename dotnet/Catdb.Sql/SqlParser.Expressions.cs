@@ -2,6 +2,8 @@ namespace Catdb.Sql;
 
 public sealed partial class SqlParser
 {
+    private readonly List<SqlCast> namedCasts = [];
+
     private SqlExpression Expression(int depth = 0)
     {
         CheckDepth(depth);
@@ -114,7 +116,9 @@ public sealed partial class SqlParser
         {
             Expect("("); var argument = Expression(depth + 1); Expect("AS");
             var (type, length) = ColumnType(); Expect(")");
-            return new SqlCast(argument, type, length);
+            var cast = new SqlCast(argument, type, length);
+            if (!SqlTypeRules.IsBuiltIn(type)) namedCasts.Add(cast);
+            return cast;
         }
         if (Peek.Kind == "word" && current + 1 < tokens.Count && tokens[current + 1] is { Kind: "symbol", Text: "(" } &&
             (Is("COUNT") || Is("SUM") || Is("AVG") || Is("MIN") || Is("MAX")))

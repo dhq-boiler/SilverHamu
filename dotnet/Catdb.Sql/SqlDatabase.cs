@@ -49,7 +49,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
     {
         ValidateRole(role);
         var script = SqlParser.Parse(sql);
-        if (allowWrites && script is [InsertRows or UpdateRows or DeleteRows])
+        if (allowWrites && script is [InsertStatement or UpdateRows or DeleteRows])
         {
             if (inTransaction()) throw new SqlException("ロール権限での更新には専用の接続を使用してください。");
             if (script[0] is UpdateRows update && (!UsesOnlyViewFields(update.Where) || update.Assignments.Values.Any(v => !UsesOnlyViewFields(v))) ||
@@ -111,6 +111,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
             var view = Deserialize<SqlTable>(bytes);
             if (role is not null && !GrantsSelect(view, role))
                 throw new SqlException("指定された公開ビューは利用できません。");
+            await BindCastsAsync(query.NamedCasts);
             return await SelectViewAsync(query, view);
         }
         finally { if (inTransaction()) await SendOperationAsync("rollback"); }
@@ -143,6 +144,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
         try
         {
             var changes = new List<(string Key, byte[]? Value)>();
+            await BindCastsAsync(statement.NamedCasts);
             if (statement is InsertSelect insertQuery)
             {
                 var input = await ReadWriteSourceAsync(insertQuery.Query);
@@ -152,6 +154,12 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
             SqlResult result;
             switch (statement)
             {
+                case CreateType createType:
+                    result = await CreateTypeAsync(createType, changes);
+                    break;
+                case ShowTypes:
+                    result = await ShowTypesAsync();
+                    break;
                 case CreateProcedure createProcedure:
                     var createKey = ProcedurePrefix + TableId(createProcedure.Name);
                     if (await GetAsync(createKey) is not null)
@@ -229,11 +237,10 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                     {
                         result = Empty("テーブルは既に存在します。変更なし。"); break;
                     }
-                    foreach (var column in create.Columns)
-                        if (column.Default is not null) Coerce(column, column.Default);
-                    var created = new SqlTable(create.Table, create.Columns, PrimaryIndex: create.Columns.Any(c => c.PrimaryKey), Checks: create.Checks,
+                    var declaredColumns = await ResolveColumnTypesAsync(create.Columns);
+                    var created = new SqlTable(create.Table, declaredColumns, PrimaryIndex: create.Columns.Any(c => c.PrimaryKey), Checks: create.Checks,
                         CompositePrimaryKey: create.CompositePrimaryKey, Indexes: create.CompositePrimaryKey is { } keys ? [new("PRIMARY", keys[0], keys)] : null) { ForeignKeys = create.ForeignKeys };
-                    ValidateChecks(created, []);
+                    await ValidateChecksAsync(created, []);
                     await ValidateOutgoingReferencesAsync(created, []);
                     changes.Add((TableKey(create.Table), Serialize(created)));
                     result = Empty($"テーブル '{create.Table}' を作成しました。");
@@ -251,7 +258,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                 default:
                     var tableName = statement switch
                     {
-                        SelectRows s => s.Table!, InsertRows s => s.Table, UpdateRows s => s.Table,
+                        SelectRows s => s.Table!, InsertStatement s => s.Table, UpdateRows s => s.Table,
                         DeleteRows s => s.Table, DropTable s => s.Table, ReindexTable s => s.Table,
                         CreateIndex s => s.Table, DropIndex s => s.Table, AddColumn s => s.Table,
                         RenameColumn s => s.Table, DropColumn s => s.Table, AlterColumn s => s.Table, _ => throw new SqlException("未対応のSQLです。")
@@ -271,7 +278,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                             }
                             CheckWritePrivilege(view, statement, requiredRole);
                             table = await ReadSourceTableAsync(view.SourceTable!);
-                            statement = TranslateViewWrite(view, table, statement);
+                            statement = await TranslateViewWriteAsync(view, table, statement);
                         }
                         else if (requiredRole is not null) throw new SqlException("指定されたテーブルまたはビューは利用できません。");
                         else if (statement is DropTable { IfExists: true }) { result = Empty("テーブルは存在しません。変更なし。"); break; }
@@ -328,11 +335,10 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                             changes.Add((TableKey(table.Name), Serialize(table with { PrimaryIndex = primary is not null, Indexes = rebuilt })));
                             result = Empty($"索引を再構築しました（{existingRows.Count} 行）。");
                             break;
-                        case InsertRows insert:
+                        case InsertStatement insert:
                             var columns = InsertColumns(table, insert.Columns);
-                            if (insert.SourceTypes is { } types) ValidateInsertTypes(columns, types);
-                            if (existingRows.Count + insert.Rows.Count > MaxRows) throw new SqlException($"初版の1テーブル上限は{MaxRows}行です。");
-                            foreach (var values in insert.Rows)
+                            if (existingRows.Count + insert.RowCount > MaxRows) throw new SqlException($"初版の1テーブル上限は{MaxRows}行です。");
+                            foreach (var values in InsertValuesForColumns(insert, columns))
                             {
                                 var inserted = MakeInsertedRow(table, columns, values);
                                 var (key, row) = inserted;
@@ -342,12 +348,12 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                                     index.RecordChange(key, null, row, indexChanges);
                             }
                             ValidateUnique(table, existingRows);
-                            result = Empty($"{insert.Rows.Count} 行を挿入しました。");
-                            ValidateChecks(table, existingRows);
+                            result = Empty($"{insert.RowCount} 行を挿入しました。");
+                            await ValidateChecksAsync(table, existingRows);
                             await ValidateOutgoingReferencesAsync(table, existingRows);
                             break;
                         case UpdateRows update:
-                            update.Where?.Validate(table.Columns);
+                            ValidatePredicate(update.Where, table.Columns);
                             var assignments = ResolveAssignments(table, update.Assignments);
                             var proposed = new List<SqlRow>(existingRows.Count);
                             var affectedRows = 0;
@@ -363,7 +369,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                             result = Empty($"{affectedRows} 行を更新しました。");
                             break;
                         case DeleteRows delete:
-                            delete.Where?.Validate(table.Columns);
+                            ValidatePredicate(delete.Where, table.Columns);
                             var survivors = existingRows.Where(r => !Matches(delete.Where, r.Values)).ToList();
                             await ApplyReferentialActionsAsync(table, existingRows, survivors, changes);
                             result = Empty($"{existingRows.Count - survivors.Count} 行を削除しました。");
@@ -420,7 +426,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
             var bytes = await GetAsync(ProcedurePrefix + TableId(procedure.Name))
                 ?? throw new SqlException($"プロシージャー '{procedure.Name}' は存在しません。");
             var body = SqlParser.Parse(Deserialize<string>(bytes));
-            if (body.Any(s => s is not (SelectRows or InsertRows or InsertSelect or MergeRows or UpdateRows or DeleteRows)))
+            if (body.Any(s => s is not (SelectRows or InsertStatement or InsertSelect or MergeRows or UpdateRows or DeleteRows)))
                 throw new SqlException("保存されたプロシージャーに対応外の文があります。");
             executing = true;
             SqlResult last = Empty("");
@@ -455,6 +461,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
 
     private async Task<SqlTable> DescribeViewAsync(CreateView view, SqlTable? replacement = null)
     {
+        await BindCastsAsync(view.Select.NamedCasts);
         var tables = new List<SqlTable>();
         foreach (var name in view.Select.Joins().Select(j => j.Table).Prepend(view.Select.Table!))
             tables.Add(replacement is not null && replacement.Name.Equals(name, StringComparison.OrdinalIgnoreCase)
@@ -468,7 +475,8 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
             query = plan.Query;
             source = plan.Schema;
         }
-        var columns = TableFromResult(view.Name, Select(query, source, [], describeOnly: true)).Columns;
+        var projected = TableFromResult(view.Name, Select(query, source, [], describeOnly: true)).Columns;
+        var columns = await ResolveColumnTypesAsync(projected, allowUntypedNull: true);
         return new(view.Name, columns, view.Query, tables[0].Name, JoinSources: tables.Skip(1).Select(t => t.Name).ToList());
     }
 
@@ -498,6 +506,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
             !string.Equals(query.Table, view.SourceTable, StringComparison.OrdinalIgnoreCase) ||
             !query.Joins().Select(j => j.Table).SequenceEqual(view.JoinSources ?? [], StringComparer.OrdinalIgnoreCase))
             throw new SqlException("ビュー定義が不正です。");
+        await BindCastsAsync(query.NamedCasts);
         var visible = query.Join is null ? await SelectTableAsync(query, await ReadSourceTableAsync(query.Table))
             : await SelectJoinAsync(query, baseTablesOnly: true);
         return visible.Rows.Select(values => new SqlRow("", new Dictionary<string, SqlValue>(visible.Columns.Zip(values, KeyValuePair.Create), StringComparer.OrdinalIgnoreCase))).ToList();
@@ -508,12 +517,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
 
     private static SqlResult Select(SelectRows select, SqlTable table, List<SqlRow> source, bool describeOnly = false)
     {
-        if (select.Where is { } predicate)
-        {
-            predicate.Validate(table.Columns);
-            if (predicate.ContainsAggregate()) throw new SqlException("Aggregates are not allowed in WHERE.");
-            RequireType(ExpressionType(predicate, table.Columns), "BOOLEAN");
-        }
+        ValidatePredicate(select.Where, table.Columns);
         foreach (var projection in select.Projections) projection.Expression?.Validate(table.Columns);
         foreach (var order in select.Order.Where(o => o.OutputIndex is null)) Column(table, order.Column);
         var selected = source.Where(x => Matches(select.Where, x.Values)).ToList();
@@ -558,24 +562,24 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
         if (!value.IsNull && value.Kind != "BOOLEAN") throw new SqlException("WHEREには条件式を指定してください。");
         return value.IsTrue;
     }
+    private static void ValidatePredicate(SqlExpression? predicate, IReadOnlyList<SqlColumn> columns)
+    {
+        if (predicate is null) return;
+        predicate.Validate(columns);
+        if (predicate.ContainsAggregate()) throw new SqlException("Aggregates are not allowed in WHERE.");
+        RequireType(ExpressionType(predicate, columns), "BOOLEAN");
+    }
     private static SqlColumn Column(SqlTable table, string name) => table.Columns.FirstOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase)) ?? throw new SqlException($"列 '{name}' は存在しません。");
     private static SqlValue Coerce(SqlColumn column, SqlValue value)
     {
-        if (value.IsNull) return value;
-        var compatible = column.Type switch
-        {
-            "INTEGER" => value.Kind == "NUMBER" && decimal.TryParse(value.Text, CultureInfo.InvariantCulture, out var n) && n == decimal.Truncate(n) && n >= long.MinValue && n <= long.MaxValue,
-            "REAL" => value.Kind == "NUMBER", "TEXT" => value.Kind == "TEXT", "BOOLEAN" => value.Kind == "BOOLEAN", "BLOB" => value.Kind == "BLOB", _ => false
-        };
-        if (!compatible) throw new SqlException($"列 '{column.Name}' の型は{column.Type}です。値の型が一致しません。");
-        if (column.MaxLength is int max && (value.Kind == "BLOB" ? value.Text!.Length / 2 : value.Text!.Length) > max) throw new SqlException($"列 '{column.Name}' は長さ{max}以下にしてください。");
-        return value;
+        try { return SqlTypeRules.Assign(value, column.Type, column.MaxLength, column.DistinctType); }
+        catch (SqlException error) { throw new SqlException($"列 '{column.Name}' ({column.Type}): {error.Message}"); }
     }
     private static void ValidateRow(SqlTable table, Dictionary<string, SqlValue> row)
     {
         foreach (var column in table.Columns)
         {
-            Coerce(column, row[column.Name]);
+            row[column.Name] = Coerce(column, row[column.Name]);
             if (column.NotNull && row[column.Name].IsNull) throw new SqlException($"列 '{column.Name}' はNULLにできません。");
         }
     }
@@ -610,34 +614,22 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
     private async Task<SqlResult> SelectTableAsync(SelectRows query, SqlTable table)
     {
         query = BindSingleSource(query, table);
-        var equality = query.Where as SqlBinary;
-        var operands = (equality?.Left, equality?.Right) switch
+        if (table.PrimaryIndex && query.Where is SqlBinary { Operator: "=" } &&
+            LiteralComparison(query.Where, table) is { } equality && Column(table, equality.Column).PrimaryKey)
         {
-            (SqlField f, SqlLiteral l) => (Field: f, Literal: l),
-            (SqlLiteral l, SqlField f) => (Field: f, Literal: l),
-            _ => default
-        };
-        if (equality?.Operator == "=" && operands.Field is not null)
-        {
-            var column = Column(table, operands.Field.Name);
-            var literal = operands.Literal!.Value;
-            var kind = column.Type is "INTEGER" or "REAL" ? "NUMBER" : column.Type;
-            if (table.PrimaryIndex && column.PrimaryKey && kind == literal.Kind)
+            var rows = new List<SqlRow>();
+            var pointer = await GetAsync(IndexKey(table, equality.Value));
+            if (pointer is not null)
             {
-                var rows = new List<SqlRow>();
-                var pointer = await GetAsync(IndexKey(table, literal));
-                if (pointer is not null)
-                {
-                    var key = Encoding.UTF8.GetString(pointer);
-                    if (!key.StartsWith(RowPrefix(table.Name), StringComparison.Ordinal))
-                        throw new SqlException("主キー索引の参照先が不正です。");
-                    var bytes = await GetAsync(key) ?? throw new SqlException("主キー索引の参照先がありません。");
-                    var row = DecodeRow(key, bytes);
-                    if (!Matches(query.Where, row.Values)) throw new SqlException("主キー索引と行の値が一致しません。");
-                    rows.Add(row);
-                }
-                return Select(query, table, rows);
+                var key = Encoding.UTF8.GetString(pointer);
+                if (!key.StartsWith(RowPrefix(table.Name), StringComparison.Ordinal))
+                    throw new SqlException("主キー索引の参照先が不正です。");
+                var bytes = await GetAsync(key) ?? throw new SqlException("主キー索引の参照先がありません。");
+                var row = DecodeRow(key, bytes);
+                if (!Matches(query.Where, row.Values)) throw new SqlException("主キー索引と行の値が一致しません。");
+                rows.Add(row);
             }
+            return Select(query, table, rows);
         }
         if (FindIndexRange(query.Where, table) is { } range)
             return await SelectSecondaryAsync(query, table, range);

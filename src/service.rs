@@ -1091,6 +1091,16 @@ fn dispatch_operation(
                 .commit()?;
             Ok(json!({"ok":true,"version":version.to_string()}))
         }
+        "lock_keys" => {
+            let keys = v["keys"].as_array().ok_or(Error::Invalid("keys"))?;
+            if keys.len() > 4096 { return Err(Error::Limit("row locks")); }
+            let keys = keys.iter()
+                .map(|k| hex_decode(k.as_str().ok_or(Error::Invalid("key"))?, 1024))
+                .collect::<Result<Vec<_>, Error>>()?;
+            let slices = keys.iter().map(Vec::as_slice).collect::<Vec<_>>();
+            tx.as_mut().ok_or(Error::Invalid("no transaction"))?.lock_keys(&slices)?;
+            Ok(json!({"ok":true}))
+        }
         "savepoint" | "rollback_to" | "release_savepoint" => {
             let name = text(v, "name")?;
             let tx = tx.as_mut().ok_or(Error::Invalid("no transaction"))?;

@@ -326,16 +326,14 @@ public sealed partial class SqlDatabase
         };
         if (timings?.Combine is { } combine) combined = combine.Observe(combined);
         IOrderedEnumerable<SqlValue[]>? ordered = null;
-        var comparison = Comparer<SqlValue>.Create(SqlValue.Compare);
         foreach (var sort in query.Order)
         {
+            var comparison = Comparer<SqlValue>.Create(sort.Compare);
             var candidates = Enumerable.Range(0, left.Columns.Count).Where(i => SqlNameComparer.Equals(left.Columns[i], sort.Column)).ToArray();
             if (sort.Qualifier is not null || candidates.Length != 1)
                 throw new SqlException($"Unknown or ambiguous set output '{sort.Column}'.");
             var index = candidates[0];
-            ordered = ordered is null ?
-                sort.Descending ? combined.OrderByDescending(r => r[index], comparison) : combined.OrderBy(r => r[index], comparison) :
-                sort.Descending ? ordered.ThenByDescending(r => r[index], comparison) : ordered.ThenBy(r => r[index], comparison);
+            ordered = ordered is null ? combined.OrderBy(r => r[index], comparison) : ordered.ThenBy(r => r[index], comparison);
         }
         var sorted = ordered is not null && timings?.Sort is { } sortStage ? sortStage.Observe(ordered) : ordered ?? combined;
         var page = sorted.Skip(query.Offset).Take(query.Limit ?? MaxRows + 1);

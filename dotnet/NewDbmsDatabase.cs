@@ -391,6 +391,25 @@ public sealed class NewDbmsTransaction : IDisposable
     }
 
     public void CreateSavepoint(string name) => ChangeSavepoint(name, 0);
+    public void LockKeys(IReadOnlyList<byte[]> keys)
+    {
+        ArgumentNullException.ThrowIfNull(keys);
+        if (keys.Count > 4096) throw new ArgumentOutOfRangeException(nameof(keys));
+        using var stream = new MemoryStream();
+        Span<byte> length = stackalloc byte[2];
+        foreach (var key in keys)
+        {
+            TransactionNative.Key(key);
+            BinaryPrimitives.WriteUInt16LittleEndian(length, checked((ushort)key.Length));
+            stream.Write(length);
+            stream.Write(key);
+        }
+        lock (_gate)
+        {
+            EnsureOpen();
+            TransactionNative.Check(TransactionNative.ndb_tx_lock_keys(_handle, stream.ToArray(), (ulong)stream.Length));
+        }
+    }
     public void RollbackToSavepoint(string name) => ChangeSavepoint(name, 1);
     public void ReleaseSavepoint(string name) => ChangeSavepoint(name, 2);
 
@@ -652,6 +671,8 @@ internal static class TransactionNative
     internal static extern int ndb_tx_put(TransactionHandle handle, byte[] key, ulong keyLength, byte[] value, ulong valueLength);
     [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_delete(TransactionHandle handle, byte[] key, ulong keyLength);
+    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int ndb_tx_lock_keys(TransactionHandle handle, byte[] frame, ulong length);
     [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_savepoint(TransactionHandle handle, uint operation, byte[] name, ulong nameLength);
     [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]

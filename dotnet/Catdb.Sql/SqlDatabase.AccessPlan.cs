@@ -87,7 +87,7 @@ public sealed partial class SqlDatabase
             }
         }
 
-        foreach (var range in CandidateIndexRanges(table, conditions, rows))
+        foreach (var range in CandidateIndexRanges(table, conditions, rows, query.Where))
         {
             // Each candidate requires an index entry and a separate row fetch.
             double cost = 2 + 2 * range.EstimatedRows;

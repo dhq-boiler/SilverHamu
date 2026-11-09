@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Numerics;
 
 namespace Catdb.Sql;
 
@@ -9,6 +10,16 @@ internal static class SqlNumbers
         : throw new SqlException("Arithmetic requires numeric operands.");
 
     internal static SqlValue Number(decimal value) => SqlValue.Number(value.ToString(CultureInfo.InvariantCulture));
+
+    internal static BigInteger UnitsAtScale28(decimal value)
+    {
+        Span<int> bits = stackalloc int[4];
+        decimal.GetBits(value, bits);
+        var coefficient = ((BigInteger)(uint)bits[2] << 64) + ((BigInteger)(uint)bits[1] << 32) + (uint)bits[0];
+        int scale = (bits[3] >> 16) & 255;
+        var magnitude = coefficient * BigInteger.Pow(10, 28 - scale);
+        return bits[3] < 0 ? -magnitude : magnitude;
+    }
 
     internal static SqlValue Calculate(SqlValue left, string op, SqlValue right)
     {
@@ -113,8 +124,9 @@ public sealed record SqlCast(SqlExpression Operand, string Type, int? MaxLength 
 
 public sealed record SqlAggregate(string Function, SqlExpression? Argument, bool Distinct = false) : SqlExpression
 {
+    public SqlExpression? Filter { get; init; }
     public override SqlExpression MapChildren(Func<SqlExpression, SqlExpression> map) =>
-        Argument is null ? this : this with { Argument = map(Argument) };
+        this with { Argument = Argument is null ? null : map(Argument), Filter = Filter is null ? null : map(Filter) };
     public override SqlValue Evaluate(IReadOnlyDictionary<string, SqlValue> row) =>
         throw new SqlException($"{Function} requires an aggregate context.");
 }

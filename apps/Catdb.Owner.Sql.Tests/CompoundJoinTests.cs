@@ -56,7 +56,7 @@ public sealed class CompoundJoinTests
     [InlineData("a.id=b.id AND b.label")]
     [InlineData("a.id=b.id AND b.missing=1")]
     [InlineData("a.id=b.id AND later.id=a.id")]
-    [InlineData("a.id=b.id OR a.tenant=b.tenant")]
+    [InlineData("a.id=b.id OR b.label")]
     public async Task Invalid_shapes_and_types_are_rejected_with_empty_inputs(string condition)
     {
         var db = Database();

@@ -16,7 +16,7 @@ public sealed partial class SqlDatabase
     // Plan every affected table before writing. Cascade edges follow row identity, so two
     // parent rows can exchange key values without moving a child twice or losing its index.
     private async Task ApplyReferentialActionsAsync(SqlTable table, List<SqlRow> original, List<SqlRow> proposed,
-        List<(string Key, byte[]? Value)> changes)
+        List<(string Key, byte[]? Value)> changes, List<PendingTrigger>? triggers = null)
     {
         var root = new RowSet(table, original, proposed);
         var initialAssignments = proposed.ToDictionary(r => r.StorageKey);
@@ -44,7 +44,10 @@ public sealed partial class SqlDatabase
                     states.Add(child.Name, children = new(child, rows, rows));
                 }
                 // Even a restricted child is in states so final-state validation covers it.
-                if (change.After is null ? !fk.DeleteCascade : !fk.UpdateCascade) continue;
+                var action = change.After is null
+                    ? fk.OnDelete ?? (fk.DeleteCascade ? SqlReferenceAction.Cascade : SqlReferenceAction.Restrict)
+                    : fk.OnUpdate ?? (fk.UpdateCascade ? SqlReferenceAction.Cascade : SqlReferenceAction.Restrict);
+                if (action == SqlReferenceAction.Restrict) continue;
                 if (!dependents.TryGetValue(fk, out var byParent))
                 {
                     byParent = children.Original.Values.Where(r => children.Current.ContainsKey(r.StorageKey) &&
@@ -59,14 +62,20 @@ public sealed partial class SqlDatabase
                 {
                     if (!children.Current.TryGetValue(oldChild.StorageKey, out var current)) continue;
                     SqlRow? next = null;
-                    if (change.After is not null)
+                    if (change.After is not null || action != SqlReferenceAction.Cascade)
                     {
                         Dictionary<string, SqlValue>? replacement = null;
                         for (int i = 0; i < fk.Columns.Count; i++)
                         {
-                            var column = Column(child, fk.Columns[i]).Name;
-                            var value = change.After.Values[fk.Targets[i]];
-                            if (SqlValue.Compare(change.Before.Values[fk.Targets[i]], value) == 0) continue;
+                            var field = Column(child, fk.Columns[i]);
+                            var column = field.Name;
+                            var value = action switch
+                            {
+                                SqlReferenceAction.SetNull => SqlValue.Null,
+                                SqlReferenceAction.SetDefault => field.Default ?? SqlValue.Null,
+                                _ => change.After!.Values[fk.Targets[i]]
+                            };
+                            if (action == SqlReferenceAction.Cascade && SqlValue.Compare(change.Before.Values[fk.Targets[i]], value) == 0) continue;
                             var slot = (current.StorageKey, column);
                             if (assignments.TryGetValue(slot, out var previous) && SqlValue.Compare(previous, value) != 0)
                                 throw new SqlException("複数のCASCADEが同じ列に異なる値を指定しています。");
@@ -93,6 +102,13 @@ public sealed partial class SqlDatabase
             await ValidateChecksAsync(state.Table, rows);
             await ValidateOutgoingReferencesAsync(state.Table, rows, states);
             RecordRowChanges(state, changes);
+            if (triggers is not null && state.Table.Triggers is { Count: > 0 })
+                foreach (var key in state.Original.Keys.Union(state.Current.Keys))
+                {
+                    state.Original.TryGetValue(key, out var old);
+                    state.Current.TryGetValue(key, out var next);
+                    if (!ReferenceEquals(old, next)) QueueTriggers(triggers, state.Table, old, next);
+                }
         }
     }
 

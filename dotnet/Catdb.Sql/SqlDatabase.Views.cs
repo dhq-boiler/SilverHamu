@@ -38,6 +38,11 @@ public sealed partial class SqlDatabase
         if (role is not null &&
             target.WriteRoles?.GetValueOrDefault(access.ToString())?.Contains(role, StringComparer.OrdinalIgnoreCase) != true)
             throw new SqlException("指定されたテーブルまたはビューは利用できません。");
+        if (role is not null && statement.Conflict?.Assignments is not null &&
+            target.WriteRoles?.GetValueOrDefault(ViewAccess.Update.ToString())?.Contains(role, StringComparer.OrdinalIgnoreCase) != true)
+            throw new SqlException("ON CONFLICT DO UPDATE requires both INSERT and UPDATE privileges.");
+        if (role is not null && statement.Returning is not null && !GrantsSelect(target, role))
+            throw new SqlException("RETURNING requires SELECT on the target.");
     }
 
     private async Task<SqlStatement> TranslateViewWriteAsync(SqlTable view, SqlTable source, SqlStatement statement)
@@ -75,7 +80,7 @@ public sealed partial class SqlDatabase
             return bound.Where is null ? requested :
                 new SqlCase(null, [new(bound.Where, requested)], new SqlLiteral(SqlValue.Boolean(false)));
         }
-        return statement switch
+        SqlStatement translated = statement switch
         {
             InsertStatement insert => insert with { Table = source.Name, Columns = (insert.Columns ?? view.Columns.Select(c => c.Name).ToList()).Select(SourceColumn).ToList() },
             UpdateRows update => UpdateRows.FromAssignments(source.Name,
@@ -83,5 +88,9 @@ public sealed partial class SqlDatabase
             DeleteRows delete => delete with { Table = source.Name, Where = Filter(delete.Where) },
             _ => throw new SqlException("未対応のビュー更新です。")
         };
+        if (statement.Returning is not { } returning) return translated;
+        var projected = BindSingleSource(new SelectRows(view.Name, returning, null, [], null, 0), view);
+        return translated with { ReturningFilter = bound.Where,
+            Returning = projected.Projections.Select(p => p with { Expression = Translate(p.Expression!) }).ToList() };
     }
 }

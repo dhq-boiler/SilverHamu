@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Runtime.CompilerServices;
 using System.Globalization;
 using System.Numerics;
 using System.Text;
@@ -7,6 +8,71 @@ namespace Catdb.Sql;
 
 public sealed partial class SqlDatabase
 {
+    private static readonly ConditionalWeakTable<SqlIndex, SqlExpression> PartialIndexPredicates = new();
+
+    private static SqlExpression IndexPredicate(SqlIndex index) =>
+        PartialIndexPredicates.GetValue(index, static i => SqlParser.ParseCheck(i.Predicate!));
+
+    private static bool IndexIncludes(SqlIndex index, IReadOnlyDictionary<string, SqlValue> row) =>
+        index.Predicate is null || IndexPredicate(index).Evaluate(row).IsTrue;
+
+    private static void ValidateIndexPredicate(SqlIndex index, SqlTable table)
+    {
+        if (index.Predicate is null) return;
+        var expression = IndexPredicate(index);
+        expression.Rewrite(node =>
+        {
+            if (node is not (SqlField or SqlLiteral or SqlIsNull or SqlBetween or SqlInList or
+                SqlBinary { Operator: "=" or "<>" or "!=" or "<" or ">" or "<=" or ">=" or "AND" or "OR" or "LIKE" } or
+                SqlUnary { Operator: "NOT" }))
+                throw new SqlException("Index predicates support comparisons and boolean conditions on table columns.");
+            return null;
+        });
+        ValidatePredicate(expression, table.Columns);
+    }
+
+    private static bool ImpliesPredicate(SqlExpression? condition, SqlExpression predicate)
+    {
+        if (SameIndexPredicate(condition, predicate)) return true;
+        if (predicate is SqlBinary { Operator: "AND" } required)
+            return ImpliesPredicate(condition, required.Left) && ImpliesPredicate(condition, required.Right);
+        if (condition is SqlBinary { Operator: "OR" } alternatives)
+            return ImpliesPredicate(alternatives.Left, predicate) && ImpliesPredicate(alternatives.Right, predicate);
+        if (predicate is SqlIsNull { Negated: true, Expression: SqlField field } &&
+            condition is SqlBinary { Operator: "=" or "<>" or "!=" or "<" or ">" or "<=" or ">=" or "LIKE" } comparison)
+            return SameIndexPredicate(comparison.Left, field) || SameIndexPredicate(comparison.Right, field);
+        return condition is SqlBinary { Operator: "AND" } conjunction &&
+            (ImpliesPredicate(conjunction.Left, predicate) || ImpliesPredicate(conjunction.Right, predicate));
+    }
+
+    private static bool SameIndexPredicate(SqlExpression? first, SqlExpression second) => (first, second) switch
+    {
+        (SqlField a, SqlField b) => string.Equals(a.Qualifier, b.Qualifier, StringComparison.OrdinalIgnoreCase)
+            && string.Equals(a.Name, b.Name, StringComparison.OrdinalIgnoreCase),
+        (SqlBinary a, SqlBinary b) => a.Operator == b.Operator &&
+            SameIndexPredicate(a.Left, b.Left) && SameIndexPredicate(a.Right, b.Right),
+        (SqlUnary a, SqlUnary b) => a.Operator == b.Operator && SameIndexPredicate(a.Operand, b.Operand),
+        (SqlIsNull a, SqlIsNull b) => a.Negated == b.Negated && SameIndexPredicate(a.Expression, b.Expression),
+        (SqlBetween a, SqlBetween b) => SameIndexPredicate(a.Value, b.Value) && SameIndexPredicate(a.Lower, b.Lower)
+            && SameIndexPredicate(a.Upper, b.Upper),
+        (SqlInList a, SqlInList b) => SameIndexPredicate(a.Value, b.Value) && a.Items.Count == b.Items.Count &&
+            a.Items.Zip(b.Items).All(pair => SameIndexPredicate(pair.First, pair.Second)),
+        _ => first == second
+    };
+
+    private static IEnumerable<SqlIndex> UniqueIndexes(SqlTable table) => (table.Indexes ?? []).Where(i => i.Unique);
+
+    private static string? UniqueIndexIdentity(SqlIndex index, SqlRow row) =>
+        IndexIncludes(index, row.Values) ? ReferenceIdentity(row, index.ColumnNames) : null;
+
+    private static void ValidateUniqueIndex(SqlIndex index, IEnumerable<SqlRow> rows)
+    {
+        var keys = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var row in rows)
+            if (UniqueIndexIdentity(index, row) is { } key && !keys.Add(key))
+                throw new SqlException($"Duplicate key for unique index '{index.Name}'.");
+    }
+
     private static string Digest(string text) =>
         Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(text)));
 
@@ -32,11 +98,7 @@ public sealed partial class SqlDatabase
             switch (value.Kind)
             {
                 case "NUMBER":
-                    var bits = decimal.GetBits(decimal.Parse(text, CultureInfo.InvariantCulture));
-                    var coefficient = ((BigInteger)(uint)bits[2] << 64) + ((BigInteger)(uint)bits[1] << 32) + (uint)bits[0];
-                    var scale = (bits[3] >> 16) & 255;
-                    var scaled = coefficient * BigInteger.Pow(10, 28 - scale);
-                    var biased = (BigInteger.One << 191) + (bits[3] < 0 ? -scaled : scaled);
+                    var biased = (BigInteger.One << 191) + SqlNumbers.UnitsAtScale28(decimal.Parse(text, CultureInfo.InvariantCulture));
                     encoded = Convert.ToHexString(biased.ToByteArray(isUnsigned: true, isBigEndian: true)).PadLeft(48, '0');
                     break;
                 case "TEXT":
@@ -64,7 +126,7 @@ public sealed partial class SqlDatabase
 
         public string? Entry(string rowKey, IReadOnlyDictionary<string, SqlValue>? row)
         {
-            if (row is null || !Ordered && row[Columns[0]].IsNull) return null;
+            if (row is null || !Ordered && row[Columns[0]].IsNull || !IndexIncludes(index, row)) return null;
             var key = new StringBuilder(Prefix);
             foreach (var name in Columns) key.Append(Component(row[name]));
             return key.Append(rowKey.AsSpan(rowKey.LastIndexOf('/') + 1)).ToString();
@@ -123,10 +185,11 @@ public sealed partial class SqlDatabase
             conditions.Add(term);
     }
 
-    private static IEnumerable<IndexRange> CandidateIndexRanges(SqlTable table, List<IndexCondition> conditions, long rowCount)
+    private static IEnumerable<IndexRange> CandidateIndexRanges(SqlTable table, List<IndexCondition> conditions, long rowCount, SqlExpression? where)
     {
         foreach (var index in table.Indexes ?? [])
         {
+            if (index.Predicate is not null && !ImpliesPredicate(where, IndexPredicate(index))) continue;
             var layout = new IndexLayout(table, index);
             var prefix = layout.Prefix;
             var start = prefix;
@@ -175,10 +238,13 @@ public sealed partial class SqlDatabase
             throw new SqlException($"索引 '{create.Name}' は既に存在します。");
         }
         var columns = create.Columns.Select(c => Column(table, c).Name).ToList();
-        var index = new SqlIndex(create.Name, columns[0], columns);
+        var index = new SqlIndex(create.Name, columns[0], columns) { Unique = create.Unique, Predicate = create.Predicate };
+        ValidateIndexPredicate(index, table);
+        var rows = await LoadRowsAsync(table);
+        if (index.Unique) ValidateUniqueIndex(index, rows);
         var layout = new IndexLayout(table, index);
-        foreach (var row in await LoadRowsAsync(table))
-            changes.Add((layout.Entry(row.StorageKey, row.Values)!, []));
+        foreach (var row in rows)
+            if (layout.Entry(row.StorageKey, row.Values) is { } key) changes.Add((key, []));
         changes.Add((TableKey(table.Name), Serialize(table with { Indexes = [.. indexes, index] })));
         return Empty($"索引 '{index.Name}' を作成しました。");
     }
@@ -193,9 +259,14 @@ public sealed partial class SqlDatabase
             if (drop.IfExists) return Empty("索引は存在しません。変更なし。");
             throw new SqlException($"索引 '{drop.Name}' は存在しません。");
         }
+        var updated = table with { Indexes = table.Indexes!.Where(i => i != index).ToList() };
+        if (index.Unique && index.Predicate is null)
+            foreach (var child in await GetTablesAsync())
+                foreach (var fk in ForeignKeys(child).Where(fk => SameTable(fk.Table, table.Name)))
+                    ValidateForeignKey(child, fk, updated);
         foreach (var entry in await ScanAsync(SecondaryPrefix(table, index), MaxRows))
             changes.Add((entry.Key, null));
-        changes.Add((TableKey(table.Name), Serialize(table with { Indexes = table.Indexes!.Where(i => i != index).ToList() })));
+        changes.Add((TableKey(table.Name), Serialize(updated)));
         return Empty($"索引 '{index.Name}' を削除しました。");
     }
 

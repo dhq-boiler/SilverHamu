@@ -14,6 +14,19 @@ public sealed class EmbeddedTests : IDisposable
     private static SqlDatabase Sql(EmbeddedCatdbStore store) => new(store.RequestAsync, () => store.InTransaction);
 
     [Fact]
+    public async Task For_update_preserves_the_result_page_and_uses_the_open_native_transaction()
+    {
+        using var db = await CatdbSqlConnection.OpenAsync(DbPath(), create: true);
+        await db.ExecuteAsync("CREATE TABLE work(id INT PRIMARY KEY); INSERT INTO work VALUES (1),(2); BEGIN");
+        var rows = (await db.ExecuteAsync("SELECT id FROM work ORDER BY id DESC LIMIT 1 FOR UPDATE"))[0];
+        Assert.Equal("2", Assert.Single(Assert.Single(rows.Rows)).Text);
+        Assert.True(db.InTransaction);
+        await db.ExecuteAsync("DELETE FROM work WHERE id=2; ROLLBACK");
+        Assert.Equal(2, (await db.ExecuteAsync("SELECT id FROM work"))[0].Rows.Count);
+        await Assert.ThrowsAsync<SqlException>(() => db.ExecuteAsync("SELECT COUNT(*) FROM work FOR UPDATE"));
+    }
+
+    [Fact]
     public async Task Reopening_preserves_named_types_and_binds_casts_in_saved_views_and_checks()
     {
         var path = DbPath();

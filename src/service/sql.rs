@@ -213,6 +213,7 @@ pub(super) fn execute(
                             | "savepoint"
                             | "rollback_to"
                             | "release_savepoint"
+                            | "lock_keys"
                             | "get"
                             | "put"
                             | "delete"

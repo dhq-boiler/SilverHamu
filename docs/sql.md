@@ -19,9 +19,9 @@ Keep existing TLS database grants when upgrading. A client must check the authen
 
 | Operation | Supported scope |
 |---|---|
-| Data definition and updates | CREATE TABLE AS SELECT, INSERT from VALUES or a query, expression assignments, DELETE and MERGE. ALTER TABLE supports adding, renaming and dropping columns, changing a compatible type, and setting or dropping a default or NOT NULL. |
-| Constraints | NOT NULL, UNIQUE, CHECK, single or composite primary and foreign keys, ON UPDATE CASCADE and ON DELETE CASCADE. |
-| Indexes | Single-column and composite indexes, leading equality and range predicates, REINDEX for rebuilding older indexes |
+| Data definition and updates | CREATE TABLE AS SELECT, INSERT, UPDATE, DELETE, MERGE and transactional TRUNCATE TABLE. INSERT supports ON CONFLICT; INSERT, UPDATE and DELETE support RETURNING. |
+| Constraints | NOT NULL, UNIQUE, CHECK, single or composite primary and foreign keys, ON UPDATE and ON DELETE actions including CASCADE, SET NULL and SET DEFAULT. |
+| Indexes | Single-column and composite indexes, unique and partial indexes, leading equality and range predicates, REINDEX for rebuilding older indexes. |
 | Queries | DISTINCT, CASE, CAST, arithmetic, BETWEEN, IN, NOT, inner/outer/cross/natural joins and USING, GROUP BY, HAVING, aggregates, ORDER BY and OFFSET/FETCH. |
 | Combining queries | Scalar and correlated subqueries, EXISTS, derived tables, UNION [ALL], INTERSECT, EXCEPT, WITH and WITH RECURSIVE. |
 | Views and procedures | Base-table views and parameterless procedures. A single-table view can accept writes when it projects distinct base columns directly and its definition has no grouping, DISTINCT, windows or pagination. |
@@ -29,6 +29,45 @@ Keep existing TLS database grants when upgrading. A client must check the authen
 | Transactions | BEGIN or START TRANSACTION, COMMIT, ROLLBACK, named SAVEPOINT, ROLLBACK TO [SAVEPOINT] and RELEASE [SAVEPOINT]. |
 
 SQL tables have at most 64 columns and 4,096 rows. Each join step, materialized subquery, CTE and set operand has a 4,096-row limit. An oversized intermediate result raises an error, including when reading an archive. A top-level SELECT without an explicit fetch count returns up to 4,096 rows. The native key-value store has its own resource limits. Physical power-loss qualification remains a separate hardware test.
+
+### Writes and concurrency
+
+Use a primary key or an unconditional unique key as the conflict target when accumulating quantities. In this example, both the insert and update paths return the final quantity:
+
+```sql
+CREATE TABLE stock (sku TEXT PRIMARY KEY, qty INT);
+INSERT INTO stock VALUES ('A', 3)
+ON CONFLICT (sku) DO UPDATE SET qty = stock.qty + excluded.qty
+RETURNING sku, qty;
+```
+
+`CREATE UNIQUE INDEX active_sku ON listings(sku) WHERE active = TRUE` enforces uniqueness among qualifying rows with non-NULL key components. A partial index can serve a query when its conditions establish the index predicate. For a foreign key with `SET DEFAULT`, the replacement must still reference an existing parent unless a NULL component exempts it. A failed referential action cancels the statement.
+
+Use a locking read when an application needs to inspect a row and then update it in the same transaction:
+
+```sql
+BEGIN;
+SELECT qty FROM stock WHERE sku = 'A' FOR UPDATE;
+UPDATE stock SET qty = qty - 1 WHERE sku = 'A';
+COMMIT;
+```
+
+`FOR UPDATE` locks the selected base rows after filtering, ordering and paging. It accepts a single base table without DISTINCT, grouping, windows, joins or subqueries. Other transactions can read their snapshots; a competing reservation or write conflicts immediately, and commit also checks writes staged before the reservation. Commit, rollback and disconnect release locks. Rolling back to a savepoint releases locks acquired after it. At most 4,096 keys can be reserved per transaction. An autocommit query releases its locks at statement end. Use matching native and service binaries; archive folders and view-only tokens cannot acquire locks.
+
+`CREATE SEQUENCE ticket_numbers START WITH 100 INCREMENT BY 1` creates a transactional sequence. Allocate a value with `SELECT NEXT VALUE FOR ticket_numbers` or directly in `INSERT ... VALUES`. Rolling back also rolls back the allocation.
+
+Administrators can define row-level AFTER triggers. In an INSERT trigger `NEW` holds the inserted row; in a DELETE trigger `OLD` holds the removed row. UPDATE supplies both. Trigger actions run in the transaction that made the change, including when a granted writer caused the change. Limit the actions an administrator attaches to writable tables accordingly.
+
+```sql
+CREATE TABLE stock_audit (sku TEXT, previous_qty INT, new_qty INT);
+CREATE TRIGGER stock_changed AFTER UPDATE ON stock FOR EACH ROW
+WHEN OLD.qty <> NEW.qty
+BEGIN
+    INSERT INTO stock_audit VALUES (NEW.sku, OLD.qty, NEW.qty);
+END;
+```
+
+`TRUNCATE TABLE stock` clears rows and indexes while preserving the schema. It rejects references from other tables and does not fire DELETE triggers. Use DELETE when row-level trigger actions are required.
 
 ### Query plans and statistics
 
@@ -48,7 +87,7 @@ Each plan row gives a step, operation, relation and detail. Where available, `es
 
 For inner joins with explicit equality keys, the planner compares connected join orders and the cost of nested loops versus building a hash table. Outer joins, `USING`, natural joins, cross joins and joins with additional filters preserve the written order. Joins materialize their inputs; a join key alone does not trigger an indexed lookup on the other table. If stale estimates lead to an oversized reordered intermediate, the executor can retry in written order under the same snapshot. The 4,096-row intermediate limit still applies.
 
-An explicit `ON` must include at least one equality between qualified columns of the new input and a previous input. Multiple equalities form a composite key. Extra predicates, such as `AND l.amount >= p.minimum`, apply before deciding which rows of an outer join need NULL padding. Aggregates and subqueries inside `ON` are unsupported.
+An explicit `ON` accepts a scalar boolean predicate. Equalities between inputs can form a composite hash key; a join such as `ON l.amount BETWEEN p.minimum AND p.maximum` compares candidate pairs directly. The full predicate is applied before deciding which rows of an outer join need NULL padding. Aggregates and subqueries inside `ON` are unsupported.
 
 `EXPLAIN` inspects metadata without executing the SELECT against stored rows. To measure execution, use `EXPLAIN ANALYZE` on a SELECT or WITH query. It executes the query once and returns the measurements in place of the query results. Execution errors, such as division by zero, propagate normally. Both forms are available on full SQL connections and in Owner's read-only folder mode. View-only service tokens cannot inspect plans.
 
@@ -126,7 +165,7 @@ Existing stored rows and schemas retain their original interpretation, including
 
 Use `OVER (PARTITION BY ... ORDER BY ...)` with `ROW_NUMBER`, `RANK`, `DENSE_RANK`, `NTILE`, `LAG`, `LEAD`, `FIRST_VALUE`, `LAST_VALUE`, `COUNT`, `SUM`, `AVG`, `MIN` or `MAX`. Both clauses are optional and accept column names. `LAG` and `LEAD` accept a nonnegative integer offset and an optional literal default. `NTILE` takes a positive integer bucket count.
 
-With ORDER BY, the default frame runs from the partition start through the current row and its peers. Without ORDER BY, it covers the whole partition. An explicit `ROWS BETWEEN ... AND ...` frame accepts current-row, preceding and following bounds. This query shows each reading next to its previous and cumulative values.
+With ORDER BY, the default frame runs from the partition start through the current row and its peers. Without ORDER BY, it covers the whole partition. Use `ROWS` for row offsets, `GROUPS` for peer-group offsets in sort order, or `RANGE` for distances from one numeric sort key. `NULLS FIRST` and `NULLS LAST` apply per sort column. Aggregate functions accept `FILTER (WHERE predicate)`, including before `OVER`. This query shows each reading next to its previous and cumulative values.
 
 ```sql
 SELECT sensor, sample_no, reading,

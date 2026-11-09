@@ -12,7 +12,7 @@
 | [SQL types for IDs, amounts and time](docs/sql.md#sql-types) | Yes | Yes | Built-in types include UUID, exact decimal, date, time, local date-time, instant and duration. Named types keep values such as customer IDs and order IDs distinct in comparisons and assignments. |
 | Add amounts of the same currency | Yes | Yes | Enable addition with `ALTER TYPE JpyAmount ENABLE OPERATOR +`. Adding two `JpyAmount` columns returns a `JpyAmount` and checks its range and constraints. Mixing currency types raises an error. |
 | Joins, views and aggregates | Yes | Yes | Inner and outer joins support up to eight inputs and 4,096 intermediate rows per join step. |
-| [Standard SQL syntax](#sql-syntax-matrix) | Partial | Partial | Both use the same SQL subset. The matrix below gives examples of supported and unsupported queries, writes and schema operations. |
+| [Standard SQL syntax](#sql-syntax-matrix) | Partial | Partial | Both use the same SQL subset. The matrix describes the supported forms and their limits; it is not a SQL standard conformance claim. |
 | [Query execution plans](docs/sql.md#query-plans-and-statistics) | Yes | Yes | `EXPLAIN SELECT` shows the plan. `EXPLAIN ANALYZE SELECT` reports actual rows, loops and elapsed time. Owner also supports both commands on folder tables. |
 | Cost-based query optimizer | Yes | Yes (SQL database) | Compares table and index access costs. For eligible inner joins it also chooses join order and hash or nested-loop execution. `ANALYZE` supplies table and column statistics. |
 | Serve authenticated network clients | Yes | No | The Rust service supports shared tokens and TLS accounts. Server-side SQL requires a separately configured SQL host. |
@@ -42,29 +42,29 @@ These labels cover common SQL forms in the shared `Catdb.Sql` engine used by cat
 | Correlated subqueries, scalar subqueries, `EXISTS`, `FROM (SELECT ...)` | ✓ Supported | Use outer columns in nested SELECTs. A scalar query returns NULL for zero rows and raises an error for multiple rows. Derived tables require an alias. |
 | `INNER JOIN`, `LEFT`, `RIGHT` and `FULL OUTER JOIN` with `ON a.id = b.id` | ✓ Supported | Up to eight inputs. A NULL join key does not match. |
 | Compound join conditions, e.g. `ON a.id = b.id AND a.region = b.region` | ✓ Supported | Match all key pairs. Additional conditions such as `AND b.active = TRUE` or `AND a.price < b.price` filter matches before outer-join padding. |
-| Joins without an equality key, e.g. `ON a.price < b.price` | ✗ Unsupported | Each explicit `ON` needs an equality between qualified columns of the new input and a previous input, either alone or as an `AND` term. |
+| Joins without an equality key, e.g. `ON a.price < b.price` | ✓ Supported | Scalar predicates can compare ranges or combine conditions with OR. Without an equality key, a nested loop evaluates the condition before outer-join padding. |
 | `CROSS JOIN`, `NATURAL JOIN`, `JOIN ... USING` | ✓ Supported | Natural joins match all shared names. USING accepts one or more columns and exposes each shared column once in `SELECT *`. |
 | `GROUP BY` | ✓ Supported | One or more grouping columns. |
-| Grouping by an expression, e.g. `GROUP BY price * qty` | ✗ Unsupported | Grouping keys must be column references. |
+| Grouping by an expression, e.g. `GROUP BY price * qty` | ✓ Supported | Rows with equal results of the grouping expression form one group. |
 | `HAVING` | ✓ Supported | Filters groups after aggregation and before window functions. |
 | `COUNT(*)` | ✓ Supported | Counts rows after filtering. |
 | `COUNT(col)`, `COUNT(DISTINCT col)` | ✓ Supported | Ignores NULL. DISTINCT counts each distinct non-NULL value once. |
-| `COUNT(*) FILTER (WHERE ...)` | ✗ Unsupported | An aggregate cannot have its own filter clause. |
+| `COUNT(*) FILTER (WHERE ...)` | ✓ Supported | Only rows for which the predicate is true contribute to that aggregate. Other aggregates in the same query can use different filters. |
 | `SUM(col)`, `AVG(col)` | ✓ Supported | Numeric columns. |
 | `MIN(col)`, `MAX(col)` | ✓ Supported | Both ignore NULL and return NULL for an empty group. |
 | `ORDER BY col ASC/DESC` | ✓ Supported | Multiple sort columns. |
-| `ORDER BY col NULLS FIRST` or `NULLS LAST` | ✗ Unsupported | The sort clause has no explicit null placement option. |
+| `ORDER BY col NULLS FIRST` or `NULLS LAST` | ✓ Supported | Set NULL placement independently of ASC or DESC for each sort column, including in window ordering. |
 | `OFFSET n ROWS FETCH NEXT n ROWS ONLY` | ✓ Supported | Supports FIRST or NEXT, ROW or ROWS, and a fetch count from 0 to 4,096. |
 | `UNION`, `UNION ALL`, `INTERSECT`, `EXCEPT` | ✓ Supported | Operands need the same number of columns with compatible types. ORDER BY and pagination apply to the combined result. |
 | `WITH`, `WITH RECURSIVE` | ✓ Supported | Recursive queries use an anchor and a UNION [ALL] recursive term, with at most 4,096 rows. |
-| Window functions (`OVER`) | ✓ Supported | Ranking, navigation and aggregate functions with PARTITION BY, ORDER BY and ROWS frames. [Functions and examples](docs/sql.md#window-functions) |
-| `RANGE` or `GROUPS` window frames | ✗ Unsupported | Explicit frame bounds use `ROWS`. |
+| Window functions (`OVER`) | ✓ Supported | Ranking, navigation and aggregate functions with PARTITION BY, ORDER BY and explicit frames. [Functions and examples](docs/sql.md#window-functions) |
+| `RANGE` or `GROUPS` window frames | ✓ Supported | GROUPS offsets count peer groups in sort order. A RANGE distance is a nonnegative numeric literal and requires one numeric ORDER BY column. |
 | `CASE`, `CAST`, arithmetic such as `SELECT price * qty` | ✓ Supported | Simple and searched CASE, casts to catdb column types, and numeric operators with precedence. |
 | `SELECT subtotal + tax FROM invoice_lines` on a named numeric type | ✓ Supported | Enable `+` for the type first. Both columns and the result share that type. |
 | `EXPLAIN SELECT ...`, `EXPLAIN WITH ... SELECT ...` | ✓ Supported | Returns plan steps and estimates for a full SQL connection or Owner folder session. |
 | `ANALYZE table_name` | ✓ Supported | Updates statistics in the current database transaction. In Owner folder mode, statistics stay in memory until the folder is closed. |
 | `EXPLAIN ANALYZE SELECT ...`, `EXPLAIN ANALYZE WITH ... SELECT ...` | ✓ Supported | Executes the query once and returns a measured plan. Compare `estimated_rows` with `actual_rows_per_loop` for repeated steps; `elapsed_ms` is cumulative for that step. |
-| `SELECT ... FOR UPDATE` | ✗ Unsupported | A query cannot request a row lock with this clause. |
+| `SELECT ... FOR UPDATE` | ✓ Supported | Reserves the returned rows of one base table. Use an explicit transaction to keep locks for a subsequent update. Competing writes report a conflict. |
 
 </details>
 
@@ -76,16 +76,17 @@ These labels cover common SQL forms in the shared `Catdb.Sql` engine used by cat
 | `INSERT INTO ... VALUES` | ✓ Supported | Optional column list and multiple rows of literals. |
 | `INSERT INTO ... SELECT` | ✓ Supported | Inserts a query result into all or selected target columns, applying defaults and constraints. |
 | `MERGE` | ✓ Supported | Accepts a table, view, query or VALUES source. Matched rows can be updated or deleted and unmatched source rows can be inserted. |
-| `INSERT ... ON CONFLICT ... DO UPDATE` | ✗ Unsupported | Use `MERGE` for matched updates and unmatched inserts. |
+| `INSERT ... ON CONFLICT ... DO UPDATE` | ✓ Supported | On a base table, name a primary or unconditional unique key. Use `excluded.col` for the proposed value. `DO NOTHING` can skip conflicts. |
 | `UPDATE ... SET col = literal [WHERE ...]` | ✓ Supported | One or more column assignments. |
 | `UPDATE ... SET qty = qty + 1` | ✓ Supported | Each assignment reads the original row, including when several columns change. |
 | `DELETE FROM ... [WHERE ...]` | ✓ Supported | |
-| `RETURNING` on `INSERT`, `UPDATE` or `DELETE` | ✗ Unsupported | These statements cannot return projected columns from the affected rows. |
+| `RETURNING` on `INSERT`, `UPDATE` or `DELETE` | ✓ Supported | Returns scalar projections or `*` for directly affected rows: new values after INSERT or UPDATE and old values for DELETE. |
 | `CREATE TABLE`, `DROP TABLE` | ✓ Supported | Up to 64 columns per table. |
-| `TRUNCATE TABLE` | ✗ Unsupported | Use `DELETE FROM table_name` to remove all rows. |
+| `TRUNCATE TABLE` | ✓ Supported | Clears a base table and its index entries transactionally. Inbound references from other tables prevent truncation. |
 | `CREATE INDEX ... ON t(col, ...)` | ✓ Supported | Index one column or a tuple of columns. |
-| `CREATE UNIQUE INDEX`; partial indexes (`CREATE INDEX ... WHERE ...`) | ✗ Unsupported | A column can declare a `UNIQUE` constraint. Standalone indexes cover all rows. |
-| `CREATE TRIGGER`; `CREATE SEQUENCE` | ✗ Unsupported | There are no SQL schema objects for triggers or sequences. |
+| `CREATE UNIQUE INDEX`; partial indexes (`CREATE INDEX ... WHERE ...`) | ✓ Supported | Unique indexes reject duplicate non-NULL key tuples. Add WHERE to index only rows satisfying a scalar predicate. |
+| `CREATE TRIGGER` | ✓ Supported | AFTER INSERT, UPDATE or DELETE on a base table. Row triggers can use OLD and NEW, an optional WHEN condition, and a body of INSERT VALUES, UPDATE or DELETE statements. |
+| `CREATE SEQUENCE` | ✓ Supported | Transactional signed 64-bit sequences with START WITH and INCREMENT BY. Use `SELECT NEXT VALUE FOR seq` or `NEXT VALUE FOR seq` in INSERT VALUES. |
 | `CREATE TYPE ... AS DISTINCT`, `SHOW TYPES` | ✓ Supported | Give IDs, amounts and other values distinct types with optional constraints. [SQL types and examples](docs/sql.md#sql-types) |
 | `ALTER TYPE T ENABLE OPERATOR +` | ✓ Supported | Enable addition for a named numeric type. The sum retains that type. |
 | `CREATE TABLE ... AS SELECT` | ✓ Supported | Copies query results and infers column types, including for an empty result. |
@@ -93,7 +94,7 @@ These labels cover common SQL forms in the shared `Catdb.Sql` engine used by cat
 | Single-column or composite `PRIMARY KEY` | ✓ Supported | |
 | Single-column `FOREIGN KEY ... REFERENCES` | ✓ Supported | |
 | Composite foreign keys, `ON DELETE CASCADE`, `ON UPDATE CASCADE` | ✓ Supported | Composite references target a composite primary key. Cascades propagate through dependent rows and indexes in the same transaction. |
-| Foreign key actions `SET NULL` and `SET DEFAULT` | ✗ Unsupported | The supported actions are `CASCADE`, `RESTRICT` and `NO ACTION`. |
+| Foreign key actions `SET NULL` and `SET DEFAULT` | ✓ Supported | On parent UPDATE or DELETE, assign NULL or the referencing columns' defaults. The resulting rows must satisfy all constraints. |
 | `ALTER TABLE ... ADD COLUMN`, `RENAME COLUMN` | ✓ Supported | |
 | `ALTER TABLE ... DROP COLUMN`, `ALTER COLUMN` | ✓ Supported | Drop columns, change a compatible data type, or set/drop DEFAULT and NOT NULL. Dependent constraints and views are checked. |
 | `CREATE VIEW ... AS SELECT`, `DROP VIEW` | ✓ Supported | View definitions select from base tables. Join and aggregate views support reads. |

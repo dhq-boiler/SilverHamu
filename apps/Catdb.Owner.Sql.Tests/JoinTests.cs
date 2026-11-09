@@ -65,7 +65,6 @@ public sealed class JoinTests
     [InlineData("SELECT b.id FROM books b JOIN authors a ON b.id=a.id ORDER BY id")]
     [InlineData("SELECT missing.id FROM books b JOIN authors a ON b.id=a.id")]
     [InlineData("SELECT b.id FROM books b JOIN authors a ON b.id=a.missing")]
-    [InlineData("SELECT b.id FROM books b JOIN authors a ON b.id=b.id")]
     [InlineData("SELECT * FROM books AS dup JOIN authors AS DUP ON dup.id=dup.id")]
     public async Task Binding_rejects_ambiguous_or_invalid_references_even_for_empty_sources(string query)
     {

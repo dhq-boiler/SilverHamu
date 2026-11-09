@@ -65,6 +65,7 @@ public sealed partial class SqlDatabase
                 }
                 return caseType;
             case SqlAggregate aggregate:
+                if (aggregate.Filter is { } filter) RequireType(TypeOf(filter), "BOOLEAN");
                 var argument = aggregate.Argument is null ? "NULL" : TypeOf(aggregate.Argument);
                 if (aggregate.Function == "COUNT") return "INTEGER";
                 if (aggregate.Function is "MIN" or "MAX") return argument;

@@ -103,6 +103,8 @@ public sealed partial class SqlDatabase
             default:
                 throw new SqlException("未対応の列変更です。");
         }
+        foreach (var index in updated.Indexes ?? []) ValidateIndexPredicate(index, updated);
+        await ValidateAlteredTriggersAsync(updated);
         foreach (var view in await GetViewsAsync())
         {
             if (!ViewUsesTable(view, table.Name)) continue;

@@ -143,10 +143,21 @@ public sealed partial class SqlParser
             var argument = function == "COUNT" && !distinct && Match("*") ? null : Expression(depth + 1);
             Expect(")");
             if (argument?.ContainsAggregate() == true) throw Error("Aggregate functions cannot be nested.");
-            return new SqlAggregate(function, argument, distinct);
+            var filter = AggregateFilter(depth);
+            if (filter?.ContainsAggregate() == true) throw Error("Aggregate FILTER cannot contain a nested aggregate.");
+            return new SqlAggregate(function, argument, distinct) { Filter = filter };
         }
         return Peek.Kind is "string" or "number" || Is("NULL") || Is("TRUE") || Is("FALSE") ||
                (Is("X") || Is("N")) && current + 1 < tokens.Count && tokens[current + 1].Kind == "string"
             ? new SqlLiteral(Literal()) : Field();
+    }
+
+    private SqlExpression? AggregateFilter(int depth)
+    {
+        if (!Match("FILTER")) return null;
+        Expect("("); Expect("WHERE");
+        var filter = Expression(depth + 1);
+        Expect(")");
+        return filter;
     }
 }

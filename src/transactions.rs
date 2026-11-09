@@ -175,6 +175,7 @@ type WriterMutex = Mutex<()>;
 type WriterGuard<'a> = std::sync::MutexGuard<'a, ()>;
 
 struct Inner {
+    has_row_locks: std::sync::atomic::AtomicBool,
     #[cfg(all(test, target_os = "linux"))]
     test_persistence: std::sync::OnceLock<Arc<dyn TestPersistence>>,
 
@@ -257,6 +258,8 @@ fn stored_key(key: &[u8]) -> StoredKey {
 }
 
 struct State {
+    lock_serial: u64,
+    locked_keys: BTreeMap<Vec<u8>, u64>,
     file: Option<WalFile>,
     path: PathBuf,
     sequence: u64,
@@ -507,6 +510,8 @@ impl KeyRange {
 }
 
 pub struct Transaction {
+    lock_owner: u64,
+    locked_keys: Vec<Vec<u8>>,
     #[cfg(feature = "skip-unneeded-history")]
     snapshot_registered: bool,
     #[cfg(feature = "wal-prepare")]
@@ -538,6 +543,7 @@ struct StagedUndo {
 }
 
 struct Savepoint {
+    locks: usize,
     name: String,
     undo_len: usize,
     undo_charge: usize,
@@ -901,6 +907,7 @@ impl Database {
         retirement.cleanup();
         Self {
             inner: Arc::new(Inner {
+                has_row_locks: false.into(),
                 #[cfg(all(test, target_os = "linux"))]
                 test_persistence: std::sync::OnceLock::new(),
                 group: group_commit::GroupCommit::default(),
@@ -1436,6 +1443,8 @@ impl Database {
             let snapshot = state.sequence;
             *state.active.entry(snapshot).or_default() += 1;
             Ok(Transaction {
+                lock_owner: 0,
+                locked_keys: Vec::new(),
                 #[cfg(feature = "skip-unneeded-history")]
                 snapshot_registered: true,
                 #[cfg(feature = "wal-prepare")]
@@ -1900,6 +1909,46 @@ impl Transaction {
         self.stage(key.into(), Some(value.into()))
     }
 
+    /// Reserves a set of keys atomically against competing reservations and writer commits.
+    pub fn lock_keys(&mut self, keys: &[&[u8]]) -> Result<()> {
+        if self.read_only {
+            return Err(Error::Invalid("read-only transaction"));
+        }
+        if keys.len() > 4096 {
+            return Err(Error::Limit("row locks"));
+        }
+        for key in keys { validate_key(key)?; }
+        // A WAL writer may have validated its keys and temporarily released state during I/O.
+        let _writer = self.database.inner.writer.lock().map_err(|_| Error::Poisoned)?;
+        let mut state = self.database.state()?;
+        let mut pending = BTreeSet::new();
+        for &key in keys {
+            if state.changed(key, self.snapshot) {
+                return Err(Error::Conflict(ConflictKind::Write));
+            }
+            if let Some(owner) = state.locked_keys.get(key) {
+                if *owner != self.lock_owner { return Err(Error::Conflict(ConflictKind::Write)); }
+            } else {
+                pending.insert(key);
+            }
+        }
+        if pending.is_empty() { return Ok(()); }
+        if self.locked_keys.len() + pending.len() > 4096 { return Err(Error::Limit("row locks")); }
+        if self.lock_owner == 0 {
+            state.lock_serial = state.lock_serial.checked_add(1).ok_or(Error::Limit("lock owner IDs"))?;
+            self.lock_owner = state.lock_serial;
+        }
+        let charge: usize = pending.iter().map(|key| 160 + 2 * key.len()).sum();
+        state.budget.replace(DEPENDENCIES, 0, charge)?;
+        self.dependency_charge += charge;
+        for key in pending {
+            state.locked_keys.insert(key.to_vec(), self.lock_owner);
+            self.locked_keys.push(key.to_vec());
+        }
+        self.database.inner.has_row_locks.store(true, std::sync::atomic::Ordering::Release);
+        Ok(())
+    }
+
     /// Marks the current write set. Reusing a name shadows its preceding mark.
     pub fn savepoint(&mut self, name: &str) -> Result<()> {
         if name.is_empty() || name.len() > 512 {
@@ -1910,6 +1959,7 @@ impl Transaction {
             return Err(Error::Limit("too many savepoints"));
         }
         history.marks.push(Savepoint {
+            locks: self.locked_keys.len(),
             name: name.to_owned(),
             undo_len: history.undo.len(),
             undo_charge: history.undo_charge,
@@ -1932,6 +1982,16 @@ impl Transaction {
         let history = self.savepoints.as_mut().unwrap();
         history.marks.truncate(index + 1);
         let mark = &history.marks[index];
+        if self.locked_keys.len() > mark.locks {
+            let mut state = self.database.state()?;
+            for key in self.locked_keys.drain(mark.locks..) {
+                state.locked_keys.remove(&key);
+                let charge = 160 + 2 * key.len();
+                self.dependency_charge -= charge;
+                state.budget.release(DEPENDENCIES, charge);
+            }
+            self.database.inner.has_row_locks.store(!state.locked_keys.is_empty(), std::sync::atomic::Ordering::Release);
+        }
         for StagedUndo { key, previous } in history.undo.drain(mark.undo_len..).rev() {
             if let Some(value) = previous {
                 self.writes.insert(key, value);
@@ -1973,6 +2033,11 @@ impl Transaction {
             return Err(Error::Invalid("read-only transaction"));
         }
         validate_key(&key)?;
+        if self.database.inner.has_row_locks.load(std::sync::atomic::Ordering::Acquire)
+            && self.database.state()?.locked_keys.get(key.as_ref()).is_some_and(|owner| *owner != self.lock_owner)
+        {
+            return Err(Error::Conflict(ConflictKind::Write));
+        }
         let previous = self.writes.get(key.as_ref());
         let previous_size = previous.map_or(0, |v| operation_size(&key, v.as_deref()));
         let size = self.write_bytes - previous_size + operation_size(&key, value.as_deref());
@@ -2057,6 +2122,9 @@ impl Transaction {
         #[cfg(feature = "lock-timing")]
         let _cost = CommitCost(0, diagnostic_now_ns());
         for key in self.writes.keys() {
+            if !state.locked_keys.is_empty() && state.locked_keys.get(key).is_some_and(|owner| *owner != self.lock_owner) {
+                return Err(Error::Conflict(ConflictKind::Write));
+            }
             if (state.sequence != self.snapshot && state.changed(key, self.snapshot))
                 || earlier.contains(key.as_slice())
             {
@@ -2209,6 +2277,10 @@ impl Drop for Transaction {
         let database = &self.database;
         if let Ok(state) = database.inner.state.lock() {
             let mut state = wrap_state(state);
+            if !self.locked_keys.is_empty() {
+                for key in &self.locked_keys { state.locked_keys.remove(key); }
+                database.inner.has_row_locks.store(!state.locked_keys.is_empty(), std::sync::atomic::Ordering::Release);
+            }
             #[cfg(feature = "skip-unneeded-history")]
             self.unregister_snapshot(&mut state);
             #[cfg(not(feature = "skip-unneeded-history"))]
@@ -2408,6 +2480,8 @@ fn exceeds_managed_threshold(capacity: u64, used: u64, incoming: u64, already_co
 impl State {
     fn new(file: WalFile, path: PathBuf, budget: Arc<Budget>) -> Self {
         Self {
+            lock_serial: 0,
+            locked_keys: BTreeMap::new(),
             file: Some(file),
             path,
             sequence: 0,

@@ -97,7 +97,8 @@ BEGIN外では変更を文ごとに自動確定する。複数文を一括で取
 |一般列の索引|`CREATE INDEX [IF NOT EXISTS] 索引名 ON テーブル名 (列名[, 列名 …])`、`DROP INDEX [IF EXISTS] 索引名 ON テーブル名`。索引名はテーブルごとに管理する。|
 |ビュー|CREATE VIEW、DROP VIEW、SHOW VIEWS。単一表の列を直接公開するビューは INSERT・UPDATE・DELETE に対応。|
 |検索|SELECT *、列指定、AS、DISTINCT、CASE、CAST、算術式、定数 SELECT。|
-|結合|INNER・LEFT・RIGHT・FULL・CROSS・NATURAL JOIN、USING。最大8つの表またはビュー。ON では修飾列同士の等価条件を AND で連結でき、一致候補を追加条件で絞り込める。|
+|結合|最大8つの表またはビューを結合できる。ON には複合等価条件のほか、価格帯の比較や OR などの条件も指定できる。|
+|書き込みとロック|通常のSQL接続では ON CONFLICT、RETURNING、TRUNCATE TABLE、行トリガーとシーケンスに対応。BEGIN 内で SELECT ... FOR UPDATE を使うと、取得した行を更新まで確保できる。[構文と制限](../../docs/sql.md#writes-and-concurrency)|
 |実行計画|SQLデータベースとフォルダー閲覧で `EXPLAIN SELECT ...` を使える。`EXPLAIN ANALYZE SELECT ...` は各ステップの推定・実測行数、実行回数、経過時間（ms）を表示する。`ANALYZE テーブル名` で推定用の統計を更新する。|
 |集計|GROUP BY、HAVING、COUNT(*)、COUNT(列)、COUNT(DISTINCT 列)、SUM・AVG・MIN・MAX。OVER で順位・集計・前後行の値を取得できる。|
 |副問い合わせ|IN、EXISTS、スカラー・相関副問い合わせ、FROM の派生表。WITH、WITH RECURSIVE、UNION [ALL]・INTERSECT・EXCEPT に対応。|

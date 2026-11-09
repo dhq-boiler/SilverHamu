@@ -11,7 +11,7 @@ public sealed partial class SqlDatabase
     private sealed record BoundMergeClause(bool Matched, SqlExpression? Condition,
         Func<SqlRow?, Dictionary<string, SqlValue>, SqlRow?> Change);
 
-    private async Task<SqlResult> MergeAsync(MergeRows merge, List<(string Key, byte[]? Value)> changes)
+    private async Task<SqlResult> MergeAsync(MergeRows merge, List<(string Key, byte[]? Value)> changes, List<PendingTrigger> triggers)
     {
         var target = await ReadSourceTableAsync(merge.Target);
         var original = await LoadRowsAsync(target);
@@ -60,7 +60,7 @@ public sealed partial class SqlDatabase
             affected++;
         }
         if (proposed.Count > MaxRows) throw new SqlException($"1テーブルの上限は{MaxRows}行です。");
-        await ApplyReferentialActionsAsync(target, original, proposed.Values.ToList(), changes);
+        await ApplyReferentialActionsAsync(target, original, proposed.Values.ToList(), changes, triggers);
         return Empty($"MERGE で {affected} 行を変更しました。");
     }
 

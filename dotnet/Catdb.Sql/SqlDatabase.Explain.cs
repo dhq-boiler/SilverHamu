@@ -159,8 +159,7 @@ public sealed partial class SqlDatabase
     private static void AppendSelectSteps(SelectRows query, List<PlanStep> steps)
     {
         if (query.Where is not null) steps.Add(new("FILTER", null, "WHERE"));
-        if (query.IsGrouped) steps.Add(new("AGGREGATE", null, query.GroupBy is { } keys
-            ? string.Join(", ", keys.Select(key => key.Name)) : "Single group"));
+        if (query.IsGrouped) steps.Add(new("AGGREGATE", null, query.GroupDescription ?? "Single group"));
         if (query.Having is not null) steps.Add(new("FILTER", null, "HAVING"));
         foreach (var window in query.Projections.Select(p => p.Window).OfType<SqlWindow>())
             steps.Add(new("WINDOW", null, window.Function));
@@ -170,7 +169,7 @@ public sealed partial class SqlDatabase
     private static void AppendSortAndPage(SelectRows query, List<PlanStep> steps)
     {
         if (query.Order.Count > 0) steps.Add(new("SORT", null,
-            string.Join(", ", query.Order.Select(order => $"{order.Column} {(order.Descending ? "DESC" : "ASC")}"))));
+            string.Join(", ", query.Order.Select(order => order.Description))));
         if (query.Distinct) steps.Add(new("DISTINCT", null, "Remove duplicate projected rows"));
         if (query.Offset > 0 || query.Limit.HasValue)
             steps.Add(new("LIMIT", null, $"Offset {query.Offset}, limit {query.Limit ?? MaxRows}"));

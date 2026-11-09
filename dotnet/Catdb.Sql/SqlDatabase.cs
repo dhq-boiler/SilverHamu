@@ -89,7 +89,8 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
     private static SelectRows RequireViewSelect(IReadOnlyList<SqlStatement> script) =>
         script is [SelectRows { Table: not null, Join: null } query] && query.AdditionalJoins is not { Count: > 0 } &&
             !query.HasQuerySources && UsesOnlyViewFields(query.Where) && UsesOnlyViewFields(query.Having) &&
-            query.Projections.All(p => UsesOnlyViewFields(p.Expression) && UsesOnlyViewFields(p.Window?.Argument)) ? query :
+            (query.GroupBy?.All(UsesOnlyViewFields) ?? true) &&
+            query.Projections.All(p => UsesOnlyViewFields(p.Expression) && UsesOnlyViewFields(p.Window?.Argument) && UsesOnlyViewFields(p.Window?.Filter)) ? query :
             throw new SqlException("許可されたビューに対するSELECTを1文だけ指定してください。");
 
     private static bool UsesOnlyViewFields(SqlExpression? expression)
@@ -126,7 +127,8 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
         finally { if (ownTransaction && inTransaction()) await SendOperationAsync("rollback"); }
     }
 
-    private async Task<SqlResult> ExecuteStatementAsync(SqlStatement statement, string? requiredRole = null, QueryProfile? profile = null)
+    private async Task<SqlResult> ExecuteStatementAsync(SqlStatement statement, string? requiredRole = null, QueryProfile? profile = null,
+        TriggerRun? triggerRun = null)
     {
         if (statement is ExecuteProcedure execute) return await ExecuteProcedureAsync(execute);
         if (statement is TransactionStatement transaction)
@@ -142,19 +144,45 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
         var ownTransaction = !inTransaction();
         if (ownTransaction) await SendOperationAsync("begin");
         var wrote = false;
+        string? triggerSavepoint = null;
         try
         {
             var changes = new List<(string Key, byte[]? Value)>();
+            var triggers = new List<PendingTrigger>();
+            List<SqlRow>? returned = statement.Returning is null ? null : [];
             await BindExpressionsAsync(statement.ExpressionBindings);
+            if (statement is InsertValues insertValues && insertValues.Rows.Any(row => row.Any(item => item is SqlNextValue)))
+            {
+                if (requiredRole is not null) throw new SqlException("A role grant does not grant access to sequences.");
+                statement = await BindSequenceValuesAsync(insertValues, changes);
+            }
             if (statement is InsertSelect insertQuery)
             {
                 var input = await ReadWriteSourceAsync(insertQuery.Query);
                 statement = new InsertRows(insertQuery.Table, insertQuery.Columns, input.Rows.Select(row => row.ToList()).ToList())
-                    { SourceTypes = ResultColumnTypes(input) };
+                    { SourceTypes = ResultColumnTypes(input), Conflict = insertQuery.Conflict, Returning = insertQuery.Returning };
             }
             SqlResult result;
             switch (statement)
             {
+                case CreateSequence createSequence:
+                    result = await CreateSequenceAsync(createSequence, changes);
+                    break;
+                case DropSequence dropSequence:
+                    result = await DropSequenceAsync(dropSequence, changes);
+                    break;
+                case AdvanceSequence advance:
+                    var pendingSequences = new Dictionary<string, SequenceState>();
+                    var sequenceValue = await TakeSequenceValueAsync(advance.Name, pendingSequences);
+                    foreach (var pair in pendingSequences) changes.Add((pair.Key, Serialize(pair.Value)));
+                    result = new([advance.Alias], [new[] { sequenceValue }], advance.Name) { ColumnTypes = ["INTEGER"] };
+                    break;
+                case CreateTrigger or DropTrigger:
+                    result = await ChangeTriggerAsync(statement, changes);
+                    break;
+                case LockRows locking:
+                    result = await SelectForUpdateAsync(locking.Query);
+                    break;
                 case ExplainQuery explain:
                     result = explain.Analyze ? await ExplainAnalyzeAsync(explain.Query) : await ExplainAsync(explain.Query);
                     break;
@@ -240,7 +268,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                     result = await CreateTableAsAsync(createAs, changes);
                     break;
                 case MergeRows merge:
-                    result = await MergeAsync(merge, changes);
+                    result = await MergeAsync(merge, changes, triggers);
                     break;
                 case CreateTable create:
                     if (!await CanCreateTableAsync(create.Table, create.IfNotExists))
@@ -273,7 +301,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                     var tableName = statement switch
                     {
                         SelectRows s => s.Table!, InsertStatement s => s.Table, UpdateRows s => s.Table,
-                        DeleteRows s => s.Table, DropTable s => s.Table, ReindexTable s => s.Table,
+                        DeleteRows s => s.Table, TruncateTable s => s.Table, DropTable s => s.Table, ReindexTable s => s.Table,
                         CreateIndex s => s.Table, DropIndex s => s.Table, AddColumn s => s.Table,
                         RenameColumn s => s.Table, DropColumn s => s.Table, AlterColumn s => s.Table, _ => throw new SqlException("未対応のSQLです。")
                     };
@@ -285,6 +313,8 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                         if (viewBytes is not null)
                         {
                             var view = Deserialize<SqlTable>(viewBytes);
+                            if (triggerRun is not null || statement.Conflict is not null)
+                                throw new SqlException("Trigger actions and ON CONFLICT require a base table.");
                             if (statement is SelectRows outer)
                             {
                                 result = await SelectViewAsync(outer, view, profile: profile);
@@ -350,11 +380,18 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                             result = Empty($"索引を再構築しました（{existingRows.Count} 行）。");
                             break;
                         case InsertStatement insert:
+                            if (insert.Conflict is not null)
+                            {
+                                result = await UpsertAsync(table, existingRows, insert, changes, triggers, returned);
+                                break;
+                            }
                             var columns = InsertColumns(table, insert.Columns);
                             if (existingRows.Count + insert.RowCount > MaxRows) throw new SqlException($"初版の1テーブル上限は{MaxRows}行です。");
                             foreach (var values in InsertValuesForColumns(insert, columns))
                             {
                                 var inserted = MakeInsertedRow(table, columns, values);
+                                QueueTriggers(triggers, table, null, inserted);
+                                returned?.Add(inserted);
                                 var (key, row) = inserted;
                                 existingRows.Add(inserted); changes.Add((key, Serialize(row)));
                                 if (table.PrimaryIndex) indexChanges[IndexKey(table, row[primary!.Name])] = Encoding.UTF8.GetBytes(key);
@@ -376,20 +413,30 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                                 if (!Matches(update.Where, row.Values)) { proposed.Add(row); continue; }
                                 var values = new Dictionary<string, SqlValue>(row.Values, StringComparer.OrdinalIgnoreCase);
                                 ApplyAssignments(table, values, assignments, row.Values);
-                                proposed.Add(new(row.StorageKey, values));
+                                var next = new SqlRow(row.StorageKey, values);
+                                proposed.Add(next);
+                                returned?.Add(next);
                                 affectedRows++;
                             }
-                            await ApplyReferentialActionsAsync(table, existingRows, proposed, changes);
+                            await ApplyReferentialActionsAsync(table, existingRows, proposed, changes, triggers);
                             result = Empty($"{affectedRows} 行を更新しました。");
                             break;
                         case DeleteRows delete:
                             ValidatePredicate(delete.Where, table.Columns);
-                            var survivors = existingRows.Where(r => !Matches(delete.Where, r.Values)).ToList();
-                            await ApplyReferentialActionsAsync(table, existingRows, survivors, changes);
+                            var survivors = new List<SqlRow>();
+                            foreach (var row in existingRows)
+                                if (Matches(delete.Where, row.Values)) returned?.Add(row); else survivors.Add(row);
+                            await ApplyReferentialActionsAsync(table, existingRows, survivors, changes, triggers);
                             result = Empty($"{existingRows.Count - survivors.Count} 行を削除しました。");
+                            break;
+                        case TruncateTable:
+                            await RestrictReferencedSchemaAsync(table, null);
+                            await ApplyReferentialActionsAsync(table, existingRows, [], changes);
+                            result = Empty($"TRUNCATE TABLE {table.Name}: {existingRows.Count} rows");
                             break;
                         case DropTable:
                             await RestrictReferencedSchemaAsync(table, null);
+                            await RestrictTriggerTargetDropAsync(table);
                             var dependent = (await GetViewsAsync()).FirstOrDefault(x => ViewUsesTable(x, table.Name));
                             if (dependent is not null) throw new SqlException($"先に依存ビュー '{dependent.Name}' を削除してください。");
                             foreach (var row in existingRows) changes.Add((row.StorageKey, null));
@@ -402,10 +449,21 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                         default: throw new SqlException("未対応のSQLです。");
                     }
                     foreach (var (key, value) in indexChanges) changes.Add((key, value));
+                    if (statement.Returning is { } projections)
+                    {
+                        if (statement.ReturningFilter is { } visibility) returned!.RemoveAll(row => !Matches(visibility, row.Values));
+                        result = ReturnRows(table, projections, returned!, result);
+                    }
                     break;
             }
             if (changes.Sum(x => (long)(x.Value?.Length ?? 0) + Encoding.UTF8.GetByteCount(x.Key)) > MaxReadBytes)
                 throw new SqlException("1文の変更量が8 MiBを超えています。分割してください。");
+            if (triggers.Count > 0 && !ownTransaction && triggerRun is null)
+            {
+                var mark = "_catdb_trigger_" + Guid.NewGuid().ToString("N");
+                await TriggerSavepointAsync("savepoint", mark);
+                triggerSavepoint = mark;
+            }
             foreach (var change in changes)
             {
                 wrote = true;
@@ -413,6 +471,8 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                 if (change.Value is not null) request["value"] = Convert.ToHexString(change.Value);
                 await send(request);
             }
+            if (triggers.Count > 0) await FireTriggersAsync(triggers, triggerRun ?? new());
+            if (triggerSavepoint is not null) await TriggerSavepointAsync("release_savepoint", triggerSavepoint);
             if (ownTransaction)
                 await SendOperationAsync(changes.Count > 0 ? "commit" : "rollback");
             else if (changes.Count > 0) result = result with { Message = result.Message + " 未確定です。COMMITで確定、ROLLBACKで取消。" };
@@ -420,7 +480,20 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
         }
         catch (Exception error)
         {
-            if ((ownTransaction || wrote) && inTransaction())
+            if (triggerSavepoint is not null && inTransaction())
+            {
+                try
+                {
+                    await TriggerSavepointAsync("rollback_to", triggerSavepoint);
+                    await TriggerSavepointAsync("release_savepoint", triggerSavepoint);
+                }
+                catch
+                {
+                    await SendOperationAsync("rollback");
+                    throw;
+                }
+            }
+            else if (triggerRun is null && (ownTransaction || wrote) && inTransaction())
             {
                 try { await SendOperationAsync("rollback"); }
                 catch (Exception rollbackError) { throw new SqlException($"{error.Message} 取消にも失敗しました: {rollbackError.Message}。接続を閉じて状態を確認してください。"); }
@@ -440,7 +513,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
             var bytes = await GetAsync(ProcedurePrefix + TableId(procedure.Name))
                 ?? throw new SqlException($"プロシージャー '{procedure.Name}' は存在しません。");
             var body = SqlParser.Parse(Deserialize<string>(bytes));
-            if (body.Any(s => s is not (SelectRows or InsertStatement or InsertSelect or MergeRows or UpdateRows or DeleteRows)))
+            if (body.Any(s => s is not (SelectRows or AdvanceSequence or InsertStatement or InsertSelect or MergeRows or UpdateRows or DeleteRows)))
                 throw new SqlException("保存されたプロシージャーに対応外の文があります。");
             executing = true;
             SqlResult last = Empty("");
@@ -547,7 +620,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
         select.Projections.SelectMany(x => x.Star ? table.Columns.Select(c => new SqlProjection(new SqlField(c.Name), c.Name)) : [x]).ToArray();
 
     private static SqlResult Select(SelectRows select, SqlTable table, List<SqlRow> source, bool describeOnly = false,
-        QueryProfile? profile = null)
+        QueryProfile? profile = null, List<string>? lockedKeys = null)
     {
         using var timings = profile is null ? null : new SelectTimings(profile, select);
         ValidatePredicate(select.Where, table.Columns);
@@ -574,17 +647,19 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
 
         var indices = Enumerable.Range(0, selected.Count);
         IOrderedEnumerable<int>? ordered = null;
-        var comparer = Comparer<SqlValue>.Create(SqlValue.Compare);
         foreach (var sort in select.Order)
         {
+            var comparer = Comparer<SqlValue>.Create(sort.Compare);
             SqlValue Key(int i) => sort.OutputIndex is int alias ? Project(i, alias) : selected[i].Values[sort.Column];
-            ordered = ordered is null
-                ? (sort.Descending ? indices.OrderByDescending(Key, comparer) : indices.OrderBy(Key, comparer))
-                : (sort.Descending ? ordered.ThenByDescending(Key, comparer) : ordered.ThenBy(Key, comparer));
+            ordered = ordered is null ? indices.OrderBy(Key, comparer) : ordered.ThenBy(Key, comparer);
         }
         IEnumerable<int> output = ordered is not null && timings?.Sort is { } sortStage ? sortStage.Observe(ordered) : ordered ?? indices;
         if (!select.Distinct) output = PageRows(output, select, timings?.Page);
-        var values = output.Select(i => projections.Select((_, column) => Project(i, column)).ToArray());
+        var values = output.Select(i =>
+        {
+            lockedKeys?.Add(selected[i].StorageKey);
+            return projections.Select((_, column) => Project(i, column)).ToArray();
+        });
         if (timings?.Project is { } project) values = project.Observe(values);
         var page = select.Distinct ? PageProjectedRows(select, values, timings) : values.ToArray();
         return new(names, page, $"{page.Length} 行を取得しました。") { ColumnTypes = types };
@@ -636,6 +711,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
     }
     private static void ValidateUnique(SqlTable table, List<SqlRow> rows)
     {
+        foreach (var index in UniqueIndexes(table)) ValidateUniqueIndex(index, rows);
         if (table.CompositePrimaryKey is { } columns)
         {
             var tuples = new HashSet<string>(StringComparer.Ordinal);
@@ -662,7 +738,22 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
     private static string IndexKey(SqlTable table, SqlValue value) =>
         IndexPrefix(table.Name) + Digest(UniqueIdentity(value));
 
-    private async Task<SqlResult> SelectTableAsync(SelectRows query, SqlTable table, QueryProfile? profile = null)
+    private async Task<SqlResult> SelectForUpdateAsync(SelectRows query)
+    {
+        if (query.Table is null || query.Join is not null || query.HasQuerySources || query.IsGrouped ||
+            query.Distinct || query.Projections.Any(p => p.Window is not null))
+            throw new SqlException("FOR UPDATE requires rows of one base table.");
+        var table = await ReadSourceTableAsync(query.Table);
+        var locked = new List<string>();
+        var result = await SelectTableAsync(query, table, lockedKeys: locked);
+        if (locked.Count > 0)
+            await send(new JsonObject { ["op"] = "lock_keys", ["keys"] = new JsonArray(
+                locked.Select(key => (JsonNode?)JsonValue.Create(SqlNames.Hex(key))).ToArray()) });
+        return result;
+    }
+
+    private async Task<SqlResult> SelectTableAsync(SelectRows query, SqlTable table, QueryProfile? profile = null,
+        List<string>? lockedKeys = null)
     {
         query = BindSingleSource(query, table);
         var access = PlanTableAccess(query, table);
@@ -688,7 +779,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
         else
             rows = await LoadRowsAsync(table);
         profile?.Record(DescribeAccess(access, query, table), rows.Count, start);
-        return Select(query, table, rows, profile: profile);
+        return Select(query, table, rows, profile: profile, lockedKeys: lockedKeys);
     }
 
     private static SqlRow DecodeRow(string key, byte[] value) =>

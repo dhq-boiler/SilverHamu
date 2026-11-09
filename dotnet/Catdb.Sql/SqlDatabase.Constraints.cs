@@ -33,7 +33,8 @@ public sealed partial class SqlDatabase
         foreach (var key in table.ForeignKeys ?? []) yield return key;
         foreach (var column in table.Columns)
             if (column.Reference is { } reference)
-                yield return new([column.Name], reference.Table, [reference.Column], reference.DeleteCascade, reference.UpdateCascade);
+                yield return new SqlForeignKey([column.Name], reference.Table, [reference.Column], reference.DeleteCascade, reference.UpdateCascade)
+                    { OnDelete = reference.OnDelete, OnUpdate = reference.OnUpdate };
     }
 
     // Length prefixes distinguish tuples even when text contains delimiters. MATCH SIMPLE
@@ -56,6 +57,8 @@ public sealed partial class SqlDatabase
         var uniqueTarget = fk.Targets.Count == 1 ? Column(parent, fk.Targets[0]).Unique :
             parent.CompositePrimaryKey is { } pk && pk.Count == fk.Targets.Count &&
             pk.All(name => fk.Targets.Contains(name, StringComparer.OrdinalIgnoreCase));
+        uniqueTarget |= UniqueIndexes(parent).Any(index => index.Predicate is null && index.ColumnNames.Count == fk.Targets.Count &&
+            index.ColumnNames.All(name => fk.Targets.Contains(name, StringComparer.OrdinalIgnoreCase)));
         if (!uniqueTarget || fk.Columns.Count != fk.Targets.Count)
             throw new SqlException($"外部キー '{child.Name}' の参照先には主キーまたはUNIQUE列を指定してください。");
         for (int i = 0; i < fk.Columns.Count; i++)

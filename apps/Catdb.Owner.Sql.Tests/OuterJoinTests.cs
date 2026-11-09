@@ -39,7 +39,8 @@ public sealed class OuterJoinTests
         Assert.Equal(new[] { "a,x,NULL", "b,NULL,20", "NULL,NULL,30" },
             result.Rows.Select(row => string.Join(",", row.Select(v => v.Display))));
         await Assert.ThrowsAsync<SqlException>(() => db.ExecuteAsync("SELECT * FROM l JOIN r ON l.k=prices.k JOIN prices ON prices.k=r.k"));
-        await Assert.ThrowsAsync<SqlException>(() => db.ExecuteAsync("SELECT * FROM l JOIN r ON l.k=r.k JOIN prices ON l.k=r.k"));
+        var oneSided = (await db.ExecuteAsync("SELECT COUNT(*) FROM l JOIN r ON l.k=r.k JOIN prices ON l.k=r.k"))[0];
+        Assert.Equal("2", oneSided.Rows.Single()[0].Display);
     }
 
     [Fact]

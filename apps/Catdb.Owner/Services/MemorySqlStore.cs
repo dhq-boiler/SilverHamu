@@ -21,6 +21,8 @@ public sealed class MemorySqlStore
         if (transaction is null) throw new CatdbRequestException("トランザクションがありません。");
         switch (op)
         {
+            // This store permits only one open transaction.
+            case "lock_keys": break;
             case "rollback": transaction = null; savepoints.Clear(); break;
             case "commit": data = transaction; transaction = null; savepoints.Clear(); break;
             case "savepoint":

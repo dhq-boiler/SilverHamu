@@ -114,7 +114,7 @@ impl Role {
         match op {
             "ping" | "begin" | "begin_read" | "get" | "scan" | "get_latest" | "scan_latest"
             | "commit" | "rollback" | "savepoint" | "rollback_to" | "release_savepoint" => true,
-            "put" | "delete" | "put_commit" | "delete_commit" | "put_batch_commit" => {
+            "put" | "delete" | "put_commit" | "delete_commit" | "put_batch_commit" | "lock_keys" => {
                 self >= Self::Writer
             }
             "checkpoint" | "create_user" | "set_role" | "sql" => self == Self::Admin,

@@ -37,7 +37,8 @@ public sealed partial record SelectRows
         DerivedSources?.Count > 0 || Expressions().Any(SqlNestedQuery.Contains);
 
     internal IEnumerable<SqlExpression?> Expressions() =>
-        Projections.Select(p => p.Expression).Concat(Projections.Select(p => p.Window?.Argument)).Append(Where).Append(Having);
+        Projections.Select(p => p.Expression).Concat(Projections.Select(p => p.Window?.Argument))
+            .Concat(Projections.Select(p => p.Window?.Filter)).Append(Where).Append(Having);
 }
 
 public sealed partial class SqlParser

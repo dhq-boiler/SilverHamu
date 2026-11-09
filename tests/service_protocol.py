@@ -124,6 +124,22 @@ class ServiceTests(unittest.TestCase):
             rows = self.ok(viewer, op="sql", sql="SELECT id FROM visible")["results"][0]["Rows"]
             self.assertEqual([row[0]["Text"] for row in rows], ["1"])
 
+    @unittest.skipUnless(os.getenv("CATDB_SQL_HOST"), "requires the built Catdb.Sql.Host executable")
+    def test_for_update_excludes_another_writer_until_transaction_end(self):
+        self.stop()
+        self.start("--sql-host", os.environ["CATDB_SQL_HOST"])
+        holder, writer = self.client(), self.client()
+        self.ok(holder, op="sql", sql="CREATE TABLE items (id INT PRIMARY KEY, n INT); INSERT INTO items VALUES (1,10),(2,20)")
+        self.ok(holder, op="begin")
+        selected = self.ok(holder, op="sql", sql="SELECT id FROM items ORDER BY id DESC LIMIT 1 FOR UPDATE")
+        self.assertEqual(selected["results"][0]["Rows"][0][0]["Text"], "2")
+        self.ok(writer, op="sql", sql="UPDATE items SET n=11 WHERE id=1")
+        denied = writer.request(op="sql", sql="DELETE FROM items WHERE id=2")
+        self.assertFalse(denied["ok"])
+        self.assertIn("conflict", denied["error"])
+        self.ok(holder, op="rollback")
+        self.ok(writer, op="sql", sql="UPDATE items SET n=21 WHERE id=2")
+
     def test_st_read_only_snapshot_rejects_mutations_and_survives_updates(self):
         self.seed(); c=self.client(); self.ok(c,op="begin_read")
         self.assertFalse(c.request(op="put",key="01",value="aa")["ok"])

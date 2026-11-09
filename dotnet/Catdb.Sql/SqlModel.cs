@@ -37,8 +37,19 @@ public sealed record SqlValue(string Kind, string? Text)
     }
 }
 
-public sealed record SqlReference(string Table, string Column, bool DeleteCascade = false, bool UpdateCascade = false);
-public sealed record SqlForeignKey(List<string> Columns, string Table, List<string> Targets, bool DeleteCascade, bool UpdateCascade);
+public enum SqlReferenceAction { Restrict, Cascade, SetNull, SetDefault }
+public sealed record SqlReference(string Table, string Column, bool DeleteCascade = false, bool UpdateCascade = false)
+{
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public SqlReferenceAction? OnDelete { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public SqlReferenceAction? OnUpdate { get; init; }
+}
+public sealed record SqlForeignKey(List<string> Columns, string Table, List<string> Targets, bool DeleteCascade, bool UpdateCascade)
+{
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public SqlReferenceAction? OnDelete { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public SqlReferenceAction? OnUpdate { get; init; }
+    internal SqlReference SingleReference() => new(Table, Targets.Single(), DeleteCascade, UpdateCascade)
+        { OnDelete = OnDelete, OnUpdate = OnUpdate };
+}
 public sealed record SqlTypeDefinition(string Name, string BaseType, int? MaxLength, string? Check);
 public sealed record SqlColumn(string Name, string Type, bool NotNull, bool Unique, bool PrimaryKey, SqlValue? Default, int? MaxLength, SqlReference? Reference = null, List<string>? Checks = null)
 {
@@ -47,11 +58,15 @@ public sealed record SqlColumn(string Name, string Type, bool NotNull, bool Uniq
 }
 public sealed record SqlIndex(string Name, string Column, List<string>? Columns = null)
 {
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool Unique { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? Predicate { get; init; }
     // A missing list identifies the original single-column hash index.
     [JsonIgnore] public IReadOnlyList<string> ColumnNames => Columns ?? [Column];
 }
 public sealed record SqlTable(string Name, List<SqlColumn> Columns, string? ViewQuery = null, string? SourceTable = null, bool PrimaryIndex = false, List<SqlIndex>? Indexes = null, List<string>? Checks = null, List<string>? SelectRoles = null, List<string>? JoinSources = null, List<string>? CompositePrimaryKey = null)
 {
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<SqlTrigger>? Triggers { get; init; }
     public Dictionary<string, List<string>>? WriteRoles { get; init; }
     public List<SqlForeignKey>? ForeignKeys { get; init; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -68,6 +83,9 @@ public sealed record SqlResult(IReadOnlyList<string> Columns, IReadOnlyList<SqlV
 
 public abstract record SqlStatement
 {
+    internal ConflictAction? Conflict { get; init; }
+    internal List<SqlProjection>? Returning { get; init; }
+    internal SqlExpression? ReturningFilter { get; init; }
     internal SqlExpressionBindings? ExpressionBindings { get; init; }
 }
 
@@ -89,7 +107,11 @@ public enum SqlColumnAlteration { Type, SetDefault, DropDefault, SetNotNull, Dro
 public sealed record AlterColumn(string Table, string Column, SqlColumnAlteration Operation,
     string? Type = null, int? MaxLength = null, SqlValue? Default = null) : SqlStatement;
 public sealed record ReindexTable(string Table) : SqlStatement;
-public sealed record CreateIndex(string Name, string Table, List<string> Columns, bool IfNotExists) : SqlStatement;
+public sealed record CreateIndex(string Name, string Table, List<string> Columns, bool IfNotExists) : SqlStatement
+{
+    public bool Unique { get; init; }
+    public string? Predicate { get; init; }
+}
 public sealed record DropIndex(string Name, string Table, bool IfExists) : SqlStatement;
 public abstract record InsertStatement(string Table, List<string>? Columns) : SqlStatement
 {
@@ -106,12 +128,13 @@ public sealed record InsertValues(string Table, List<string>? Columns, List<List
 }
 public sealed record InsertSelect(string Table, List<string>? Columns, SelectRows Query) : SqlStatement;
 public sealed record CreateTableAs(string Table, List<string>? Columns, SelectRows Query, bool IfNotExists) : SqlStatement;
-public sealed partial record SelectRows(string? Table, List<SqlProjection> Projections, SqlExpression? Where, List<SqlOrder> Order, int? Limit, int Offset, string? TableAlias = null, SqlJoin? Join = null, List<SqlField>? GroupBy = null, List<SqlJoin>? AdditionalJoins = null) : SqlStatement
+public sealed partial record SelectRows(string? Table, List<SqlProjection> Projections, SqlExpression? Where, List<SqlOrder> Order, int? Limit, int Offset, string? TableAlias = null, SqlJoin? Join = null, IReadOnlyList<SqlExpression>? GroupBy = null, List<SqlJoin>? AdditionalJoins = null) : SqlStatement
 {
     public bool Distinct { get; init; }
     public SqlExpression? Having { get; init; }
+    internal string? GroupDescription { get; init; }
     public bool IsGrouped => Having is not null || GroupBy is { Count: > 0 } ||
-        Projections.Any(p => p.IsAggregate || p.Window?.Argument?.ContainsAggregate() == true);
+        Projections.Any(p => p.IsAggregate || p.Window?.Argument?.ContainsAggregate() == true || p.Window?.Filter?.ContainsAggregate() == true);
     public IEnumerable<SqlJoin> Joins()
     {
         if (Join is not null) yield return Join;
@@ -142,6 +165,7 @@ public sealed record UpdateRows(string Table, Dictionary<string, SqlValue> Value
 public sealed record DeleteRows(string Table, SqlExpression? Where) : SqlStatement;
 public sealed record TransactionStatement(string Operation, string? Savepoint = null) : SqlStatement;
 public sealed record ShowTables : SqlStatement;
+public sealed record LockRows(SelectRows Query) : SqlStatement;
 public sealed record ShowViews : SqlStatement;
 [Flags]
 public enum ViewAccess { Select = 1, Insert = 2, Update = 4, Delete = 8 }
@@ -160,7 +184,20 @@ public sealed record SqlProjection(SqlExpression? Expression, string? Alias, boo
     public SqlWindow? Window { get; init; }
     public bool IsAggregate => Window is null && (Count || Aggregate.HasValue || Expression?.ContainsAggregate() == true);
 }
-public sealed record SqlOrder(string Column, bool Descending, string? Qualifier = null, int? OutputIndex = null);
+public sealed record SqlOrder(string Column, bool Descending, string? Qualifier = null, int? OutputIndex = null)
+{
+    public bool? NullsFirst { get; init; }
+    internal string Description => $"{Column} {(Descending ? "DESC" : "ASC")}" +
+        (NullsFirst is bool first ? first ? " NULLS FIRST" : " NULLS LAST" : "");
+
+    internal int Compare(SqlValue left, SqlValue right)
+    {
+        if (left.IsNull != right.IsNull)
+            return left.IsNull == (NullsFirst ?? !Descending) ? -1 : 1;
+        int comparison = SqlValue.Compare(left, right);
+        return Descending ? -comparison : comparison;
+    }
+}
 
 public abstract record SqlExpression
 {

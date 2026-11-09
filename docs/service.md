@@ -38,6 +38,7 @@ Every message is a four-byte big-endian unsigned length followed by that many UT
 | begin | none | version: pinned snapshot version |
 | begin_read | none | version: pinned read-only snapshot version |
 | get | key | value: hexadecimal string or null |
+| lock_keys | keys: array of hexadecimal keys, in a read/write transaction | Reserves all keys atomically, up to 4,096 per transaction. A competing lock or write reports `conflict`. |
 | put | key, value | none |
 | delete | key | none |
 | scan | start, optional end/after/rows/bytes/visits | rows: key/value pairs, next_after, visited |

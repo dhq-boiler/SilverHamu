@@ -1,7 +1,7 @@
 version: 3
 title: catdb
 createdAt: 2026-11-09T15:31:25.7166025Z
-modifiedAt: 2026-11-09T17:03:16.3841345Z
+modifiedAt: 2026-11-09T17:35:38.6376392Z
 tasks:
 - id: sql-semantic-types
   title: SQLで日時・金額・識別子の意味を保証する
@@ -67,3 +67,27 @@ tasks:
   estimateHours: 4
   remainingHours: 0
   notes: Ownerの実際のフォルダー閲覧でBook_3のANALYZE・EXPLAIN・EXPLAIN ANALYZEが成功。全20979行から1600行を調査し、PublishDate条件で16840行を読んで10行を返した。統計はセッション内のみ。通常DBフォルダー・分割書庫の非変更と再オープン時の統計破棄を自動検証。VS Debugビルド成功、SQLテスト219件全件成功。
+- id: sql-matrix-remaining
+  title: SQL syntax matrixの未対応12項目を実装する
+  notes: READMEの旧未対応12行を実装し、各構文の範囲と制限を記載。Releaseビルド成功、SQLテスト253件、Rustライブラリ118件とトランザクション27件、実TCP統合2件が成功。CLIでも実DB上でトリガー・シーケンス・更新結果などを含む22文を検証。
+  children:
+  - id: sql-matrix-query
+    title: 結合、集約、ソート、ウィンドウを拡張する
+    estimateHours: 8
+    remainingHours: 0
+  - id: sql-matrix-dml
+    title: 競合時更新・更新結果・一括削除とトリガーを実装する
+    estimateHours: 10
+    remainingHours: 0
+  - id: sql-matrix-schema
+    title: 一意索引・部分索引・参照アクション・シーケンスを実装する
+    estimateHours: 8
+    remainingHours: 0
+  - id: sql-matrix-lock
+    title: トランザクションの行ロックを実装する
+    estimateHours: 5
+    remainingHours: 0
+  - id: sql-matrix-verify
+    title: 統合検証し構文ごとの対応範囲をREADMEに反映する
+    estimateHours: 3
+    remainingHours: 0

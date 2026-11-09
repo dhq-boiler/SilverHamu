@@ -78,6 +78,7 @@ public sealed class EmbeddedCatdbStore : IDisposable
                 using (pending) response["version"] = Decimal(pending.Commit());
                 break;
             case "rollback": RequireTransaction().Dispose(); transaction = null; break;
+            case "lock_keys": RequireTransaction().LockKeys(request["keys"]!.AsArray().Select(Bytes).ToArray()); break;
             case "savepoint": RequireTransaction().CreateSavepoint(request["name"]!.GetValue<string>()); break;
             case "rollback_to": RequireTransaction().RollbackToSavepoint(request["name"]!.GetValue<string>()); break;
             case "release_savepoint": RequireTransaction().ReleaseSavepoint(request["name"]!.GetValue<string>()); break;

@@ -61,6 +61,36 @@ fn value(db: &Database, key: &[u8]) -> Option<Vec<u8>> {
 }
 
 #[test]
+fn row_reservations_exclude_competing_commits_and_follow_savepoints() {
+    let fixture = Fixture::new();
+    let db = fixture.create();
+    put(&db, b"a", b"before");
+    let mut staged = db.begin().unwrap();
+    staged.put(b"a", b"other").unwrap();
+    let mut owner = db.begin().unwrap();
+    owner.lock_keys(&[b"a"]).unwrap();
+    owner.savepoint("first").unwrap();
+    owner.lock_keys(&[b"b", b"a"]).unwrap();
+    assert!(matches!(staged.commit(), Err(Error::Conflict(ConflictKind::Write))));
+    let mut other = db.begin().unwrap();
+    assert!(matches!(other.put(b"a", b"blocked"), Err(Error::Conflict(ConflictKind::Write))));
+    assert!(matches!(other.lock_keys(&[b"free", b"b"]), Err(Error::Conflict(_))));
+    owner.lock_keys(&[b"free"]).unwrap();
+    owner.rollback_to_savepoint("first").unwrap();
+    other.lock_keys(&[b"b", b"free"]).unwrap();
+    assert!(matches!(other.lock_keys(&[b"a"]), Err(Error::Conflict(_))));
+    drop(other);
+    owner.put(b"a", b"after").unwrap();
+    owner.commit().unwrap();
+    assert_eq!(value(&db, b"a").as_deref(), Some(b"after".as_slice()));
+    let mut stale = db.begin().unwrap();
+    put(&db, b"a", b"newer");
+    assert!(matches!(stale.lock_keys(&[b"a"]), Err(Error::Conflict(_))));
+    db.begin().unwrap().lock_keys(&[b"a"]).unwrap();
+    assert!(db.begin_read().unwrap().lock_keys(&[b"a"]).is_err());
+}
+
+#[test]
 fn savepoint_undo_preserves_snapshot_and_releases_staging_budget() {
     let fixture = Fixture::new();
     let db = fixture.create();

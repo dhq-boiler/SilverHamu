@@ -11,10 +11,12 @@ public sealed partial class SqlParser
     private bool inProcedureBody;
     private readonly string source;
     private SqlParser(string sql) { source = sql; tokens = Lex(sql); }
-    public static IReadOnlyList<SqlStatement> Parse(string sql)
+    public static IReadOnlyList<SqlStatement> Parse(string sql) => Parse(sql, triggerBody: false);
+
+    internal static IReadOnlyList<SqlStatement> Parse(string sql, bool triggerBody)
     {
         if (sql.Length > 1024 * 1024) throw new SqlException("SQLは1 MiB以下にしてください。");
-        var parser = new SqlParser(sql);
+        var parser = new SqlParser(sql) { inTriggerBody = triggerBody };
         var statements = new List<SqlStatement>();
         while (!parser.End)
         {
@@ -44,6 +46,7 @@ public sealed partial class SqlParser
             return new ExplainQuery(QueryExpression(), analyze);
         }
         if (Match("CREATE")) return Create();
+        if (Match("TRUNCATE")) { Expect("TABLE"); return new TruncateTable(Name()); }
         if (Match("ANALYZE")) return new AnalyzeTable(Name());
         if (Match("EXEC") || Match("EXECUTE")) return new ExecuteProcedure(Name());
         if (Is("GRANT") || Is("REVOKE"))
@@ -84,6 +87,17 @@ public sealed partial class SqlParser
         if (Match("REINDEX")) return new ReindexTable(Name());
         if (Match("DROP"))
         {
+            if (Match("SEQUENCE"))
+            {
+                bool ifExists = Match("IF");
+                if (ifExists) Expect("EXISTS");
+                return new DropSequence(Name(), ifExists);
+            }
+            if (Match("TRIGGER"))
+            {
+                var optionalTrigger = Match("IF"); if (optionalTrigger) Expect("EXISTS");
+                return new DropTrigger(Name(), optionalTrigger);
+            }
             var kind = SchemaObjectKind();
             var optional = Match("IF"); if (optional) Expect("EXISTS");
             var name = Name();
@@ -95,15 +109,27 @@ public sealed partial class SqlParser
             }
             return kind == "VIEW" ? new DropView(name, optional) : new DropTable(name, optional);
         }
-        if (Match("INSERT")) return Insert();
+        if (Match("INSERT")) return WriteTail(Insert(), allowConflict: true);
         if (Match("MERGE")) return Merge();
-        if (Is("SELECT") || Is("WITH")) return QueryExpression();
+        if (Is("SELECT") && StartsSequenceValue(current + 1))
+        {
+            Expect("SELECT");
+            var sequence = NextSequenceName();
+            return new AdvanceSequence(sequence, Match("AS") ? Name() : "value");
+        }
+        if (Is("SELECT") || Is("WITH"))
+        {
+            var query = QueryExpression();
+            if (!Match("FOR")) return query;
+            Expect("UPDATE");
+            return new LockRows(query);
+        }
         if (Match("UPDATE"))
         {
             var table = Name(); Expect("SET"); var values = Assignments();
-            return UpdateRows.FromAssignments(table, values, Match("WHERE") ? Expression() : null);
+            return WriteTail(UpdateRows.FromAssignments(table, values, Match("WHERE") ? Expression() : null));
         }
-        if (Match("DELETE")) { Expect("FROM"); var table = Name(); return new DeleteRows(table, Match("WHERE") ? Expression() : null); }
+        if (Match("DELETE")) { Expect("FROM"); var table = Name(); return WriteTail(new DeleteRows(table, Match("WHERE") ? Expression() : null)); }
         if (Match("BEGIN")) { Match("TRANSACTION"); return new TransactionStatement("begin"); }
         if (Match("START")) { Expect("TRANSACTION"); return new TransactionStatement("begin"); }
         if (Match("SAVEPOINT")) return new TransactionStatement("savepoint", Name());
@@ -135,7 +161,11 @@ public sealed partial class SqlParser
 
     private SqlStatement Create()
     {
+        if (Match("TRIGGER")) return TriggerDefinition();
         if (Match("TYPE")) return TypeDefinition();
+        if (Match("SEQUENCE")) return SequenceDefinition();
+        bool uniqueIndex = Match("UNIQUE");
+        if (uniqueIndex && !Is("INDEX")) throw Error("Expected INDEX after UNIQUE.");
         var kind = SchemaObjectKind();
         var optional = Match("IF"); if (optional) { Expect("NOT"); Expect("EXISTS"); }
         var objectName = Name();
@@ -154,7 +184,14 @@ public sealed partial class SqlParser
                 if (indexColumns.Count > 64) throw Error("索引は64列までです。");
             } while (Match(","));
             Expect(")");
-            return new CreateIndex(objectName, table, indexColumns, optional);
+            string? predicate = null;
+            if (Match("WHERE"))
+            {
+                int start = Peek.Position;
+                Expression();
+                predicate = source[start..Peek.Position].TrimEnd();
+            }
+            return new CreateIndex(objectName, table, indexColumns, optional) { Unique = uniqueIndex, Predicate = predicate };
         }
         if (kind == "VIEW")
         {
@@ -214,7 +251,7 @@ public sealed partial class SqlParser
             var pos = columns.FindIndex(c => c.Name.Equals(key.Columns[0], StringComparison.OrdinalIgnoreCase));
             if (pos < 0) throw Error($"外部キーの列 '{key.Columns[0]}' は存在しません。");
             if (columns[pos].Reference is not null) throw Error("同じ列の外部キーが重複しています。");
-            columns[pos] = columns[pos] with { Reference = new(key.Table, key.Targets[0], key.DeleteCascade, key.UpdateCascade) };
+            columns[pos] = columns[pos] with { Reference = key.SingleReference() };
         }
         references.RemoveAll(key => key.Columns.Count == 1);
         if (columns.Count(x => x.PrimaryKey) + (primaryColumns is null ? 0 : 1) > 1) throw Error("主キーは1つだけ指定してください。");
@@ -253,17 +290,31 @@ public sealed partial class SqlParser
         var table = Name();
         var targets = ForeignKeyColumns();
         if (children.Count != targets.Count) throw Error("外部キーの列数が参照先と一致しません。");
-        bool? delete = null, update = null;
+        SqlReferenceAction? delete = null, update = null;
         while (Match("ON"))
         {
             var isDelete = Match("DELETE");
             if (!isDelete) Expect("UPDATE");
             if ((isDelete ? delete : update).HasValue) throw Error("外部キーの参照アクションが重複しています。");
-            var cascade = Match("CASCADE");
-            if (!cascade && !Match("RESTRICT")) { Expect("NO"); Expect("ACTION"); }
-            if (isDelete) delete = cascade; else update = cascade;
+            SqlReferenceAction action;
+            if (Match("CASCADE")) action = SqlReferenceAction.Cascade;
+            else if (Match("SET"))
+            {
+                if (Match("NULL")) action = SqlReferenceAction.SetNull;
+                else { Expect("DEFAULT"); action = SqlReferenceAction.SetDefault; }
+            }
+            else
+            {
+                if (!Match("RESTRICT")) { Expect("NO"); Expect("ACTION"); }
+                action = SqlReferenceAction.Restrict;
+            }
+            if (isDelete) delete = action; else update = action;
         }
-        return new(children, table, targets, delete == true, update == true);
+        return new(children, table, targets, delete == SqlReferenceAction.Cascade, update == SqlReferenceAction.Cascade)
+        {
+            OnDelete = delete is SqlReferenceAction.SetNull or SqlReferenceAction.SetDefault ? delete : null,
+            OnUpdate = update is SqlReferenceAction.SetNull or SqlReferenceAction.SetDefault ? update : null
+        };
     }
 
     private string CheckDefinition()
@@ -373,7 +424,7 @@ public sealed partial class SqlParser
             {
                 if (reference is not null) throw Error("同じ列の外部キーが重複しています。");
                 var fk = ReferenceDefinition([name]);
-                reference = new(fk.Table, fk.Targets[0], fk.DeleteCascade, fk.UpdateCascade);
+                reference = fk.SingleReference();
             }
             else if (Match("CHECK")) checks.Add(CheckDefinition());
             else break;
@@ -394,7 +445,18 @@ public sealed partial class SqlParser
             var values = new List<SqlExpression>();
             do
             {
-                if (Is("CAST"))
+                if (StartsSequenceValue(current))
+                {
+                    if (inTriggerBody) throw Error("NEXT VALUE FOR is not supported inside a trigger.");
+                    values.Add(new SqlNextValue(NextSequenceName()));
+                    hasCast = true;
+                }
+                else if (inTriggerBody)
+                {
+                    values.Add(Expression());
+                    hasCast = true;
+                }
+                else if (Is("CAST"))
                 {
                     var expression = Factor(0);
                     var operand = expression;
@@ -437,7 +499,7 @@ public sealed partial class SqlParser
                     SqlAggregate aggregate => aggregate.Function.ToLowerInvariant(),
                     _ => "value"
                 };
-                projections.Add(expression is SqlAggregate { Function: "COUNT", Argument: null }
+                projections.Add(expression is SqlAggregate { Function: "COUNT", Argument: null, Filter: null }
                     ? new(null, name, Count: true) : new(expression, name));
             }
             if (projections.Count > 64) throw Error("結果列は64列以下にしてください。");
@@ -493,25 +555,30 @@ public sealed partial class SqlParser
             }
         }
         var where = Match("WHERE") ? Expression() : null;
-        List<SqlField>? groupBy = null;
+        List<SqlExpression>? groupBy = null;
+        string? groupDescription = null;
         if (Match("GROUP"))
         {
             Expect("BY"); groupBy = [];
+            int groupStart = Peek.Position;
             do
             {
-                groupBy.Add(Field());
+                var key = Expression();
+                if (key.ContainsAggregate() || SqlNestedQuery.Contains(key)) throw Error("GROUP BY requires scalar expressions over the input row.");
+                groupBy.Add(key);
                 if (groupBy.Count > 64) throw Error("GROUP BYは64列以下にしてください。");
             } while (Match(","));
+            groupDescription = source[groupStart..(End ? source.Length : Peek.Position)].Trim();
         }
         var having = Match("HAVING") ? Expression() : null;
-        return new SelectRows(table, projections, where, [], limit, 0, alias, join, groupBy, additionalJoins) { Having = having, Distinct = distinct, DerivedSources = derived };
+        return new SelectRows(table, projections, where, [], limit, 0, alias, join, groupBy, additionalJoins) { Having = having, Distinct = distinct, DerivedSources = derived, GroupDescription = groupDescription };
     }
 
     private SelectRows QueryTail(SelectRows query)
     {
         var limit = query.Limit;
         var order = new List<SqlOrder>();
-        if (Match("ORDER")) { Expect("BY"); do { var field = Field(); var descending = Match("DESC"); if (!descending) Match("ASC"); order.Add(new(field.Name, descending, field.Qualifier)); } while (Match(",")); }
+        if (Match("ORDER")) { Expect("BY"); do { order.Add(OrderTerm()); } while (Match(",")); }
         if (Match("LIMIT")) { if (limit is not null) throw Error("TOPとLIMITは併用できません。"); limit = Integer(0, 4096); }
         var offset = 0;
         if (Match("OFFSET"))
@@ -530,6 +597,20 @@ public sealed partial class SqlParser
         return query with { Order = order, Limit = limit, Offset = offset };
     }
 
+    private SqlOrder OrderTerm()
+    {
+        var field = Field();
+        bool descending = Match("DESC");
+        if (!descending) Match("ASC");
+        bool? nullsFirst = null;
+        if (Match("NULLS"))
+        {
+            nullsFirst = Match("FIRST");
+            if (nullsFirst == false) Expect("LAST");
+        }
+        return new(field.Name, descending, field.Qualifier) { NullsFirst = nullsFirst };
+    }
+
     private string? TableAlias()
     {
         if (inProcedureBody && Is("END")) return null;
@@ -539,8 +620,8 @@ public sealed partial class SqlParser
         return Peek.Text.ToUpperInvariant() switch
         {
             "INNER" or "JOIN" or "ON" or "WHERE" or "HAVING" or "GROUP" or "ORDER" or "LIMIT" or "OFFSET" or
-            "LEFT" or "RIGHT" or "FULL" or "OUTER" or "NATURAL" or "CROSS" or "USING" or
-            "WITH" or "UNION" or "ALL" or "INTERSECT" or "EXCEPT" or "FETCH" or "WHEN" => null,
+            "LEFT" or "RIGHT" or "FULL" or "OUTER" or "NATURAL" or "CROSS" or "USING" or "FOR" or
+            "WITH" or "UNION" or "ALL" or "INTERSECT" or "EXCEPT" or "FETCH" or "WHEN" or "RETURNING" => null,
             _ => Name()
         };
     }

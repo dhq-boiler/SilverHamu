@@ -84,7 +84,7 @@ public sealed partial class SqlDatabase
         {
             if (row.Count != columns.Count) throw new SqlException("INSERT の列数と入力の列数が一致しません。");
             for (var i = 0; i < row.Count; i++)
-                if (row[i] is SqlCast cast) CommonType(columns[i].Type, ExpressionType(cast, []));
+                if (row[i] is not SqlLiteral) CommonType(columns[i].Type, ExpressionType(row[i], []));
             return row.Select(expression => expression.Evaluate(empty)).ToArray();
         });
     }

@@ -84,7 +84,7 @@ public sealed partial class SqlDatabase
                 else projections.Add(p with { Expression = BindExpression(p.Expression), Window = BindWindow(p.Window) });
             }
             if (projections.Count > 64) throw new SqlException("結果列は64列以下にしてください。");
-            var groupBy = query.GroupBy?.Select(f => new SqlField(SelectKey(Resolve(f)))).ToList();
+            var groupBy = query.GroupBy?.Select(key => BindExpression(key)!).ToList();
             var order = new List<SqlOrder>();
             foreach (var sort in query.Order)
             {
@@ -100,7 +100,7 @@ public sealed partial class SqlDatabase
                         continue;
                     }
                 }
-                order.Add(new(SelectKey(Resolve(new(sort.Column, sort.Qualifier))), sort.Descending));
+                order.Add(sort with { Column = SelectKey(Resolve(new(sort.Column, sort.Qualifier))), Qualifier = null });
             }
             return query with { Projections = projections, ProfileSource = query.ProfileSource ?? query, Where = BindExpression(query.Where),
                 Having = BindExpression(query.Having), Order = order, GroupBy = groupBy };
@@ -177,8 +177,6 @@ public sealed partial class SqlDatabase
             });
             filter = filter is null ? bound : new SqlBinary(filter, "AND", bound);
         }
-        if (keys.Count == 0)
-            throw new SqlException("JOIN ON requires equality between qualified columns of a preceding input and the new input.");
         if (filter is null) return null;
         var columns = inputs.Values.ToArray();
         ValidatePredicate(filter, columns.Select(c => c.Column with { Name = c.Key }).ToArray());

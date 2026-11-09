@@ -24,8 +24,9 @@ public sealed partial class SqlDatabase
 
     private static SqlResult SelectGroups(SelectRows select, SqlTable table, List<SqlRow> rows, bool describeOnly, SelectTimings? timings)
     {
-        var keys = select.GroupBy?.Select(f => f.Name).Distinct(StringComparer.OrdinalIgnoreCase).ToArray() ?? [];
-        var groupedColumns = keys.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var keys = select.GroupBy ?? [];
+        foreach (var key in keys) ExpressionType(key, table.Columns);
+        var groupedColumns = keys.OfType<SqlField>().Select(field => field.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
         void RequireGrouped(string field)
         {
             if (!groupedColumns.Contains(field)) throw new SqlException($"Column '{field}' must be grouped or aggregated.");
@@ -34,7 +35,7 @@ public sealed partial class SqlDatabase
         {
             expression?.Rewrite(node =>
             {
-                if (node is SqlAggregate) return node;
+                if (node is SqlAggregate || keys.Any(key => SameGroupingExpression(key, node))) return node;
                 if (node is SqlField field) RequireGrouped(field.Name);
                 if (node is SqlBoundQuery query)
                     foreach (var column in query.CorrelatedFields) RequireGrouped(column);
@@ -51,6 +52,7 @@ public sealed partial class SqlDatabase
         if (select.Having is { } filter) RequireType(ExpressionType(filter, table.Columns), "BOOLEAN");
         foreach (var window in select.Projections.Select(p => p.Window).OfType<SqlWindow>())
         {
+            ValidateGrouped(window.Filter);
             foreach (var field in window.Partition) RequireGrouped(field.Name);
             foreach (var sort in window.Order) RequireGrouped(sort.Column);
         }
@@ -58,14 +60,15 @@ public sealed partial class SqlDatabase
             if (sort.OutputIndex is null) RequireGrouped(sort.Column);
 
         // A global aggregate returns one group even when no input row survives WHERE.
-        IEnumerable<List<SqlRow>> groups = describeOnly ? [] : keys.Length == 0 ? [rows] :
-            rows.GroupBy(r => keys.Select(k => r.Values[k]).ToArray(), new GroupKeyComparer()).Select(g => g.ToList());
+        IEnumerable<List<SqlRow>> groups = describeOnly ? [] : keys.Count == 0 ? [rows] :
+            rows.GroupBy(r => keys.Select(k => k.Evaluate(r.Values)).ToArray(), new GroupKeyComparer()).Select(g => g.ToList());
         if (timings?.Groups is { } groupStage) groups = groupStage.Observe(groups);
         var groupRows = new List<SqlRow>();
         var results = new List<SqlValue[]>();
         foreach (var group in groups)
         {
-            var grouped = keys.ToDictionary(key => key, key => group[0].Values[key], StringComparer.OrdinalIgnoreCase);
+            var grouped = keys.Count == 0 ? new Dictionary<string, SqlValue>(StringComparer.OrdinalIgnoreCase)
+                : new Dictionary<string, SqlValue>(group[0].Values, StringComparer.OrdinalIgnoreCase);
             var aggregates = new Dictionary<SqlAggregate, SqlValue>();
             SqlValue Evaluate(SqlExpression expression) => expression.Rewrite(node =>
             {
@@ -90,7 +93,14 @@ public sealed partial class SqlDatabase
             var values = new SqlValue[expressions.Length];
             for (int i = 0; i < expressions.Length; i++)
             {
-                values[i] = expressions[i] is { } expr ? Evaluate(expr) : SqlValue.Null;
+                var accepted = true;
+                if (select.Projections[i].Window?.Filter is { } windowFilter)
+                {
+                    var keep = Evaluate(windowFilter);
+                    grouped[WindowFilterKey(i)] = keep;
+                    accepted = keep.IsTrue;
+                }
+                values[i] = accepted && expressions[i] is { } expr ? Evaluate(expr) : SqlValue.Null;
                 if (select.Projections[i].Window?.Argument is not null)
                     grouped[WindowArgumentKey(i)] = values[i];
             }
@@ -104,6 +114,7 @@ public sealed partial class SqlDatabase
         {
             if (select.Projections[i].Window is not { } window) continue;
             if (window.Argument is not null) window = window with { Argument = new SqlField(WindowArgumentKey(i)) };
+            if (window.Filter is not null) window = window with { Filter = new SqlField(WindowFilterKey(i)) };
             var values = WindowValues(window, groupRows, timings?.Windows.GetValueOrDefault(i));
             for (int row = 0; row < results.Count; row++) results[row][i] = values[row];
         }
@@ -114,8 +125,8 @@ public sealed partial class SqlDatabase
                 foreach (var sort in select.Order)
                 {
                     SqlValue SortValue(int i) => sort.OutputIndex is int index ? results[i][index] : groupRows[i].Values[sort.Column];
-                    var comparison = SqlValue.Compare(SortValue(left), SortValue(right));
-                    if (comparison != 0) return sort.Descending ? -comparison : comparison;
+                    var comparison = sort.Compare(SortValue(left), SortValue(right));
+                    if (comparison != 0) return comparison;
                 }
                 return 0;
             }));
@@ -127,10 +138,29 @@ public sealed partial class SqlDatabase
 
     // SQL identifiers cannot contain control characters, so these keys cannot collide with user columns.
     private static string WindowArgumentKey(int index) => $"\0window{index}";
+    private static string WindowFilterKey(int index) => $"\0windowFilter{index}";
+
+    // Record equality alone compares CASE branches and IN lists by collection identity.
+    private static bool SameGroupingExpression(SqlExpression? a, SqlExpression? b) => (a, b) switch
+    {
+        (SqlCase x, SqlCase y) => SameGroupingExpression(x.Operand, y.Operand) && SameGroupingExpression(x.Else, y.Else)
+            && x.Branches.Count == y.Branches.Count && x.Branches.Zip(y.Branches).All(p =>
+                SameGroupingExpression(p.First.When, p.Second.When) && SameGroupingExpression(p.First.Then, p.Second.Then)),
+        (SqlInList x, SqlInList y) => SameGroupingExpression(x.Value, y.Value) && x.Items.Count == y.Items.Count &&
+            x.Items.Zip(y.Items).All(p => SameGroupingExpression(p.First, p.Second)),
+        (SqlBinary x, SqlBinary y) => x.Operator == y.Operator && SameGroupingExpression(x.Left, y.Left) && SameGroupingExpression(x.Right, y.Right),
+        (SqlUnary x, SqlUnary y) => x.Operator == y.Operator && SameGroupingExpression(x.Operand, y.Operand),
+        (SqlIsNull x, SqlIsNull y) => x.Negated == y.Negated && SameGroupingExpression(x.Expression, y.Expression),
+        (SqlCast x, SqlCast y) => x.TargetType == y.TargetType && x.MaxLength == y.MaxLength && SameGroupingExpression(x.Operand, y.Operand),
+        (SqlBetween x, SqlBetween y) => SameGroupingExpression(x.Value, y.Value) && SameGroupingExpression(x.Lower, y.Lower) &&
+            SameGroupingExpression(x.Upper, y.Upper),
+        _ => Equals(a, b)
+    };
 
     private static SqlValue EvaluateAggregate(SqlAggregate aggregate, IReadOnlyList<SqlRow> group)
     {
-        if (aggregate.Argument is null) return SqlNumbers.Number(group.Count);
+        if (aggregate.Argument is null)
+            return SqlNumbers.Number(aggregate.Filter is null ? group.Count : group.Count(r => aggregate.Filter.Evaluate(r.Values).IsTrue));
         var seen = aggregate.Distinct ? new HashSet<string>(StringComparer.Ordinal) : null;
         SqlValue extreme = SqlValue.Null;
         decimal sum = 0;
@@ -139,6 +169,7 @@ public sealed partial class SqlDatabase
         {
             foreach (var row in group)
             {
+                if (aggregate.Filter is not null && !aggregate.Filter.Evaluate(row.Values).IsTrue) continue;
                 var value = aggregate.Argument.Evaluate(row.Values);
                 if (value.IsNull || seen is not null && !seen.Add(UniqueIdentity(value))) continue;
                 count++;

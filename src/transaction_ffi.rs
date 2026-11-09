@@ -549,6 +549,24 @@ pub unsafe extern "C" fn ndb_tx_delete(id: u64, key: *const u8, key_len: u64) ->
         Ok(0)
     })
 }
+/// Reserves keys encoded as repeated little-endian u16 lengths followed by key bytes.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn ndb_tx_lock_keys(id: u64, frame: *const u8, len: u64) -> i32 {
+    guard(|| {
+        let mut frame = unsafe { bytes(frame, len, 4096 * (MAX_KEY_BYTES + 2))? };
+        let mut keys = Vec::new();
+        while !frame.is_empty() {
+            let (length, rest) = frame.split_at_checked(2).ok_or(1)?;
+            let length = usize::from(u16::from_le_bytes([length[0], length[1]]));
+            let (key, rest) = rest.split_at_checked(length).ok_or(1)?;
+            if keys.len() == 4096 || key.len() > MAX_KEY_BYTES { return Err(1); }
+            keys.push(key);
+            frame = rest;
+        }
+        with_transaction(id, |tx| tx.lock_keys(&keys))?;
+        Ok(0)
+    })
+}
 /// Operation 0 creates a mark, 1 rolls back to it, and 2 releases it. Names are UTF-8 bytes.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn ndb_tx_savepoint(id: u64, operation: u32, name: *const u8, len: u64) -> i32 {

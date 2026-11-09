@@ -84,8 +84,7 @@ public sealed partial class SqlDatabase
                 if (query.Where is not null) Where = Stage("FILTER", "WHERE");
                 if (bound.IsGrouped)
                 {
-                    Groups = Stage("AGGREGATE", query.GroupBy is { } keys
-                        ? string.Join(", ", keys.Select(key => key.Name)) : "Single group");
+                    Groups = Stage("AGGREGATE", query.GroupDescription ?? "Single group");
                     if (query.Having is not null) Having = Stage("FILTER", "HAVING");
                     Project = Stage("PROJECT");
                 }
@@ -94,7 +93,7 @@ public sealed partial class SqlDatabase
                         Windows[i] = Stage("WINDOW", window.Function, profile.Child($"window:{i}"));
             }
             if (query.Order.Count > 0)
-                Sort = Stage("SORT", string.Join(", ", query.Order.Select(order => $"{order.Column} {(order.Descending ? "DESC" : "ASC")}")));
+                Sort = Stage("SORT", string.Join(", ", query.Order.Select(order => order.Description)));
             if (Combine is null && !bound.IsGrouped && query.Distinct) Project = Stage("PROJECT");
             if (query.Distinct) Distinct = Stage("DISTINCT", "Remove duplicate projected rows");
             if (query.Offset > 0 || query.Limit.HasValue) Page = Stage("LIMIT", $"Offset {query.Offset}, limit {query.Limit ?? MaxRows}");

@@ -67,6 +67,7 @@ These labels cover common SQL forms in the shared `Catdb.Sql` engine used by cat
 | `DELETE FROM ... [WHERE ...]` | ✓ Supported | |
 | `CREATE TABLE`, `DROP TABLE` | ✓ Supported | Up to 64 columns per table. |
 | `CREATE TYPE ... AS DISTINCT`, `SHOW TYPES` | ✓ Supported | Give IDs, amounts and other values distinct types with optional constraints. [SQL types and examples](docs/sql.md#sql-types) |
+| `ALTER TYPE T ENABLE OPERATOR +` | ✓ Supported | Enable addition for a named numeric type. The sum retains that type. |
 | `CREATE TABLE ... AS SELECT` | ✓ Supported | Copies query results and infers column types, including for an empty result. |
 | `NOT NULL`, column-level `UNIQUE`, `DEFAULT literal`, `CHECK` | ✓ Supported | Column and table checks use the supported predicate syntax. |
 | Single-column or composite `PRIMARY KEY` | ✓ Supported | |

@@ -2,7 +2,7 @@ namespace Catdb.Sql;
 
 public sealed partial class SqlParser
 {
-    private readonly List<SqlCast> namedCasts = [];
+    private SqlExpressionBindings bindings = new();
 
     private SqlExpression Expression(int depth = 0)
     {
@@ -70,9 +70,22 @@ public sealed partial class SqlParser
     private SqlExpression Additive(int depth)
     {
         var left = Multiplicative(depth);
-        while (Is("+") || Is("-")) left = new SqlBinary(left, tokens[current++].Text, Multiplicative(depth));
+        while (Is("+") || Is("-"))
+        {
+            var sum = new SqlBinary(left, tokens[current++].Text, Multiplicative(depth));
+            if (sum.Operator == "+" && MayHaveDistinctType(sum.Left) && MayHaveDistinctType(sum.Right))
+                bindings.Additions.Add(sum);
+            left = sum;
+        }
         return left;
     }
+
+    private static bool MayHaveDistinctType(SqlExpression operand) => operand switch
+    {
+        SqlLiteral literal => literal.Value.IsNull,
+        SqlCast cast => !SqlTypeRules.IsBuiltIn(cast.Type),
+        _ => true
+    };
 
     private SqlExpression Multiplicative(int depth)
     {
@@ -117,7 +130,7 @@ public sealed partial class SqlParser
             Expect("("); var argument = Expression(depth + 1); Expect("AS");
             var (type, length) = ColumnType(); Expect(")");
             var cast = new SqlCast(argument, type, length);
-            if (!SqlTypeRules.IsBuiltIn(type)) namedCasts.Add(cast);
+            if (!SqlTypeRules.IsBuiltIn(type)) bindings.NamedCasts.Add(cast);
             return cast;
         }
         if (Peek.Kind == "word" && current + 1 < tokens.Count && tokens[current + 1] is { Kind: "symbol", Text: "(" } &&

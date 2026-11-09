@@ -9,8 +9,8 @@ public sealed partial class SqlDatabase
         var definitions = (table.Checks ?? []).Concat(table.Columns.SelectMany(c => c.Checks ?? []));
         foreach (var text in definitions)
         {
-            var expression = SqlParser.ParseCheck(text, out var casts);
-            await BindCastsAsync(casts);
+            var expression = SqlParser.ParseCheck(text, out var bindings);
+            await BindExpressionsAsync(bindings);
             ValidateCheckExpression(expression, table.Columns);
             foreach (var row in rows)
             {

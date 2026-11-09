@@ -22,10 +22,10 @@ public sealed partial class SqlParser
             parser.conditionCount = 0;
             parser.compoundCount = 0;
             var statement = parser.Statement();
-            if (parser.namedCasts.Count > 0)
+            if (parser.bindings.NamedCasts.Count > 0 || parser.bindings.Additions.Count > 0)
             {
-                statement = statement with { NamedCasts = parser.namedCasts.ToArray() };
-                parser.namedCasts.Clear();
+                statement = statement with { ExpressionBindings = parser.bindings };
+                parser.bindings = new();
             }
             statements.Add(statement);
             if (!parser.End) parser.Expect(";");
@@ -59,6 +59,14 @@ public sealed partial class SqlParser
         }
         if (Match("ALTER"))
         {
+            if (Match("TYPE"))
+            {
+                var type = Name();
+                Expect("ENABLE");
+                Expect("OPERATOR");
+                Expect("+");
+                return new EnableAddition(type);
+            }
             Expect("TABLE"); var table = Name();
             if (Match("ADD")) { Match("COLUMN"); return new AddColumn(table, ColumnDefinition()); }
             if (Match("DROP")) { Match("COLUMN"); return new DropColumn(table, Name()); }
@@ -263,13 +271,13 @@ public sealed partial class SqlParser
 
     internal static SqlExpression ParseCheck(string text) => ParseCheck(text, out _);
 
-    internal static SqlExpression ParseCheck(string text, out IReadOnlyList<SqlCast> namedCasts)
+    internal static SqlExpression ParseCheck(string text, out SqlExpressionBindings bindings)
     {
         var parser = new SqlParser(text);
         var expression = parser.Expression();
         if (SqlNestedQuery.Contains(expression)) throw parser.Error("CHECK cannot read another relation.");
         if (!parser.End) throw parser.Error("CHECK式が不正です。");
-        namedCasts = parser.namedCasts;
+        bindings = parser.bindings;
         return expression;
     }
 
@@ -624,6 +632,7 @@ public sealed partial class SqlParser
             }
             else if (char.IsLetter(c) || c == '_') { i++; while (i < sql.Length && (char.IsLetterOrDigit(sql[i]) || sql[i] == '_')) i++; tokens.Add(new(sql[start..i], "word", start)); }
             else if (char.IsDigit(c) || c == '.' && i + 1 < sql.Length && char.IsDigit(sql[i + 1])) { i++; while (i < sql.Length && (char.IsDigit(sql[i]) || sql[i] is '.' or 'e' or 'E' || sql[i] is '+' or '-' && sql[i - 1] is 'e' or 'E')) i++; tokens.Add(new(sql[start..i], "number", start)); }
+            else if (c == '＋') { i++; tokens.Add(new("+", "symbol", start)); }
             else if ("(),;.*=<>!+-/%".Contains(c)) { i++; if (i < sql.Length && (c is '<' or '>' or '!' && sql[i] == '=' || c == '<' && sql[i] == '>')) i++; tokens.Add(new(sql[start..i], "symbol", start)); }
             else throw new SqlException($"SQL位置 {i + 1}: 未対応の文字 '{c}' です。");
             if (tokens.Count > 50000) throw new SqlException("SQLの要素数が上限を超えています。");

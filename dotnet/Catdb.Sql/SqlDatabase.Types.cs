@@ -3,14 +3,44 @@ namespace Catdb.Sql;
 public sealed partial class SqlDatabase
 {
     private const string TypePrefix = "_catdb_owner/sql/v1/type/";
+    private const string AdditionPrefix = "_catdb_owner/sql/v1/operator/add/";
+    private const int MaxTypes = 256;
 
-    private async Task BindCastsAsync(IReadOnlyList<SqlCast> casts)
+    private Task<List<(string Key, byte[] Value)>> ScanTypeCatalogAsync(string prefix) =>
+        ScanRangeAsync(prefix, prefix + "~", MaxTypes, MaxTypes * MaxSerializedBytes);
+
+    private async Task<IReadOnlyDictionary<string, SqlTypeDefinition>> GetAdditionTypesAsync()
     {
-        if (casts.Count == 0) return;
-        foreach (var group in casts.GroupBy(cast => cast.Type, StringComparer.OrdinalIgnoreCase))
+        var entries = await ScanTypeCatalogAsync(AdditionPrefix);
+        return entries.Select(entry => Deserialize<SqlTypeDefinition>(entry.Value))
+            .ToDictionary(type => type.Name, StringComparer.OrdinalIgnoreCase);
+    }
+
+    private async Task<SqlResult> EnableAdditionAsync(EnableAddition addition, List<(string Key, byte[]? Value)> changes)
+    {
+        var type = await GetDistinctTypeAsync(addition.TypeName)
+            ?? throw new SqlException($"加算を有効にする独自型 '{addition.TypeName}' が存在しません。");
+        if (!IsNumericType(type.BaseType))
+            throw new SqlException($"型 '{type.Name}' の加算には数値の基底型が必要です。");
+        var key = AdditionPrefix + TableId(type.Name);
+        if (await GetAsync(key) is not null)
+            throw new SqlException($"型 '{type.Name}' の加算は既に有効です。");
+        changes.Add((key, Serialize(type)));
+        return Empty($"型 '{type.Name}' の加算を有効にしました。");
+    }
+
+    private async Task BindExpressionsAsync(SqlExpressionBindings? bindings)
+    {
+        if (bindings is null) return;
+        foreach (var group in bindings.NamedCasts.GroupBy(cast => cast.Type, StringComparer.OrdinalIgnoreCase))
         {
             var type = await GetDistinctTypeAsync(group.Key) ?? throw new SqlException($"型 '{group.Key}' が存在しません。");
             foreach (var cast in group) cast.DistinctType = type;
+        }
+        if (bindings.Additions.Count > 0)
+        {
+            var types = await GetAdditionTypesAsync();
+            foreach (var addition in bindings.Additions) addition.AdditionTypes = types;
         }
     }
 
@@ -28,12 +58,12 @@ public sealed partial class SqlDatabase
             if (create.IfNotExists) return Empty($"型 '{type.Name}' は既に存在します。変更なし。");
             throw new SqlException($"型 '{type.Name}' は既に存在します。");
         }
-        if ((await ScanAsync(TypePrefix, 256)).Count >= 256)
+        if ((await ScanTypeCatalogAsync(TypePrefix)).Count >= MaxTypes)
             throw new SqlException("独自型の上限256に達しています。");
         if (type.Check is { } check)
         {
-            var expression = SqlParser.ParseCheck(check, out var casts);
-            if (casts.Any(cast => !SqlTypeRules.IsBuiltIn(cast.Type)))
+            var expression = SqlParser.ParseCheck(check, out var bindings);
+            if (bindings.NamedCasts.Count > 0)
                 throw new SqlException("A distinct type CHECK may cast only to built-in types.");
             var value = new SqlColumn("VALUE", type.BaseType, false, false, false, null, type.MaxLength);
             ValidateCheckExpression(expression, [value]);
@@ -44,7 +74,7 @@ public sealed partial class SqlDatabase
 
     private async Task<SqlResult> ShowTypesAsync()
     {
-        var types = (await ScanAsync(TypePrefix, 256)).Select(pair => Deserialize<SqlTypeDefinition>(pair.Value))
+        var types = (await ScanTypeCatalogAsync(TypePrefix)).Select(pair => Deserialize<SqlTypeDefinition>(pair.Value))
             .OrderBy(type => type.Name, StringComparer.OrdinalIgnoreCase);
         var rows = types.Select(type => new[]
         {

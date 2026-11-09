@@ -63,9 +63,16 @@ public sealed record SqlResult(IReadOnlyList<string> Columns, IReadOnlyList<SqlV
 
 public abstract record SqlStatement
 {
-    internal IReadOnlyList<SqlCast> NamedCasts { get; init; } = [];
+    internal SqlExpressionBindings? ExpressionBindings { get; init; }
+}
+
+internal sealed class SqlExpressionBindings
+{
+    internal List<SqlCast> NamedCasts { get; } = [];
+    internal List<SqlBinary> Additions { get; } = [];
 }
 public sealed record CreateType(SqlTypeDefinition Definition, bool IfNotExists) : SqlStatement;
+public sealed record EnableAddition(string TypeName) : SqlStatement;
 public sealed record ShowTypes : SqlStatement;
 public sealed record CreateTable(string Table, List<SqlColumn> Columns, bool IfNotExists, List<string>? Checks = null, List<string>? CompositePrimaryKey = null, List<SqlForeignKey>? ForeignKeys = null) : SqlStatement;
 public sealed record DropTable(string Table, bool IfExists) : SqlStatement;
@@ -180,6 +187,17 @@ public sealed record SqlField(string Name, string? Qualifier = null) : SqlExpres
 }
 public sealed record SqlBinary(SqlExpression Left, string Operator, SqlExpression Right) : SqlExpression
 {
+    internal IReadOnlyDictionary<string, SqlTypeDefinition>? AdditionTypes { get; set; }
+
+    internal SqlTypeDefinition ResolveDistinctAddition(string left, string right)
+    {
+        var name = left == "NULL" ? right : left;
+        if ((left == "NULL" || right == "NULL" || left.Equals(right, StringComparison.OrdinalIgnoreCase))
+            && AdditionTypes is not null && AdditionTypes.TryGetValue(name, out var definition))
+            return definition;
+        throw new SqlException($"Addition is not enabled for {left} and {right}.");
+    }
+
     public override SqlExpression MapChildren(Func<SqlExpression, SqlExpression> map) => this with { Left = map(Left), Right = map(Right) };
     public override void Validate(IEnumerable<SqlColumn> columns) { Left.Validate(columns); Right.Validate(columns); }
     public override SqlValue Evaluate(IReadOnlyDictionary<string, SqlValue> row)
@@ -190,6 +208,11 @@ public sealed record SqlBinary(SqlExpression Left, string Operator, SqlExpressio
             if ((!left.IsNull && left.Kind != "BOOLEAN") || (!right.IsNull && right.Kind != "BOOLEAN")) throw new SqlException("AND / ORには条件式が必要です。");
             if (Operator == "AND") return (!left.IsNull && !left.IsTrue) || (!right.IsNull && !right.IsTrue) ? SqlValue.Boolean(false) : left.IsNull || right.IsNull ? SqlValue.Null : SqlValue.Boolean(true);
             return left.IsTrue || right.IsTrue ? SqlValue.Boolean(true) : left.IsNull || right.IsNull ? SqlValue.Null : SqlValue.Boolean(false);
+        }
+        if (Operator == "+" && (left.TypeName is not null || right.TypeName is not null))
+        {
+            var type = ResolveDistinctAddition(left.TypeName ?? left.Kind, right.TypeName ?? right.Kind);
+            return left.IsNull || right.IsNull ? SqlValue.Null : SqlTypeRules.AddDistinct(left, right, type);
         }
         if (left.IsNull || right.IsNull) return SqlValue.Null;
         if (Operator is "+" or "-" or "*" or "/" or "%")

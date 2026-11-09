@@ -56,7 +56,19 @@ SHOW TYPES;
 
 Joining on `orders.id = customers.id` raises a type error, even with empty tables. A literal assigned to a column is checked against its declaration. In a predicate, construct a typed value explicitly, for example `WHERE qty = CAST(2 AS Quantity)`. A type's `CHECK` evaluates its base value as `VALUE` and rejects a false result. Use `NOT NULL` on the column when a value is required.
 
-Same-type assignments, comparisons and foreign keys preserve the type's identity. Arithmetic on a distinct type requires an explicit conversion. For example, `SUM(CAST(paid AS DECIMAL(18,0)))` sums yen as numbers. Cast the result back to `JpyAmount` to check its range and recover the currency type. Query results report declared names in `ColumnTypes`, including for empty results. Each non-null named value also carries `TypeName` alongside its primitive `Kind` and `Text`.
+Same-type assignments, comparisons and foreign keys preserve the type's identity. Query results report declared names in `ColumnTypes`, including for empty results. Each non-null named value also carries `TypeName` alongside its primitive `Kind` and `Text`.
+
+To add two amounts and keep their currency, enable addition for their type once in the database. This works for existing columns as well as new ones.
+
+```sql
+ALTER TYPE JpyAmount ENABLE OPERATOR +;
+CREATE TABLE invoice_lines (subtotal JpyAmount, tax JpyAmount);
+INSERT INTO invoice_lines VALUES (1000, 100);
+SELECT subtotal + tax AS total FROM invoice_lines;
+-- total = 1100, column type = JpyAmount
+```
+
+Addition can be enabled for a distinct type based on `INTEGER`, `DECIMAL(p,s)` or `REAL`. Both operands and the result have that distinct type. Each addition uses the base numeric addition and validates the result against the declared range, scale and `CHECK`. An inexact or out-of-range result raises an error. A NULL operand yields NULL with the declared result column type. A different currency or a plain numeric operand is a type error. A literal can be given a currency explicitly, for example `subtotal + CAST(100 AS JpyAmount)`. The lexer also accepts fullwidth `＋` in expressions. Other arithmetic and aggregates retain their existing rules, for example `SUM(CAST(paid AS DECIMAL(18,0)))` sums the base numbers.
 
 | Base type | Input and guarantees |
 |---|---|
@@ -68,7 +80,7 @@ Same-type assignments, comparisons and foreign keys preserve the type's identity
 | `INSTANT` | Date and time with an explicit offset or `Z`. Equivalent instants compare equal and are returned in UTC. |
 | `DURATION` | Signed elapsed time such as `-1.02:30:00` (one day, two hours and thirty minutes before zero). Time, timestamp and duration inputs support up to seven fractional second digits. |
 
-Type names are case-insensitive and results use the declared spelling. Up to 256 distinct types can be created per database. Definitions participate in transactions and can use a built-in base with an optional length, precision or scale. The available type DDL is `CREATE TYPE [IF NOT EXISTS] ...` and `SHOW TYPES`. A type check may refer to `VALUE` and cast to built-in types. When adopting a named type on an existing column, `ALTER TABLE ... ALTER COLUMN ... TYPE ...` validates the existing values.
+Type names are case-insensitive and results use the declared spelling. Up to 256 distinct types can be created per database. Definitions participate in transactions and can use a built-in base with an optional length, precision or scale. Use `CREATE TYPE [IF NOT EXISTS]` to declare a type, `ALTER TYPE ... ENABLE OPERATOR +` to enable addition and `SHOW TYPES` to list types. A type check may refer to `VALUE` and cast to built-in types. When adopting a named type on an existing column, `ALTER TABLE ... ALTER COLUMN ... TYPE ...` validates the existing values.
 
 Existing stored rows and schemas retain their original interpretation, including bare `DECIMAL`, `FLOAT` and `DOUBLE` as aliases for `REAL`. New numeric literals that would silently lose significant digits in the decimal parser raise an error. Use matching SQL engines for all writers to a database that uses named types.
 
@@ -88,5 +100,7 @@ ORDER BY sensor, sample_no;
 ```
 
 ### Role writes
+
+For a view-only application on a token-based service, configure `--sql-host`, `--read-role app_viewer` and `--read-token-file <private-file>`, with role writes disabled (the default). Give the application only this role token. An administrator publishes a view with `GRANT SELECT ON public_books TO app_viewer`. The application can query its granted views and list them with `SHOW VIEWS`. Direct key reads, range scans, base-table queries and writes are denied. Once `REVOKE SELECT ON public_books FROM app_viewer` commits, the next query on an already authenticated connection is denied too. An account-mode database `reader` grant permits raw key reads and is unsuitable for this role. Use loopback or an encrypted tunnel for token-mode connections.
 
 An administrator can run `GRANT UPDATE ON public_books TO editor` and later `REVOKE UPDATE ON public_books FROM editor`. An embedded host supplies the authenticated role to `ExecuteRoleAsync(sql, role)`. On the token-based SQL service, configure the role and enable `--allow-role-writes` to use these grants. The read-only APIs continue to accept only view queries. For an updatable filtered view, UPDATE and DELETE select only visible rows. INSERT uses the exposed columns and the underlying table's defaults and constraints.

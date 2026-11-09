@@ -12,6 +12,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
     private const string ProcedurePrefix = "_catdb_owner/sql/v1/procedure/";
     public const int MaxRows = 4096;
     private const int MaxReadBytes = 8 * 1024 * 1024;
+    private const int MaxSerializedBytes = 256 * 1024;
 
     public async Task<IReadOnlyList<SqlResult>> ExecuteAsync(string sql)
     {
@@ -111,7 +112,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
             var view = Deserialize<SqlTable>(bytes);
             if (role is not null && !GrantsSelect(view, role))
                 throw new SqlException("指定された公開ビューは利用できません。");
-            await BindCastsAsync(query.NamedCasts);
+            await BindExpressionsAsync(query.ExpressionBindings);
             return await SelectViewAsync(query, view);
         }
         finally { if (inTransaction()) await SendOperationAsync("rollback"); }
@@ -144,7 +145,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
         try
         {
             var changes = new List<(string Key, byte[]? Value)>();
-            await BindCastsAsync(statement.NamedCasts);
+            await BindExpressionsAsync(statement.ExpressionBindings);
             if (statement is InsertSelect insertQuery)
             {
                 var input = await ReadWriteSourceAsync(insertQuery.Query);
@@ -156,6 +157,9 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
             {
                 case CreateType createType:
                     result = await CreateTypeAsync(createType, changes);
+                    break;
+                case EnableAddition addition:
+                    result = await EnableAdditionAsync(addition, changes);
                     break;
                 case ShowTypes:
                     result = await ShowTypesAsync();
@@ -461,7 +465,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
 
     private async Task<SqlTable> DescribeViewAsync(CreateView view, SqlTable? replacement = null)
     {
-        await BindCastsAsync(view.Select.NamedCasts);
+        await BindExpressionsAsync(view.Select.ExpressionBindings);
         var tables = new List<SqlTable>();
         foreach (var name in view.Select.Joins().Select(j => j.Table).Prepend(view.Select.Table!))
             tables.Add(replacement is not null && replacement.Name.Equals(name, StringComparison.OrdinalIgnoreCase)
@@ -506,7 +510,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
             !string.Equals(query.Table, view.SourceTable, StringComparison.OrdinalIgnoreCase) ||
             !query.Joins().Select(j => j.Table).SequenceEqual(view.JoinSources ?? [], StringComparer.OrdinalIgnoreCase))
             throw new SqlException("ビュー定義が不正です。");
-        await BindCastsAsync(query.NamedCasts);
+        await BindExpressionsAsync(query.ExpressionBindings);
         var visible = query.Join is null ? await SelectTableAsync(query, await ReadSourceTableAsync(query.Table))
             : await SelectJoinAsync(query, baseTablesOnly: true);
         return visible.Rows.Select(values => new SqlRow("", new Dictionary<string, SqlValue>(visible.Columns.Zip(values, KeyValuePair.Create), StringComparer.OrdinalIgnoreCase))).ToList();
@@ -645,7 +649,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
     private Task<List<(string Key, byte[] Value)>> ScanAsync(string prefix, int maxRows) =>
         ScanRangeAsync(prefix, prefix + "~", maxRows);
 
-    private async Task<List<(string Key, byte[] Value)>> ScanRangeAsync(string start, string end, int maxRows)
+    private async Task<List<(string Key, byte[] Value)>> ScanRangeAsync(string start, string end, int maxRows, int maxBytes = MaxReadBytes)
     {
         var rows = new List<(string, byte[])>(); string? after = null; var totalBytes = 0; var pages = 0;
         do
@@ -658,7 +662,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
             {
                 var key = Encoding.UTF8.GetString(Convert.FromHexString(item![0]!.ToString())); var value = Convert.FromHexString(item[1]!.ToString());
                 totalBytes += value.Length;
-                if (rows.Count >= maxRows || totalBytes > MaxReadBytes) throw new SqlException($"読込上限（{maxRows}行・8 MiB）を超えています。部分結果は返しません。");
+                if (rows.Count >= maxRows || totalBytes > maxBytes) throw new SqlException($"読込上限（{maxRows}行・{maxBytes / (1024 * 1024)} MiB）を超えています。部分結果は返しません。");
                 rows.Add((key, value));
             }
             var next = page["next_after"]?.ToString();
@@ -680,7 +684,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
     private static byte[] Serialize<T>(T value)
     {
         var bytes = JsonSerializer.SerializeToUtf8Bytes(value);
-        if (bytes.Length > 256 * 1024) throw new SqlException("1行またはテーブル定義の保存サイズは256 KiB以下にしてください。");
+        if (bytes.Length > MaxSerializedBytes) throw new SqlException("1行またはテーブル定義の保存サイズは256 KiB以下にしてください。");
         return bytes;
     }
     private static T Deserialize<T>(byte[] bytes) => JsonSerializer.Deserialize<T>(bytes) ?? throw new SqlException("SQLデータの形式が不正です。");

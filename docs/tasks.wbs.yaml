@@ -1,7 +1,7 @@
 version: 3
 title: catdb
 createdAt: 2026-11-09T15:31:25.7166025Z
-modifiedAt: 2026-11-09T15:39:38.6945393Z
+modifiedAt: 2026-11-09T16:05:58.3832111Z
 tasks:
 - id: sql-semantic-types
   title: SQLで日時・金額・識別子の意味を保証する
@@ -22,3 +22,22 @@ tasks:
     estimateHours: 2
     remainingHours: 0
     notes: Visual Studio 2026 の Debug ビルド成功。SQLテストはTRXで160件中160件成功。CLIで文書の例を実行し、ネイティブDBを作成後に再オープンした結果、金額1200をJpyAmount型で取得し、数値の合計1200を確認した。
+- id: sql-distinct-addition
+  title: 名前付き数値型の加算をSQLで有効にする
+  notes: 同じ独自型の2つの値を加算して同じ型の結果を得られること、混在した型や結果の制約違反を拒否できることを終了条件とする。
+  children:
+  - id: sql-distinct-addition-engine
+    title: ALTER TYPE による加算の有効化と式評価を実装する
+    estimateHours: 2
+    remainingHours: 0
+    notes: ALTER TYPE ... ENABLE OPERATOR + で名前付き数値型の加算を有効にする。式評価と型推論で結果の独自型を保ち、精度・範囲・CHECKを検証する。
+  - id: sql-distinct-addition-verification
+    title: 加算の成功・拒否条件をテストし、SQLの使用例を文書化する
+    estimateHours: 1
+    remainingHours: 0
+    notes: Visual Studio 2026 の Debug ビルド成功。TRXでSQLテスト179件中179件成功。CLIで実DBを再オープンし、日本語列の SELECT カラム１＋カラム２ が円型の1100を返した。加算が有効でない型、異通貨、範囲と精度の超過、CHECK違反、ロールバックも検証した。
+- id: app-view-token-access
+  title: 閲覧用アプリの公開ビュー限定アクセスと権限取消を検証する
+  estimateHours: 1
+  remainingHours: 0
+  notes: 閲覧専用ロールトークンの設定手順を文書化。実TCPで許可ビューのSELECTと、原表・非公開ビュー・生KVのget/scanの拒否を確認した。同じ接続でREVOKE直後の読み取りは拒否、再付与後は成功。CIの既存プロトコルテストに追加。

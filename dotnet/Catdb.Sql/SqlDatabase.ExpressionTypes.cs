@@ -36,6 +36,8 @@ public sealed partial class SqlDatabase
                 var left = TypeOf(binary.Left); var right = TypeOf(binary.Right);
                 if (binary.Operator is "+" or "-" or "*" or "/" or "%")
                 {
+                    if (binary.Operator == "+" && (IsDistinctType(left) || IsDistinctType(right)))
+                        return binary.ResolveDistinctAddition(left, right).Name;
                     RequireNumber(left); RequireNumber(right);
                     // A computed value can exceed the precision or scale of either input column.
                     return binary.Operator == "/" || SqlTypeRules.IsDecimal(left) || SqlTypeRules.IsDecimal(right)
@@ -84,6 +86,8 @@ public sealed partial class SqlDatabase
     }
 
     private static bool IsNumericType(string type) => type is "INTEGER" or "REAL" || SqlTypeRules.IsDecimal(type);
+
+    private static bool IsDistinctType(string type) => type != "NULL" && !SqlTypeRules.IsBuiltIn(type);
 
     private static string CommonType(string first, string second)
     {

@@ -81,7 +81,7 @@ class ServiceTests(unittest.TestCase):
         read_secret.write_text(read_token, encoding="utf-8")
         self.start("--sql-host", os.environ["CATDB_SQL_HOST"], "--read-role", "reader", "--read-token-file", str(read_secret))
         with Client("127.0.0.1", self.port, self.token) as admin, Client("127.0.0.1", self.port, read_token) as viewer:
-            self.ok(admin, op="sql", sql="CREATE TABLE docs(id INT PRIMARY KEY); INSERT INTO docs VALUES (1); CREATE VIEW visible AS SELECT id FROM docs; GRANT SELECT ON visible TO reader")
+            self.ok(admin, op="sql", sql="CREATE TABLE docs(id INT PRIMARY KEY); INSERT INTO docs VALUES (1); CREATE VIEW visible AS SELECT id FROM docs; CREATE VIEW private_docs AS SELECT id FROM docs; GRANT SELECT ON visible TO reader")
             self.ok(admin, op="begin")
             self.assertTrue(self.ok(admin, op="sql", sql="INSERT INTO docs VALUES (2)")["in_transaction"])
             self.ok(admin, op="rollback")
@@ -91,10 +91,38 @@ class ServiceTests(unittest.TestCase):
             self.assertFalse(self.ok(admin, op="sql", sql="RELEASE SAVEPOINT keep_docs; COMMIT")["in_transaction"])
             rows = self.ok(viewer, op="sql", sql="SELECT id FROM visible")["results"][0]["Rows"]
             self.assertEqual([row[0]["Text"] for row in rows], ["1"])
-            self.assertFalse(viewer.request(op="sql", role="admin", sql="SELECT id FROM docs")["ok"])
-            self.assertEqual(viewer.request(op="get_latest", key="")["error"], "forbidden")
+            for request in [
+                {"sql": "SELECT id FROM docs"},
+                {"sql": "SELECT id FROM private_docs"},
+                {"sql": "SELECT id FROM visible WHERE id IN (SELECT id FROM docs)"},
+                {"sql": "SELECT id FROM docs", "role": "admin"},
+                {"sql": "DELETE FROM visible"},
+            ]:
+                with self.subTest(request=request):
+                    denied = viewer.request(op="sql", **request)
+                    self.assertFalse(denied["ok"])
+                    self.assertNotIn("results", denied)
+            self.ok(admin, op="put_commit", key="01", value="ab")
+            self.assertEqual(self.ok(admin, op="get_latest", key="01")["value"], "ab")
+            for request in [
+                {"op": "get_latest", "key": "01"}, {"op": "scan_latest", "start": "01"},
+                {"op": "begin_read"}, {"op": "get", "key": "01"}, {"op": "scan", "start": "01"},
+            ]:
+                with self.subTest(request=request):
+                    denied = viewer.request(**request)
+                    self.assertFalse(denied["ok"])
+                    self.assertEqual(denied["error"], "forbidden")
+                    self.assertNotIn("value", denied)
+                    self.assertNotIn("rows", denied)
+            self.ok(viewer, op="sql", sql="SELECT id FROM visible")
             self.ok(admin, op="sql", sql="REVOKE SELECT ON visible FROM reader")
-            self.assertFalse(viewer.request(op="sql", sql="SELECT id FROM visible")["ok"])
+            revoked = viewer.request(op="sql", sql="SELECT id FROM visible")
+            self.assertFalse(revoked["ok"])
+            self.assertNotIn("results", revoked)
+            self.assertEqual(self.ok(viewer, op="sql", sql="SHOW VIEWS")["results"][0]["Rows"], [])
+            self.ok(admin, op="sql", sql="GRANT SELECT ON visible TO reader")
+            rows = self.ok(viewer, op="sql", sql="SELECT id FROM visible")["results"][0]["Rows"]
+            self.assertEqual([row[0]["Text"] for row in rows], ["1"])
 
     def test_st_read_only_snapshot_rejects_mutations_and_survives_updates(self):
         self.seed(); c=self.client(); self.ok(c,op="begin_read")

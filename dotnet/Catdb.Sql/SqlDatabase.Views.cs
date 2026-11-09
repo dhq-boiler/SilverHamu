@@ -48,7 +48,7 @@ public sealed partial class SqlDatabase
             definition.Projections.Any(p => p.Window is not null) ||
             definition.Limit is not null || definition.Offset != 0)
             throw new SqlException($"ビュー '{view.Name}' は更新できません。");
-        await BindCastsAsync(definition.NamedCasts);
+        await BindExpressionsAsync(definition.ExpressionBindings);
         var bound = BindSingleSource(definition, source);
         var columns = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         var sources = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

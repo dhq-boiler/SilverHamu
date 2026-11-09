@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace Catdb.Sql;
@@ -37,6 +38,29 @@ internal static class SqlTypeRules
         static string SignificantDigits(string digits) =>
             digits.Trim().TrimStart('+', '-').Replace(".", "").Trim('0');
         return SignificantDigits(mantissa) == SignificantDigits(number.ToString(Invariant));
+    }
+
+    internal static SqlValue AddDistinct(SqlValue left, SqlValue right, SqlTypeDefinition definition)
+    {
+        if (left.Kind != "NUMBER" || right.Kind != "NUMBER")
+            throw new SqlException($"Operator + requires numeric operands for {definition.Name}.");
+        // Decimal addition can round a large coefficient to fit, even in a checked context.
+        var (x, xScale) = DecimalParts(left.Text!);
+        var (y, yScale) = DecimalParts(right.Text!);
+        var scale = Math.Max(xScale, yScale);
+        var sum = x * BigInteger.Pow(10, scale - xScale) + y * BigInteger.Pow(10, scale - yScale);
+        var exact = FormattableString.Invariant($"{sum}e-{scale}");
+        if (!TryParseExactNumber(exact, out var number))
+            throw new SqlException($"Sum cannot be represented exactly as {definition.Name}.");
+        return Assign(new("NUMBER", number.ToString(Invariant)), definition.Name, definition.MaxLength, definition);
+    }
+
+    private static (BigInteger Coefficient, int Scale) DecimalParts(string text)
+    {
+        var point = text.IndexOf('.');
+        var scale = point < 0 ? 0 : text.Length - point - 1;
+        var digits = point < 0 ? text : text.Remove(point, 1);
+        return (BigInteger.Parse(digits, Invariant), scale);
     }
 
     public static SqlValue Assign(SqlValue value, string type, int? length, SqlTypeDefinition? definition)

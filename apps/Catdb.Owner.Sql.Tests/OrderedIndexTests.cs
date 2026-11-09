@@ -67,7 +67,7 @@ public sealed class OrderedIndexTests
         foreach (var condition in new[] { $"k>'{prefix}b'", $"k='{prefix}b'", "k>='𐀀' AND k<''" })
         {
             var indexed = (await db.ExecuteAsync($"SELECT id FROM t WHERE {condition} ORDER BY id"))[0].Rows;
-            var scanned = (await db.ExecuteAsync($"SELECT id FROM t WHERE ({condition}) AND TRUE ORDER BY id"))[0].Rows;
+            var scanned = (await db.ExecuteAsync($"SELECT id FROM t WHERE ({condition}) OR FALSE ORDER BY id"))[0].Rows;
             Assert.Equal(scanned.Select(r => r[0].Display), indexed.Select(r => r[0].Display));
         }
     }

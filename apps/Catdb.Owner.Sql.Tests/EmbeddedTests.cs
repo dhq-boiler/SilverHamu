@@ -157,7 +157,7 @@ public sealed class EmbeddedTests : IDisposable
         using var reopened = await EmbeddedCatdbStore.OpenAsync(path);
         var restored = Sql(reopened);
         var indexed = (await restored.ExecuteAsync("SELECT id FROM books WHERE shelf='B' ORDER BY id"))[0];
-        var scanned = (await restored.ExecuteAsync("SELECT id FROM books WHERE shelf='B' AND TRUE ORDER BY id"))[0];
+        var scanned = (await restored.ExecuteAsync("SELECT id FROM books WHERE shelf='B' OR FALSE ORDER BY id"))[0];
         Assert.Equal(new[] { "1", "3", "5" }, indexed.Rows.Select(row => row[0].Display));
         Assert.Equal(scanned.Rows.Select(row => row[0].Display), indexed.Rows.Select(row => row[0].Display));
         Assert.Empty((await restored.ExecuteAsync("SELECT id FROM books WHERE shelf='A'"))[0].Rows);
@@ -178,7 +178,7 @@ public sealed class EmbeddedTests : IDisposable
         {
             var predicate = $"id='{key}'";
             var indexed = (await db.ExecuteAsync($"SELECT v FROM t WHERE {predicate}"))[0];
-            var scanned = (await db.ExecuteAsync($"SELECT v FROM t WHERE {predicate} AND TRUE"))[0];
+            var scanned = (await db.ExecuteAsync($"SELECT v FROM t WHERE ({predicate}) OR FALSE"))[0];
             Assert.Equal(scanned.Rows.Select(r => r[0].Display), indexed.Rows.Select(r => r[0].Display));
             Assert.Equal(key == "鳥" ? 1 : 0, indexed.Rows.Count);
         }

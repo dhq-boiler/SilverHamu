@@ -95,7 +95,8 @@ BEGIN外では変更を文ごとに自動確定する。複数文を一括で取
 |一般列の索引|`CREATE INDEX [IF NOT EXISTS] 索引名 ON テーブル名 (列名[, 列名 …])`、`DROP INDEX [IF EXISTS] 索引名 ON テーブル名`。索引名はテーブルごとに管理する。|
 |ビュー|CREATE VIEW、DROP VIEW、SHOW VIEWS。単一表の列を直接公開するビューは INSERT・UPDATE・DELETE に対応。|
 |検索|SELECT *、列指定、AS、DISTINCT、CASE、CAST、算術式、定数 SELECT。|
-|結合|INNER・LEFT・RIGHT・FULL・CROSS・NATURAL JOIN、USING。最大8つの表またはビュー。ON は修飾した列同士の等価条件に対応。|
+|結合|INNER・LEFT・RIGHT・FULL・CROSS・NATURAL JOIN、USING。最大8つの表またはビュー。ON では修飾列同士の等価条件を AND で連結でき、一致候補を追加条件で絞り込める。|
+|実行計画|SQLデータベースでは `EXPLAIN SELECT ...` で走査・索引・結合方法を確認できる。`ANALYZE テーブル名` で推定に使う統計を更新する。|
 |集計|GROUP BY、HAVING、COUNT(*)、COUNT(列)、COUNT(DISTINCT 列)、SUM・AVG・MIN・MAX。OVER で順位・集計・前後行の値を取得できる。|
 |副問い合わせ|IN、EXISTS、スカラー・相関副問い合わせ、FROM の派生表。WITH、WITH RECURSIVE、UNION [ALL]・INTERSECT・EXCEPT に対応。|
 |プロシージャー|CREATE PROCEDURE、EXEC / EXECUTE、DROP PROCEDURE。引数なし、本文は最大100文。|

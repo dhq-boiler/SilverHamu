@@ -15,6 +15,7 @@ public sealed partial class SqlDatabase
 
     private sealed class IndexLayout(SqlTable table, SqlIndex index)
     {
+        public string Name => index.Name;
         public string Prefix { get; } = SecondaryPrefix(table, index);
         public IReadOnlyList<string> Columns { get; } = index.ColumnNames;
         public bool Ordered { get; } = index.Columns is not null;
@@ -81,7 +82,7 @@ public sealed partial class SqlDatabase
     }
 
     private sealed record IndexCondition(string Column, string Operator, SqlValue Value);
-    private sealed record IndexRange(IndexLayout Layout, string Start, string End, int MatchedColumns);
+    private sealed record IndexRange(IndexLayout Layout, string Start, string End, double EstimatedRows);
 
     private static SqlValue? IndexLiteral(SqlExpression expression) => expression switch
     {
@@ -111,28 +112,27 @@ public sealed partial class SqlDatabase
         return MatchesIndexType(column, value) ? new(column.Name, op, value) : null;
     }
 
-    private static bool CollectIndexConditions(SqlExpression? expression, SqlTable table, List<IndexCondition> conditions)
+    private static void CollectIndexConditions(SqlExpression? expression, SqlTable table, List<IndexCondition> conditions)
     {
         if (expression is SqlBinary { Operator: "AND" } and)
-            return CollectIndexConditions(and.Left, table, conditions) && CollectIndexConditions(and.Right, table, conditions);
-        if (LiteralComparison(expression, table) is not { } term) return false;
-        conditions.Add(term);
-        return true;
+        {
+            CollectIndexConditions(and.Left, table, conditions);
+            CollectIndexConditions(and.Right, table, conditions);
+        }
+        else if (LiteralComparison(expression, table) is { } term)
+            conditions.Add(term);
     }
 
-    private static IndexRange? FindIndexRange(SqlExpression? where, SqlTable table)
+    private static IEnumerable<IndexRange> CandidateIndexRanges(SqlTable table, List<IndexCondition> conditions, int rowCount)
     {
-        if (table.Indexes is not { Count: > 0 }) return null;
-        var conditions = new List<IndexCondition>();
-        if (!CollectIndexConditions(where, table, conditions)) return null;
-        IndexRange? best = null;
-        foreach (var index in table.Indexes)
+        foreach (var index in table.Indexes ?? [])
         {
             var layout = new IndexLayout(table, index);
             var prefix = layout.Prefix;
             var start = prefix;
             var end = prefix + "~";
             int matched = 0;
+            double estimated = rowCount;
             foreach (var name in layout.Columns)
             {
                 var terms = conditions.Where(c => c.Column == name).ToList();
@@ -140,6 +140,7 @@ public sealed partial class SqlDatabase
                 var equal = terms.Find(c => c.Operator == "=");
                 if (equal is not null)
                 {
+                    estimated *= EstimateEqualityFraction(table, name, equal.Value);
                     prefix += layout.Component(equal.Value);
                     start = prefix;
                     end = prefix + "~";
@@ -147,6 +148,7 @@ public sealed partial class SqlDatabase
                     continue;
                 }
                 if (!layout.Ordered) break;
+                estimated *= terms.Any(t => t.Operator is "<" or "<=") && terms.Any(t => t.Operator is ">" or ">=") ? 0.125 : 0.333;
                 foreach (var term in terms)
                 {
                     var bound = prefix + layout.Component(term.Value);
@@ -159,9 +161,9 @@ public sealed partial class SqlDatabase
                 matched++;
                 break;
             }
-            if (matched > (best?.MatchedColumns ?? 0)) best = new(layout, start, end, matched);
+            if (matched > 0)
+                yield return new(layout, start, end, rowCount == 0 ? 0 : Math.Max(1, estimated));
         }
-        return best;
     }
 
     private async Task<SqlResult> CreateIndexAsync(SqlTable table, CreateIndex create, List<(string Key, byte[]? Value)> changes)

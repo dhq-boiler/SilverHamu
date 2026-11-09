@@ -13,8 +13,8 @@
 | Add amounts of the same currency | Yes | Yes | Enable addition with `ALTER TYPE JpyAmount ENABLE OPERATOR +`. Adding two `JpyAmount` columns returns a `JpyAmount` and checks its range and constraints. Mixing currency types raises an error. |
 | Joins, views and aggregates | Yes | Yes | Inner and outer joins support up to eight inputs and 4,096 intermediate rows per join step. |
 | [Standard SQL syntax](#sql-syntax-matrix) | Partial | Partial | Both use the same SQL subset. The matrix below gives examples of supported and unsupported queries, writes and schema operations. |
-| Query execution plans | No | No | TODO: Build an explicit plan for each query and expose it through `EXPLAIN` so users can inspect scans, index lookups and joins. |
-| Cost-based query optimizer | No | No | TODO: Estimate row counts and compare alternative access paths and join orders to choose an execution plan. |
+| [Query execution plans](docs/sql.md#query-plans-and-statistics) | Yes | Yes (SQL database) | `EXPLAIN SELECT` shows scans, index lookups, joins and subsequent query steps without reading result rows. |
+| Cost-based query optimizer | Yes | Yes (SQL database) | Compares table and index access costs. For eligible inner joins it also chooses join order and hash or nested-loop execution. `ANALYZE` supplies table and column statistics. |
 | Serve authenticated network clients | Yes | No | The Rust service supports shared tokens and TLS accounts. Server-side SQL requires a separately configured SQL host. |
 | [Query granted views with a view-only token](docs/sql.md#role-writes) | Yes | Yes (client) | The SQL service limits reads to granted views and denies direct key reads and scans. Once a revocation commits, the next read on the same connection is denied. |
 | Back up and restore a standalone database | Yes | Yes | Offline backup preserves the physical file. Embedded online backup captures a committed generation. Account-enrolled services require a coordinated backup. |
@@ -40,9 +40,9 @@ These labels cover common SQL forms in the shared `Catdb.Sql` engine used by cat
 | `BETWEEN`, `IN (value, ...)`, unary `NOT` | ✓ Supported | Inclusive bounds, value lists and SQL three-valued logic. |
 | `WHERE col IN (SELECT col FROM t ...)` | ✓ Supported | One-column query used as a predicate, including in compound conditions. |
 | Correlated subqueries, scalar subqueries, `EXISTS`, `FROM (SELECT ...)` | ✓ Supported | Use outer columns in nested SELECTs. A scalar query returns NULL for zero rows and raises an error for multiple rows. Derived tables require an alias. |
-| `INNER JOIN`, `LEFT`, `RIGHT` and `FULL OUTER JOIN` with `ON a.id = b.id` | ✓ Supported | One equality comparison between qualified columns per join. Up to eight inputs. |
-| Compound join conditions, e.g. `ON a.id = b.id AND a.region = b.region` | ✗ Unsupported | For equality on multiple columns with matching names, use `JOIN ... USING (id, region)`. |
-| Non-equality join conditions, e.g. `ON a.price < b.price` | ✗ Unsupported | The comparison operator in an `ON` clause must be `=`. |
+| `INNER JOIN`, `LEFT`, `RIGHT` and `FULL OUTER JOIN` with `ON a.id = b.id` | ✓ Supported | Up to eight inputs. A NULL join key does not match. |
+| Compound join conditions, e.g. `ON a.id = b.id AND a.region = b.region` | ✓ Supported | Match all key pairs. Additional conditions such as `AND b.active = TRUE` or `AND a.price < b.price` filter matches before outer-join padding. |
+| Joins without an equality key, e.g. `ON a.price < b.price` | ✗ Unsupported | Each explicit `ON` needs an equality between qualified columns of the new input and a previous input, either alone or as an `AND` term. |
 | `CROSS JOIN`, `NATURAL JOIN`, `JOIN ... USING` | ✓ Supported | Natural joins match all shared names. USING accepts one or more columns and exposes each shared column once in `SELECT *`. |
 | `GROUP BY` | ✓ Supported | One or more grouping columns. |
 | Grouping by an expression, e.g. `GROUP BY price * qty` | ✗ Unsupported | Grouping keys must be column references. |
@@ -61,7 +61,9 @@ These labels cover common SQL forms in the shared `Catdb.Sql` engine used by cat
 | `RANGE` or `GROUPS` window frames | ✗ Unsupported | Explicit frame bounds use `ROWS`. |
 | `CASE`, `CAST`, arithmetic such as `SELECT price * qty` | ✓ Supported | Simple and searched CASE, casts to catdb column types, and numeric operators with precedence. |
 | `SELECT subtotal + tax FROM invoice_lines` on a named numeric type | ✓ Supported | Enable `+` for the type first. Both columns and the result share that type. |
-| `EXPLAIN SELECT ...` | ✗ Unsupported | SQL cannot display a query execution plan. |
+| `EXPLAIN SELECT ...`, `EXPLAIN WITH ... SELECT ...` | ✓ Supported | Returns plan steps and available estimates. Use on a SQL database with a full SQL connection. |
+| `ANALYZE table_name` | ✓ Supported | Refreshes planner statistics for a base table in the current transaction. |
+| `EXPLAIN ANALYZE ...` | ✗ Unsupported | `EXPLAIN` reports the planned work; measured execution timings are unavailable. |
 | `SELECT ... FOR UPDATE` | ✗ Unsupported | A query cannot request a row lock with this clause. |
 
 </details>

@@ -54,8 +54,13 @@ public sealed record SqlTable(string Name, List<SqlColumn> Columns, string? View
 {
     public Dictionary<string, List<string>>? WriteRoles { get; init; }
     public List<SqlForeignKey>? ForeignKeys { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public SqlTableStatistics? Statistics { get; init; }
 }
 public sealed record SqlRow(string StorageKey, Dictionary<string, SqlValue> Values);
+public sealed record SqlTableStatistics(int RowCount, Dictionary<string, SqlColumnStatistics> Columns);
+public sealed record SqlColumnStatistics(int NonNullRows, int DistinctCount, Dictionary<string, int> FrequentValues);
+public sealed record AnalyzeTable(string Name) : SqlStatement;
 public sealed record SqlResult(IReadOnlyList<string> Columns, IReadOnlyList<SqlValue[]> Rows, string Message)
 {
     public IReadOnlyList<string>? ColumnTypes { get; init; }
@@ -74,6 +79,7 @@ internal sealed class SqlExpressionBindings
 public sealed record CreateType(SqlTypeDefinition Definition, bool IfNotExists) : SqlStatement;
 public sealed record EnableAddition(string TypeName) : SqlStatement;
 public sealed record ShowTypes : SqlStatement;
+public sealed record ExplainQuery(SelectRows Query) : SqlStatement;
 public sealed record CreateTable(string Table, List<SqlColumn> Columns, bool IfNotExists, List<string>? Checks = null, List<string>? CompositePrimaryKey = null, List<SqlForeignKey>? ForeignKeys = null) : SqlStatement;
 public sealed record DropTable(string Table, bool IfExists) : SqlStatement;
 public sealed record AddColumn(string Table, SqlColumn Column) : SqlStatement;
@@ -116,6 +122,7 @@ public sealed partial record SelectRows(string? Table, List<SqlProjection> Proje
 public enum SqlJoinKind { Inner, Left, Right, Full, Cross }
 public sealed record SqlJoin(string Table, string? Alias, SqlField? Left, SqlField? Right, SqlJoinKind Kind = SqlJoinKind.Inner)
 {
+    public SqlExpression? On { get; init; }
     public List<string>? Using { get; init; }
     public bool Natural { get; init; }
 }

@@ -155,6 +155,9 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
             SqlResult result;
             switch (statement)
             {
+                case ExplainQuery explain:
+                    result = await ExplainAsync(explain.Query);
+                    break;
                 case CreateType createType:
                     result = await CreateTypeAsync(createType, changes);
                     break;
@@ -229,6 +232,9 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                 case ShowTables:
                     var tables = await GetTablesAsync();
                     result = new(["table_name", "columns"], tables.Select(x => new[] { SqlValue.String(x.Name), SqlValue.Number(x.Columns.Count.ToString(CultureInfo.InvariantCulture)) }).ToArray(), $"{tables.Count} テーブル");
+                    break;
+                case AnalyzeTable analyze:
+                    result = await AnalyzeTableAsync(analyze.Name, changes);
                     break;
                 case CreateTableAs createAs:
                     result = await CreateTableAsAsync(createAs, changes);
@@ -504,14 +510,20 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
         return (view, await LoadViewRowsAsync(view));
     }
 
-    private async Task<List<SqlRow>> LoadViewRowsAsync(SqlTable view)
+    private async Task<SelectRows> ReadViewQueryAsync(SqlTable view)
     {
         if (view.ViewQuery is null || SqlParser.Parse(view.ViewQuery) is not [SelectRows query] || query.Table is null || query.HasQuerySources ||
             !string.Equals(query.Table, view.SourceTable, StringComparison.OrdinalIgnoreCase) ||
             !query.Joins().Select(j => j.Table).SequenceEqual(view.JoinSources ?? [], StringComparer.OrdinalIgnoreCase))
             throw new SqlException("ビュー定義が不正です。");
         await BindExpressionsAsync(query.ExpressionBindings);
-        var visible = query.Join is null ? await SelectTableAsync(query, await ReadSourceTableAsync(query.Table))
+        return query;
+    }
+
+    private async Task<List<SqlRow>> LoadViewRowsAsync(SqlTable view)
+    {
+        var query = await ReadViewQueryAsync(view);
+        var visible = query.Join is null ? await SelectTableAsync(query, await ReadSourceTableAsync(query.Table!))
             : await SelectJoinAsync(query, baseTablesOnly: true);
         return visible.Rows.Select(values => new SqlRow("", new Dictionary<string, SqlValue>(visible.Columns.Zip(values, KeyValuePair.Create), StringComparer.OrdinalIgnoreCase))).ToList();
     }
@@ -618,8 +630,8 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
     private async Task<SqlResult> SelectTableAsync(SelectRows query, SqlTable table)
     {
         query = BindSingleSource(query, table);
-        if (table.PrimaryIndex && query.Where is SqlBinary { Operator: "=" } &&
-            LiteralComparison(query.Where, table) is { } equality && Column(table, equality.Column).PrimaryKey)
+        var access = PlanTableAccess(query, table);
+        if (access.PrimaryKey is { } equality)
         {
             var rows = new List<SqlRow>();
             var pointer = await GetAsync(IndexKey(table, equality.Value));
@@ -630,12 +642,12 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                     throw new SqlException("主キー索引の参照先が不正です。");
                 var bytes = await GetAsync(key) ?? throw new SqlException("主キー索引の参照先がありません。");
                 var row = DecodeRow(key, bytes);
-                if (!Matches(query.Where, row.Values)) throw new SqlException("主キー索引と行の値が一致しません。");
+                if (SqlValue.Compare(row.Values[equality.Column], equality.Value) != 0) throw new SqlException("主キー索引と行の値が一致しません。");
                 rows.Add(row);
             }
             return Select(query, table, rows);
         }
-        if (FindIndexRange(query.Where, table) is { } range)
+        if (access.Range is { } range)
             return await SelectSecondaryAsync(query, table, range);
         return Select(query, table, await LoadRowsAsync(table));
     }

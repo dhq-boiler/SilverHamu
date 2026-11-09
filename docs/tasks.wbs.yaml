@@ -1,7 +1,7 @@
 version: 3
 title: catdb
 createdAt: 2026-11-09T15:31:25.7166025Z
-modifiedAt: 2026-11-09T16:05:58.3832111Z
+modifiedAt: 2026-11-09T16:35:16.5377094Z
 tasks:
 - id: sql-semantic-types
   title: SQLで日時・金額・識別子の意味を保証する
@@ -41,3 +41,19 @@ tasks:
   estimateHours: 1
   remainingHours: 0
   notes: 閲覧専用ロールトークンの設定手順を文書化。実TCPで許可ビューのSELECTと、原表・非公開ビュー・生KVのget/scanの拒否を確認した。同じ接続でREVOKE直後の読み取りは拒否、再付与後は成功。CIの既存プロトコルテストに追加。
+- id: sql-costed-planning
+  title: 複合結合条件とコストに基づく実行計画をSQLで利用できるようにする
+  notes: VS 2026 Debugビルド成功、SQLテスト199/199。実DBで複合LEFT JOINの結果とEXPLAIN表示を確認。ANALYZE後の値の偏りによる索引・表走査の切替、結合順と方式の変更、古い統計からの復帰を検証。READMEのFeature matrixとSQL syntax matrixを更新。
+  children:
+  - id: sql-join-on-and
+    title: ANDで結ぶ複数のJOIN条件を評価する
+    estimateHours: 2
+    remainingHours: 0
+  - id: sql-costed-access-joins
+    title: 読み取り方法と結合順を推定コストで選択する
+    estimateHours: 4
+    remainingHours: 0
+  - id: sql-explain-costed
+    title: EXPLAINで計画を表示し、動作検証とREADME更新を行う
+    estimateHours: 3
+    remainingHours: 0

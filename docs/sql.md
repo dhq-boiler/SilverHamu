@@ -30,6 +30,28 @@ Keep existing TLS database grants when upgrading. A client must check the authen
 
 SQL tables have at most 64 columns and 4,096 rows. Each join step, materialized subquery, CTE and set operand has a 4,096-row limit. An oversized intermediate result raises an error, including when reading an archive. A top-level SELECT without an explicit fetch count returns up to 4,096 rows. The native key-value store has its own resource limits. Physical power-loss qualification remains a separate hardware test.
 
+### Query plans and statistics
+
+Use `EXPLAIN` to see how a SELECT will access data. For example, these statements collect statistics on two existing tables and inspect the plan for matching order lines to prices by product and currency:
+
+```sql
+ANALYZE order_lines;
+ANALYZE prices;
+EXPLAIN SELECT l.product_id, p.price
+FROM order_lines AS l
+JOIN prices AS p ON l.product_id = p.product_id AND l.currency = p.currency;
+```
+
+Each plan row gives a step, operation, relation and detail. Where available, `estimated_rows` describes the access or join output and `estimated_cost` gives relative work units. A table scan can be cheaper than fetching many rows through an index. A primary-key lookup needs at most one row, and an ordered secondary index can narrow a scan using equality on leading columns followed by a range. The full predicate is still checked on the candidates.
+
+`ANALYZE table_name` scans a base table and stores its row count, non-NULL counts, distinct counts and frequencies for up to eight repeated values per column. The statistics follow transaction commit and rollback. Run it again after large data changes to refresh the estimates. Tables without statistics use a default cardinality of 256. Estimates guide plan selection and never limit how many matching rows a statement returns.
+
+For inner joins with explicit equality keys, the planner compares connected join orders and the cost of nested loops versus building a hash table. Outer joins, `USING`, natural joins, cross joins and joins with additional filters preserve the written order. Joins materialize their inputs; a join key alone does not trigger an indexed lookup on the other table. If stale estimates lead to an oversized reordered intermediate, the executor can retry in written order under the same snapshot. The 4,096-row intermediate limit still applies.
+
+An explicit `ON` must include at least one equality between qualified columns of the new input and a previous input. Multiple equalities form a composite key. Extra predicates, such as `AND l.amount >= p.minimum`, apply before deciding which rows of an outer join need NULL padding. Aggregates and subqueries inside `ON` are unsupported.
+
+`EXPLAIN` inspects metadata without executing the SELECT against stored rows. It requires a full SQL connection. View-only tokens and Owner's read-only archive interface accept their existing query subsets. Use `ANALYZE table_name` to refresh estimates; `EXPLAIN ANALYZE` is not implemented.
+
 ### SQL types
 
 A column declaration determines how SQL validates, compares and returns its values. Choose a named type when two columns share a representation but exchanging their values would be an error.

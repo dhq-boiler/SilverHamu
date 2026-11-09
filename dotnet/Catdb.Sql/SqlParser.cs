@@ -37,7 +37,13 @@ public sealed partial class SqlParser
 
     private SqlStatement Statement()
     {
+        if (Match("EXPLAIN"))
+        {
+            if (!(Is("SELECT") || Is("WITH"))) throw Error("EXPLAIN requires a SELECT or WITH query.");
+            return new ExplainQuery(QueryExpression());
+        }
         if (Match("CREATE")) return Create();
+        if (Match("ANALYZE")) return new AnalyzeTable(Name());
         if (Match("EXEC") || Match("EXECUTE")) return new ExecuteProcedure(Name());
         if (Is("GRANT") || Is("REVOKE"))
         {
@@ -470,10 +476,10 @@ public sealed partial class SqlParser
                     else
                     {
                         Expect("ON");
-                        var left = Field(); Expect("="); var right = Field();
-                        if (left.Qualifier is null || right.Qualifier is null)
-                            throw Error("ONの両辺をテーブル名または別名で修飾してください。");
-                        next = next with { Left = left, Right = right };
+                        var condition = Expression();
+                        next = condition is SqlBinary { Operator: "=", Left: SqlField left, Right: SqlField right }
+                            ? next with { Left = left, Right = right, On = condition }
+                            : next with { On = condition };
                     }
                 }
                 if (join is null) join = next;

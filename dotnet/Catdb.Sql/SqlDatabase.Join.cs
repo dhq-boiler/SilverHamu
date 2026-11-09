@@ -125,8 +125,65 @@ public sealed partial class SqlDatabase
 
     private static SelectRows BindSingleSource(SelectRows query, SqlTable table) => new SelectScope(query, table).Bind(query);
 
-    private sealed record JoinStep(List<(BoundColumn Left, BoundColumn Right)> Keys, SqlJoinKind Kind);
+    private sealed record JoinStep(List<(BoundColumn Left, BoundColumn Right)> Keys, SqlJoinKind Kind, JoinFilter? Filter = null);
+    private sealed record JoinFilter(SqlExpression Predicate, BoundColumn[] Inputs)
+    {
+        public bool Accepts(SqlRow?[] left, SqlRow right, int source, Dictionary<string, SqlValue> values)
+        {
+            foreach (var input in Inputs)
+                values[input.Key] = input.Source == source ? right.Values[input.Column.Name] : input.Read(left);
+            return Matches(Predicate, values);
+        }
+    }
     private sealed record BoundJoin(SelectRows Query, SqlTable Schema, BoundColumn[] Columns, List<JoinStep> Steps);
+
+    private static IEnumerable<SqlExpression> JoinTerms(SqlExpression predicate)
+    {
+        if (predicate is SqlBinary { Operator: "AND" } conjunction)
+        {
+            foreach (var term in JoinTerms(conjunction.Left)) yield return term;
+            foreach (var term in JoinTerms(conjunction.Right)) yield return term;
+        }
+        else yield return predicate;
+    }
+
+    private static JoinFilter? BindOn(SqlJoin join, SelectScope scope, int source,
+        List<(BoundColumn Left, BoundColumn Right)> keys)
+    {
+        var predicate = join.On ?? (join.Left is not null && join.Right is not null
+            ? new SqlBinary(join.Left, "=", join.Right) : throw new SqlException("Expected a JOIN ON condition."));
+        var inputs = new Dictionary<string, BoundColumn>(StringComparer.OrdinalIgnoreCase);
+        SqlExpression? filter = null;
+        foreach (var term in JoinTerms(predicate))
+        {
+            if (term is SqlBinary { Operator: "=", Left: SqlField { Qualifier: not null } a, Right: SqlField { Qualifier: not null } b })
+            {
+                var first = scope.Resolve(a);
+                var second = scope.Resolve(b);
+                if ((first.Source == source) != (second.Source == source))
+                {
+                    keys.Add(first.Source == source ? (second, first) : (first, second));
+                    continue;
+                }
+            }
+            var bound = term.Rewrite(node =>
+            {
+                if (node is SqlNestedQuery or SqlAggregate)
+                    throw new SqlException("JOIN ON does not support aggregates or subqueries.");
+                if (node is not SqlField field) return null;
+                var column = scope.Resolve(field);
+                inputs[column.Key] = column;
+                return new SqlField(column.Key);
+            });
+            filter = filter is null ? bound : new SqlBinary(filter, "AND", bound);
+        }
+        if (keys.Count == 0)
+            throw new SqlException("JOIN ON requires equality between qualified columns of a preceding input and the new input.");
+        if (filter is null) return null;
+        var columns = inputs.Values.ToArray();
+        ValidatePredicate(filter, columns.Select(c => c.Column with { Name = c.Key }).ToArray());
+        return new(filter, columns);
+    }
 
     private static BoundJoin BindJoin(SelectRows query, List<SqlTable> tables)
     {
@@ -141,6 +198,7 @@ public sealed partial class SqlDatabase
             var leftKeys = names?.Select(name => scope.Resolve(new(name))).ToList();
             scope.AddSource(tables[n], qualifier, n, true);
             var keys = new List<(BoundColumn Left, BoundColumn Right)>();
+            JoinFilter? filter = null;
             if (leftKeys is not null)
             {
                 foreach (var left in leftKeys)
@@ -148,18 +206,12 @@ public sealed partial class SqlDatabase
                 scope.MergeKeys(keys);
             }
             else if (join.Kind != SqlJoinKind.Cross)
-            {
-                var first = scope.Resolve(join.Left!);
-                var second = scope.Resolve(join.Right!);
-                if ((first.Source == n) == (second.Source == n))
-                    throw new SqlException("ON must compare a preceding input with the new input.");
-                keys.Add(first.Source == n ? (second, first) : (first, second));
-            }
+                filter = BindOn(join, scope, n, keys);
             foreach (var (left, right) in keys)
                 if (ComparisonType(left.Column) != ComparisonType(right.Column) &&
                     left.Column.Type != "NULL" && right.Column.Type != "NULL")
                     throw new SqlException("JOIN key types must match.");
-            steps.Add(new(keys, join.Kind));
+            steps.Add(new(keys, join.Kind, filter));
         }
         var bound = scope.Bind(query);
         var columns = scope.ResultColumns();
@@ -185,12 +237,14 @@ public sealed partial class SqlDatabase
         return SelectJoined(query, sources);
     }
 
-    private static SqlResult SelectJoined(SelectRows query, List<(SqlTable Table, List<SqlRow> Rows)> sources, bool describeOnly = false)
+    private static SqlResult SelectJoined(SelectRows query, List<(SqlTable Table, List<SqlRow> Rows)> sources, bool describeOnly = false,
+        List<PlanStep>? explain = null)
     {
-        var plan = BindJoin(query, sources.Select(s => s.Table).ToList());
-        var rows = sources[0].Rows.Select(row => new SqlRow?[] { row }).ToList();
-        for (int i = 0; i < plan.Steps.Count; i++)
-            rows = JoinRows(rows, sources[i + 1].Rows, plan.Steps[i], i + 1);
+        var schemas = sources.Select(s => s.Table).ToList();
+        var plan = BindJoin(query, schemas);
+        var physical = ChooseJoinOrder(query, plan, schemas);
+        if (explain is not null) explain.AddRange(ExplainJoinAccess(query, plan, schemas, physical));
+        var rows = ExecuteJoinOrder(physical, plan, sources);
         var resultRows = rows.Select(tuple =>
         {
             var values = new Dictionary<string, SqlValue>(plan.Columns.Length, StringComparer.OrdinalIgnoreCase);
@@ -203,27 +257,33 @@ public sealed partial class SqlDatabase
 
     private static List<SqlRow?[]> JoinRows(List<SqlRow?[]> leftRows, List<SqlRow> rightRows, JoinStep step, int source)
     {
-        var rightKeys = rightRows.Select(row => (Row: row, Key: step.Keys.Select(k => row.Values[k.Right.Column.Name]).ToArray())).ToList();
+        var rightKeys = rightRows.Select((row, index) => (Row: row, Index: index,
+            Key: step.Keys.Select(k => row.Values[k.Right.Column.Name]).ToArray())).ToList();
         var comparer = new GroupKeyComparer();
-        var lookup = rightKeys.Where(r => !r.Key.Any(v => v.IsNull)).ToLookup(r => r.Key, r => r.Row, comparer);
+        var lookup = step.Keys.Count == 0 ? null : rightKeys.Where(r => !r.Key.Any(v => v.IsNull)).ToLookup(r => r.Key, comparer);
         var pairs = new List<SqlRow?[]>();
         var preserveLeft = step.Kind is SqlJoinKind.Left or SqlJoinKind.Full;
-        var matchedRightKeys = step.Kind is SqlJoinKind.Right or SqlJoinKind.Full
-            ? new HashSet<SqlValue[]>(comparer) : null;
+        var matchedRight = step.Kind is SqlJoinKind.Right or SqlJoinKind.Full ? new bool[rightRows.Count] : null;
+        var values = new Dictionary<string, SqlValue>(StringComparer.OrdinalIgnoreCase);
         foreach (var leftRow in leftRows)
         {
             var key = step.Keys.Select(k => k.Left.Read(leftRow)).ToArray();
-            if (key.Any(v => v.IsNull) || !lookup.Contains(key))
+            bool matched = false;
+            if (!key.Any(v => v.IsNull))
             {
-                if (preserveLeft) AppendPair(leftRow, null);
-                continue;
+                foreach (var candidate in lookup is null ? rightKeys : lookup[key])
+                {
+                    if (step.Filter?.Accepts(leftRow, candidate.Row, source, values) == false) continue;
+                    AppendPair(leftRow, candidate.Row);
+                    matched = true;
+                    if (matchedRight is not null) matchedRight[candidate.Index] = true;
+                }
             }
-            matchedRightKeys?.Add(key);
-            foreach (var rightRow in lookup[key]) AppendPair(leftRow, rightRow);
+            if (!matched && preserveLeft) AppendPair(leftRow, null);
         }
-        if (matchedRightKeys is not null)
-            foreach (var (rightRow, key) in rightKeys)
-                if (!matchedRightKeys.Contains(key)) AppendPair(null, rightRow);
+        if (matchedRight is not null)
+            for (int i = 0; i < rightRows.Count; i++)
+                if (!matchedRight[i]) AppendPair(null, rightRows[i]);
         return pairs;
 
         void AppendPair(SqlRow?[]? leftRow, SqlRow? rightRow)

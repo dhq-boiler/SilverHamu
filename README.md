@@ -12,7 +12,7 @@
 | [SQL types for IDs, amounts and time](docs/sql.md#sql-types) | Yes | Yes | Built-in types include UUID, exact decimal, date, time, local date-time, instant and duration. Named types keep values such as customer IDs and order IDs distinct in comparisons and assignments. |
 | Add amounts of the same currency | Yes | Yes | Enable addition with `ALTER TYPE JpyAmount ENABLE OPERATOR +`. Adding two `JpyAmount` columns returns a `JpyAmount` and checks its range and constraints. Mixing currency types raises an error. |
 | Joins, views and aggregates | Yes | Yes | Inner and outer joins support up to eight inputs and 4,096 intermediate rows per join step. |
-| [Standard SQL syntax](#sql-syntax-matrix) | Partial | Partial | Both use the same SQL subset. The matrix describes the supported forms and their limits; it is not a SQL standard conformance claim. |
+| [SQL syntax listed below](#sql-syntax-matrix) | Yes | Yes (SQL database) | Both use the shared SQL engine and support every listed form within the limits shown. |
 | [Query execution plans](docs/sql.md#query-plans-and-statistics) | Yes | Yes | `EXPLAIN SELECT` shows the plan. `EXPLAIN ANALYZE SELECT` reports actual rows, loops and elapsed time. Owner also supports both commands on folder tables. |
 | Cost-based query optimizer | Yes | Yes (SQL database) | Compares table and index access costs. For eligible inner joins it also chooses join order and hash or nested-loop execution. `ANALYZE` supplies table and column statistics. |
 | Serve authenticated network clients | Yes | No | The Rust service supports shared tokens and TLS accounts. Server-side SQL requires a separately configured SQL host. |

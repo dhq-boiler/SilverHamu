@@ -1,6 +1,6 @@
 # catdb Owner
 
-Owner is a Windows x64 SQL editor and database manager. Open a local catdb file directly, connect to a service, or explore the in-memory demo. The SQL editor uses the shared `Catdb.Sql` implementation.
+Owner is a Windows x64 SQL editor and database manager. Open a local catdb file directly or connect to a service. The SQL editor uses the shared `Catdb.Sql` implementation.
 
 ## Build and run
 
@@ -12,6 +12,12 @@ dotnet build apps/Catdb.Owner/Catdb.Owner.csproj -c Release
 ```
 
 Open `apps/Catdb.Owner.sln` in Visual Studio, select the Catdb.Owner project and run the Windows target. For local storage use **新規DB** to create a database or **DBファイルを開く** to open an existing file. The native library must match the source revision used to build the app.
+
+Open a .catlink file to browse the tables in its target folder. Select a table to view its rows, or run a read-only SELECT query in the SQL editor. For example:
+
+~~~~sql
+SELECT * FROM Book_3 WHERE PublishDate IS NOT NULL;
+~~~~
 
 ## Service connections
 

@@ -123,7 +123,10 @@ public sealed partial class SqlDatabase
         return new(bound, new("", columns.Select(c => c.Column with { Name = c.Key }).ToList()), columns, steps);
     }
 
-    private async Task<SqlResult> SelectJoinAsync(SelectRows query, bool baseTablesOnly = false)
+    private Task<SqlResult> SelectJoinAsync(SelectRows query, bool baseTablesOnly = false) =>
+        SelectJoinAsync(query, name => LoadJoinSourceAsync(name, baseTablesOnly));
+
+    private static async Task<SqlResult> SelectJoinAsync(SelectRows query, Func<string, Task<(SqlTable Table, List<SqlRow> Rows)>> load)
     {
         var cache = new Dictionary<string, (SqlTable Table, List<SqlRow> Rows)>(StringComparer.OrdinalIgnoreCase);
         var sources = new List<(SqlTable Table, List<SqlRow> Rows)>();
@@ -131,7 +134,7 @@ public sealed partial class SqlDatabase
         {
             if (!cache.TryGetValue(name, out var source))
             {
-                source = await LoadJoinSourceAsync(name, baseTablesOnly);
+                source = await load(name);
                 cache.Add(name, source);
             }
             sources.Add(source);

@@ -45,19 +45,20 @@ public sealed partial class MainPage : ContentPage
     private readonly List<QueryDocument> documents = [new("クエリ 1", DefaultQuery)];
     private SqlResult result = new([], [], "");
     private readonly List<SqlTable> tables = [];
-    private MemorySqlStore? demoStore;
     private SqlDatabase Database => new(SendAsync, () => inTransaction);
     private readonly List<Button> guarded = [];
     private CatdbClient? client;
     private bool IsReadRole => client?.ReadRole is not null;
     private bool KvAccount => client is { AccountLogin: true, SupportsSql: false };
     private EmbeddedCatdbStore? embedded;
+    private CatlinkFolder? folder;
+    private FolderTable? folderSelection;
+    private long? nextFolderPage;
     private readonly Label sourceNote = Text("SQL テーブル · catdb保存\nCREATE TABLEで作成できます。\n一覧更新: SHOW TABLES;", 12, color: Muted);
     private readonly Label sqlHint = new() { Text = "  SQL · CREATE TABLE / SELECT / INSERT / UPDATE / DELETE · 通常は文ごとに自動確定", FontSize = 11, TextColor = Muted, BackgroundColor = Surface, VerticalTextAlignment = TextAlignment.Center };
     private readonly Button backupButton;
     private readonly Button restoreButton;
-    private bool HasConnection => demo || client is not null || embedded is not null;
-    private bool demo;
+    private bool HasConnection => client is not null || embedded is not null;
     private bool inTransaction;
     private int activeDocument;
     private int queryNumber = 1;
@@ -107,12 +108,6 @@ public sealed partial class MainPage : ContentPage
         tools.Add(Action("＋ 新しいクエリ", "NewQuery", NewQueryAsync));
         tools.Add(Action("開く", "OpenQuery", OpenAsync));
         tools.Add(Action("保存", "SaveQuery", SaveAsync));
-        tools.Add(Action("SQLの例", "SqlExample", async () =>
-        {
-            await NewQueryAsync();
-            editor.Text = "CREATE TABLE example (\n  id INTEGER PRIMARY KEY,\n  name TEXT NOT NULL,\n  price REAL\n);\nINSERT INTO example VALUES (1, 'サンプル', 1200);\nSELECT * FROM example ORDER BY id;";
-        }));
-        tools.Add(Action("デモを試す", "Demo", DemoAsync));
         root.Add(new ScrollView { Orientation = ScrollOrientation.Horizontal, Content = tools }, 0, 1);
 
         var workspace = new Grid { ColumnSpacing = 1, BackgroundColor = Color.FromArgb("#2A3945"), ColumnDefinitions = { new(264), new(GridLength.Star) } };
@@ -168,7 +163,7 @@ public sealed partial class MainPage : ContentPage
         RenderExplorer();
         RenderRows();
         UpdateMode();
-        Log("サービスまたはローカルDBに接続できます。「デモを試す」は実データを変更しません。");
+        Log("サービス・DBファイル・新規DBから接続先を選べます。");
         Unloaded += (_, _) => CloseStorage();
         status.LineBreakMode = LineBreakMode.TailTruncation; status.MaxLines = 1;
         connection.LineBreakMode = LineBreakMode.TailTruncation; connection.MaxLines = 1;
@@ -237,7 +232,7 @@ public sealed partial class MainPage : ContentPage
             else await candidate.ConnectAsync(host.Text.Trim(), number, token.Text);
         }
         catch { candidate.Dispose(); throw; }
-        CloseStorage(); client = candidate; demo = false;
+        CloseStorage(); client = candidate;
         token.Text = "";
         overlay.IsVisible = false;
         connection.Text = $"● {host.Text.Trim()}:{number}" + (accountLogin ? $" / {databaseName.Text!.Trim()} (TLS)" : "");
@@ -258,8 +253,25 @@ public sealed partial class MainPage : ContentPage
     private async Task OpenEmbeddedAsync(bool create)
     {
         if (inTransaction) throw new InvalidOperationException("接続を変更する前に COMMIT または ROLLBACK してください。");
-        var path = await PickPathAsync(create ? "組み込みcatdbを新規作成" : "組み込みcatdbを開く", embedded?.DatabasePath ?? Path.Combine(FileSystem.AppDataDirectory, "catdb.ndb"), create, browse: !create);
+        var path = await PickPathAsync(create ? "組み込みcatdbを新規作成" : "組み込みcatdbを開く", create ? embedded?.DatabasePath ?? Path.Combine(FileSystem.AppDataDirectory, "catdb.ndb") : string.Empty, create, browse: !create);
         if (path is null) return;
+        if (!create && (Path.GetExtension(path).Equals(".catlink", StringComparison.OrdinalIgnoreCase)
+            || Path.GetFileName(path).Equals("catdb-current.txt", StringComparison.OrdinalIgnoreCase)))
+        {
+            path = Catlink.Resolve(path);
+            if (Directory.Exists(path))
+            {
+                var loaded = await Task.Run(() => CatlinkFolder.LoadAsync(path));
+                CloseStorage(); tables.Clear();
+                folder = loaded;
+                connection.Text = $"● {Path.GetFileName(path)}";
+                ToolTipProperties.SetText(connection, path);
+                status.Text = $"フォルダー閲覧 · {path}";
+                await BrowseAsync();
+                Log($"{loaded.Tables.Count} 件のテーブルを読み込みました。");
+                return;
+            }
+        }
         if (!create && embedded is not null && string.Equals(path, embedded.DatabasePath, StringComparison.OrdinalIgnoreCase))
         { Log("この組み込みDBには既に接続しています。"); return; }
         await OpenEmbeddedPathAsync(path, create);
@@ -268,7 +280,7 @@ public sealed partial class MainPage : ContentPage
     private async Task OpenEmbeddedPathAsync(string path, bool create)
     {
         var candidate = await EmbeddedCatdbStore.OpenAsync(path, create);
-        CloseStorage(); embedded = candidate; demo = false;
+        CloseStorage(); embedded = candidate;
         connection.Text = $"● 組み込み / {Path.GetFileName(path)}";
         ToolTipProperties.SetText(connection, path);
         status.Text = $"組み込み接続 · {path}";
@@ -309,9 +321,14 @@ public sealed partial class MainPage : ContentPage
         snapshotButton.IsEnabled = !busy && embedded is not null && !IsReadRole;
         rawKvButton.IsVisible = snapshotButton.IsVisible = !IsReadRole;
         foreach (var button in guarded.Where(b => b.AutomationId is "Begin" or "Commit" or "Rollback" or "Checkpoint"))
-            button.IsVisible = !IsReadRole && (button.AutomationId != "Checkpoint" || client is not null || embedded is not null);
+            button.IsVisible = folder is null && !IsReadRole && (button.AutomationId != "Checkpoint" || client is not null || embedded is not null);
         sqlHint.Text = "  SQL · CREATE TABLE / SELECT / INSERT / UPDATE / DELETE · 通常は文ごとに自動確定";
         sourceNote.Text = "SQL テーブル · catdb保存\nCREATE TABLEで作成できます。\n一覧更新: SHOW TABLES;";
+        if (folder is not null)
+        {
+            sourceNote.Text = "テーブルを選ぶと列名と行を表示します。";
+            sqlHint.Text = "  フォルダー閲覧 · SHOW TABLES / SELECT（読み取り専用）";
+        }
         if (IsReadRole)
         {
             sourceNote.Text = $"閲覧ロール · {client!.ReadRole}\n許可されたビューを表示しています。";
@@ -328,6 +345,7 @@ public sealed partial class MainPage : ContentPage
 
     private void CloseStorage()
     {
+        folder?.Dispose(); folder = null; folderSelection = null; nextFolderPage = null;
         embedded?.Dispose(); embedded = null;
         client?.Dispose(); client = null;
     }
@@ -335,7 +353,7 @@ public sealed partial class MainPage : ContentPage
     private Task DisconnectAsync()
     {
         var wasEmbedded = embedded is not null;
-        CloseStorage(); demo = false; inTransaction = false;
+        CloseStorage(); inTransaction = false;
         connection.Text = "接続されていません"; status.Text = "未接続";
         ToolTipProperties.SetText(connection, "未接続");
         transaction.Text = "トランザクションなし";
@@ -344,33 +362,31 @@ public sealed partial class MainPage : ContentPage
         return Task.CompletedTask;
     }
 
-    private async Task DemoAsync()
-    {
-        if (inTransaction) throw new InvalidOperationException("先に COMMIT または ROLLBACK してください。");
-        CloseStorage(); demo = true; demoStore = new();
-        connection.Text = "● SQLデモ / メモリー内";
-        ToolTipProperties.SetText(connection, "SQLデモ · ファイルへの保存なし");
-        status.Text = "デモ · 実データへの接続なし";
-        await Database.ExecuteAsync("CREATE TABLE books (id INTEGER PRIMARY KEY, title TEXT NOT NULL, author TEXT, price REAL, available BOOLEAN DEFAULT TRUE); INSERT INTO books VALUES (1, 'The Art of Databases', 'A. Cat', 2800, TRUE), (2, '小さなストアの設計', '猫山 まこと', 1800, TRUE), (3, 'Reliable Systems', NULL, 3200, FALSE);");
-        editor.Text = "SELECT * FROM books ORDER BY id LIMIT 100;";
-        await ExecuteAsync();
-        Log("SQLデモです。CREATE TABLE / SELECT / INSERT / UPDATE / DELETEを試せます。変更はメモリー内のみで、デモを開き直すと初期化します。");
-    }
-
     private async Task ExecuteAsync()
     {
         if (KvAccount) throw new InvalidOperationException("この TLS 接続ではサーバーが SQL 実行を許可していません。");
-        if (!HasConnection) throw new InvalidOperationException("サービスへ接続するか、DBファイルまたはSQLデモを開いてください。");
+        if (!HasConnection && folder is null) throw new InvalidOperationException("サービスへ接続するか、DBファイルを開いてください。");
         var watch = Stopwatch.StartNew();
         result = new([], [], ""); RenderRows();
         IReadOnlyList<SqlResult> output;
-        if (client?.SupportsSql == true) output = await ExecuteServiceSqlAsync(editor.Text);
+        if (folder is not null)
+        {
+            var currentFolder = folder;
+            var sql = editor.Text;
+            output = await Task.Run(() => currentFolder.ExecuteAsync(sql));
+        }
+        else if (client?.SupportsSql == true) output = await ExecuteServiceSqlAsync(editor.Text);
         else output = await Database.ExecuteAsync(editor.Text);
         result = output[^1];
         filter.Text = "";
         RenderRows();
         timing.Text = $"{watch.Elapsed.TotalMilliseconds:N0} ms";
         foreach (var item in output) Log(item.Message);
+        if (folder is not null)
+        {
+            folderSelection = null; nextFolderPage = null; RenderExplorer();
+            return;
+        }
         try { await RefreshTablesAsync(); }
         catch (Exception error) { Log($"SQL実行は完了しましたが、テーブル一覧を更新できません: {error.Message}"); }
     }
@@ -402,7 +418,7 @@ public sealed partial class MainPage : ContentPage
         var op = request["op"]!.ToString();
         try
         {
-            var response = demo ? await demoStore!.RequestAsync(request) : embedded is not null ? await embedded.RequestAsync(request) : await client!.RequestAsync(request);
+            var response = embedded is not null ? await embedded.RequestAsync(request) : await client!.RequestAsync(request);
             if (op == "begin") inTransaction = true;
             if (op is "commit" or "rollback") inTransaction = false;
             if (op == "sql") inTransaction = client!.SqlTransactionActive;
@@ -428,7 +444,7 @@ public sealed partial class MainPage : ContentPage
 
     private async Task TransactionAsync(string op)
     {
-        if (!HasConnection) throw new InvalidOperationException("先に接続またはデモを開いてください。");
+        if (!HasConnection) throw new InvalidOperationException("先にサービスへ接続するか、DBファイルを開いてください。");
         var response = await SendAsync(new JsonObject { ["op"] = op });
         Log($"{op.ToUpperInvariant()} 完了");
         await RefreshTablesAsync();
@@ -444,6 +460,12 @@ public sealed partial class MainPage : ContentPage
 
     private Task BrowseAsync()
     {
+        if (folder is not null)
+        {
+            folderSelection = null; nextFolderPage = null; filter.Text = "";
+            result = folder.Summary(); RenderRows(); RenderExplorer();
+            return Task.CompletedTask;
+        }
         editor.Text = tables.Count > 0 ? $"SELECT * FROM {SqlNames.Quote(tables[0].Name)} LIMIT 100;" : IsReadRole ? "SHOW VIEWS;" : "SHOW TABLES;"; return ExecuteAsync();
     }
 
@@ -574,7 +596,16 @@ public sealed partial class MainPage : ContentPage
     {
         foreach (var button in explorer.Children.OfType<Button>()) guarded.Remove(button);
         explorer.Clear();
-        explorer.Add(Text(demo ? "⌄  SQLデモ" : embedded is not null ? "⌄  組み込みデータベース" : client is null ? "接続先なし" : "⌄  サービス データベース", 13, true));
+        if (folder is not null)
+        {
+            explorer.Add(Text($"テーブル ({folder.Tables.Count})", 13, true));
+            if (folderSelection is not null && nextFolderPage is not null)
+                explorer.Add(Action("次のページ", "FolderNext", () => ShowFolderPageAsync(folderSelection, nextFolderPage.Value)));
+            foreach (var table in folder.Tables)
+                explorer.Add(TableAction(folder.Label(table), $"FolderTable{explorer.Count}", () => ShowFolderPageAsync(table, 0)));
+            return;
+        }
+        explorer.Add(Text(embedded is not null ? "⌄  組み込みデータベース" : client is null ? "接続先なし" : "⌄  サービス データベース", 13, true));
         if (!HasConnection) return;
         if (KvAccount) { explorer.Add(Text("キー値接続", 11, color: Muted)); return; }
         explorer.Add(Action("テーブル・ビュー一覧を更新", "RefreshTables", async () => { await RefreshTablesAsync(); Log($"一覧を更新しました（{tables.Count} 件）"); }));
@@ -588,6 +619,15 @@ public sealed partial class MainPage : ContentPage
             foreach (var index in table.Indexes ?? [])
                 explorer.Add(Text($"    INDEX  {index.Name} ({string.Join(", ", index.ColumnNames)})", 11, color: Muted));
         }
+    }
+
+    private async Task ShowFolderPageAsync(FolderTable table, long offset)
+    {
+        if (folder is null) return;
+        var page = await Task.Run(() => folder.ReadPageAsync(table, offset));
+        folderSelection = table; nextFolderPage = page.Next;
+        status.Text = $"フォルダー閲覧 · {table.Name}";
+        filter.Text = ""; result = page.Result; RenderRows(); RenderExplorer();
     }
 
     private Button TableAction(string caption, string id, Func<Task> action)
@@ -606,7 +646,7 @@ public sealed partial class MainPage : ContentPage
     {
         filterTimer.Stop();
         var watch = Stopwatch.StartNew();
-        var source = embedded is not null ? $"DB:{embedded.DatabasePath}" : demo ? "demo" : connection.Text;
+        var source = embedded is not null ? $"DB:{embedded.DatabasePath}" : connection.Text;
         var layoutKey = JsonSerializer.Serialize(new { Source = source, Columns = result.Columns });
         if (!savedColumnWidths.TryGetValue(layoutKey, out var widths))
             savedColumnWidths[layoutKey] = widths = Enumerable.Repeat(240d, result.Columns.Count).ToArray();

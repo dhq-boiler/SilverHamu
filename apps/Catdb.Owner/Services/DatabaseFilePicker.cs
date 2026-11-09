@@ -12,7 +12,7 @@ internal static class DatabaseFilePicker
         var selection = new OpenFileName
         {
             Owner = WinRT.Interop.WindowNative.GetWindowHandle(window),
-            Filter = "catdb データベース (*.ndb)\0*.ndb\0catdb バックアップ (*.catbak)\0*.catbak\0すべてのファイル (*.*)\0*.*\0\0",
+            Filter = "catdb データベース・参照ファイル (*.ndb;*.catlink)\0*.ndb;*.catlink\0catdb バックアップ (*.catbak)\0*.catbak\0すべてのファイル (*.*)\0*.*\0\0",
             FilterIndex = Path.GetExtension(currentPath).ToLowerInvariant() switch { ".ndb" => 1, ".catbak" => 2, _ => 3 },
             File = Marshal.AllocHGlobal(32768 * sizeof(char)),
             MaxFile = 32768,

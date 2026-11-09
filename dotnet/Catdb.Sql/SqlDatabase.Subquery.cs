@@ -38,7 +38,12 @@ public sealed partial class SqlDatabase
             source = Deserialize<SqlTable>(viewBytes);
             selected = await SelectViewAsync(query, source);
         }
-        var field = (SqlField)query.Projections[0].Expression!;
+        return BindSubqueryValues(predicate, source, selected);
+    }
+
+    private static SqlInValues BindSubqueryValues(SqlInSubquery predicate, SqlTable source, SqlResult selected)
+    {
+        var field = (SqlField)predicate.Query.Projections[0].Expression!;
         var innerType = ComparisonType(Column(source, field.Name));
         var values = new HashSet<string>(StringComparer.Ordinal);
         bool containsNull = false;

@@ -1,4 +1,5 @@
 use super::raft::{Entry, HardState, MAX_LOG_BYTES, MAX_LOG_ENTRIES};
+use super::snapshot::{CHUNK, MAX_IMAGE, Snapshot};
 use crate::transactions::{
     Database, MAX_KEY_BYTES, MAX_TRANSACTION_WRITES, ResourceLimits, raft_path,
 };
@@ -17,9 +18,9 @@ fn invalid(message: &'static str) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidData, message)
 }
 
-fn log_key(index: usize) -> [u8; 9] {
+fn log_key(index: u64) -> [u8; 9] {
     let mut key = [b'L'; 9];
-    key[1..].copy_from_slice(&(index as u64).to_be_bytes());
+    key[1..].copy_from_slice(&index.to_be_bytes());
     key
 }
 
@@ -93,7 +94,15 @@ pub(super) fn command_size(command: &Value) -> io::Result<usize> {
     decode_command(command).map(|(_, size)| size)
 }
 
+const IMAGE: &[u8] = b"snapshot/header";
+const ORIGIN: &[u8] = b"snapshot/application";
+fn chunk_key(bank: u64, chunk: usize) -> Vec<u8> {
+    format!("snapshot/{bank}/{chunk:016x}").into_bytes()
+}
+
 struct Durable {
+    base: u64,
+    bank: u64,
     term: u64,
     voted_for: Option<String>,
     commit: u64,
@@ -101,6 +110,7 @@ struct Durable {
 }
 
 pub(super) struct Storage {
+    origin: Mutex<(u64, u64, bool)>,
     data: Database,
     journal: Database,
     member_ids: HashSet<String>,
@@ -201,11 +211,41 @@ impl Storage {
             .map_err(io::Error::other)?
             .ok_or_else(|| invalid("missing Raft hard state"))?;
         let header: Value = serde_json::from_slice(&header)?;
-        let last =
-            usize::try_from(number(&header, "last")?).map_err(|_| invalid("invalid log length"))?;
-        let high =
-            usize::try_from(number(&header, "high")?).map_err(|_| invalid("invalid log extent"))?;
-        if last > high || high > MAX_LOG_ENTRIES {
+        let last = number(&header, "last")?;
+        let high = number(&header, "high")?;
+        let mut snapshot = Snapshot::default();
+        let mut bank = 0;
+        if let Some(meta) = reader.get(IMAGE).map_err(io::Error::other)? {
+            let (idx, term, slot, size, hash): (u64, u64, u64, usize, String) =
+                serde_json::from_slice(&meta)?;
+            if size > MAX_IMAGE || slot > 1 || idx == 0 || idx > i64::MAX as u64 || term == 0 {
+                return Err(invalid("snapshot metadata"));
+            }
+            bank = slot;
+            let mut data = Vec::with_capacity(size);
+            for i in 0..size.div_ceil(CHUNK) {
+                let chunk = reader
+                    .get(&chunk_key(slot, i))
+                    .map_err(io::Error::other)?
+                    .ok_or_else(|| invalid("snapshot chunk missing"))?;
+                if chunk.len() != (size - data.len()).min(CHUNK) {
+                    return Err(invalid("snapshot chunk length"));
+                }
+                data.extend_from_slice(&chunk);
+            }
+            snapshot = Snapshot::new(idx, term, data);
+            if snapshot.hash != hash {
+                return Err(invalid("snapshot checksum"));
+            }
+        }
+        let base = snapshot.index;
+        let origin = reader
+            .get(ORIGIN)
+            .map_err(io::Error::other)?
+            .map(|b| serde_json::from_slice(&b))
+            .transpose()?
+            .unwrap_or((0, 0, false));
+        if last < base || last > high || high - base > MAX_LOG_ENTRIES as u64 {
             return Err(invalid("invalid Raft log extent"));
         }
         let vote = match header.get("vote") {
@@ -217,14 +257,18 @@ impl Storage {
             term: number(&header, "term")?,
             voted_for: vote,
             commit: number(&header, "commit")?,
+            snapshot,
             log: Vec::new(),
         };
-        if state.commit > last as u64 || (state.term == 0 && state.voted_for.is_some()) {
+        if state.commit < base
+            || state.commit > last
+            || (state.term == 0 && state.voted_for.is_some())
+        {
             return Err(invalid("invalid durable hard state"));
         }
         let mut prefix_bytes = vec![0usize];
-        let mut previous_term = 0;
-        for index in 1..=last {
+        let mut previous_term = state.snapshot.term;
+        for index in base + 1..=last {
             let bytes = reader
                 .get(&log_key(index))
                 .map_err(io::Error::other)?
@@ -243,10 +287,13 @@ impl Storage {
         }
         drop(reader);
         let store = Self {
+            origin: Mutex::new(origin),
             data,
             journal,
             member_ids: ids,
             durable: Mutex::new(Some(Durable {
+                base,
+                bank,
                 term: state.term,
                 voted_for: state.voted_for.clone(),
                 commit: state.commit,
@@ -255,6 +302,9 @@ impl Storage {
         };
         store.apply_through(&state)?;
         store.remove_unreachable(&state, high)?;
+        if base > 0 {
+            store.prune(base, bank, state.snapshot.bytes.len())?;
+        }
         Ok((store, state))
     }
 
@@ -268,13 +318,18 @@ impl Storage {
         let durable = guard
             .as_mut()
             .ok_or_else(|| invalid("replica storage must be reopened"))?;
-        let old_last = durable.prefix_bytes.len() - 1;
+        let old_last = durable.base + (durable.prefix_bytes.len() - 1) as u64;
+        let base = state.snapshot.index;
+        let last = base + state.log.len() as u64;
+        let moved = base != durable.base;
         let result = (|| {
             if state.term < durable.term
                 || state.commit < durable.commit
-                || state.commit > state.log.len() as u64
+                || state.commit > last
                 || state.log.len() > MAX_LOG_ENTRIES
-                || common > old_last.min(state.log.len())
+                || base < durable.base
+                || common > state.log.len()
+                || (common > 0 && base + common as u64 > old_last)
                 || (state.term == 0 && state.voted_for.is_some())
                 || state
                     .voted_for
@@ -286,12 +341,51 @@ impl Storage {
             {
                 return Err(invalid("invalid durable Raft transition"));
             }
-            if common < durable.commit as usize {
+            if base + (common as u64) < durable.commit {
                 return Err(invalid("cannot rewrite a committed Raft entry"));
             }
-            let high = old_last.max(state.log.len());
+            let high = old_last.max(last);
+            let mut pending = false;
+            if moved {
+                let slot = 1 - durable.bank;
+                for (batch, data) in state.snapshot.bytes.chunks(16 * CHUNK).enumerate() {
+                    let mut write = self.journal.begin().map_err(io::Error::other)?;
+                    for (part, chunk) in data.chunks(CHUNK).enumerate() {
+                        write
+                            .put(&chunk_key(slot, batch * 16 + part), chunk)
+                            .map_err(io::Error::other)?;
+                    }
+                    write.commit().map_err(io::Error::other)?;
+                }
+                pending = self.applied_index().map_err(io::Error::other)? < state.snapshot.index;
+                durable.bank = slot;
+                durable.prefix_bytes = vec![0];
+                for e in &state.log[..common] {
+                    durable.prefix_bytes.push(
+                        durable.prefix_bytes.last().unwrap() + command_size(&e.command)? + 48,
+                    );
+                }
+            }
             let mut tx = self.journal.begin().map_err(io::Error::other)?;
-            let mut prior_term = state.log[..common].last().map_or(0, |entry| entry.term);
+            if moved {
+                tx.put(
+                    IMAGE,
+                    &serde_json::to_vec(&(
+                        base,
+                        state.snapshot.term,
+                        durable.bank,
+                        state.snapshot.bytes.len(),
+                        &state.snapshot.hash,
+                    ))?,
+                )
+                .map_err(io::Error::other)?;
+                if pending {
+                    tx.put(ORIGIN, b"[0,0,true]").map_err(io::Error::other)?;
+                }
+            }
+            let mut prior_term = state.log[..common]
+                .last()
+                .map_or(state.snapshot.term, |entry| entry.term);
             durable.prefix_bytes.truncate(common + 1);
             let mut total = durable.prefix_bytes[common];
             for (offset, entry) in state.log[common..].iter().enumerate() {
@@ -304,7 +398,7 @@ impl Storage {
                 }
                 durable.prefix_bytes.push(total);
                 tx.put(
-                    &log_key(common + offset + 1),
+                    &log_key(base + (common + offset + 1) as u64),
                     &serde_json::to_vec(&(entry.term, &entry.command))?,
                 )
                 .map_err(io::Error::other)?;
@@ -313,8 +407,15 @@ impl Storage {
             tx.put(STATE, &encode_state(state, high)?)
                 .map_err(io::Error::other)?;
             tx.commit().map_err(io::Error::other)?;
+            if pending {
+                *self.origin.lock().unwrap() = (0, 0, true);
+            }
             self.apply_through(state)?;
             self.remove_unreachable(state, high)?;
+            if moved {
+                self.prune(base, durable.bank, state.snapshot.bytes.len())?;
+            }
+            durable.base = base;
             durable.term = state.term;
             durable.voted_for.clone_from(&state.voted_for);
             durable.commit = state.commit;
@@ -327,12 +428,32 @@ impl Storage {
     }
 
     fn apply_through(&self, state: &HardState) -> io::Result<()> {
-        let version = self.data.current_version().map_err(io::Error::other)?;
-        if version > state.commit || state.commit > state.log.len() as u64 {
+        if self.origin.lock().unwrap().2 {
+            match state.snapshot.install(&self.data) {
+                Ok(()) => (),
+                Err(crate::transactions::Error::ResourceExhausted(_)) => return Ok(()),
+                Err(e) => return Err(io::Error::other(e)),
+            }
+            let origin = (
+                state.snapshot.index,
+                self.data.current_version().map_err(io::Error::other)?,
+                false,
+            );
+            let mut tx = self.journal.begin().map_err(io::Error::other)?;
+            tx.put(ORIGIN, &serde_json::to_vec(&origin)?)
+                .map_err(io::Error::other)?;
+            tx.commit().map_err(io::Error::other)?;
+            *self.origin.lock().unwrap() = origin;
+        }
+        let version = self.applied_index().map_err(io::Error::other)?;
+        if version < state.snapshot.index
+            || version > state.commit
+            || state.commit - state.snapshot.index > state.log.len() as u64
+        {
             return Err(invalid("invalid Raft application watermark"));
         }
         for idx in version + 1..=state.commit {
-            let entry = &state.log[idx as usize - 1];
+            let entry = &state.log[(idx - state.snapshot.index - 1) as usize];
             let (writes, _) = decode_command(&entry.command)?;
             match self.apply_entry(idx, writes) {
                 Ok(()) => (),
@@ -347,7 +468,7 @@ impl Storage {
 
     fn apply_entry(&self, index: u64, writes: WriteSet) -> crate::transactions::Result<()> {
         let mut tx = self.data.begin()?;
-        if tx.version() != index - 1 {
+        if self.logical_version(tx.version())? != index - 1 {
             return Err(crate::transactions::Error::Invalid(
                 "application database changed outside Raft",
             ));
@@ -368,7 +489,7 @@ impl Storage {
                 }
             }
         }
-        if tx.commit()? != index {
+        if self.logical_version(tx.commit()?)? != index {
             return Err(crate::transactions::Error::Invalid(
                 "applied log index mismatch",
             ));
@@ -395,10 +516,68 @@ impl Storage {
         result
     }
 
-    fn remove_unreachable(&self, state: &HardState, mut high: usize) -> io::Result<()> {
+    pub(super) fn logical_version(&self, native: u64) -> crate::transactions::Result<u64> {
+        let (absolute, origin, pending) = *self.origin.lock().unwrap();
+        if pending {
+            return Ok(0);
+        }
+        native
+            .checked_sub(origin)
+            .and_then(|n| absolute.checked_add(n))
+            .ok_or(crate::transactions::Error::Invalid(
+                "snapshot version mapping",
+            ))
+    }
+    pub(super) fn applied_index(&self) -> crate::transactions::Result<u64> {
+        self.logical_version(self.data.current_version()?)
+    }
+    pub(super) fn installed_snapshot_index(&self) -> u64 {
+        self.origin.lock().unwrap().0
+    }
+    fn prune(&self, base: u64, bank: u64, size: usize) -> io::Result<()> {
+        self.delete_range(&log_key(0), &log_key(base + 1))?;
+        self.delete_range(&chunk_key(1 - bank, 0), &chunk_key(1 - bank, usize::MAX))?;
+        self.delete_range(
+            &chunk_key(bank, size.div_ceil(CHUNK)),
+            &chunk_key(bank, usize::MAX),
+        )
+    }
+    fn delete_range(&self, start: &[u8], end: &[u8]) -> io::Result<()> {
+        let mut after = None;
+        loop {
+            let page = self
+                .journal
+                .begin_read()
+                .map_err(io::Error::other)?
+                .scan_page(
+                    start,
+                    Some(end),
+                    after.as_deref(),
+                    crate::transactions::ScanLimits {
+                        max_bytes: 2 * 1024 * 1024,
+                        ..Default::default()
+                    },
+                )
+                .map_err(io::Error::other)?;
+            if !page.rows.is_empty() {
+                let mut tx = self.journal.begin().map_err(io::Error::other)?;
+                for (key, _) in page.rows {
+                    tx.delete(&key).map_err(io::Error::other)?;
+                }
+                tx.commit().map_err(io::Error::other)?;
+            }
+            after = page.next_after;
+            if after.is_none() {
+                return Ok(());
+            }
+        }
+    }
+
+    fn remove_unreachable(&self, state: &HardState, mut high: u64) -> io::Result<()> {
         // The published logical length already excludes these keys; cleanup is restartable.
-        while high > state.log.len() {
-            let next = high.saturating_sub(256).max(state.log.len());
+        let last = state.snapshot.index + state.log.len() as u64;
+        while high > last {
+            let next = high.saturating_sub(256).max(last);
             let mut tx = self.journal.begin().map_err(io::Error::other)?;
             for idx in next + 1..=high {
                 tx.delete(&log_key(idx)).map_err(io::Error::other)?;
@@ -412,10 +591,10 @@ impl Storage {
     }
 }
 
-fn encode_state(state: &HardState, high: usize) -> io::Result<Vec<u8>> {
+fn encode_state(state: &HardState, high: u64) -> io::Result<Vec<u8>> {
     Ok(serde_json::to_vec(
         &json!({"term":state.term, "vote":state.voted_for, "commit":state.commit,
-        "last":state.log.len(), "high":high}),
+        "last":state.snapshot.index+state.log.len() as u64, "high":high}),
     )?)
 }
 
@@ -598,6 +777,60 @@ mod tests {
         ] {
             assert!(validate_command(&command).is_err());
         }
+    }
+
+    #[test]
+    fn restart_finishes_snapshot_install_before_applying_the_retained_suffix() {
+        let files = Files::new();
+        let (store, mut hard) = files.open(true).unwrap();
+        hard.term = 1;
+        hard.log = vec![write(1, "00", "ff")];
+        hard.commit = 1;
+        store.persist(&hard, 0).unwrap();
+        let mut row = Vec::new();
+        for field in [b"k".as_slice(), b"value"] {
+            row.extend_from_slice(&(field.len() as u32).to_be_bytes());
+            row.extend_from_slice(field);
+        }
+        hard.snapshot = Snapshot::new(70_000, 1, row);
+        hard.log.clear();
+        hard.commit = 70_000;
+        store.persist(&hard, 0).unwrap();
+        assert!(
+            store
+                .journal
+                .begin_read()
+                .unwrap()
+                .get(&log_key(1))
+                .unwrap()
+                .is_none()
+        );
+        hard.log.push(write(1, "ff", "ef"));
+        hard.commit += 1;
+        // Model a power loss after journal publication and a partial application batch.
+        let mut journal = store.journal.begin().unwrap();
+        journal.put(ORIGIN, b"[0,0,true]").unwrap();
+        journal
+            .put(
+                &log_key(70001),
+                &serde_json::to_vec(&(1, &hard.log[0].command)).unwrap(),
+            )
+            .unwrap();
+        journal
+            .put(STATE, &encode_state(&hard, 70001).unwrap())
+            .unwrap();
+        journal.commit().unwrap();
+        let mut partial = store.data.begin().unwrap();
+        partial.put(b"k", b"old").unwrap();
+        partial.put(b"obsolete", b"x").unwrap();
+        partial.commit().unwrap();
+        drop(store);
+        let (store, recovered) = files.open(false).unwrap();
+        assert_eq!(recovered, hard);
+        assert_eq!(store.applied_index().unwrap(), 70001);
+        assert_eq!(get(&store, b"k").unwrap(), b"value");
+        assert_eq!(get(&store, b"obsolete"), None);
+        assert_eq!(get(&store, &[255]), Some(vec![0xef]));
     }
 
     #[test]

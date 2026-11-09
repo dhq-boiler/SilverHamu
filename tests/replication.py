@@ -134,6 +134,43 @@ class ClusterFixture(unittest.TestCase):
 
 
 class ReplicationTests(ClusterFixture):
+    def test_offline_member_installs_compacted_snapshot_and_replays_tail(self):
+        for node in self.endpoints:
+            self.start(node)
+        with self.discover() as leader:
+            primary = self.ok(leader, "cluster_status")["node_id"]
+            offline, other = [n for n in self.endpoints if n != primary]
+            initial = int(self.ok(leader, "put_commit", key="00", value="dead")["version"])
+            self.await_condition("original value on offline member",
+                                 lambda: int(self.status(offline)["applied_index"]) >= initial)
+            self.stop(offline)
+            self.ok(leader, "delete_commit", key="00")
+            boundary = initial
+            for byte in ("ab", "cd"):
+                payload = byte * (240 * 1024)
+                for _ in range(19):
+                    self.ok(leader, "put_commit", key="01", value=payload)
+                self.await_condition("leader to advance the compacted prefix",
+                                     lambda: int(self.status(primary)["snapshot_index"]) > boundary)
+                boundary = int(self.status(primary)["snapshot_index"])
+            tail = int(self.ok(leader, "put_commit", key="02", value="beef")["version"])
+            self.assertLess(int(self.status(primary)["snapshot_index"]), tail)
+            self.start(offline)
+            self.await_condition("snapshot and subsequent entries on returning member",
+                                 lambda: int(self.status(offline)["applied_index"]) == tail)
+            self.assertGreaterEqual(int(self.status(offline)["installed_snapshot_index"]), boundary)
+            self.stop(other)
+            self.ok(leader, "put_commit", key="03", value="aa")
+        self.stop(primary)
+        self.stop(offline)
+        self.start(offline)
+        self.start(other)
+        with self.discover() as restored:
+            self.assertEqual(self.ok(restored, "cluster_status")["node_id"], offline)
+            self.verify_data(restored, {"00": None, "01": payload, "02": "beef", "03": "aa"})
+            self.assertEqual(self.ok(restored, "ping")["version"],
+                             self.ok(restored, "cluster_status")["applied_index"])
+
     @unittest.skipUnless(os.getenv("CATDB_SQL_HOST"), "requires Catdb.Sql.Host")
     def test_sql_grants_survive_failover(self):
         viewer_token = secrets.token_hex(32)

@@ -1,5 +1,6 @@
 //! Fixed-membership consensus for the token-authenticated service.
 mod raft;
+mod snapshot;
 mod storage;
 mod transport;
 
@@ -259,7 +260,7 @@ impl Cluster {
             let mut core = self.lock()?;
             let Core { raft, storage } = &mut *core;
             self.storage_result(storage.retry_apply(raft.hard_state()))?;
-            if self.database.current_version().map_err(io::Error::other)? < raft.commit_index() {
+            if storage.applied_index().map_err(io::Error::other)? < raft.commit_index() {
                 raft.defer_leadership();
                 return Ok(());
             }
@@ -286,6 +287,31 @@ impl Cluster {
         Ok(())
     }
 
+    fn compact(&self) -> io::Result<()> {
+        let (read, index, term) = {
+            let core = self.lock()?;
+            let raft = &core.raft;
+            if !raft.needs_snapshot()
+                || core.storage.applied_index().map_err(io::Error::other)? != raft.commit_index()
+            {
+                return Ok(());
+            }
+            let index = raft.commit_index();
+            (
+                self.database.begin_read().map_err(io::Error::other)?,
+                index,
+                raft.entry(index).unwrap().term,
+            )
+        };
+        let image = snapshot::Snapshot::capture(read, index, term).map_err(io::Error::other)?;
+        let mut core = self.lock()?;
+        let Core { raft, storage } = &mut *core;
+        if raft.entry(index).is_some_and(|entry| entry.term == term) {
+            raft.compact(image, &mut self.persist(storage))?;
+        }
+        Ok(())
+    }
+
     pub(crate) fn run(self: Arc<Self>, stop: Arc<AtomicBool>) -> thread::JoinHandle<()> {
         thread::spawn(move || {
             thread::scope(|scope| {
@@ -293,6 +319,18 @@ impl Cluster {
                     while !stop.load(Ordering::Acquire) {
                         let _ = self.tick();
                         thread::sleep(Duration::from_millis(75));
+                    }
+                });
+                scope.spawn(|| {
+                    let mut retry = Instant::now();
+                    while !stop.load(Ordering::Acquire) {
+                        if Instant::now() >= retry
+                            && let Err(e) = self.compact()
+                        {
+                            eprintln!("catdb: snapshot deferred: {e}");
+                            retry = Instant::now() + Duration::from_secs(10);
+                        }
+                        thread::sleep(Duration::from_millis(100));
                     }
                 });
                 let mut workers: Vec<thread::ScopedJoinHandle<'_, ()>> = Vec::new();
@@ -335,7 +373,7 @@ impl Cluster {
             Role::Candidate => "candidate",
         };
         Ok(
-            json!({"ok":true,"cluster_id":self.config.id,"node_id":self.config.node,"role":role,"leader_id":raft.leader(),"term":raft.term().to_string(),"commit_index":raft.commit_index().to_string(),"applied_index":self.database.current_version()?.to_string()}),
+            json!({"ok":true,"cluster_id":self.config.id,"node_id":self.config.node,"role":role,"leader_id":raft.leader(),"term":raft.term().to_string(),"commit_index":raft.commit_index().to_string(),"applied_index":core.storage.applied_index()?.to_string(),"snapshot_index":raft.hard_state().snapshot.index.to_string(),"log_entries":raft.hard_state().log.len(),"installed_snapshot_index":core.storage.installed_snapshot_index().to_string()}),
         )
     }
 
@@ -352,9 +390,9 @@ impl Cluster {
                 let _ = self.replicate(Some(&mut round));
                 let core = self.lock().map_err(|_| "reopen_required")?;
                 if round.ready(&core.raft) && core.raft.commit_index() == core.raft.last_index() {
-                    if self
-                        .database
-                        .current_version()
+                    if core
+                        .storage
+                        .applied_index()
                         .map_err(|_| "reopen_required")?
                         != core.raft.commit_index()
                     {
@@ -427,7 +465,12 @@ impl Cluster {
             | "lock_keys" => {
                 let result = crate::service::dispatch(&self.database, tx, request);
                 *pinned = tx.as_ref().map(|_| term);
-                return result;
+                return result.and_then(|mut v| {
+                    if let Some(n) = v["version"].as_str().and_then(|s| s.parse().ok()) {
+                        v["version"] = core.storage.logical_version(n)?.to_string().into();
+                    }
+                    Ok(v)
+                });
             }
             "put_commit" | "delete_commit" => {
                 return Err(Error::Invalid("single request requires no transaction"));
@@ -435,7 +478,7 @@ impl Cluster {
             _ => return Ok(crate::service::error("unsupported_cluster_operation")),
         };
         *pinned = None;
-        let version = mutating.version();
+        let version = core.storage.logical_version(mutating.version())?;
         let writes = mutating.replication_writes()?;
         if writes.is_empty() {
             return Ok(json!({"ok":true,"version":version.to_string()}));
@@ -480,9 +523,9 @@ impl Cluster {
                 )));
             }
             if core.raft.commit_index() >= index
-                && self
-                    .database
-                    .current_version()
+                && core
+                    .storage
+                    .applied_index()
                     .map_err(|e| Error::CommitUncertain(io::Error::other(e)))?
                     >= index
             {

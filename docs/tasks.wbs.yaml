@@ -1,7 +1,7 @@
 version: 3
 title: catdb
 createdAt: 2026-11-09T15:31:25.7166025Z
-modifiedAt: 2026-11-09T18:18:40.5590323Z
+modifiedAt: 2026-11-09T23:17:48.5706610Z
 tasks:
 - id: sql-semantic-types
   title: SQLで日時・金額・識別子の意味を保証する
@@ -107,3 +107,8 @@ tasks:
     title: 障害・復旧を実プロセスで検証し運用手順を記録する
     estimateHours: 5
     remainingHours: 0
+- id: raft-snapshot-recovery
+  title: Raftログを圧縮し停止ノードをスナップショットで復旧する
+  estimateHours: 8
+  remainingHours: 0
+  notes: 確定ログの自動圧縮と分割スナップショット転送を実装。Windowsの3台クラスタで1台停止中に2回圧縮し、復帰ノードの受信位置、後続ログ適用、再起動・リーダー選出後の削除と更新を検証。Rustテスト227件、実TCP障害・復旧テスト8件成功。

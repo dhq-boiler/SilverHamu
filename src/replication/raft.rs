@@ -1,3 +1,4 @@
+use super::snapshot::{CHUNK, MAX_IMAGE, Snapshot};
 use serde_json::{Value, json};
 use std::collections::{BTreeMap, BTreeSet};
 use std::io;
@@ -9,6 +10,8 @@ pub(super) const MAX_LOG_ENTRIES: usize = 65_536;
 pub(super) const MAX_LOG_BYTES: usize = 128 * 1024 * 1024;
 const APPEND_BYTES: usize = 3 * 1024 * 1024;
 const APPEND_COUNT: usize = 64;
+const SNAPSHOT_ENTRIES: usize = 128;
+const SNAPSHOT_BYTES: usize = 8 * 1024 * 1024;
 const ENTRY_OVERHEAD: usize = 48;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -22,6 +25,7 @@ pub(super) struct HardState {
     pub term: u64,
     pub voted_for: Option<String>,
     pub log: Vec<Entry>,
+    pub snapshot: Snapshot,
     pub commit: u64,
 }
 
@@ -33,8 +37,21 @@ pub(super) enum Role {
 }
 
 struct Progress {
+    snapshot: Option<Snapshot>,
+    offset: usize,
     next: u64,
     matched: u64,
+}
+
+impl Progress {
+    fn advance_to(&mut self, next: u64, current_snapshot: u64) {
+        self.next = self.next.max(next);
+        let transferring = self.snapshot.as_ref().map_or(current_snapshot, |s| s.index);
+        if self.next > transferring {
+            self.snapshot = None;
+            self.offset = 0;
+        }
+    }
 }
 
 pub(super) struct Raft {
@@ -51,6 +68,7 @@ pub(super) struct Raft {
     random: u64,
     round_id: u64,
     failed: bool,
+    incoming: Option<(u64, String, Vec<u8>)>,
 }
 
 pub(super) struct ReadRound {
@@ -113,11 +131,14 @@ impl Raft {
                 .is_some_and(|vote| !members.contains(vote))
             || hard.term == 0 && hard.voted_for.is_some()
             || hard.log.len() > MAX_LOG_ENTRIES
-            || hard.commit > hard.log.len() as u64
+            || hard.snapshot.term > hard.term
+            || hard.commit < hard.snapshot.index
+            || hard.snapshot.index > i64::MAX as u64
+            || hard.commit > hard.snapshot.index + hard.log.len() as u64
         {
             return Err(invalid("invalid Raft membership or hard state"));
         }
-        let mut previous = 0;
+        let mut previous = hard.snapshot.term;
         let mut entry_bytes = Vec::with_capacity(hard.log.len());
         let mut log_bytes = 0;
         for entry in &hard.log {
@@ -149,6 +170,7 @@ impl Raft {
             random: u64::from_le_bytes(seed).max(1),
             round_id: 0,
             failed: false,
+            incoming: None,
         };
         raft.reset_deadline();
         Ok(raft)
@@ -170,16 +192,16 @@ impl Raft {
         &self.hard
     }
     pub(super) fn last_index(&self) -> u64 {
-        self.hard.log.len() as u64
+        self.hard.snapshot.index + self.hard.log.len() as u64
     }
     pub(super) fn entry(&self, index: u64) -> Option<&Entry> {
         self.hard
             .log
-            .get(usize::try_from(index.checked_sub(1)?).ok()?)
+            .get(usize::try_from(index.checked_sub(self.hard.snapshot.index + 1)?).ok()?)
     }
     fn term_at(&self, index: u64) -> Option<u64> {
-        if index == 0 {
-            Some(0)
+        if index == self.hard.snapshot.index {
+            Some(self.hard.snapshot.term)
         } else {
             self.entry(index).map(|entry| entry.term)
         }
@@ -258,6 +280,7 @@ impl Raft {
         persist: &mut impl FnMut(&HardState, usize) -> io::Result<()>,
     ) -> io::Result<()> {
         if term > self.term() {
+            self.incoming = None;
             self.follower();
             self.hard.term = term;
             self.hard.voted_for = None;
@@ -286,6 +309,7 @@ impl Raft {
             .term()
             .checked_add(1)
             .ok_or_else(|| invalid("Raft term exhausted"))?;
+        self.incoming = None;
         self.hard.voted_for = Some(self.id.clone());
         self.flush(self.hard.log.len(), &mut persist)?;
         self.role = Role::Candidate;
@@ -310,12 +334,13 @@ impl Raft {
             return Err(invalid("zero RPC term"));
         }
         match rpc["kind"].as_str() {
+            Some("snapshot") => self.receive_snapshot(from, rpc, term, &mut persist),
             Some("vote") => {
                 let last_index = number(rpc, "last_index")?;
                 let last_term = number(rpc, "last_term")?;
                 if (last_index == 0) != (last_term == 0)
                     || last_term > term
-                    || last_index > MAX_LOG_ENTRIES as u64
+                    || last_index > i64::MAX as u64
                 {
                     return Err(invalid("invalid candidate log position"));
                 }
@@ -363,7 +388,17 @@ impl Raft {
             .members
             .iter()
             .filter(|id| **id != self.id)
-            .map(|id| (id.clone(), Progress { next, matched: 0 }))
+            .map(|id| {
+                (
+                    id.clone(),
+                    Progress {
+                        next,
+                        matched: 0,
+                        snapshot: None,
+                        offset: 0,
+                    },
+                )
+            })
             .collect();
         self.role = Role::Leader;
         self.leader = Some(self.id.clone());
@@ -414,6 +449,125 @@ impl Raft {
         self.push(command, false, &mut persist)
     }
 
+    pub(super) fn needs_snapshot(&self) -> bool {
+        let committed = (self.commit_index() - self.hard.snapshot.index) as usize;
+        committed >= SNAPSHOT_ENTRIES
+            || (self.log_bytes >= SNAPSHOT_BYTES
+                && self.entry_bytes[..committed].iter().sum::<usize>() >= SNAPSHOT_BYTES)
+    }
+    pub(super) fn compact(
+        &mut self,
+        snapshot: Snapshot,
+        persist: &mut impl FnMut(&HardState, usize) -> io::Result<()>,
+    ) -> io::Result<()> {
+        let old = self.hard.snapshot.index;
+        if snapshot.index <= old
+            || (snapshot.index <= self.commit_index()
+                && self.term_at(snapshot.index) != Some(snapshot.term))
+        {
+            return Err(invalid("snapshot would replace a committed boundary"));
+        }
+        for progress in self.peers.values_mut() {
+            if progress.next <= old && progress.offset != 0 && progress.snapshot.is_none() {
+                progress.snapshot = Some(self.hard.snapshot.clone());
+            }
+        }
+        let keep = if self.term_at(snapshot.index) == Some(snapshot.term) {
+            let n = (snapshot.index - old) as usize;
+            self.hard.log.drain(..n);
+            self.entry_bytes.drain(..n);
+            self.hard.log.len()
+        } else {
+            self.hard.log.clear();
+            self.entry_bytes.clear();
+            0
+        };
+        self.log_bytes = self.entry_bytes.iter().sum();
+        self.hard.commit = self.hard.commit.max(snapshot.index);
+        self.hard.snapshot = snapshot;
+        self.flush(keep, persist)
+    }
+    fn receive_snapshot(
+        &mut self,
+        from: &str,
+        rpc: &Value,
+        term: u64,
+        persist: &mut impl FnMut(&HardState, usize) -> io::Result<()>,
+    ) -> io::Result<Value> {
+        let index = number(rpc, "index")?;
+        let base_term = number(rpc, "base_term")?;
+        let size = number(rpc, "size")?;
+        let offset = number(rpc, "offset")?;
+        let hash = rpc["hash"]
+            .as_str()
+            .filter(|h| h.len() == 64)
+            .ok_or_else(|| invalid("snapshot digest"))?;
+        if rpc["to"] != self.id
+            || index == 0
+            || index > i64::MAX as u64
+            || base_term == 0
+            || base_term > term
+            || size > MAX_IMAGE as u64
+            || offset > size
+        {
+            return Err(invalid("invalid snapshot header"));
+        }
+        self.observe_term(term, persist)?;
+        let mut reply = json!({"kind":"snapshot","term":self.term(),"installed":false,"offset":0});
+        if term < self.term() {
+            return Ok(reply);
+        }
+        if self.role == Role::Leader || self.leader.as_deref().is_some_and(|l| l != from) {
+            return Err(invalid("conflicting snapshot leader"));
+        }
+        self.follower();
+        self.leader = Some(from.to_owned());
+        self.reset_deadline();
+        if index <= self.commit_index() {
+            reply["installed"] = true.into();
+            return Ok(reply);
+        }
+        if offset == 0
+            && self
+                .incoming
+                .as_ref()
+                .is_none_or(|(i, h, _)| *i != index || h != hash)
+        {
+            self.incoming = Some((index, hash.into(), Vec::new()));
+        }
+        let Some((i, h, buf)) = &mut self.incoming else {
+            return Ok(reply);
+        };
+        if *i != index || h != hash {
+            return Ok(reply);
+        }
+        if offset == buf.len() as u64 {
+            let chunk = crate::service::hex_decode(
+                rpc["data"]
+                    .as_str()
+                    .ok_or_else(|| invalid("snapshot chunk"))?,
+                CHUNK,
+            )
+            .map_err(io::Error::other)?;
+            if offset + chunk.len() as u64 > size {
+                return Err(invalid("snapshot extent"));
+            }
+            buf.extend_from_slice(&chunk);
+        }
+        reply["offset"] = buf.len().into();
+        if buf.len() as u64 == size {
+            let (_, _, data) = self.incoming.take().unwrap();
+            let snap = Snapshot::new(index, base_term, data);
+            if snap.hash != hash {
+                return Err(invalid("snapshot digest mismatch"));
+            }
+            snap.validate()?;
+            self.compact(snap, persist)?;
+            reply["installed"] = true.into();
+        }
+        Ok(reply)
+    }
+
     pub(super) fn read_round(&mut self) -> io::Result<ReadRound> {
         self.require_leader()?;
         if self.term_at(self.commit_index()) != Some(self.term()) {
@@ -448,12 +602,22 @@ impl Raft {
             .get(peer)
             .ok_or_else(|| invalid("unknown remote voter"))?
             .next;
+        if next <= self.hard.snapshot.index {
+            let progress = &self.peers[peer];
+            let snap = progress.snapshot.as_ref().unwrap_or(&self.hard.snapshot);
+            let offset = progress.offset;
+            let end = (offset + CHUNK).min(snap.bytes.len());
+            return Ok(
+                json!({"kind":"snapshot","to":peer,"term":self.term(),"index":snap.index,"base_term":snap.term,"hash":snap.hash,"size":snap.bytes.len(),"offset":offset,"data":crate::service::hex(&snap.bytes[offset..end])}),
+            );
+        }
         let prev = next - 1;
+        let start = (prev - self.hard.snapshot.index) as usize;
         let mut bytes = 0;
         let mut entries = Vec::new();
-        for (entry, size) in self.hard.log[prev as usize..]
+        for (entry, size) in self.hard.log[start..]
             .iter()
-            .zip(&self.entry_bytes[prev as usize..])
+            .zip(&self.entry_bytes[start..])
             .take(APPEND_COUNT)
         {
             if bytes + size > APPEND_BYTES {
@@ -484,8 +648,10 @@ impl Raft {
         let incoming = rpc["entries"]
             .as_array()
             .ok_or_else(|| invalid("missing entries"))?;
-        if prev > MAX_LOG_ENTRIES as u64
-            || prev + incoming.len() as u64 > MAX_LOG_ENTRIES as u64
+        if prev > i64::MAX as u64
+            || (prev + incoming.len() as u64).saturating_sub(self.hard.snapshot.index)
+                > MAX_LOG_ENTRIES as u64
+                && prev <= self.last_index()
             || incoming.len() > APPEND_COUNT
             || (prev == 0) != (prev_term == 0)
             || prev_term > term
@@ -503,6 +669,11 @@ impl Raft {
         self.follower();
         self.leader = Some(from.to_owned());
         self.reset_deadline();
+        if prev < self.hard.snapshot.index {
+            let mut response = reject(self.term(), self.hard.snapshot.index + 1);
+            response["base_term"] = self.hard.snapshot.term.into();
+            return Ok(response);
+        }
         if self.term_at(prev) != Some(prev_term) {
             let hint = if prev > self.last_index() {
                 self.last_index() + 1
@@ -511,6 +682,7 @@ impl Raft {
                 self.hard
                     .log
                     .partition_point(|entry| entry.term < conflict_term) as u64
+                    + self.hard.snapshot.index
                     + 1
             };
             return Ok(reject(self.term(), hint));
@@ -536,12 +708,12 @@ impl Raft {
                 if &existing.command != command {
                     return Err(invalid("disagreement at identical log term and index"));
                 }
-                batch_bytes += self.entry_bytes[index as usize - 1];
+                batch_bytes += self.entry_bytes[(index - self.hard.snapshot.index - 1) as usize];
             } else {
                 if index <= self.commit_index() {
                     return Err(invalid("cannot replace a committed log entry"));
                 }
-                truncate.get_or_insert(index as usize - 1);
+                truncate.get_or_insert((index - self.hard.snapshot.index - 1) as usize);
                 let size = entry_size(command)?;
                 batch_bytes += size;
                 suffix.push((
@@ -576,6 +748,13 @@ impl Raft {
         }
         if changed {
             self.hard.commit = commit;
+            if self
+                .incoming
+                .as_ref()
+                .is_some_and(|(index, _, _)| *index <= commit)
+            {
+                self.incoming = None;
+            }
             self.flush(truncate.unwrap_or(self.hard.log.len()), persist)?;
         }
         Ok(
@@ -593,6 +772,28 @@ impl Raft {
         self.check_peer(peer)?;
         let term = number(reply, "term")?;
         self.observe_term(term, &mut persist)?;
+        if sent["kind"] == "snapshot" && reply["kind"] == "snapshot" && sent["to"] == peer {
+            if self.role != Role::Leader || term != self.term() || sent["term"] != term {
+                return Ok(false);
+            }
+            let p = self.peers.get_mut(peer).unwrap();
+            let snap = p.snapshot.as_ref().unwrap_or(&self.hard.snapshot);
+            if sent["index"] != snap.index || p.next > snap.index || sent["offset"] != p.offset {
+                return Ok(false);
+            }
+            if reply["installed"] == true {
+                p.matched = p.matched.max(snap.index);
+                p.next = p.matched + 1;
+                p.snapshot = None;
+                p.offset = 0;
+            } else if let Some(offset) = reply["offset"]
+                .as_u64()
+                .filter(|o| *o <= snap.bytes.len() as u64)
+            {
+                p.offset = offset as usize;
+            }
+            return Ok(false);
+        }
         if reply["kind"] != "append" || sent["kind"] != "append" || sent["to"] != peer {
             return Err(invalid("unexpected append reply"));
         }
@@ -608,10 +809,23 @@ impl Raft {
         if matched > self.last_index() {
             return Err(invalid("reply refers to an unknown log position"));
         }
+        let compacted_hint = reply["hint"]
+            .as_u64()
+            .and_then(|n| n.checked_sub(1))
+            .filter(|i| {
+                *i > prev
+                    && reply["base_term"]
+                        .as_u64()
+                        .is_some_and(|t| self.term_at(*i) == Some(t))
+            });
         let progress = self.peers.get_mut(peer).unwrap();
         if reply["success"] == false {
             let hint = number(reply, "hint")?;
-            if prev > progress.matched && progress.next == prev + 1 {
+            if let Some(base) = compacted_hint
+                && progress.next == prev + 1
+            {
+                progress.advance_to(base + 1, self.hard.snapshot.index);
+            } else if prev > progress.matched && progress.next == prev + 1 {
                 progress.next = hint.clamp(progress.matched + 1, prev);
             }
             return Ok(false);
@@ -623,7 +837,7 @@ impl Raft {
             return Err(invalid("invalid append acknowledgment"));
         }
         progress.matched = progress.matched.max(matched);
-        progress.next = progress.next.max(matched + 1);
+        progress.advance_to(matched + 1, self.hard.snapshot.index);
         let mut matches = self.peers.values().map(|p| p.matched).collect::<Vec<_>>();
         matches.push(self.last_index());
         matches.sort_unstable();
@@ -670,6 +884,76 @@ mod tests {
             .append_reply(&voter.id, &sent, &reply, durable)
             .unwrap();
         (sent, reply, accepted)
+    }
+
+    #[test]
+    fn interrupted_snapshot_restarts_at_zero_and_only_a_verified_image_advances_commit() {
+        let mut c = node("c", HardState::default());
+        let mut bytes = Vec::new();
+        bytes.extend_from_slice(&0u32.to_be_bytes());
+        bytes.extend_from_slice(&(CHUNK as u32).to_be_bytes());
+        bytes.resize(CHUNK + 8, 7);
+        let snap = Snapshot::new(70_000, 2, bytes);
+        let chunk = |offset: usize, data: &[u8]| {
+            json!({"kind":"snapshot","to":"c","term":3,
+            "index":snap.index,"base_term":snap.term,"size":snap.bytes.len(),"hash":snap.hash,
+            "offset":offset,"data":crate::service::hex(data)})
+        };
+        let first = chunk(0, &snap.bytes[..CHUNK]);
+        let last = chunk(CHUNK, &snap.bytes[CHUNK..]);
+        assert_eq!(c.handle_rpc("a", &first, durable).unwrap()["offset"], CHUNK);
+        assert_eq!(c.commit_index(), 0);
+        c = node("c", c.hard);
+        assert_eq!(c.handle_rpc("a", &last, durable).unwrap()["offset"], 0);
+        c.handle_rpc("a", &first, durable).unwrap();
+        assert!(c.handle_rpc("a", &chunk(CHUNK, &[42; 8]), durable).is_err());
+        assert_eq!(c.commit_index(), 0);
+        c.handle_rpc("a", &first, durable).unwrap();
+        c.handle_rpc("a", &first, durable).unwrap();
+        assert_eq!(
+            c.handle_rpc("a", &last, durable).unwrap()["installed"],
+            true
+        );
+        assert_eq!(c.term_at(70_000), Some(2));
+        let tail = json!({"kind":"append","to":"c","term":3,"prev_index":70000,"prev_term":2,
+            "commit":70001,"entries":[{"term":3,"command":write(1)}]});
+        assert_eq!(c.handle_rpc("a", &tail, durable).unwrap()["success"], true);
+        c.handle_rpc("a", &last, durable).unwrap();
+        assert_eq!(c.commit_index(), 70_001);
+        assert_eq!(c.hard.log.len(), 1);
+    }
+
+    #[test]
+    fn installing_a_snapshot_keeps_only_a_suffix_with_a_matching_boundary_term() {
+        for (base_term, expected_log_len) in [(1, 1), (2, 0)] {
+            let mut c = node(
+                "c",
+                HardState {
+                    term: 2,
+                    log: vec![
+                        Entry {
+                            term: 1,
+                            command: write(1),
+                        },
+                        Entry {
+                            term: 2,
+                            command: write(2),
+                        },
+                    ],
+                    ..Default::default()
+                },
+            );
+            let empty = Snapshot::new(1, base_term, Vec::new());
+            let request = json!({"kind":"snapshot","to":"c","term":3,"index":1,"base_term":base_term,
+                "hash":empty.hash,"size":0,"offset":0,"data":""});
+            assert_eq!(
+                c.handle_rpc("a", &request, durable).unwrap()["installed"],
+                true
+            );
+            assert_eq!(c.hard.log.len(), expected_log_len);
+            assert_eq!(c.term_at(1), Some(base_term));
+            assert_eq!(c.commit_index(), 1);
+        }
     }
 
     #[test]
@@ -765,6 +1049,7 @@ mod tests {
                 term: 3,
                 commit: 1,
                 voted_for: None,
+                snapshot: Snapshot::default(),
                 log: vec![
                     Entry {
                         term: 1,

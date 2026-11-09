@@ -13,7 +13,7 @@ public sealed partial class SqlDatabase
                 .Select(group => (Value: group.Key, Count: group.Count())).ToArray();
             var frequent = frequencies.Where(f => f.Count > 1).OrderByDescending(f => f.Count)
                 .ThenBy(f => f.Value, StringComparer.Ordinal).Take(8)
-                .ToDictionary(f => Digest(f.Value), f => f.Count);
+                .ToDictionary(f => Digest(f.Value), f => (long)f.Count);
             return new SqlColumnStatistics(frequencies.Sum(f => f.Count), frequencies.Length, frequent);
         });
         var updated = table with { Statistics = new(rows.Count, columns) };
@@ -21,9 +21,9 @@ public sealed partial class SqlDatabase
         return Empty($"ANALYZE {table.Name}: {rows.Count} rows");
     }
 
-    private static int EstimateTableRows(SqlTable table) => table.Statistics?.RowCount ?? 256;
+    private static long EstimateTableRows(SqlTable table) => table.Statistics?.RowCount ?? 256;
 
-    private static int EstimateDistinctCount(SqlTable table, SqlColumn column)
+    private static long EstimateDistinctCount(SqlTable table, SqlColumn column)
     {
         if (table.Statistics?.Columns.TryGetValue(column.Name, out var statistics) == true)
             return Math.Max(1, statistics.DistinctCount);
@@ -36,7 +36,7 @@ public sealed partial class SqlDatabase
         if (table.Statistics is not { RowCount: > 0 } analyzed ||
             !analyzed.Columns.TryGetValue(name, out var column))
             return 1.0 / EstimateDistinctCount(table, Column(table, name));
-        if (column.FrequentValues.TryGetValue(Digest(UniqueIdentity(literal)), out var count))
+        if (column.FrequentValues.TryGetValue(StatisticsDigest(literal), out var count))
             return (double)count / analyzed.RowCount;
         var remaining = column.NonNullRows - column.FrequentValues.Values.Sum();
         var distinct = column.DistinctCount - column.FrequentValues.Count;
@@ -45,12 +45,32 @@ public sealed partial class SqlDatabase
 
     private sealed record TableAccess(PlanStep Step, IndexCondition? PrimaryKey = null, IndexRange? Range = null);
 
-    private static PlanStep ExplainTableAccess(SelectRows bound, SqlTable table) => PlanTableAccess(bound, table).Step;
+    private static PlanStep ExplainTableAccess(SelectRows bound, SqlTable table) =>
+        DescribeAccess(PlanTableAccess(bound, table), bound, table);
+
+    private static PlanStep DescribeAccess(TableAccess access, SelectRows query, SqlTable table)
+    {
+        if (query.Where is SqlIsNull { Expression: SqlField field } test && table.Statistics is { } stats &&
+            stats.Columns.TryGetValue(Column(table, field.Name).Name, out var column))
+        {
+            var matching = test.Negated ? column.NonNullRows : stats.RowCount - column.NonNullRows;
+            return access.Step with { FilteredRows = Math.Min(access.Step.EstimatedRows ?? matching, matching) };
+        }
+        // Evaluating user expressions to obtain a selectivity estimate could change query behavior.
+        if (query.Where is not (SqlBinary { Left: SqlField, Right: SqlLiteral } or
+            SqlBinary { Left: SqlLiteral, Right: SqlField }) ||
+            LiteralComparison(query.Where, table) is not { } term) return access.Step;
+        var fraction = term.Operator == "="
+            ? EstimateEqualityFraction(table, term.Column, term.Value) : 1d / 3;
+        var input = EstimateTableRows(table);
+        var rows = input == 0 ? 0 : Math.Max(1, input * fraction);
+        return access.Step with { FilteredRows = Math.Min(access.Step.EstimatedRows ?? rows, rows) };
+    }
 
     private static TableAccess PlanTableAccess(SelectRows query, SqlTable table)
     {
         var rows = EstimateTableRows(table);
-        double bestCost = 1 + rows;
+        double bestCost = 1d + rows;
         var stats = table.Statistics is null ? "default estimate" : "ANALYZE statistics";
         var best = new TableAccess(new("TABLE SCAN", table.Name, stats, rows, bestCost));
         var conditions = new List<IndexCondition>();

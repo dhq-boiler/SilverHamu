@@ -119,8 +119,9 @@ public sealed partial class SqlDatabase
         return window.Function switch { "COUNT" => "INTEGER", "AVG" or "SUM" => "REAL", _ => type };
     }
 
-    private static SqlValue[] WindowValues(SqlWindow window, List<SqlRow> rows)
+    private static SqlValue[] WindowValues(SqlWindow window, List<SqlRow> rows, OperatorTiming? timing)
     {
+        long started = timing?.Start() ?? 0;
         var result = new SqlValue[rows.Count];
         var partitions = Enumerable.Range(0, rows.Count).GroupBy(i =>
             window.Partition.Select(f => rows[i].Values[f.Name]).ToArray(), new GroupKeyComparer());
@@ -188,6 +189,7 @@ public sealed partial class SqlDatabase
                 result[indices[i]] = aggregate.Value();
             }
         }
+        timing?.End(started, result.Length);
         return result;
     }
 

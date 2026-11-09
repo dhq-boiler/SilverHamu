@@ -1,33 +1,30 @@
+using System.Globalization;
+
 namespace Catdb.Sql;
 
 public sealed partial class SqlDatabase
 {
-    // Use the same name binding, projection, grouping, and joins for externally stored rows.
-    public static async Task<SqlResult> QueryReadOnlyAsync(SelectRows query, Func<string, SqlTable> schema,
+    public static Task<SqlResult> QueryReadOnlyAsync(SelectRows query, Func<string, SqlTable> schema,
+        Func<string, IAsyncEnumerable<SqlRow>> scan, Func<string, long?>? rowCount = null) =>
+        ExecuteReadOnlyAsync(query, schema, scan, rowCount, null);
+
+    public static async Task<SqlResult> ExplainReadOnlyAsync(ExplainQuery explain, Func<string, SqlTable> schema,
         Func<string, IAsyncEnumerable<SqlRow>> scan, Func<string, long?>? rowCount = null)
     {
-        if (query.HasQuerySources)
-        {
-            long bytes = 0;
-            return await QueryRelationsAsync(query, async name =>
-            {
-                var table = schema(name);
-                var rows = new List<SqlRow>();
-                await foreach (var row in scan(name))
-                {
-                    bytes += 128 + row.Values.Sum(p => 96L + 2L * (p.Value.Text?.Length ?? 0));
-                    if (bytes > 128L * 1024 * 1024) throw new SqlException("Query inputs exceed 128 MiB.");
-                    rows.Add(row);
-                }
-                return (table, rows);
-            });
-        }
-        if (query.Table is null)
-        {
-            var empty = new SqlTable("", []);
-            return Select(BindSingleSource(query, empty), empty, [new("", new(StringComparer.OrdinalIgnoreCase))]);
-        }
+        var profile = new QueryProfile();
+        if (!explain.Analyze) profile = profile.Planning();
+        var started = profile.Start();
+        var result = await ExecuteReadOnlyAsync(explain.Query, schema, scan, rowCount, profile);
+        if (!explain.Analyze)
+            return FormatPlan(explain.Query, profile.Measurements.Select(s => s.Step).ToArray());
+        profile.Record(new("RESULT", null, "SELECT execution, including child operations"), result.Rows.Count, started);
+        return FormatProfile(explain.Query, profile);
+    }
 
+    private static async Task<SqlResult> ExecuteReadOnlyAsync(SelectRows query, Func<string, SqlTable> schema,
+        Func<string, IAsyncEnumerable<SqlRow>> scan, Func<string, long?>? rowCount, QueryProfile? profile)
+    {
+        bool planning = profile?.IsPlanning == true;
         long retained = 0;
         void Retain(List<SqlRow> list, SqlRow row)
         {
@@ -36,42 +33,132 @@ public sealed partial class SqlDatabase
             list.Add(row);
         }
 
-        if (query.Join is not null)
+        async Task<(SqlTable Table, List<SqlRow> Rows)> Materialize(string name)
         {
-            return await SelectJoinAsync(query, async name =>
-            {
-                var source = schema(name);
-                var rows = new List<SqlRow>();
-                await foreach (var row in scan(name)) Retain(rows, row);
-                return (source, rows);
-            });
+            var table = WithArchiveCount(schema(name), rowCount?.Invoke(name));
+            var rows = new List<SqlRow>();
+            var step = ArchiveScan(table, "Materialize query input");
+            var input = profile?.Child(name);
+            input?.Declare(step);
+            if (!planning)
+                await foreach (var row in ReadArchiveRows(name, scan, step, input)) Retain(rows, row);
+            return (table, rows);
+        }
+
+        if (query.HasQuerySources)
+            return await QueryRelationsAsync(query, Materialize, profile);
+        if (query.Join is not null)
+            return await SelectJoinAsync(query, Materialize, profile);
+        if (query.Table is null)
+        {
+            var start = profile?.Start() ?? 0;
+            var empty = new SqlTable("", []);
+            List<SqlRow> unit = planning ? [] : [new("", new(StringComparer.OrdinalIgnoreCase))];
+            profile?.Record(new("CONSTANT ROW", null, null, 1, 0), unit.Count, start);
+            return Select(BindSingleSource(query, empty), empty, unit, describeOnly: planning, profile: profile);
         }
 
         var table = schema(query.Table);
         var bound = BindSingleSource(query, table);
-        var unfiltered = bound with { Where = null };
-        var countOnly = bound.Projections is [{ Count: true }] && bound.GroupBy is not { Count: > 0 } && bound.Having is null;
-        var selectedRows = new List<SqlRow>();
-        long count = 0;
-        // Validate even for empty input or LIMIT 0.
+        // Validate even when metadata supplies the result or LIMIT 0 skips the input.
         Select(bound, table, [], describeOnly: true);
-        if (countOnly && bound.Where is null && rowCount?.Invoke(query.Table) is long knownCount)
-            count = knownCount;
-        else if (bound.Limit != 0)
+        bool countOnly = bound.Projections is [{ Count: true }] && bound.GroupBy is not { Count: > 0 } && bound.Having is null;
+        bool countFromHeader = countOnly && bound.Where is null;
+        long metadataStarted = profile?.Start() ?? 0;
+        long? known = countFromHeader || profile is not null ? rowCount?.Invoke(query.Table) : null;
+        table = WithArchiveCount(table, known);
+        if (countFromHeader && known is { } metadataCount)
         {
-            await foreach (var row in scan(query.Table))
+            profile?.Record(new("ARCHIVE ROW COUNT", table.Name, "COUNT(*) from the archive manifest", 1, 1), 1, metadataStarted);
+            return ReadOnlyCountResult(bound, table, metadataCount, profile);
+        }
+
+        var scanStep = ArchiveScan(table, "Stream source rows");
+        if (profile is not null) scanStep = DescribeAccess(new TableAccess(scanStep), bound, table);
+        profile?.Declare(scanStep);
+        var filter = profile is not null && bound.Where is not null
+            ? new OperatorTiming(profile, new("FILTER", null, "WHERE")) : null;
+        long count = 0;
+        var selected = new List<SqlRow>();
+        long started = profile?.Start() ?? 0;
+        bool read = !planning && bound.Limit != 0;
+        if (read)
+        {
+            bool stopEarly = !bound.IsGrouped && !bound.Distinct && bound.Projections.All(p => p.Window is null)
+                && bound.Order.Count == 0;
+            filter?.End(filter.Start(), 0);
+            await foreach (var row in ReadArchiveRows(query.Table, scan, scanStep, profile))
             {
-                if (!Matches(bound.Where, row.Values)) continue;
+                long filtered = filter?.Start() ?? 0;
+                bool matches = Matches(bound.Where, row.Values);
+                filter?.End(filtered, matches ? 1 : 0);
+                if (!matches) continue;
                 count++;
                 if (countOnly) continue;
-                Retain(selectedRows, row);
-                if (!bound.IsGrouped && !bound.Distinct && bound.Projections.All(p => p.Window is null) && bound.Order.Count == 0 && count >= bound.Offset + (bound.Limit ?? MaxRows)) break;
+                Retain(selected, row);
+                if (stopEarly && count >= (long)bound.Offset + (bound.Limit ?? MaxRows)) break;
             }
         }
+        filter?.Publish();
         if (countOnly)
-            return new([bound.Projections[0].Alias ?? "count"], bound.Offset > 0 || bound.Limit == 0 ? [] :
-                [new[] { SqlValue.Number(count.ToString(System.Globalization.CultureInfo.InvariantCulture)) }], $"{table.Name}: {count} 行")
-                { ColumnTypes = ["INTEGER"] };
-        return Select(unfiltered, table, selectedRows);
+        {
+            var step = new PlanStep("AGGREGATE", table.Name, "Streaming COUNT(*)", 1);
+            if (read) profile?.Record(step, 1, started); else profile?.Declare(step);
+            return ReadOnlyCountResult(bound, table, count, profile);
+        }
+        var unfiltered = bound with { Where = null, ProfileSource = profile is null ? null : query with { Where = null } };
+        return Select(unfiltered, table, selected, describeOnly: planning, profile: profile);
+    }
+
+    private static PlanStep ArchiveScan(SqlTable table, string detail)
+    {
+        long rows = EstimateTableRows(table);
+        return new("ARCHIVE SCAN", table.Name, detail, rows, 1d + rows);
+    }
+
+    private static SqlTable WithArchiveCount(SqlTable table, long? count) =>
+        count is { } total && table.Statistics?.RowCount != total
+            ? table with { Statistics = new(total, new(StringComparer.OrdinalIgnoreCase)) }
+            : table;
+
+    private static IAsyncEnumerable<SqlRow> ReadArchiveRows(string name, Func<string, IAsyncEnumerable<SqlRow>> scan,
+        PlanStep scanStep, QueryProfile? profile) =>
+        profile is null ? scan(name) : ObserveArchiveScan(name, scan, scanStep, profile);
+
+    private static async IAsyncEnumerable<SqlRow> ObserveArchiveScan(string name, Func<string, IAsyncEnumerable<SqlRow>> scan,
+        PlanStep scanStep, QueryProfile profile)
+    {
+        var timing = new OperatorTiming(profile, scanStep);
+        var start = timing.Start();
+        var reader = scan(name).GetAsyncEnumerator();
+        timing.End(start, 0);
+        try
+        {
+            while (true)
+            {
+                start = timing.Start();
+                bool next = await reader.MoveNextAsync();
+                timing.End(start, next ? 1 : 0);
+                if (!next) yield break;
+                yield return reader.Current;
+            }
+        }
+        finally
+        {
+            start = timing.Start();
+            await reader.DisposeAsync();
+            timing.End(start, 0);
+            timing.Publish();
+        }
+    }
+
+    private static SqlResult ReadOnlyCountResult(SelectRows bound, SqlTable table, long count, QueryProfile? profile)
+    {
+        long start = profile?.Start() ?? 0;
+        var rows = bound.Offset > 0 || bound.Limit == 0 || profile?.IsPlanning == true
+            ? Array.Empty<SqlValue[]>() : [new[] { SqlValue.Number(count.ToString(CultureInfo.InvariantCulture)) }];
+        if (bound.Offset > 0 || bound.Limit.HasValue)
+            profile?.Record(new("LIMIT", null, $"Offset {bound.Offset}, limit {bound.Limit ?? MaxRows}"), rows.Length, start);
+        return new([bound.Projections[0].Alias ?? "count"], rows, $"{table.Name}: {count} 行") { ColumnTypes = ["INTEGER"] };
     }
 }

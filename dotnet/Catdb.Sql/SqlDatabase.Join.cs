@@ -102,7 +102,7 @@ public sealed partial class SqlDatabase
                 }
                 order.Add(new(SelectKey(Resolve(new(sort.Column, sort.Qualifier))), sort.Descending));
             }
-            return query with { Projections = projections, Where = BindExpression(query.Where),
+            return query with { Projections = projections, ProfileSource = query.ProfileSource ?? query, Where = BindExpression(query.Where),
                 Having = BindExpression(query.Having), Order = order, GroupBy = groupBy };
         }
 
@@ -218,10 +218,11 @@ public sealed partial class SqlDatabase
         return new(bound, new("", columns.Select(c => c.Column with { Name = c.Key }).ToList()), columns, steps);
     }
 
-    private Task<SqlResult> SelectJoinAsync(SelectRows query, bool baseTablesOnly = false) =>
-        SelectJoinAsync(query, name => LoadJoinSourceAsync(name, baseTablesOnly));
+    private Task<SqlResult> SelectJoinAsync(SelectRows query, bool baseTablesOnly = false, QueryProfile? profile = null) =>
+        SelectJoinAsync(query, name => LoadJoinSourceAsync(name, baseTablesOnly, profile: profile?.Child(name)), profile);
 
-    private static async Task<SqlResult> SelectJoinAsync(SelectRows query, Func<string, Task<(SqlTable Table, List<SqlRow> Rows)>> load)
+    private static async Task<SqlResult> SelectJoinAsync(SelectRows query, Func<string, Task<(SqlTable Table, List<SqlRow> Rows)>> load,
+        QueryProfile? profile = null)
     {
         var cache = new Dictionary<string, (SqlTable Table, List<SqlRow> Rows)>(StringComparer.OrdinalIgnoreCase);
         var sources = new List<(SqlTable Table, List<SqlRow> Rows)>();
@@ -234,17 +235,17 @@ public sealed partial class SqlDatabase
             }
             sources.Add(source);
         }
-        return SelectJoined(query, sources);
+        return SelectJoined(query, sources, describeOnly: profile?.IsPlanning == true, profile: profile);
     }
 
     private static SqlResult SelectJoined(SelectRows query, List<(SqlTable Table, List<SqlRow> Rows)> sources, bool describeOnly = false,
-        List<PlanStep>? explain = null)
+        List<PlanStep>? explain = null, QueryProfile? profile = null)
     {
         var schemas = sources.Select(s => s.Table).ToList();
         var plan = BindJoin(query, schemas);
         var physical = ChooseJoinOrder(query, plan, schemas);
         if (explain is not null) explain.AddRange(ExplainJoinAccess(query, plan, schemas, physical));
-        var rows = ExecuteJoinOrder(physical, plan, sources);
+        var rows = ExecuteJoinOrder(physical, plan, sources, query, schemas, profile);
         var resultRows = rows.Select(tuple =>
         {
             var values = new Dictionary<string, SqlValue>(plan.Columns.Length, StringComparer.OrdinalIgnoreCase);
@@ -252,7 +253,7 @@ public sealed partial class SqlDatabase
                 values[col.Key] = col.Read(tuple);
             return new SqlRow("", values);
         }).ToList();
-        return Select(plan.Query, plan.Schema, resultRows, describeOnly);
+        return Select(plan.Query, plan.Schema, resultRows, describeOnly, profile: profile);
     }
 
     private static List<SqlRow?[]> JoinRows(List<SqlRow?[]> leftRows, List<SqlRow> rightRows, JoinStep step, int source)

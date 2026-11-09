@@ -39,8 +39,9 @@ public sealed partial class SqlParser
     {
         if (Match("EXPLAIN"))
         {
+            bool analyze = Match("ANALYZE");
             if (!(Is("SELECT") || Is("WITH"))) throw Error("EXPLAIN requires a SELECT or WITH query.");
-            return new ExplainQuery(QueryExpression());
+            return new ExplainQuery(QueryExpression(), analyze);
         }
         if (Match("CREATE")) return Create();
         if (Match("ANALYZE")) return new AnalyzeTable(Name());

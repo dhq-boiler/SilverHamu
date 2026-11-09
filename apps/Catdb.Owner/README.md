@@ -25,6 +25,8 @@ TCP サービスに SQL ホストが設定されている場合は、Owner が�
 - 「DBファイルを開く…」で既存の catdb データベース（*.ndb）を指定する。フルパスを入力するか、「参照…」でファイルを選んで「決定」を押す。
 - 同じ画面で `.catlink`（旧名 `catdb-current.txt`）も開ける。リンクには相対パスを1行で記述する。`data/main.ndb` ならその DB を開く。`data` のようにフォルダーを指定すると、書庫のテーブル定義（通常の SQL データベースでは各 DB のカタログ）からテーブル一覧を表示する。左のテーブル名を選ぶと、その列名とデータ行を最大100行ずつ閲覧できる。閲覧には一時コピーを使う。書庫にも catdb の SELECT を実行できる。例: `SELECT * FROM Book_3 WHERE PublishDate IS NOT NULL`。列の選択、絞り込み、並べ替え、集計、JOIN、IN サブクエリに対応する。SQL で比較・集計する際はプレビュー省略前の値を使う。
 - 「新規DB…」で新しいファイルを作る（初期ファイル名はcatdb.ndb）。親フォルダーは事前に作成し、既存ファイルは上書きしない。
+- フォルダーを開いた状態で `ANALYZE Book_3;` を実行すると、その閲覧中に使う統計をメモリに収集する。大きな分割書庫では一部の行をサンプリングする。書庫ファイルは更新せず、閉じると統計は破棄する。
+- `EXPLAIN SELECT * FROM Book_3 WHERE PublishDate IS NOT NULL LIMIT 10;` は実行計画を表示する。`EXPLAIN ANALYZE SELECT * FROM Book_3 WHERE PublishDate IS NOT NULL LIMIT 10;` は同じクエリを実行し、行数・回数・時間を結果グリッドに表示する。
 - トークンや常駐サービスは不要。接続種別とファイル名を左側に、フルパスをステータスに表示する。
 - SQLの構文・結果表示・確定・取消はサービス接続と共通。接続方式を変更する前に、未確定トランザクションをCOMMITまたはROLLBACKする。
 - 「接続解除」では未確定の変更を破棄し、ファイルの所有権を解放する。再接続すると確定済みのテーブルとデータを復元する。
@@ -96,7 +98,7 @@ BEGIN外では変更を文ごとに自動確定する。複数文を一括で取
 |ビュー|CREATE VIEW、DROP VIEW、SHOW VIEWS。単一表の列を直接公開するビューは INSERT・UPDATE・DELETE に対応。|
 |検索|SELECT *、列指定、AS、DISTINCT、CASE、CAST、算術式、定数 SELECT。|
 |結合|INNER・LEFT・RIGHT・FULL・CROSS・NATURAL JOIN、USING。最大8つの表またはビュー。ON では修飾列同士の等価条件を AND で連結でき、一致候補を追加条件で絞り込める。|
-|実行計画|SQLデータベースでは `EXPLAIN SELECT ...` で走査・索引・結合方法を確認できる。`ANALYZE テーブル名` で推定に使う統計を更新する。|
+|実行計画|SQLデータベースとフォルダー閲覧で `EXPLAIN SELECT ...` を使える。`EXPLAIN ANALYZE SELECT ...` は各ステップの推定・実測行数、実行回数、経過時間（ms）を表示する。`ANALYZE テーブル名` で推定用の統計を更新する。|
 |集計|GROUP BY、HAVING、COUNT(*)、COUNT(列)、COUNT(DISTINCT 列)、SUM・AVG・MIN・MAX。OVER で順位・集計・前後行の値を取得できる。|
 |副問い合わせ|IN、EXISTS、スカラー・相関副問い合わせ、FROM の派生表。WITH、WITH RECURSIVE、UNION [ALL]・INTERSECT・EXCEPT に対応。|
 |プロシージャー|CREATE PROCEDURE、EXEC / EXECUTE、DROP PROCEDURE。引数なし、本文は最大100文。|

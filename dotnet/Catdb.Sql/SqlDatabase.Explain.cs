@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 
 namespace Catdb.Sql;
@@ -5,27 +6,88 @@ namespace Catdb.Sql;
 public sealed partial class SqlDatabase
 {
     private sealed record PlanStep(string Operation, string? Relation, string? Detail,
-        double? EstimatedRows = null, double? EstimatedCost = null);
+        double? EstimatedRows = null, double? EstimatedCost = null, double? FilteredRows = null);
 
     private async Task<SqlResult> ExplainAsync(SelectRows query)
     {
         var steps = new List<PlanStep>();
         await ExplainSelectAsync(query, steps);
-        SqlValue Text(string? value) => value is null ? SqlValue.Null : SqlValue.String(value);
-        SqlValue Estimate(double? value)
+        return FormatPlan(query, steps);
+    }
+
+    private static SqlResult FormatPlan(SelectRows query, IReadOnlyList<PlanStep> steps)
+    {
+        var rows = WithPipelineEstimates(query, steps).Select(MakePlanRow).ToArray();
+        return new(PlanColumns, rows, $"{rows.Length} plan steps") { ColumnTypes = PlanColumnTypes };
+    }
+
+    private async Task<SqlResult> ExplainAnalyzeAsync(SelectRows query)
+    {
+        var profile = new QueryProfile();
+        long started = profile.Start();
+        var result = await ExecuteStatementAsync(query, profile: profile);
+        profile.Record(new("RESULT", null, "SELECT execution, including child operations"), result.Rows.Count, started);
+        return FormatProfile(query, profile);
+    }
+
+    private static SqlResult FormatProfile(SelectRows query, QueryProfile profile)
+    {
+        var plans = WithPipelineEstimates(query, profile.Measurements.Select(sample => sample.Step).ToArray());
+        var rows = plans.Select((step, i) =>
+        {
+            var sample = profile.Measurements[i];
+            SqlValue average = sample.Loops == 0 ? SqlValue.Null : SqlNumbers.Number((decimal)sample.Rows / sample.Loops);
+            SqlValue[] metrics = [SqlNumbers.Number(sample.Rows), SqlNumbers.Number(sample.Loops), average,
+                SqlNumbers.Number(decimal.Round(sample.ElapsedTicks * 1000m / Stopwatch.Frequency, 6))];
+            return (SqlValue[])[.. MakePlanRow(step, i), .. metrics];
+        }).ToArray();
+        return new([.. PlanColumns, "actual_rows", "loops", "actual_rows_per_loop", "elapsed_ms"], rows, $"{rows.Length} measured plan steps")
+            { ColumnTypes = [.. PlanColumnTypes, "INTEGER", "INTEGER", "REAL", "REAL"] };
+    }
+
+    private static IReadOnlyList<string> PlanColumns =>
+        ["step", "operation", "relation", "detail", "estimated_rows", "estimated_cost"];
+    private static IReadOnlyList<string> PlanColumnTypes => ["INTEGER", "TEXT", "TEXT", "TEXT", "REAL", "REAL"];
+
+    private static IEnumerable<PlanStep> WithPipelineEstimates(SelectRows query, IReadOnlyList<PlanStep> steps)
+    {
+        // Nested materializations and subqueries have independent input cardinalities.
+        // A flat list of their plan steps cannot propagate one estimate across scopes.
+        bool singleSource = !query.HasQuerySources && query.Join is null &&
+            !steps.Any(step => step.Operation == "MATERIALIZE VIEW");
+        double? rows = null;
+        double? filteredRows = null;
+        foreach (var step in steps)
+        {
+            if (!singleSource) { yield return step; continue; }
+            if (step.FilteredRows is { } estimate) filteredRows = estimate;
+            rows = step.EstimatedRows ?? step.Operation switch
+            {
+                "FILTER" when step.Detail == "WHERE" => filteredRows,
+                "SORT" or "WINDOW" or "PROJECT" or "RESULT" => rows,
+                "AGGREGATE" when query.GroupBy is null => 1,
+                "LIMIT" when query.Limit == 0 => 0,
+                "LIMIT" when rows is { } input => Math.Clamp(input - query.Offset, 0, query.Limit ?? MaxRows),
+                _ => null
+            };
+            yield return step with { EstimatedRows = rows };
+        }
+    }
+
+    private static SqlValue[] MakePlanRow(PlanStep step, int index)
+    {
+        static SqlValue Text(string? value) => value is null ? SqlValue.Null : SqlValue.String(value);
+        static SqlValue Estimate(double? value)
         {
             if (value is null) return SqlValue.Null;
             var text = value.Value.ToString("0.####", CultureInfo.InvariantCulture);
             return decimal.TryParse(text, NumberStyles.Number, CultureInfo.InvariantCulture, out var number)
                 ? SqlNumbers.Number(number) : SqlValue.Null;
         }
-        var rows = steps.Select((step, i) => new[]
-        {
-            SqlNumbers.Number(i + 1), SqlValue.String(step.Operation), Text(step.Relation), Text(step.Detail),
+        return [
+            SqlNumbers.Number(index + 1), SqlValue.String(step.Operation), Text(step.Relation), Text(step.Detail),
             Estimate(step.EstimatedRows), Estimate(step.EstimatedCost)
-        }).ToArray();
-        return new(["step", "operation", "relation", "detail", "estimated_rows", "estimated_cost"], rows, $"{rows.Length} plan steps")
-            { ColumnTypes = ["INTEGER", "TEXT", "TEXT", "TEXT", "REAL", "REAL"] };
+        ];
     }
 
     private async Task<SqlTable> ReadExplainSourceAsync(string name, bool baseOnly)
@@ -51,7 +113,7 @@ public sealed partial class SqlDatabase
             var join = BindJoin(query, sources);
             Select(join.Query, join.Schema, [], describeOnly: true);
             foreach (var source in sources.DistinctBy(table => table.Name, SqlNameComparer))
-                await ExplainMaterializationAsync(source, steps, "Materialize join input");
+                await ExplainMaterializationAsync(source, steps);
             steps.AddRange(ExplainJoinAccess(query, join, sources, ChooseJoinOrder(query, join, sources)));
         }
         else
@@ -77,21 +139,21 @@ public sealed partial class SqlDatabase
         {
             var source = await ReadExplainSourceAsync(name, baseOnly: false);
             inputs.Add(name, new(source, []));
-            await ExplainMaterializationAsync(source, steps, "Materialize query input");
+            await ExplainMaterializationAsync(source, steps);
         }
         RunQuery(query, inputs, null, describe: true, finalPage: true, explain: steps);
     }
 
-    private async Task ExplainMaterializationAsync(SqlTable source, List<PlanStep> steps, string detail)
+    private async Task ExplainMaterializationAsync(SqlTable source, List<PlanStep> steps)
     {
         if (source.ViewQuery is null)
         {
             var rows = EstimateTableRows(source);
-            steps.Add(new("TABLE SCAN", source.Name, detail, rows, 1d + rows));
+            steps.Add(new("TABLE SCAN", source.Name, "Materialize query input", rows, 1d + rows));
             return;
         }
         await ExplainSelectAsync(await ReadViewQueryAsync(source), steps, baseOnly: true);
-        steps.Add(new("MATERIALIZE VIEW", source.Name, detail));
+        steps.Add(new("MATERIALIZE VIEW", source.Name, null));
     }
 
     private static void AppendSelectSteps(SelectRows query, List<PlanStep> steps)

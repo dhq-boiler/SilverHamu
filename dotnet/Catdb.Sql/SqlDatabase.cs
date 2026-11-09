@@ -126,7 +126,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
         finally { if (ownTransaction && inTransaction()) await SendOperationAsync("rollback"); }
     }
 
-    private async Task<SqlResult> ExecuteStatementAsync(SqlStatement statement, string? requiredRole = null)
+    private async Task<SqlResult> ExecuteStatementAsync(SqlStatement statement, string? requiredRole = null, QueryProfile? profile = null)
     {
         if (statement is ExecuteProcedure execute) return await ExecuteProcedureAsync(execute);
         if (statement is TransactionStatement transaction)
@@ -156,7 +156,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
             switch (statement)
             {
                 case ExplainQuery explain:
-                    result = await ExplainAsync(explain.Query);
+                    result = explain.Analyze ? await ExplainAnalyzeAsync(explain.Query) : await ExplainAsync(explain.Query);
                     break;
                 case CreateType createType:
                     result = await CreateTypeAsync(createType, changes);
@@ -256,14 +256,18 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                     result = Empty($"テーブル '{create.Table}' を作成しました。");
                     break;
                 case SelectRows advanced when advanced.HasQuerySources:
-                    result = await QueryRelationsAsync(advanced, name => LoadJoinSourceAsync(name, baseTablesOnly: false));
+                    result = await QueryRelationsAsync(advanced,
+                        name => LoadJoinSourceAsync(name, baseTablesOnly: false, profile: profile?.Child(name)), profile: profile);
                     break;
                 case SelectRows select when select.Table is null:
+                    var unitStart = profile?.Start() ?? 0;
                     var noTable = new SqlTable("", []);
-                    result = Select(BindSingleSource(select, noTable), noTable, [new("", new(StringComparer.OrdinalIgnoreCase))]);
+                    var unitRows = new List<SqlRow> { new("", new(StringComparer.OrdinalIgnoreCase)) };
+                    profile?.Record(new("CONSTANT ROW", null, null, 1, 0), 1, unitStart);
+                    result = Select(BindSingleSource(select, noTable), noTable, unitRows, profile: profile);
                     break;
                 case SelectRows { Join: not null } joined:
-                    result = await SelectJoinAsync(joined);
+                    result = await SelectJoinAsync(joined, profile: profile);
                     break;
                 default:
                     var tableName = statement switch
@@ -283,7 +287,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                             var view = Deserialize<SqlTable>(viewBytes);
                             if (statement is SelectRows outer)
                             {
-                                result = await SelectViewAsync(outer, view);
+                                result = await SelectViewAsync(outer, view, profile: profile);
                                 break;
                             }
                             CheckWritePrivilege(view, statement, requiredRole);
@@ -301,7 +305,7 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                     }
                     if (statement is SelectRows lookup)
                     {
-                        result = await SelectTableAsync(lookup, table);
+                        result = await SelectTableAsync(lookup, table, profile: profile);
                         break;
                     }
                     if (statement is CreateIndex createIndex)
@@ -490,24 +494,31 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
         return new(view.Name, columns, view.Query, tables[0].Name, JoinSources: tables.Skip(1).Select(t => t.Name).ToList());
     }
 
-    private async Task<SqlResult> SelectViewAsync(SelectRows outer, SqlTable view)
+    private async Task<SqlResult> SelectViewAsync(SelectRows outer, SqlTable view, QueryProfile? profile = null)
     {
         var bound = BindSingleSource(outer, view);
-        return Select(bound, view, await LoadViewRowsAsync(view));
+        return Select(bound, view, await LoadViewRowsAsync(view, profile), profile: profile);
     }
 
-    private async Task<(SqlTable Table, List<SqlRow> Rows)> LoadJoinSourceAsync(string name, bool baseTablesOnly)
+    private async Task<(SqlTable Table, List<SqlRow> Rows)> LoadJoinSourceAsync(string name, bool baseTablesOnly, QueryProfile? profile = null)
     {
         var schema = await GetAsync(TableKey(name));
         if (schema is not null)
         {
             var table = Deserialize<SqlTable>(schema);
-            return (table, await LoadRowsAsync(table));
+            var start = profile?.Start() ?? 0;
+            var rows = await LoadRowsAsync(table);
+            if (profile is not null)
+            {
+                var estimate = EstimateTableRows(table);
+                profile.Record(new("TABLE SCAN", table.Name, "Materialize query input", estimate, 1d + estimate), rows.Count, start);
+            }
+            return (table, rows);
         }
         if (baseTablesOnly) throw new SqlException($"ビュー定義の元テーブル '{name}' がありません。");
         var bytes = await GetAsync(ViewKey(name)) ?? throw new SqlException($"テーブルまたはビュー '{name}' は存在しません。");
         var view = Deserialize<SqlTable>(bytes);
-        return (view, await LoadViewRowsAsync(view));
+        return (view, await LoadViewRowsAsync(view, profile));
     }
 
     private async Task<SelectRows> ReadViewQueryAsync(SqlTable view)
@@ -520,31 +531,44 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
         return query;
     }
 
-    private async Task<List<SqlRow>> LoadViewRowsAsync(SqlTable view)
+    private async Task<List<SqlRow>> LoadViewRowsAsync(SqlTable view, QueryProfile? profile = null)
     {
+        var start = profile?.Start() ?? 0;
+        var child = profile?.Child("view:" + view.Name);
         var query = await ReadViewQueryAsync(view);
-        var visible = query.Join is null ? await SelectTableAsync(query, await ReadSourceTableAsync(query.Table!))
-            : await SelectJoinAsync(query, baseTablesOnly: true);
-        return visible.Rows.Select(values => new SqlRow("", new Dictionary<string, SqlValue>(visible.Columns.Zip(values, KeyValuePair.Create), StringComparer.OrdinalIgnoreCase))).ToList();
+        var visible = query.Join is null ? await SelectTableAsync(query, await ReadSourceTableAsync(query.Table!), child)
+            : await SelectJoinAsync(query, baseTablesOnly: true, profile: child);
+        var rows = visible.Rows.Select(values => new SqlRow("", new Dictionary<string, SqlValue>(visible.Columns.Zip(values, KeyValuePair.Create), StringComparer.OrdinalIgnoreCase))).ToList();
+        profile?.Record(new("MATERIALIZE VIEW", view.Name, null), rows.Count, start);
+        return rows;
     }
 
     private static SqlProjection[] ExpandProjections(SelectRows select, SqlTable table) =>
         select.Projections.SelectMany(x => x.Star ? table.Columns.Select(c => new SqlProjection(new SqlField(c.Name), c.Name)) : [x]).ToArray();
 
-    private static SqlResult Select(SelectRows select, SqlTable table, List<SqlRow> source, bool describeOnly = false)
+    private static SqlResult Select(SelectRows select, SqlTable table, List<SqlRow> source, bool describeOnly = false,
+        QueryProfile? profile = null)
     {
+        using var timings = profile is null ? null : new SelectTimings(profile, select);
         ValidatePredicate(select.Where, table.Columns);
         foreach (var projection in select.Projections) projection.Expression?.Validate(table.Columns);
         foreach (var order in select.Order.Where(o => o.OutputIndex is null)) Column(table, order.Column);
+        var start = timings?.Where?.Start() ?? 0;
         var selected = source.Where(x => Matches(select.Where, x.Values)).ToList();
-        if (select.IsGrouped) return SelectGroups(select, table, selected, describeOnly);
+        timings?.Where?.End(start, selected.Count);
+        if (select.IsGrouped) return SelectGroups(select, table, selected, describeOnly, timings);
         var projections = ExpandProjections(select, table);
         if (projections.Length > 64) throw new SqlException("結果列は64列以下にしてください。");
         if (projections.Length == 0) throw new SqlException("SELECT *にはFROMでテーブルを指定してください。");
         var types = ProjectionTypes(projections, table);
         var names = projections.Select(p => p.Alias ?? "value").ToArray();
-        if (describeOnly || select.Limit == 0) return new(names, [], "0 rows") { ColumnTypes = types };
-        var windows = projections.Select(p => p.Window is { } window ? WindowValues(window, selected) : null).ToArray();
+        if (describeOnly || select.Limit == 0)
+        {
+            if (!describeOnly && select.Limit == 0 && timings?.Page is { } limit) limit.End(limit.Start(), 0);
+            return new(names, [], "0 rows") { ColumnTypes = types };
+        }
+        var windows = projections.Select((p, i) => p.Window is { } window
+            ? WindowValues(window, selected, timings?.Windows.GetValueOrDefault(i)) : null).ToArray();
         SqlValue Project(int row, int column) => windows[column] is { } values
             ? values[row] : projections[column].Expression!.Evaluate(selected[row].Values);
 
@@ -558,17 +582,28 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                 ? (sort.Descending ? indices.OrderByDescending(Key, comparer) : indices.OrderBy(Key, comparer))
                 : (sort.Descending ? ordered.ThenByDescending(Key, comparer) : ordered.ThenBy(Key, comparer));
         }
-        IEnumerable<int> output = ordered ?? indices;
-        if (!select.Distinct) output = output.Skip(select.Offset).Take(select.Limit ?? MaxRows);
+        IEnumerable<int> output = ordered is not null && timings?.Sort is { } sortStage ? sortStage.Observe(ordered) : ordered ?? indices;
+        if (!select.Distinct) output = PageRows(output, select, timings?.Page);
         var values = output.Select(i => projections.Select((_, column) => Project(i, column)).ToArray());
-        var page = select.Distinct ? PageProjectedRows(select, values) : values.ToArray();
+        if (timings?.Project is { } project) values = project.Observe(values);
+        var page = select.Distinct ? PageProjectedRows(select, values, timings) : values.ToArray();
         return new(names, page, $"{page.Length} 行を取得しました。") { ColumnTypes = types };
     }
 
-    private static SqlValue[][] PageProjectedRows(SelectRows select, IEnumerable<SqlValue[]> projected)
+    private static IEnumerable<T> PageRows<T>(IEnumerable<T> input, SelectRows select, OperatorTiming? timing)
     {
-        if (select.Distinct) projected = projected.Distinct(new GroupKeyComparer());
-        return projected.Skip(select.Offset).Take(select.Limit ?? MaxRows).ToArray();
+        var page = input.Skip(select.Offset).Take(select.Limit ?? MaxRows);
+        return timing?.Observe(page) ?? page;
+    }
+
+    private static SqlValue[][] PageProjectedRows(SelectRows select, IEnumerable<SqlValue[]> projected, SelectTimings? timings)
+    {
+        if (select.Distinct)
+        {
+            projected = projected.Distinct(new GroupKeyComparer());
+            if (timings?.Distinct is { } distinct) projected = distinct.Observe(projected);
+        }
+        return PageRows(projected, select, timings?.Page).ToArray();
     }
 
     private static bool Matches(SqlExpression? expression, Dictionary<string, SqlValue> row)
@@ -627,13 +662,15 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
     private static string IndexKey(SqlTable table, SqlValue value) =>
         IndexPrefix(table.Name) + Digest(UniqueIdentity(value));
 
-    private async Task<SqlResult> SelectTableAsync(SelectRows query, SqlTable table)
+    private async Task<SqlResult> SelectTableAsync(SelectRows query, SqlTable table, QueryProfile? profile = null)
     {
         query = BindSingleSource(query, table);
         var access = PlanTableAccess(query, table);
+        var start = profile?.Start() ?? 0;
+        List<SqlRow> rows;
         if (access.PrimaryKey is { } equality)
         {
-            var rows = new List<SqlRow>();
+            rows = [];
             var pointer = await GetAsync(IndexKey(table, equality.Value));
             if (pointer is not null)
             {
@@ -645,11 +682,13 @@ public sealed partial class SqlDatabase(Func<JsonObject, Task<JsonObject>> send,
                 if (SqlValue.Compare(row.Values[equality.Column], equality.Value) != 0) throw new SqlException("主キー索引と行の値が一致しません。");
                 rows.Add(row);
             }
-            return Select(query, table, rows);
         }
-        if (access.Range is { } range)
-            return await SelectSecondaryAsync(query, table, range);
-        return Select(query, table, await LoadRowsAsync(table));
+        else if (access.Range is { } range)
+            rows = await LoadSecondaryRowsAsync(table, range);
+        else
+            rows = await LoadRowsAsync(table);
+        profile?.Record(DescribeAccess(access, query, table), rows.Count, start);
+        return Select(query, table, rows, profile: profile);
     }
 
     private static SqlRow DecodeRow(string key, byte[] value) =>

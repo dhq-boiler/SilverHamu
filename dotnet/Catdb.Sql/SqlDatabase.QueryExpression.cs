@@ -7,11 +7,12 @@ public sealed partial record SelectRows
 
 public sealed partial class SqlDatabase
 {
-    internal delegate SqlResult RunNestedQuery(SelectRows query, Func<SqlField, SqlExpression?> resolveOuter, bool describeOnly, bool explain);
+    internal delegate SqlResult RunNestedQuery(SqlNestedQuery site, SelectRows query, Func<SqlField, SqlExpression?> resolveOuter,
+        bool describeOnly, bool explain, bool correlated = false);
     internal sealed record QueryBinding(
         RunNestedQuery Run,
         Func<SqlField, SqlExpression?>? Outer,
-        Action<SubqueryKind, bool>? DescribeSubquery);
+        Action<SqlNestedQuery, bool>? DescribeSubquery);
 
     private sealed partial class SelectScope
     {
@@ -46,9 +47,9 @@ public sealed partial class SqlDatabase
                     Distinct = false, Order = [], Limit = Math.Min(execution.Limit ?? 1, 1)
                 };
             bool samePlan = ReferenceEquals(execution, nested.Query);
-            var shape = queryBinding.Run(nested.Query, field => Capture(field, null), describeOnly: true, explain: samePlan);
+            var shape = queryBinding.Run(nested, nested.Query, field => Capture(field, null), describeOnly: true, explain: samePlan);
             if (!samePlan && queryBinding.DescribeSubquery is not null)
-                queryBinding.Run(execution, field => Capture(field, null), describeOnly: true, explain: true);
+                queryBinding.Run(nested, execution, field => Capture(field, null), describeOnly: true, explain: true);
             if (nested.Kind != SubqueryKind.Exists && shape.Columns.Count != 1)
                 throw new SqlException("A scalar or IN subquery must return exactly one column.");
             var type = shape.ColumnTypes?[0] ?? "NULL";
@@ -63,7 +64,7 @@ public sealed partial class SqlDatabase
             HashSet<string>? members = null;
             bool hasNull = false;
             bool correlated = capture.Count > 0;
-            queryBinding.DescribeSubquery?.Invoke(nested.Kind, correlated);
+            queryBinding.DescribeSubquery?.Invoke(nested, correlated);
             var dependencies = new HashSet<string>(capture, StringComparer.OrdinalIgnoreCase);
             operand?.Rewrite(node =>
             {
@@ -73,7 +74,8 @@ public sealed partial class SqlDatabase
             });
             SqlValue Evaluate(IReadOnlyDictionary<string, SqlValue> row)
             {
-                var result = cached ?? queryBinding.Run(execution, field => Capture(field, row), describeOnly: false, explain: false);
+                var result = cached ?? queryBinding.Run(nested, execution, field => Capture(field, row),
+                    describeOnly: false, explain: false, correlated: correlated);
                 if (!correlated) cached = result;
                 if (nested.Kind == SubqueryKind.Exists) return SqlValue.Boolean(result.Rows.Count != 0);
                 if (nested.Kind == SubqueryKind.Scalar)
@@ -142,7 +144,7 @@ public sealed partial class SqlDatabase
     }
 
     private static async Task<SqlResult> QueryRelationsAsync(SelectRows query,
-        Func<string, Task<(SqlTable Table, List<SqlRow> Rows)>> load)
+        Func<string, Task<(SqlTable Table, List<SqlRow> Rows)>> load, QueryProfile? profile = null)
     {
         var tables = new Dictionary<string, Relation>(SqlNameComparer);
         foreach (var name in RequiredSources(query, new(SqlNameComparer)).Distinct(SqlNameComparer))
@@ -150,7 +152,7 @@ public sealed partial class SqlDatabase
             var source = await load(name);
             tables.Add(name, new(source.Table, source.Rows));
         }
-        return RunQuery(query, tables, null, false, finalPage: true);
+        return RunQuery(query, tables, null, describe: profile?.IsPlanning == true, finalPage: true, profile: profile);
     }
 
     private static Relation MakeRelation(string name, SqlResult result, IReadOnlyList<string>? aliases = null)
@@ -160,13 +162,18 @@ public sealed partial class SqlDatabase
     }
 
     private static SqlResult RunQuery(SelectRows query, Dictionary<string, Relation> inherited,
-        Func<SqlField, SqlExpression?>? outer, bool describe, bool finalPage = false, List<PlanStep>? explain = null)
+        Func<SqlField, SqlExpression?>? outer, bool describe, bool finalPage = false, List<PlanStep>? explain = null,
+        QueryProfile? profile = null)
     {
         // Only the client-facing result has an implicit page size. For a relation consumed by
         // another clause, probe one extra row so a bounded query never silently changes its data.
-        describe |= query.Limit == 0;
-        var execution = query with { Limit = describe ? 0 : query.Limit ?? (finalPage ? MaxRows : MaxRows + 1) };
-        var result = EvaluateQuery(execution, inherited, outer, describe, explain);
+        bool zeroLimit = !describe && query.Limit == 0;
+        long started = zeroLimit ? profile?.Start() ?? 0 : 0;
+        describe |= zeroLimit;
+        var execution = query with { Limit = describe ? 0 : query.Limit ?? (finalPage ? MaxRows : MaxRows + 1),
+            ProfileSource = profile is null ? null : query.ProfileSource ?? query };
+        var result = EvaluateQuery(execution, inherited, outer, describe, explain, describe ? profile?.Planning() : profile);
+        if (zeroLimit) profile?.Record(new("LIMIT", null, $"Offset {query.Offset}, limit 0"), 0, started);
         if (explain is not null)
         {
             if (query.SetExpression is null) AppendSelectSteps(query, explain);
@@ -178,7 +185,7 @@ public sealed partial class SqlDatabase
     }
 
     private static SqlResult EvaluateQuery(SelectRows query, Dictionary<string, Relation> inherited,
-        Func<SqlField, SqlExpression?>? outer, bool describe, List<PlanStep>? explain)
+        Func<SqlField, SqlExpression?>? outer, bool describe, List<PlanStep>? explain, QueryProfile? profile)
     {
         var scope = inherited;
         if (query.CommonTables.Count > 0 || query.DerivedSources?.Count > 0)
@@ -186,35 +193,55 @@ public sealed partial class SqlDatabase
         foreach (var cte in query.CommonTables)
         {
             var selfReference = query.Recursive && ReadsTable(cte.Query, cte.Name);
-            var result = selfReference ? RecursiveCte(cte, scope, outer, describe, explain) :
-                RunQuery(cte.Query, scope, outer, describe, explain: explain);
+            var cteProfile = profile?.Child(cte);
+            long started = cteProfile?.Start() ?? 0;
+            var result = selfReference ? RecursiveCte(cte, scope, outer, describe, explain, cteProfile) :
+                RunQuery(cte.Query, scope, outer, describe, explain: explain, profile: cteProfile);
             scope[cte.Name] = MakeRelation(cte.Name, result, cte.Columns);
             explain?.Add(new(selfReference ? "RECURSIVE CTE" : "MATERIALIZE CTE", cte.Name, null));
+            cteProfile?.Record(new(selfReference ? "RECURSIVE CTE" : "MATERIALIZE CTE", cte.Name, null), result.Rows.Count, started);
         }
         if (query.SetExpression is { } set)
-            return SetResult(query, set, scope, outer, describe, explain);
+            return SetResult(query, set, scope, outer, describe, explain, profile);
         if (query.DerivedSources is not null)
             foreach (var (key, derived) in query.DerivedSources)
             {
-                scope[key] = MakeRelation(key, RunQuery(derived.Query, scope, outer, describe, explain: explain), derived.Columns);
-                if (explain is not null)
+                var derivedProfile = profile?.Child(derived);
+                long started = derivedProfile?.Start() ?? 0;
+                scope[key] = MakeRelation(key, RunQuery(derived.Query, scope, outer, describe, explain: explain,
+                    profile: derivedProfile), derived.Columns);
+                if (explain is not null || profile is not null)
                 {
                     var alias = key == query.Table ? query.TableAlias : query.Joins().First(j => j.Table == key).Alias;
-                    explain.Add(new("MATERIALIZE DERIVED TABLE", alias, null));
+                    var step = new PlanStep("MATERIALIZE DERIVED TABLE", alias, null);
+                    explain?.Add(step);
+                    derivedProfile?.Record(step, scope[key].Rows.Count, started);
                 }
             }
         query = query with
         {
-            Binding = new((nested, frame, shapeOnly, showPlan) =>
-                RunQuery(nested, scope, frame, shapeOnly, explain: showPlan ? explain : null), outer,
-                explain is null ? null : (kind, correlated) => explain.Add(new("SUBQUERY", null,
-                    $"{kind}, {(correlated ? "per outer row" : "cached per query invocation")}")))
+            Binding = new((site, nested, frame, shapeOnly, showPlan, correlated) =>
+            {
+                var child = shapeOnly && !showPlan ? null : profile?.Child(site.Query);
+                long started = child?.Start() ?? 0;
+                var result = RunQuery(nested, scope, frame, shapeOnly, explain: showPlan ? explain : null, profile: child);
+                if (!shapeOnly) child?.Record(SubqueryStep(site.Kind, correlated), result.Rows.Count, started);
+                return result;
+            }, outer, explain is null && profile is null ? null : (site, correlated) =>
+            {
+                var step = SubqueryStep(site.Kind, correlated);
+                explain?.Add(step);
+                profile?.Child(site.Query).Declare(step);
+            })
         };
         if (query.Table is null)
         {
             explain?.Add(new("CONSTANT ROW", null, null, 1, 0));
+            long started = profile?.Start() ?? 0;
             var unit = new SqlTable("", []);
-            return Select(BindSingleSource(query, unit), unit, describe ? [] : [new("", new(SqlNameComparer))], describe);
+            List<SqlRow> rows = describe ? [] : [new("", new(SqlNameComparer))];
+            profile?.Record(new("CONSTANT ROW", null, null, 1, 0), rows.Count, started);
+            return Select(BindSingleSource(query, unit), unit, rows, describe, profile: profile);
         }
         if (query.Join is not null)
         {
@@ -224,18 +251,23 @@ public sealed partial class SqlDatabase
                 var source = scope[name];
                 sources.Add((source.Table, describe ? [] : source.Rows));
             }
-            return SelectJoined(query, sources, describe, explain);
+            return SelectJoined(query, sources, describe, explain, profile);
         }
+        long read = profile?.Start() ?? 0;
         var table = scope[query.Table];
         explain?.Add(new("READ MATERIALIZED INPUT", query.TableAlias ?? query.Table, null));
-        return Select(BindSingleSource(query, table.Table), table.Table, describe ? [] : table.Rows, describe);
+        profile?.Record(new("READ MATERIALIZED INPUT", query.TableAlias ?? query.Table, null), table.Rows.Count, read);
+        return Select(BindSingleSource(query, table.Table), table.Table, describe ? [] : table.Rows, describe, profile: profile);
     }
+
+    private static PlanStep SubqueryStep(SubqueryKind kind, bool correlated) =>
+        new("SUBQUERY", null, $"{kind}, {(correlated ? "per outer row" : "cached per query invocation")}");
 
     private static bool ReadsTable(SelectRows query, string name) =>
         RequiredSources(query, new(SqlNameComparer)).Contains(name, SqlNameComparer);
 
     private static SqlResult RecursiveCte(SqlCommonTable cte, Dictionary<string, Relation> scope,
-        Func<SqlField, SqlExpression?>? outer, bool describe, List<PlanStep>? explain)
+        Func<SqlField, SqlExpression?>? outer, bool describe, List<PlanStep>? explain, QueryProfile? profile)
     {
         var body = cte.Query;
         if (body.SetExpression is not { Operation: "UNION" or "UNION ALL" } union ||
@@ -243,7 +275,8 @@ public sealed partial class SqlDatabase
             throw new SqlException("A recursive CTE requires a nonrecursive anchor UNION [ALL] a recursive term.");
         if (body.CommonTables.Count != 0 || body.Order.Count != 0 || body.Limit.HasValue || body.Offset != 0)
             throw new SqlException("Place ordering and pagination in the query reading the recursive CTE.");
-        var anchor = RunQuery(union.Left, scope, outer, describe, explain: explain);
+        long started = profile?.Start() ?? 0;
+        var anchor = RunQuery(union.Left, scope, outer, describe, explain: explain, profile: profile?.Child(union.Left));
         var seen = union.Operation == "UNION" ? new HashSet<SqlValue[]>(new GroupKeyComparer()) : null;
         var rows = anchor.Rows.Where(row => seen?.Add(row) != false).ToList();
         var delta = (IReadOnlyList<SqlValue[]>)rows.ToArray();
@@ -252,7 +285,8 @@ public sealed partial class SqlDatabase
         do
         {
             local[cte.Name] = MakeRelation(cte.Name, anchor with { Rows = delta, ColumnTypes = types }, cte.Columns);
-            var step = RunQuery(union.Right, local, outer, describe || delta.Count == 0, explain: explain);
+            var step = RunQuery(union.Right, local, outer, describe || delta.Count == 0, explain: explain,
+                profile: profile?.Child(union.Right));
             types = SetTypes(anchor with { ColumnTypes = types }, step);
             delta = step.Rows.Where(row => seen?.Add(row) != false).ToArray();
             if (rows.Count + delta.Count > MaxRows)
@@ -260,6 +294,7 @@ public sealed partial class SqlDatabase
             rows.AddRange(delta);
         } while (!describe && delta.Count > 0);
         explain?.Add(new(union.Operation, cte.Name, "Combine anchor and recursive term until no new rows"));
+        profile?.Record(new(union.Operation, cte.Name, "Combine anchor and recursive term until no new rows"), rows.Count, started);
         return anchor with { Rows = rows, ColumnTypes = types };
     }
 
@@ -272,11 +307,12 @@ public sealed partial class SqlDatabase
     }
 
     private static SqlResult SetResult(SelectRows query, SqlSetExpression set, Dictionary<string, Relation> scope,
-        Func<SqlField, SqlExpression?>? outer, bool describe, List<PlanStep>? explain)
+        Func<SqlField, SqlExpression?>? outer, bool describe, List<PlanStep>? explain, QueryProfile? profile)
     {
-        var left = RunQuery(set.Left, scope, outer, describe, explain: explain);
-        var right = RunQuery(set.Right, scope, outer, describe, explain: explain);
+        var left = RunQuery(set.Left, scope, outer, describe, explain: explain, profile: profile?.Child(set.Left));
+        var right = RunQuery(set.Right, scope, outer, describe, explain: explain, profile: profile?.Child(set.Right));
         explain?.Add(new(set.Operation, null, "Combine query results"));
+        using var timings = profile is null ? null : new SelectTimings(profile, query);
         var types = SetTypes(left, right);
         var comparer = new GroupKeyComparer();
         IEnumerable<SqlValue[]> combined = set.Operation switch
@@ -288,6 +324,7 @@ public sealed partial class SqlDatabase
             "INTERSECT ALL" or "EXCEPT ALL" => Multiset(left.Rows, right.Rows, set.Operation == "INTERSECT ALL", comparer),
             _ => throw new SqlException("Unknown set operator.")
         };
+        if (timings?.Combine is { } combine) combined = combine.Observe(combined);
         IOrderedEnumerable<SqlValue[]>? ordered = null;
         var comparison = Comparer<SqlValue>.Create(SqlValue.Compare);
         foreach (var sort in query.Order)
@@ -300,7 +337,10 @@ public sealed partial class SqlDatabase
                 sort.Descending ? combined.OrderByDescending(r => r[index], comparison) : combined.OrderBy(r => r[index], comparison) :
                 sort.Descending ? ordered.ThenByDescending(r => r[index], comparison) : ordered.ThenBy(r => r[index], comparison);
         }
-        var rows = (ordered ?? combined).Skip(query.Offset).Take(query.Limit ?? MaxRows + 1).ToArray();
+        var sorted = ordered is not null && timings?.Sort is { } sortStage ? sortStage.Observe(ordered) : ordered ?? combined;
+        var page = sorted.Skip(query.Offset).Take(query.Limit ?? MaxRows + 1);
+        if (timings?.Page is { } limit) page = limit.Observe(page);
+        var rows = page.ToArray();
         return new(left.Columns, rows, $"{rows.Length} rows") { ColumnTypes = types };
     }
 

@@ -295,8 +295,8 @@ public sealed partial class MainPage : ContentPage
         sourceNote.Text = "SQL テーブル · catdb保存\nCREATE TABLEで作成できます。\n一覧更新: SHOW TABLES;";
         if (folder is not null)
         {
-            sourceNote.Text = "テーブルを選ぶと列名と行を表示します。";
-            sqlHint.Text = "  フォルダー閲覧 · SHOW TABLES / SELECT（読み取り専用）";
+            sourceNote.Text = "テーブルを選ぶと列名と行を表示します。\nANALYZE の統計は、このフォルダーを閉じるまで有効です。";
+            sqlHint.Text = "  フォルダー閲覧 · SHOW TABLES / SELECT / ANALYZE / EXPLAIN / EXPLAIN ANALYZE";
         }
         if (IsReadRole)
         {

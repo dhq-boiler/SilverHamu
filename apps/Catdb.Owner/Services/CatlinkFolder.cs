@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Catdb.Sql;
 
 namespace Catdb.Owner.Services;
@@ -10,6 +11,7 @@ internal sealed record FolderTable(string Name, string Source, int Index, long? 
 internal sealed class CatlinkFolder : IDisposable
 {
     private readonly ArchiveTableReader? archive;
+    private readonly ConcurrentDictionary<string, SqlTableStatistics> sessionStatistics = new(StringComparer.OrdinalIgnoreCase);
     public IReadOnlyList<FolderTable> Tables { get; }
 
     private CatlinkFolder(IEnumerable<FolderTable> tables, ArchiveTableReader? archive = null)
@@ -48,16 +50,81 @@ internal sealed class CatlinkFolder : IDisposable
         var results = new List<SqlResult>();
         foreach (var statement in SqlParser.Parse(sql))
         {
-            if (statement is ShowTables)
+            switch (statement)
             {
-                results.Add(Summary());
-                continue;
+                case ShowTables:
+                    results.Add(Summary());
+                    break;
+                case AnalyzeTable analyze:
+                    results.Add(await AnalyzeAsync(FindTable(analyze.Name)));
+                    break;
+                case ExplainQuery explain:
+                    results.Add(await SqlDatabase.ExplainReadOnlyAsync(explain, Schema, ScanAsync, name => FindTable(name).Rows));
+                    break;
+                case SelectRows query:
+                    results.Add(await SqlDatabase.QueryReadOnlyAsync(query, Schema, ScanAsync, name => FindTable(name).Rows));
+                    break;
+                default:
+                    throw new SqlException("フォルダー閲覧では SELECT、SHOW TABLES、ANALYZE、EXPLAIN、EXPLAIN ANALYZE を実行できます。");
             }
-            if (statement is not SelectRows query)
-                throw new SqlException("フォルダー閲覧では SELECT と SHOW TABLES を実行できます。");
-            results.Add(await SqlDatabase.QueryReadOnlyAsync(query, name => FindTable(name).Schema, ScanAsync, name => FindTable(name).Rows));
         }
         return results;
+    }
+
+    private SqlTable Schema(string name)
+    {
+        var table = FindTable(name);
+        return sessionStatistics.TryGetValue(table.Name, out var statistics)
+            ? table.Schema with { Statistics = statistics } : table.Schema;
+    }
+
+    private async Task<SqlResult> AnalyzeAsync(FolderTable table)
+    {
+        long sampled;
+        SqlTableStatistics statistics;
+        if (archive is not null)
+        {
+            long total = table.Rows!.Value;
+            sampled = SqlDatabase.ReadOnlySampleSize(table.Schema, total);
+            statistics = await SqlDatabase.AnalyzeReadOnlySampleAsync(table.Schema, total,
+                ArchiveSampleAsync(archive, table.Index, total, (int)sampled));
+        }
+        else
+        {
+            statistics = await ReadSqlCopyAsync(table.Source, async db =>
+            {
+                await db.ExecuteAsync($"ANALYZE {SqlNames.Quote(table.Name)}");
+                var analyzed = (await db.GetTablesAsync()).Single(t => t.Name.Equals(table.Name, StringComparison.OrdinalIgnoreCase));
+                return analyzed.Statistics ?? throw new SqlException($"'{table.Name}' の統計を取得できませんでした。");
+            });
+            sampled = statistics.RowCount;
+        }
+        sessionStatistics[table.Name] = statistics;
+        var message = $"ANALYZE {table.Name}: 全 {statistics.RowCount:N0} 行のうち {sampled:N0} 行を調査。このフォルダーを開いている間だけ統計を使用します。";
+        return new(["table_name", "total_rows", "sampled_rows"], [new[] { SqlValue.String(table.Name),
+            SqlValue.Number(statistics.RowCount.ToString(System.Globalization.CultureInfo.InvariantCulture)),
+            SqlValue.Number(sampled.ToString(System.Globalization.CultureInfo.InvariantCulture)) }], message)
+            { ColumnTypes = ["TEXT", "INTEGER", "INTEGER"] };
+    }
+
+    private static async IAsyncEnumerable<SqlValue[]> ArchiveSampleAsync(ArchiveTableReader archive, int tableIndex,
+        long totalRows, int sampleSize)
+    {
+        int pages = (sampleSize + ArchiveTableReader.PageSize - 1) / ArchiveTableReader.PageSize;
+        for (int i = 0; i < pages; i++)
+        {
+            int begin = sampleSize * i / pages;
+            int count = sampleSize * (i + 1) / pages - begin;
+            long offset = begin + (long)((totalRows - sampleSize) * (i + 0.5m) / pages);
+            long end = offset + count;
+            while (offset < end)
+            {
+                var page = await archive.ReadPageAsync(tableIndex, offset, (int)(end - offset), preview: false).ConfigureAwait(false);
+                if (page.NextOffset <= offset) throw new InvalidDataException("統計を収集中の書庫ページの読み込みが進みません。");
+                foreach (var row in page.Result.Rows) yield return row;
+                offset = page.NextOffset;
+            }
+        }
     }
 
     private FolderTable FindTable(string name)

@@ -13,7 +13,7 @@
 | Add amounts of the same currency | Yes | Yes | Enable addition with `ALTER TYPE JpyAmount ENABLE OPERATOR +`. Adding two `JpyAmount` columns returns a `JpyAmount` and checks its range and constraints. Mixing currency types raises an error. |
 | Joins, views and aggregates | Yes | Yes | Inner and outer joins support up to eight inputs and 4,096 intermediate rows per join step. |
 | [Standard SQL syntax](#sql-syntax-matrix) | Partial | Partial | Both use the same SQL subset. The matrix below gives examples of supported and unsupported queries, writes and schema operations. |
-| [Query execution plans](docs/sql.md#query-plans-and-statistics) | Yes | Yes (SQL database) | `EXPLAIN SELECT` shows scans, index lookups, joins and subsequent query steps without reading result rows. |
+| [Query execution plans](docs/sql.md#query-plans-and-statistics) | Yes | Yes | `EXPLAIN SELECT` shows the plan. `EXPLAIN ANALYZE SELECT` reports actual rows, loops and elapsed time. Owner also supports both commands on folder tables. |
 | Cost-based query optimizer | Yes | Yes (SQL database) | Compares table and index access costs. For eligible inner joins it also chooses join order and hash or nested-loop execution. `ANALYZE` supplies table and column statistics. |
 | Serve authenticated network clients | Yes | No | The Rust service supports shared tokens and TLS accounts. Server-side SQL requires a separately configured SQL host. |
 | [Query granted views with a view-only token](docs/sql.md#role-writes) | Yes | Yes (client) | The SQL service limits reads to granted views and denies direct key reads and scans. Once a revocation commits, the next read on the same connection is denied. |
@@ -25,7 +25,7 @@
 
 ### SQL syntax matrix
 
-These labels cover common SQL forms in the shared `Catdb.Sql` engine used by catdb and Windows Owner. Each label applies to the form shown. In Owner, a folder opened through `.catlink` is read-only and accepts queries against its tables.
+These labels cover common SQL forms in the shared `Catdb.Sql` engine used by catdb and Windows Owner. Each label applies to the form shown. In Owner, a folder opened through `.catlink` supports read-only queries, query plans and session-local table statistics.
 
 <details>
 <summary>Queries, expressions and joins</summary>
@@ -61,9 +61,9 @@ These labels cover common SQL forms in the shared `Catdb.Sql` engine used by cat
 | `RANGE` or `GROUPS` window frames | ✗ Unsupported | Explicit frame bounds use `ROWS`. |
 | `CASE`, `CAST`, arithmetic such as `SELECT price * qty` | ✓ Supported | Simple and searched CASE, casts to catdb column types, and numeric operators with precedence. |
 | `SELECT subtotal + tax FROM invoice_lines` on a named numeric type | ✓ Supported | Enable `+` for the type first. Both columns and the result share that type. |
-| `EXPLAIN SELECT ...`, `EXPLAIN WITH ... SELECT ...` | ✓ Supported | Returns plan steps and available estimates. Use on a SQL database with a full SQL connection. |
-| `ANALYZE table_name` | ✓ Supported | Refreshes planner statistics for a base table in the current transaction. |
-| `EXPLAIN ANALYZE ...` | ✗ Unsupported | `EXPLAIN` reports the planned work; measured execution timings are unavailable. |
+| `EXPLAIN SELECT ...`, `EXPLAIN WITH ... SELECT ...` | ✓ Supported | Returns plan steps and estimates for a full SQL connection or Owner folder session. |
+| `ANALYZE table_name` | ✓ Supported | Updates statistics in the current database transaction. In Owner folder mode, statistics stay in memory until the folder is closed. |
+| `EXPLAIN ANALYZE SELECT ...`, `EXPLAIN ANALYZE WITH ... SELECT ...` | ✓ Supported | Executes the query once and returns a measured plan. Compare `estimated_rows` with `actual_rows_per_loop` for repeated steps; `elapsed_ms` is cumulative for that step. |
 | `SELECT ... FOR UPDATE` | ✗ Unsupported | A query cannot request a row lock with this clause. |
 
 </details>

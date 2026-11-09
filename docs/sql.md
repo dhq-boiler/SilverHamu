@@ -50,7 +50,23 @@ For inner joins with explicit equality keys, the planner compares connected join
 
 An explicit `ON` must include at least one equality between qualified columns of the new input and a previous input. Multiple equalities form a composite key. Extra predicates, such as `AND l.amount >= p.minimum`, apply before deciding which rows of an outer join need NULL padding. Aggregates and subqueries inside `ON` are unsupported.
 
-`EXPLAIN` inspects metadata without executing the SELECT against stored rows. It requires a full SQL connection. View-only tokens and Owner's read-only archive interface accept their existing query subsets. Use `ANALYZE table_name` to refresh estimates; `EXPLAIN ANALYZE` is not implemented.
+`EXPLAIN` inspects metadata without executing the SELECT against stored rows. To measure execution, use `EXPLAIN ANALYZE` on a SELECT or WITH query. It executes the query once and returns the measurements in place of the query results. Execution errors, such as division by zero, propagate normally. Both forms are available on full SQL connections and in Owner's read-only folder mode. View-only service tokens cannot inspect plans.
+
+In a folder session, `ANALYZE Book_3` collects statistics in memory. Closing or reopening the folder clears them. For a large segmented archive the row count comes from the manifest and the column estimates use sampled rows. To inspect a concrete read, run `EXPLAIN SELECT * FROM Book_3 WHERE PublishDate IS NOT NULL LIMIT 10` and then prefix the same query with `EXPLAIN ANALYZE` to measure it. A simple limit can stop the scan early; an unfiltered `COUNT(*)` on a segmented archive can use the manifest count without reading table rows.
+
+```sql
+EXPLAIN ANALYZE SELECT product_id FROM prices WHERE price > 100 ORDER BY product_id;
+```
+
+| Profile column | How to read it |
+|---|---|
+| `estimated_rows` | Planner estimate for one execution of the step, where available. |
+| `actual_rows` | Total rows emitted by the step across its executions. A scan counts candidates before filtering. |
+| `loops` | Number of executions. Zero identifies a reported step that was never run. |
+| `actual_rows_per_loop` | Compare this value with `estimated_rows` for a correlated subquery or another repeated step. It is NULL if the step never ran. |
+| `elapsed_ms` | Measured elapsed milliseconds accumulated across executions, including waits and work done by children inside the timed operation. |
+
+For example, a scan can return 1,000 candidate rows while a filter emits only 20. A downstream limit can stop pulling rows early, so a step's output count can be smaller than the number of rows it examined. A `JOIN RETRY` marks buffered rows from an abandoned join order. The final `RESULT` row gives the SELECT's output count and elapsed time. Nested timings overlap, so adding step times can exceed the total. A NULL estimate means the planner has no estimate for that step. `ANALYZE table_name` refreshes stored statistics; running `EXPLAIN ANALYZE` measures a query using the current statistics.
 
 ### SQL types
 

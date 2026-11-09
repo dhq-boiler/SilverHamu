@@ -58,8 +58,8 @@ public sealed record SqlTable(string Name, List<SqlColumn> Columns, string? View
     public SqlTableStatistics? Statistics { get; init; }
 }
 public sealed record SqlRow(string StorageKey, Dictionary<string, SqlValue> Values);
-public sealed record SqlTableStatistics(int RowCount, Dictionary<string, SqlColumnStatistics> Columns);
-public sealed record SqlColumnStatistics(int NonNullRows, int DistinctCount, Dictionary<string, int> FrequentValues);
+public sealed record SqlTableStatistics(long RowCount, Dictionary<string, SqlColumnStatistics> Columns);
+public sealed record SqlColumnStatistics(long NonNullRows, long DistinctCount, Dictionary<string, long> FrequentValues);
 public sealed record AnalyzeTable(string Name) : SqlStatement;
 public sealed record SqlResult(IReadOnlyList<string> Columns, IReadOnlyList<SqlValue[]> Rows, string Message)
 {
@@ -79,7 +79,7 @@ internal sealed class SqlExpressionBindings
 public sealed record CreateType(SqlTypeDefinition Definition, bool IfNotExists) : SqlStatement;
 public sealed record EnableAddition(string TypeName) : SqlStatement;
 public sealed record ShowTypes : SqlStatement;
-public sealed record ExplainQuery(SelectRows Query) : SqlStatement;
+public sealed record ExplainQuery(SelectRows Query, bool Analyze = false) : SqlStatement;
 public sealed record CreateTable(string Table, List<SqlColumn> Columns, bool IfNotExists, List<string>? Checks = null, List<string>? CompositePrimaryKey = null, List<SqlForeignKey>? ForeignKeys = null) : SqlStatement;
 public sealed record DropTable(string Table, bool IfExists) : SqlStatement;
 public sealed record AddColumn(string Table, SqlColumn Column) : SqlStatement;

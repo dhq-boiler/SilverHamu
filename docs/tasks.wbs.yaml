@@ -1,7 +1,7 @@
 version: 3
 title: catdb
 createdAt: 2026-11-09T15:31:25.7166025Z
-modifiedAt: 2026-11-09T16:35:16.5377094Z
+modifiedAt: 2026-11-09T17:03:16.3841345Z
 tasks:
 - id: sql-semantic-types
   title: SQLで日時・金額・識別子の意味を保証する
@@ -57,3 +57,13 @@ tasks:
     title: EXPLAINで計画を表示し、動作検証とREADME更新を行う
     estimateHours: 3
     remainingHours: 0
+- id: sql-explain-runtime
+  title: EXPLAIN ANALYZEで推定と実測を比較できるようにする
+  estimateHours: 5
+  remainingHours: 0
+  notes: SELECT・WITHの実行を計測し、推定行数、実測行数、ループ数、1回あたりの行数、累積経過時間を表示。実DBで推定2行・実測4行の走査と相関サブクエリ4回を確認した。VS 2026 Debugビルド成功、SQLテスト210件全件成功。READMEのSQL syntax matrixと利用例を更新。
+- id: owner-folder-explain
+  title: Ownerのフォルダー閲覧でBook_3の統計・計画・実測を確認する
+  estimateHours: 4
+  remainingHours: 0
+  notes: Ownerの実際のフォルダー閲覧でBook_3のANALYZE・EXPLAIN・EXPLAIN ANALYZEが成功。全20979行から1600行を調査し、PublishDate条件で16840行を読んで10行を返した。統計はセッション内のみ。通常DBフォルダー・分割書庫の非変更と再オープン時の統計破棄を自動検証。VS Debugビルド成功、SQLテスト219件全件成功。

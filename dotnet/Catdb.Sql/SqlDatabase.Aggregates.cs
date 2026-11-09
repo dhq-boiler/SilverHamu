@@ -22,7 +22,7 @@ public sealed partial class SqlDatabase
         }
     }
 
-    private static SqlResult SelectGroups(SelectRows select, SqlTable table, List<SqlRow> rows, bool describeOnly)
+    private static SqlResult SelectGroups(SelectRows select, SqlTable table, List<SqlRow> rows, bool describeOnly, SelectTimings? timings)
     {
         var keys = select.GroupBy?.Select(f => f.Name).Distinct(StringComparer.OrdinalIgnoreCase).ToArray() ?? [];
         var groupedColumns = keys.ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -60,6 +60,7 @@ public sealed partial class SqlDatabase
         // A global aggregate returns one group even when no input row survives WHERE.
         IEnumerable<List<SqlRow>> groups = describeOnly ? [] : keys.Length == 0 ? [rows] :
             rows.GroupBy(r => keys.Select(k => r.Values[k]).ToArray(), new GroupKeyComparer()).Select(g => g.ToList());
+        if (timings?.Groups is { } groupStage) groups = groupStage.Observe(groups);
         var groupRows = new List<SqlRow>();
         var results = new List<SqlValue[]>();
         foreach (var group in groups)
@@ -70,11 +71,22 @@ public sealed partial class SqlDatabase
             {
                 if (node is not SqlAggregate aggregate) return null;
                 if (!aggregates.TryGetValue(aggregate, out var value))
+                {
+                    var started = timings?.Groups?.Start() ?? 0;
                     aggregates[aggregate] = value = EvaluateAggregate(aggregate, group);
+                    timings?.Groups?.End(started, 0);
+                }
                 return new SqlLiteral(value);
             }).Evaluate(grouped);
 
-            if (select.Having is not null && !Evaluate(select.Having).IsTrue) continue;
+            if (select.Having is not null)
+            {
+                var started = timings?.Having?.Start() ?? 0;
+                bool accepted = Evaluate(select.Having).IsTrue;
+                timings?.Having?.End(started, accepted ? 1 : 0);
+                if (!accepted) continue;
+            }
+            var projectionStart = timings?.Project?.Start() ?? 0;
             var values = new SqlValue[expressions.Length];
             for (int i = 0; i < expressions.Length; i++)
             {
@@ -84,6 +96,7 @@ public sealed partial class SqlDatabase
             }
             groupRows.Add(new("", grouped));
             results.Add(values);
+            timings?.Project?.End(projectionStart, 1);
         }
 
         // Window functions see the surviving groups before the final ORDER BY and pagination.
@@ -91,7 +104,7 @@ public sealed partial class SqlDatabase
         {
             if (select.Projections[i].Window is not { } window) continue;
             if (window.Argument is not null) window = window with { Argument = new SqlField(WindowArgumentKey(i)) };
-            var values = WindowValues(window, groupRows);
+            var values = WindowValues(window, groupRows, timings?.Windows.GetValueOrDefault(i));
             for (int row = 0; row < results.Count; row++) results[row][i] = values[row];
         }
         var order = Enumerable.Range(0, results.Count);
@@ -106,7 +119,8 @@ public sealed partial class SqlDatabase
                 }
                 return 0;
             }));
-        var page = PageProjectedRows(select, order.Select(i => results[i]));
+        if (timings?.Sort is { } sortStage) order = sortStage.Observe(order);
+        var page = PageProjectedRows(select, order.Select(i => results[i]), timings);
         return new(select.Projections.Select(p => p.Alias ?? "value").ToArray(), page, $"{page.Length} rows")
             { ColumnTypes = types };
     }

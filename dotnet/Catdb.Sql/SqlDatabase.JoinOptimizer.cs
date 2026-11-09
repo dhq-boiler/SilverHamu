@@ -38,7 +38,7 @@ public sealed partial class SqlDatabase
                 var rightRows = estimates[source];
                 double output = EstimateJoinOutput(prefix.Rows, rightRows, keys, schemas);
                 double nestedCost = prefix.Rows * rightRows * keys.Count;
-                double hashCost = 4 + (prefix.Rows + 2 * rightRows) * keys.Count;
+                double hashCost = 4 + (prefix.Rows + 2d * rightRows) * keys.Count;
                 bool useHash = hashCost < nestedCost;
                 double cost = prefix.Cost + rightRows + output + Math.Min(hashCost, nestedCost);
                 var next = mask | bit;
@@ -55,16 +55,21 @@ public sealed partial class SqlDatabase
         double rows = left * right;
         foreach (var (a, b) in keys)
         {
-            int ndvLeft = EstimateDistinctCount(schemas[a.Source], a.Column);
-            int ndvRight = EstimateDistinctCount(schemas[b.Source], b.Column);
+            long ndvLeft = EstimateDistinctCount(schemas[a.Source], a.Column);
+            long ndvRight = EstimateDistinctCount(schemas[b.Source], b.Column);
             rows /= Math.Max(ndvLeft, ndvRight);
         }
         return left == 0 || right == 0 ? 0 : Math.Max(1, rows);
     }
 
     private static List<SqlRow?[]> ExecuteJoinOrder(JoinOrder? physical, BoundJoin bound,
-        List<(SqlTable Table, List<SqlRow> Rows)> sources)
+        List<(SqlTable Table, List<SqlRow> Rows)> sources, SelectRows query, IReadOnlyList<SqlTable> schemas,
+        QueryProfile? profile)
     {
+        var steps = profile is null ? null : ExplainJoinAccess(query, bound, schemas, physical);
+        if (steps is not null)
+            foreach (var step in steps) profile!.Declare(step);
+        long started = profile?.Start() ?? 0;
         if (physical is not null)
         {
             int width = sources.Count;
@@ -74,14 +79,27 @@ public sealed partial class SqlDatabase
                 tuple[physical.First] = row;
                 return tuple;
             }).ToList();
+            profile?.Record(steps![0], rows.Count, started);
             bool reordered = IsReordered(physical);
             for (int i = 0; i < physical.Steps.Count; i++)
             {
                 var step = physical.Steps[i];
+                started = profile?.Start() ?? 0;
                 var joined = ExecuteInnerStep(rows, sources[step.Source].Rows, step);
+                profile?.Record(steps![i + 1], joined?.Count ?? MaxRows, started);
                 if (joined is null)
                 {
-                    if (reordered && i + 1 < physical.Steps.Count) break;
+                    if (reordered && i + 1 < physical.Steps.Count)
+                    {
+                        if (profile is not null)
+                        {
+                            profile.Record(new("JOIN RETRY", null, $"Discard {MaxRows} buffered tuples and restart in SQL order"),
+                                0, profile.Start());
+                            profile = profile.Child("join retry");
+                            steps = ExplainJoinAccess(query, bound, schemas, null);
+                        }
+                        break;
+                    }
                     throw new SqlException($"JOINの中間結果が上限{MaxRows}件を超えています。");
                 }
                 rows = joined;
@@ -90,9 +108,15 @@ public sealed partial class SqlDatabase
         }
         // Stale statistics can select an oversized intermediate despite a legal
         // written order. Retry only that order, reusing the same snapshot.
+        started = profile?.Start() ?? 0;
         var written = sources[0].Rows.Select(row => new SqlRow?[] { row }).ToList();
+        profile?.Record(steps![0], written.Count, started);
         for (int i = 0; i < bound.Steps.Count; i++)
+        {
+            started = profile?.Start() ?? 0;
             written = JoinRows(written, sources[i + 1].Rows, bound.Steps[i], i + 1);
+            profile?.Record(steps![i + 1], written.Count, started);
+        }
         return written;
     }
 

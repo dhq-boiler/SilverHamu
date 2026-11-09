@@ -12,6 +12,9 @@
     <Compile Include="../../dotnet/NewDbmsSnapshot.cs" Link="Native/NewDbmsSnapshot.cs" />
     <Compile Include="../Catdb.Owner/Services/MemorySqlStore.cs" Link="Services/MemorySqlStore.cs" />
     <Compile Include="../Catdb.Owner/Services/CatdbClient.cs" Link="Services/CatdbClient.cs" />
+    <Compile Include="../Catdb.Owner/Services/Catlink.cs" Link="Services/Catlink.cs" />
+    <Compile Include="../Catdb.Owner/Services/CatlinkFolder.cs" Link="Services/CatlinkFolder.cs" />
+    <Compile Include="../Catdb.Owner/Services/ArchiveTableReader.cs" Link="Services/ArchiveTableReader.cs" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" PrivateAssets="all" />

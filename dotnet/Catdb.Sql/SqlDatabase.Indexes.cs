@@ -123,7 +123,7 @@ public sealed partial class SqlDatabase
             conditions.Add(term);
     }
 
-    private static IEnumerable<IndexRange> CandidateIndexRanges(SqlTable table, List<IndexCondition> conditions, int rowCount)
+    private static IEnumerable<IndexRange> CandidateIndexRanges(SqlTable table, List<IndexCondition> conditions, long rowCount)
     {
         foreach (var index in table.Indexes ?? [])
         {
@@ -199,9 +199,9 @@ public sealed partial class SqlDatabase
         return Empty($"索引 '{index.Name}' を削除しました。");
     }
 
-    private async Task<SqlResult> SelectSecondaryAsync(SelectRows query, SqlTable table, IndexRange range)
+    private async Task<List<SqlRow>> LoadSecondaryRowsAsync(SqlTable table, IndexRange range)
     {
-        if (string.CompareOrdinal(range.Start, range.End) >= 0) return Select(query, table, []);
+        if (string.CompareOrdinal(range.Start, range.End) >= 0) return [];
         var rowPrefix = RowPrefix(table.Name);
         var rows = new List<SqlRow>();
         var bytesRead = 0;
@@ -217,6 +217,6 @@ public sealed partial class SqlDatabase
             if (range.Layout.Entry(key, row.Values) != entry.Key) throw new SqlException("索引と行の値が一致しません。");
             rows.Add(row);
         }
-        return Select(query, table, rows);
+        return rows;
     }
 }

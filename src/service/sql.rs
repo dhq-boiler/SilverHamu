@@ -1,6 +1,6 @@
 //! A configured SQL interpreter plans statements. The server owns every transaction.
-use super::{MAX_RESPONSE, dispatch, error_code, same_token};
-use crate::transactions::{Database, Error, Transaction};
+use super::{MAX_RESPONSE, error_code, same_token};
+use crate::transactions::{Error, Transaction};
 use serde_json::{Value, json};
 use std::io::{self, BufRead, BufReader, BufWriter, Read, Write};
 use std::path::PathBuf;
@@ -117,7 +117,6 @@ fn receive_line(input: &mut impl BufRead) -> io::Result<Value> {
 
 #[allow(clippy::too_many_arguments)]
 pub(super) fn execute(
-    db: &Database,
     tx: &mut Option<Transaction>,
     request: &Value,
     sql_host: &ConfiguredSql,
@@ -126,6 +125,7 @@ pub(super) fn execute(
     deadline: Instant,
     expires: &mut Option<Instant>,
     stop: &AtomicBool,
+    mut dispatch: impl FnMut(&mut Option<Transaction>, &Value) -> Result<Value, Error>,
     mut authorized: impl FnMut() -> bool,
 ) -> Result<Value, Error> {
     let Some(sql) = request["sql"].as_str() else {
@@ -222,7 +222,7 @@ pub(super) fn execute(
                 ) {
                     return Err(io::Error::other("invalid SQL callback"));
                 }
-                let response = match dispatch(db, tx, op) {
+                let response = match dispatch(tx, op) {
                     Ok(value) => value,
                     Err(
                         e @ (Error::CommitUncertain(_)

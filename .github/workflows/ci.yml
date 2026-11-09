@@ -81,6 +81,8 @@ jobs:
       - run: python benchmarks/inline-qualification/test_fixture.py
       - run: python tests/service_protocol.py
       - if: matrix.features == 'service'
+        run: python tests/replication.py
+      - if: matrix.features == 'service'
         run: python tests/service_accounts.py
       - if: matrix.features == 'service'
         run: python tests/managed_wal_service.py

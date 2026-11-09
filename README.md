@@ -19,7 +19,7 @@
 | [Query granted views with a view-only token](docs/sql.md#role-writes) | Yes | Yes (client) | The SQL service limits reads to granted views and denies direct key reads and scans. Once a revocation commits, the next read on the same connection is denied. |
 | Back up and restore a standalone database | Yes | Yes | Offline backup preserves the physical file. Embedded online backup captures a committed generation. Account-enrolled services require a coordinated backup. |
 | SQL editor and result grid | No | Yes | The standalone SQL CLI is also available for scripts. |
-| Replication and automatic failover | No | No | Single-owner storage; no multi-node promotion protocol. |
+| [Replication and automatic failover](docs/replication.md) | Yes (token service) | No | A fixed group of three or five servers replicates commits and elects a new leader. Reads and writes require a majority. The Python client can discover the leader. |
 
 [Try embedded SQL](dotnet/README.md#embedded-sql-and-cli) · [SQL and service compatibility](docs/sql.md) · [Back up and restore](docs/backup.md)
 

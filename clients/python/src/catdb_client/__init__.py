@@ -26,13 +26,13 @@ class Client(_WireClient):
     """One connection and transaction context. Use a separate client per transaction."""
 
     def __init__(self, host, port, token=None, timeout=10, *, username=None, password=None,
-                 database="main", cafile=None):
+                 database="main", cafile=None, _discovery_deadline=None):
         if username is not None and password is None:
             raise ValueError("account authentication requires a password")
         self._lock = RLock()
         self._closed = False
         super().__init__(host, port, token, timeout, username=username, password=password,
-                         database=database, cafile=cafile)
+                         database=database, cafile=cafile, _discovery_deadline=_discovery_deadline)
 
     def request(self, **fields):
         """Send a wire operation. Versions in responses are decimal strings."""

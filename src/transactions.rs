@@ -657,6 +657,20 @@ impl Database {
         id: [u8; 16],
         limits: ResourceLimits,
     ) -> Result<Self> {
+        Self::ensure_standalone_path(path.as_ref())?;
+        Self::create_default(path.as_ref(), id, limits)
+    }
+
+    #[cfg(feature = "service")]
+    pub(crate) fn create_replica_file(
+        path: &Path,
+        id: [u8; 16],
+        limits: ResourceLimits,
+    ) -> Result<Self> {
+        Self::create_default(path, id, limits)
+    }
+
+    fn create_default(path: &Path, id: [u8; 16], limits: ResourceLimits) -> Result<Self> {
         #[cfg(feature = "redo-witness")]
         let layout = Some(CheckpointLog::DEFAULT_MANAGED);
         #[cfg(not(feature = "redo-witness"))]
@@ -674,6 +688,7 @@ impl Database {
         id: [u8; 16],
         limits: ResourceLimits,
     ) -> Result<Self> {
+        Self::ensure_standalone_path(path.as_ref())?;
         Self::create_with_log(path, id, limits, None)
     }
 
@@ -750,7 +765,28 @@ impl Database {
     }
 
     pub fn open_with_limits(path: impl AsRef<Path>, limits: ResourceLimits) -> Result<Self> {
+        Self::ensure_standalone_path(path.as_ref())?;
         Self::open_internal(path.as_ref(), limits, false)
+    }
+
+    #[cfg(feature = "service")]
+    pub(crate) fn open_replica_file(path: &Path, limits: ResourceLimits) -> Result<Self> {
+        Self::open_internal(path, limits, false)
+    }
+
+    pub(crate) fn ensure_standalone_path(path: &Path) -> Result<()> {
+        let path = database_path(path)?;
+        if raft_path(&path).try_exists()?
+            || (path
+                .extension()
+                .is_some_and(|s| s.eq_ignore_ascii_case("raft"))
+                && path.with_extension("").is_file())
+        {
+            return Err(Error::Invalid(
+                "cluster database requires its configured replica service",
+            ));
+        }
+        Ok(())
     }
 
     fn open_internal(path: &Path, limits: ResourceLimits, checkpoint_only: bool) -> Result<Self> {
@@ -942,6 +978,16 @@ impl Database {
             return Err(Error::Poisoned);
         }
         Ok(wrap_state(state))
+    }
+
+    #[cfg(feature = "service")]
+    pub(crate) fn release_replica_locks(&self) -> Result<()> {
+        let mut state = self.state()?;
+        state.locked_keys.clear();
+        self.inner
+            .has_row_locks
+            .store(false, std::sync::atomic::Ordering::Release);
+        Ok(())
     }
 
     fn persist_wal<'a>(
@@ -1555,6 +1601,16 @@ impl Database {
 }
 
 impl Transaction {
+    #[cfg(feature = "service")]
+    pub(crate) fn replication_writes(mut self) -> Result<WriteSet> {
+        if !self.writes.is_empty() {
+            let state = self.database.state()?;
+            self.validate_commit(&state, &BTreeSet::new())?;
+            state.check_retained(&self.writes)?;
+        }
+        Ok(std::mem::take(&mut self.writes))
+    }
+
     #[cfg(feature = "wal-prepare")]
     fn prepare_log(&mut self) -> Result<()> {
         if self.writes.is_empty() || self.prepared.is_some() {
@@ -1985,7 +2041,9 @@ impl Transaction {
         if self.locked_keys.len() > mark.locks {
             let mut state = self.database.state()?;
             for key in self.locked_keys.drain(mark.locks..) {
-                state.locked_keys.remove(&key);
+                if state.locked_keys.get(&key) == Some(&self.lock_owner) {
+                    state.locked_keys.remove(&key);
+                }
                 let charge = 160 + 2 * key.len();
                 self.dependency_charge -= charge;
                 state.budget.release(DEPENDENCIES, charge);
@@ -2278,7 +2336,11 @@ impl Drop for Transaction {
         if let Ok(state) = database.inner.state.lock() {
             let mut state = wrap_state(state);
             if !self.locked_keys.is_empty() {
-                for key in &self.locked_keys { state.locked_keys.remove(key); }
+                for key in &self.locked_keys {
+                    if state.locked_keys.get(key) == Some(&self.lock_owner) {
+                        state.locked_keys.remove(key);
+                    }
+                }
                 database.inner.has_row_locks.store(!state.locked_keys.is_empty(), std::sync::atomic::Ordering::Release);
             }
             #[cfg(feature = "skip-unneeded-history")]
@@ -2295,6 +2357,10 @@ impl Drop for Transaction {
             drop(retired);
         }
     }
+}
+
+pub(crate) fn raft_path(path: &Path) -> PathBuf {
+    with_suffix(path, ".raft")
 }
 
 fn database_path(path: &Path) -> io::Result<PathBuf> {

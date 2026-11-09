@@ -2,20 +2,80 @@
 import argparse
 import getpass
 import json
+import math
 import pathlib
 import socket
 import ssl
 import struct
 import sys
+import time
 
 
 class Client:
+    _discovery_deadline = None
+
+    @classmethod
+    def connect_leader(cls, seeds, token, *, cluster_id, timeout=10, discovery_timeout=10):
+        """Probe configured client endpoints for a leader. Never submits or replays a write."""
+        if not isinstance(cluster_id, str) or not cluster_id:
+            raise ValueError("cluster_id must be a nonempty string")
+        if not math.isfinite(timeout) or timeout <= 0 or not math.isfinite(discovery_timeout) or discovery_timeout <= 0:
+            raise ValueError("timeouts must be positive and finite")
+        endpoints = list(dict.fromkeys((host, port) for host, port in seeds))
+        if not endpoints or any(not isinstance(host, str) or not host or type(port) is not int
+                                or not 0 < port <= 65535 for host, port in endpoints):
+            raise ValueError("seeds must contain (host, port) client endpoints")
+        deadline = time.monotonic() + discovery_timeout
+        while time.monotonic() < deadline:
+            for host, port in endpoints:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    break
+                client = None
+                try:
+                    # Leave time for the other configured nodes when one address is unreachable.
+                    probe_time = min(timeout, remaining, max(0.1, discovery_timeout / len(endpoints)))
+                    client = cls(host, port, token, timeout=probe_time, _discovery_deadline=time.monotonic() + probe_time)
+                    status = client.request(op="cluster_status")
+                    if not isinstance(status, dict) or status.get("ok") is not True:
+                        raise RuntimeError("endpoint rejected cluster_status")
+                    if status.get("cluster_id") != cluster_id:
+                        raise ValueError("seed belongs to a different catdb cluster")
+                    role = status.get("role")
+                    if role not in ("candidate", "follower", "leader"):
+                        raise ValueError("invalid cluster_status role")
+                    if role == "leader":
+                        if not isinstance(status.get("node_id"), str) or status["node_id"] != status.get("leader_id"):
+                            raise ValueError("inconsistent leader identity")
+                        # An isolated former leader can still report its old role. A ping needs a quorum.
+                        health = client._exchange(client._encode({"op": "ping"}))
+                        if isinstance(health, dict) and health.get("ok") is False and health.get("error") in (
+                                "not_leader", "quorum_unavailable", "resource_exhausted", "request_timeout"):
+                            continue
+                        version = health.get("version") if isinstance(health, dict) and health.get("ok") is True else None
+                        if not isinstance(version, str) or not version.isascii() or not version.isdecimal():
+                            raise ValueError("invalid leader ping")
+                        client._discovery_deadline = None
+                        client.socket.settimeout(timeout)
+                        leader, client = client, None
+                        return leader
+                except OSError:
+                    pass
+                finally:
+                    if client is not None:
+                        client.close()
+            remaining = deadline - time.monotonic()
+            if remaining > 0:
+                time.sleep(min(0.1, remaining))
+        raise TimeoutError("no leader found among the configured catdb endpoints")
+
     def __init__(self, host, port, token=None, timeout=10, *, username=None, password=None,
-                 database="main", cafile=None):
+                 database="main", cafile=None, _discovery_deadline=None):
         if (token is None) == (username is None):
             raise ValueError("choose token or account authentication")
         if token is not None and (password is not None or cafile is not None or database != "main"):
             raise ValueError("TLS account options cannot be used with a token")
+        self._discovery_deadline = _discovery_deadline
         self.socket = socket.create_connection((host, port), timeout)
         try:
             if username is not None:
@@ -36,11 +96,19 @@ class Client:
     def receive_exact(self, count):
         chunks = bytearray()
         while len(chunks) < count:
+            self._limit_discovery_wait()
             chunk = self.socket.recv(count - len(chunks))
             if not chunk:
                 raise ConnectionError("connection closed; a submitted commit may have completed")
             chunks.extend(chunk)
         return chunks
+
+    def _limit_discovery_wait(self):
+        if self._discovery_deadline is not None:
+            remaining = self._discovery_deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError("catdb discovery probe timed out")
+            self.socket.settimeout(remaining)
 
     @staticmethod
     def _encode(request):
@@ -53,6 +121,7 @@ class Client:
         return self._exchange(self._encode(request))
 
     def _exchange(self, body):
+        self._limit_discovery_wait()
         self.socket.sendall(struct.pack("!I", len(body)) + body)
         size = struct.unpack("!I", self.receive_exact(4))[0]
         if not 0 < size <= 2 * 1024 * 1024 + 8192:

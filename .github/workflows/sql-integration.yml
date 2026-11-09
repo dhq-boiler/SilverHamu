@@ -29,5 +29,7 @@ jobs:
         run: dotnet test apps/Catdb.Owner.Sql.Tests/Catdb.Owner.Sql.Tests.csproj --configuration Release
       - name: Test SQL transactions and view grants over TCP
         run: python tests/service_protocol.py ServiceTests.test_sql_host_and_view_token ServiceTests.test_for_update_excludes_another_writer_until_transaction_end
+      - name: Test SQL data and view grants across a leader failure
+        run: python tests/replication.py ReplicationTests.test_sql_grants_survive_failover
       - name: Test SQL with TLS account permissions and multiple databases
         run: python tests/service_accounts.py AccountsTest.test_sql_uses_selected_database_admin_grant

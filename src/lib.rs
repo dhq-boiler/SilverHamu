@@ -7,6 +7,8 @@ mod ffi;
 mod inline_key;
 mod resources;
 #[cfg(feature = "service")]
+pub mod replication;
+#[cfg(feature = "service")]
 pub mod service;
 mod transaction_ffi;
 pub mod transactions;

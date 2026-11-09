@@ -1,3 +1,4 @@
+use newdbms::replication::ClusterConfig;
 use newdbms::service::{AccountOptions, Config, ReadRole, Server, SqlOptions, healthcheck};
 use newdbms::transactions::ResourceLimits;
 use std::io::Read;
@@ -13,7 +14,10 @@ fn main() {
     }
 }
 fn run() -> Result<(), Box<dyn std::error::Error>> {
-    let mut bind = "127.0.0.1:7400".to_string();
+    let mut bind: Option<String> = None;
+    let mut cluster_file = None;
+    let mut node_id = None;
+    let mut peer_token_file = None;
     let mut database = None;
     let mut token_file = None;
     let mut sql_host = None;
@@ -52,7 +56,14 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 let (name, path) = spec.split_once('=').ok_or("--attach requires NAME=PATH")?;
                 attachments.push((name.to_owned(), path.into()));
             }
-            "--bind" => bind = args.next().ok_or("--bind requires an address")?,
+            "--bind" => bind = Some(args.next().ok_or("--bind requires an address")?),
+            "--cluster-config" => {
+                cluster_file = Some(args.next().ok_or("missing cluster config path")?)
+            }
+            "--node-id" => node_id = Some(args.next().ok_or("missing node id")?),
+            "--peer-token-file" => {
+                peer_token_file = Some(args.next().ok_or("missing peer token path")?)
+            }
             "--db" => database = Some(args.next().ok_or("--db requires a file")?),
             "--token-file" => token_file = Some(args.next().ok_or("--token-file requires a file")?),
             "--max-connections" => max_connections = args.next().ok_or("missing limit")?.parse()?,
@@ -82,6 +93,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             "--allow-remote" => remote = true,
             "--healthcheck" => check = true,
             "--help" => {
+                println!(
+                    "Replicated token service: --db PATH --token-file PATH --cluster-config FILE --node-id ID --peer-token-file FILE [--init] [--sql-host ABSOLUTE_EXE]"
+                );
                 println!(
                     "Account service: --db PATH --tls-cert CERT.pem --tls-key KEY.pem [--attach NAME=EXISTING_DB] [--bootstrap-admin NAME --bootstrap-password-file FILE]"
                 );
@@ -156,7 +170,18 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             );
         }
     };
-    let address: SocketAddr = bind.parse()?;
+    let replicated = match (cluster_file, node_id, peer_token_file) {
+        (None, None, None) => None,
+        (Some(file), Some(node), Some(peer_token)) if !secure && !check => {
+            Some((ClusterConfig::load(std::path::Path::new(&file), &node, remote)?, read_token(peer_token)?))
+        }
+        _ => return Err("cluster mode requires --cluster-config, --node-id, --peer-token-file and token authentication".into()),
+    };
+    let address = match (bind, &replicated) {
+        (Some(bind), _) => bind.parse::<SocketAddr>()?,
+        (None, Some((topology, _))) => topology.client_address(),
+        (None, None) => "127.0.0.1:7400".parse()?,
+    };
     if check {
         let address = if address.ip().is_unspecified() {
             SocketAddr::new(
@@ -187,16 +212,25 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         request_timeout: Duration::from_secs(request_timeout),
         transaction_timeout: Duration::from_secs(transaction_timeout),
     };
-    let server = match (sql_host, accounts) {
-        (Some(host), accounts) => Server::bind_with_sql_role_access(
+    let server = match (sql_host, accounts, replicated) {
+        (host, None, Some((topology, peer_token))) => Server::bind_cluster(
+            config,
+            limits,
+            topology,
+            peer_token,
+            host.map(|host| SqlOptions { host, read_role }),
+            allow_role_writes,
+        )?,
+        (_, Some(_), Some(_)) => return Err("cluster mode requires token authentication".into()),
+        (Some(host), accounts, None) => Server::bind_with_sql_role_access(
             config,
             limits,
             accounts,
             SqlOptions { host, read_role },
             allow_role_writes,
         )?,
-        (None, Some(accounts)) => Server::bind_accounts(config, limits, accounts)?,
-        (None, None) => Server::bind_with_limits(config, limits)?,
+        (None, Some(accounts), None) => Server::bind_accounts(config, limits, accounts)?,
+        (None, None, None) => Server::bind_with_limits(config, limits)?,
     };
     println!(
         "catdb-server ready {} protocol={}",

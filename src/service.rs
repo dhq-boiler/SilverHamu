@@ -18,6 +18,7 @@ pub use accounts::AccountOptions;
 mod sql;
 use accounts::{Accounts, Role};
 use sql::ConfiguredSql;
+use crate::replication::{Cluster, ClusterConfig};
 pub use sql::{ReadRole, SqlOptions};
 
 pub const MAX_REQUEST: usize = 1024 * 1024;
@@ -61,6 +62,7 @@ impl Config {
 }
 
 pub struct Server {
+    cluster: Option<Arc<Cluster>>,
     sql: Option<Arc<ConfiguredSql>>,
     accounts: Option<Arc<Accounts>>,
     config: Arc<Config>,
@@ -69,6 +71,72 @@ pub struct Server {
 }
 
 impl Server {
+    pub fn bind_cluster(
+        config: Config,
+        mut limits: ResourceLimits,
+        topology: ClusterConfig,
+        peer_token: Vec<u8>,
+        sql: Option<SqlOptions>,
+        allow_role_writes: bool,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
+        config.validate()?;
+        if config.bind != topology.client_address()
+            || !(32..=256).contains(&peer_token.len())
+            || same_token(&config.token, &peer_token)
+        {
+            return Err("cluster bind must match its configured client endpoint and peer credentials must be distinct".into());
+        }
+        if config
+            .database
+            .extension()
+            .is_some_and(|s| s.eq_ignore_ascii_case("raft") || s.eq_ignore_ascii_case("accounts"))
+            || accounts::catalog_path(&config.database).try_exists()?
+            || accounts::owner_path(&config.database).try_exists()?
+        {
+            return Err("cluster mode requires its own application database".into());
+        }
+        if allow_role_writes && sql.as_ref().and_then(|s| s.read_role.as_ref()).is_none() {
+            return Err("role writes require a configured SQL role token".into());
+        }
+        if let Some(options) = &sql {
+            options.validate(&config.token, false)?;
+            if options
+                .read_role
+                .as_ref()
+                .is_some_and(|r| same_token(&r.token, &peer_token))
+            {
+                return Err("peer and SQL role tokens must be distinct".into());
+            }
+        }
+        let listener = TcpListener::bind(config.bind)?;
+        listener.set_nonblocking(true)?;
+        limits.validate()?;
+        limits.max_transactions = limits
+            .max_transactions
+            .max(config.max_connections)
+            .saturating_add(1);
+        let cluster = Arc::new(Cluster::open(
+            topology,
+            &peer_token,
+            &config.database,
+            config.initialize,
+            limits,
+        )?);
+        Ok(Self {
+            db: cluster.database(),
+            cluster: Some(cluster),
+            sql: sql.map(|options| {
+                Arc::new(ConfiguredSql {
+                    options,
+                    allow_role_writes,
+                })
+            }),
+            accounts: None,
+            config: Arc::new(config),
+            listener,
+        })
+    }
+
     pub fn bind(config: Config) -> Result<Self, Box<dyn std::error::Error>> {
         let limits = ResourceLimits {
             max_transactions: config.max_connections,
@@ -129,6 +197,7 @@ impl Server {
         sql: Option<Arc<ConfiguredSql>>,
     ) -> Result<Self, Box<dyn std::error::Error>> {
         config.validate_mode(options.is_some())?;
+        Database::ensure_standalone_path(&config.database)?;
         if config
             .database
             .extension()
@@ -244,6 +313,7 @@ impl Server {
             .map(|opts| Accounts::open(&config, &db, limits, opts).map(Arc::new))
             .transpose()?;
         Ok(Self {
+            cluster: None,
             sql,
             accounts,
             config: Arc::new(config),
@@ -257,6 +327,7 @@ impl Server {
     }
 
     pub fn run(self, stop: Arc<AtomicBool>) -> io::Result<()> {
+        let peer_worker = self.cluster.clone().map(|cluster| cluster.run(Arc::clone(&stop)));
         let active = Arc::new(AtomicUsize::new(0));
         #[cfg(feature = "single-client-commit")]
         self.db.set_service_clients(Arc::clone(&active));
@@ -285,6 +356,7 @@ impl Server {
                     let stopping = Arc::clone(&stop);
                     let accounts = self.accounts.clone();
                     let sql = self.sql.clone();
+                    let cluster = self.cluster.clone();
                     match thread::Builder::new()
                         .name(client_thread_name())
                         .spawn(move || {
@@ -302,6 +374,7 @@ impl Server {
                                 &stopping,
                                 accounts.as_deref(),
                                 sql.as_deref(),
+                                cluster.as_deref(),
                             );
                         }) {
                         Ok(worker) => workers.push(worker),
@@ -322,6 +395,12 @@ impl Server {
             }
         }
         stop.store(true, Ordering::Release);
+        if let Some(worker) = peer_worker {
+            worker.join().map_err(|_| io::Error::other("replication worker failed"))?;
+            if self.cluster.as_ref().is_some_and(|c| !c.healthy()) {
+                failure = Some(io::Error::other("replication storage requires recovery"));
+            }
+        }
         for worker in workers {
             let _ = worker.join();
         }
@@ -402,7 +481,7 @@ fn send(
     Ok(())
 }
 
-fn error(code: &str) -> Value {
+pub(crate) fn error(code: &str) -> Value {
     json!({"ok": false, "error": code})
 }
 fn error_code(e: &Error) -> &'static str {
@@ -550,6 +629,7 @@ fn connection(
     stop: &AtomicBool,
     accounts: Option<&Accounts>,
     sql: Option<&ConfiguredSql>,
+    cluster: Option<&Cluster>,
 ) -> io::Result<()> {
     stream.set_nodelay(true)?;
     stream.set_read_timeout(Some(Duration::from_millis(100)))?;
@@ -572,11 +652,13 @@ fn connection(
             Some((accounts, peer)),
             &clock,
             sql,
+            None,
         );
     }
-    session(stream, db, config, stop, None, &clock, sql)
+    session(stream, db, config, stop, None, &clock, sql, cluster)
 }
 
+#[allow(clippy::too_many_arguments)]
 fn session(
     mut stream: impl Read + Write,
     mut db: Database,
@@ -585,6 +667,7 @@ fn session(
     accounts: Option<(&Accounts, std::net::IpAddr)>,
     clock: &std::cell::Cell<Instant>,
     sql: Option<&ConfiguredSql>,
+    cluster: Option<&Cluster>,
 ) -> io::Result<()> {
     let deadline = clock.get();
     let mut wire = Wire::default();
@@ -653,6 +736,7 @@ fn session(
     #[cfg(feature = "lock-timing")]
     let mut request_index = 0_u64;
     let mut transaction: Option<Transaction> = None;
+    let mut transaction_term = None;
     let mut expires = None;
     while !stop.load(Ordering::Acquire) {
         let mut deadline = Instant::now() + config.request_timeout;
@@ -664,7 +748,8 @@ fn session(
         if Instant::now() >= deadline || stop.load(Ordering::Acquire) {
             break;
         }
-        if view_role.is_some() && !matches!(request["op"].as_str(), Some("sql" | "ping")) {
+        if view_role.is_some() && !matches!(request["op"].as_str(), Some("sql" | "ping"))
+            && !(cluster.is_some() && request["op"] == "cluster_status") {
             wire.send(&mut stream, &error("forbidden"), deadline, stop)?;
             stream.flush()?;
             continue;
@@ -729,10 +814,13 @@ fn session(
             crate::transactions::diagnostic_now_ns()
         };
         let sql_request = request["op"].as_str() == Some("sql");
+        let mut execute_operation = |tx: &mut Option<Transaction>, op: &Value| match cluster {
+            Some(cluster) => cluster.dispatch(tx, &mut transaction_term, op, deadline),
+            None => dispatch(&db, tx, op),
+        };
         let result = if sql_request {
             if let Some(options) = sql {
                 sql::execute(
-                    &db,
                     &mut transaction,
                     &request,
                     options,
@@ -741,6 +829,7 @@ fn session(
                     deadline,
                     &mut expires,
                     stop,
+                    &mut execute_operation,
                     || match (accounts, principal.as_mut()) {
                         (Some((accounts, _)), Some(user)) => {
                             accounts.current(&db, user) && user.role.permits("sql")
@@ -754,7 +843,7 @@ fn session(
                 )
             }
         } else {
-            dispatch(&db, &mut transaction, &request)
+            execute_operation(&mut transaction, &request)
         };
         #[cfg(feature = "lock-timing")]
         let dispatch_finished = crate::transactions::diagnostic_now_ns();
@@ -866,7 +955,7 @@ fn text<'a>(v: &'a Value, name: &str) -> Result<&'a str, Error> {
         .and_then(Value::as_str)
         .ok_or(Error::Invalid("string field required"))
 }
-fn hex_decode(value: &str, max: usize) -> Result<Vec<u8>, Error> {
+pub(crate) fn hex_decode(value: &str, max: usize) -> Result<Vec<u8>, Error> {
     if !value.len().is_multiple_of(2) || value.len() / 2 > max {
         return Err(Error::Limit("hex size"));
     }
@@ -885,7 +974,7 @@ fn hex_decode(value: &str, max: usize) -> Result<Vec<u8>, Error> {
     }
     Ok(decoded)
 }
-fn hex(bytes: &[u8]) -> String {
+pub(crate) fn hex(bytes: &[u8]) -> String {
     const DIGITS: &[u8] = b"0123456789abcdef";
     let mut s = String::with_capacity(bytes.len() * 2);
     for b in bytes {
@@ -914,7 +1003,7 @@ fn limit(v: &Value, name: &str, default: usize, max: usize) -> Result<usize, Err
     }
 }
 
-fn stage_request(tx: Option<&mut Transaction>, v: &Value, put: bool) -> Result<(), Error> {
+pub(crate) fn stage_request(tx: Option<&mut Transaction>, v: &Value, put: bool) -> Result<(), Error> {
     let key = bytes(v, "key", 1024)?;
     let tx = tx.ok_or(Error::Invalid("no transaction"))?;
     let value = if put {
@@ -925,7 +1014,7 @@ fn stage_request(tx: Option<&mut Transaction>, v: &Value, put: bool) -> Result<(
     tx.stage(key.into(), value)
 }
 
-fn dispatch(db: &Database, tx: &mut Option<Transaction>, v: &Value) -> Result<Value, Error> {
+pub(crate) fn dispatch(db: &Database, tx: &mut Option<Transaction>, v: &Value) -> Result<Value, Error> {
     dispatch_operation(db, tx, v, text(v, "op")?)
 }
 
@@ -1595,6 +1684,7 @@ mod tests {
                 None,
                 &std::cell::Cell::new(deadline),
                 Some(options),
+                None,
             )
             .unwrap_err();
             assert_eq!(error.kind(), io::ErrorKind::UnexpectedEof);

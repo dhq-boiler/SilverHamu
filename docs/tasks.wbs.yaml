@@ -1,7 +1,7 @@
 version: 3
 title: catdb
 createdAt: 2026-11-09T15:31:25.7166025Z
-modifiedAt: 2026-11-09T17:35:38.6376392Z
+modifiedAt: 2026-11-09T18:18:40.5590323Z
 tasks:
 - id: sql-semantic-types
   title: SQLで日時・金額・識別子の意味を保証する
@@ -90,4 +90,20 @@ tasks:
   - id: sql-matrix-verify
     title: 統合検証し構文ごとの対応範囲をREADMEに反映する
     estimateHours: 3
+    remainingHours: 0
+- id: catdb-replicated-service
+  title: 過半数による複製と自動フェイルオーバーを実装する
+  notes: 固定3台・5台のRaft複製、自動選出、過半数での読み書きとPythonのリーダー探索を実装。Windows実TCPの障害・復旧・SQL権限テスト7件、既存サービス25件、Rustライブラリ132件が成功。READMEと運用手順に制約を記載。
+  children:
+  - id: catdb-quorum-log
+    title: 選挙と永続ログで確定済みデータを保護する
+    estimateHours: 8
+    remainingHours: 0
+  - id: catdb-cluster-service
+    title: サーバーとクライアントを複製クラスタに接続する
+    estimateHours: 8
+    remainingHours: 0
+  - id: catdb-failover-test
+    title: 障害・復旧を実プロセスで検証し運用手順を記録する
+    estimateHours: 5
     remainingHours: 0

@@ -79,6 +79,7 @@ fn reject_sidecar_name(path: &Path) -> Result<()> {
 
 fn standalone(path: &Path) -> Result<()> {
     reject_sidecar_name(path)?;
+    Database::ensure_standalone_path(path)?;
     if path_occupied(&with_suffix(path, ".accounts"))?
         || path_occupied(&with_suffix(path, ".account-owner"))?
     {

@@ -691,6 +691,54 @@ pub unsafe extern "C" fn ndb_tx_checkpoint(
     })
 }
 #[unsafe(no_mangle)]
+pub unsafe extern "C" fn ndb_tx_backup(
+    id: u64,
+    destination: *const u8,
+    destination_len: u64,
+    version: *mut u64,
+    records: *mut u64,
+) -> i32 {
+    guard(|| {
+        unsafe {
+            reset(version)?;
+            reset(records)?;
+        }
+        let destination = unsafe { path(destination, destination_len)? };
+        let info = database(id)?.backup(destination).map_err(code)?;
+        unsafe {
+            *version = info.version;
+            *records = info.records as u64;
+        }
+        Ok(0)
+    })
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn ndb_tx_restore(
+    source: *const u8,
+    source_len: u64,
+    destination: *const u8,
+    destination_len: u64,
+    version: *mut u64,
+    records: *mut u64,
+) -> i32 {
+    guard(|| {
+        unsafe {
+            reset(version)?;
+            reset(records)?;
+        }
+        let source = unsafe { path(source, source_len)? };
+        let destination = unsafe { path(destination, destination_len)? };
+        let info = Database::restore(source, destination).map_err(code)?;
+        unsafe {
+            *version = info.version;
+            *records = info.records as u64;
+        }
+        Ok(0)
+    })
+}
+
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn ndb_tx_export(
     id: u64,
     p: *const u8,

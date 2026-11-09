@@ -1,4 +1,4 @@
-use newdbms::service::{AccountOptions, Config, Server, healthcheck};
+use newdbms::service::{AccountOptions, Config, ReadRole, Server, SqlOptions, healthcheck};
 use newdbms::transactions::ResourceLimits;
 use std::io::Read;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
@@ -16,6 +16,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     let mut bind = "127.0.0.1:7400".to_string();
     let mut database = None;
     let mut token_file = None;
+    let mut sql_host = None;
+    let mut read_role = None;
+    let mut read_token_file = None;
     let mut cert = None;
     let mut key = None;
     let mut admin = None;
@@ -31,6 +34,11 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     let mut args = std::env::args().skip(1);
     while let Some(arg) = args.next() {
         match arg.as_str() {
+            "--sql-host" => sql_host = Some(args.next().ok_or("missing SQL host path")?.into()),
+            "--read-role" => read_role = Some(args.next().ok_or("missing read role name")?),
+            "--read-token-file" => {
+                read_token_file = Some(args.next().ok_or("missing read token path")?)
+            }
             "--tls-cert" => cert = Some(args.next().ok_or("missing certificate path")?.into()),
             "--tls-key" => key = Some(args.next().ok_or("missing private key path")?.into()),
             "--bootstrap-admin" => admin = Some(args.next().ok_or("missing admin name")?),
@@ -76,7 +84,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                     "Account service: --db PATH --tls-cert CERT.pem --tls-key KEY.pem [--attach NAME=EXISTING_DB] [--bootstrap-admin NAME --bootstrap-password-file FILE]"
                 );
                 println!(
-                    "catdb-server --db PATH --token-file PATH [--init] [--bind 127.0.0.1:7400] [--allow-remote] [--max-connections 32] [--request-timeout-secs 30] [--transaction-timeout-secs 60] [--max-retained-bytes 134217728] [--max-staged-bytes 33554432] [--max-dependency-bytes 16777216] [--max-buffer-bytes 16777216]\ncatdb-server --healthcheck --token-file PATH [--bind 127.0.0.1:7400]\nExperimental framed JSON v1, not SQL or HTTP. Remote transport requires an encrypted tunnel."
+                    "catdb-server --db PATH --token-file PATH [--init] [--bind 127.0.0.1:7400] [--allow-remote] [--max-connections 32] [--request-timeout-secs 30] [--transaction-timeout-secs 60] [--max-retained-bytes 134217728] [--max-staged-bytes 33554432] [--max-dependency-bytes 16777216] [--max-buffer-bytes 16777216]\ncatdb-server --healthcheck --token-file PATH [--bind 127.0.0.1:7400]\nOptional SQL: --sql-host ABSOLUTE_EXE [--read-role NAME --read-token-file FILE] (view tokens in token mode only). Remote transport requires an encrypted tunnel."
                 );
                 return Ok(());
             }
@@ -125,21 +133,23 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         None
     };
     let token = if let Some(file) = token_file {
-        let mut token = String::new();
-        let token_input = std::fs::File::open(file)?;
-        if token_input.metadata()?.len() > 258 {
-            return Err("token file too large".into());
-        }
-        token_input.take(258).read_to_string(&mut token)?;
-        let token = token.trim_end_matches(['\r', '\n']).as_bytes().to_vec();
-        if !(32..=256).contains(&token.len()) {
-            return Err("token must be 32..256 UTF-8 bytes".into());
-        }
-        token
+        read_token(file)?
     } else if secure {
         Vec::new()
     } else {
         return Err("--token-file or TLS account configuration required".into());
+    };
+    let read_role = match (read_role, read_token_file) {
+        (None, None) => None,
+        (Some(name), Some(file)) if !secure && sql_host.is_some() => Some(ReadRole {
+            name,
+            token: read_token(file)?,
+        }),
+        _ => {
+            return Err(
+                "--read-role and --read-token-file require --sql-host and legacy token mode".into(),
+            );
+        }
     };
     let address: SocketAddr = bind.parse()?;
     if check {
@@ -172,9 +182,12 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         request_timeout: Duration::from_secs(request_timeout),
         transaction_timeout: Duration::from_secs(transaction_timeout),
     };
-    let server = match accounts {
-        Some(options) => Server::bind_accounts(config, limits, options)?,
-        None => Server::bind_with_limits(config, limits)?,
+    let server = match (sql_host, accounts) {
+        (Some(host), accounts) => {
+            Server::bind_with_sql(config, limits, accounts, SqlOptions { host, read_role })?
+        }
+        (None, Some(accounts)) => Server::bind_accounts(config, limits, accounts)?,
+        (None, None) => Server::bind_with_limits(config, limits)?,
     };
     println!(
         "catdb-server ready {} protocol={}",
@@ -183,6 +196,20 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     );
     server.run(stop)?;
     Ok(())
+}
+
+fn read_token(file: String) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    let mut token = String::new();
+    let token_input = std::fs::File::open(file)?;
+    if token_input.metadata()?.len() > 258 {
+        return Err("token file too large".into());
+    }
+    token_input.take(258).read_to_string(&mut token)?;
+    let token = token.trim_end_matches(['\r', '\n']).as_bytes().to_vec();
+    if !(32..=256).contains(&token.len()) {
+        return Err("token must be 32..256 UTF-8 bytes".into());
+    }
+    Ok(token)
 }
 
 fn budget_bytes(value: &str) -> Result<usize, Box<dyn std::error::Error>> {

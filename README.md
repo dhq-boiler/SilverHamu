@@ -2,6 +2,21 @@
 
 ![Status: Experimental](https://img.shields.io/badge/status-Experimental-orange)
 
+## Feature matrix
+
+| Capability | catdb | Windows Owner | Scope in this checkout |
+|---|:---:|:---:|---|
+| Open a local database without a server | Yes | Yes | One owning process per file. Rust, C and C# can embed the storage engine. |
+| Transactions and crash recovery | Yes | Yes | Snapshot reads, conflict detection, commit and rollback use the same native engine. |
+| SQL tables, indexes and constraints | Yes | Yes | The .NET 10 SQL layer supports primary and foreign keys, checks and composite indexes. SQL tables are limited to 4,096 rows each. |
+| Joins, views and aggregates | Yes | Yes | Inner and outer joins support up to eight inputs and 4,096 intermediate rows per join step. |
+| Serve authenticated network clients | Yes | No | The Rust service supports shared tokens and TLS accounts. Server-side SQL requires a separately configured SQL host. |
+| Back up and restore a standalone database | Yes | Yes | Offline backup preserves the physical file. Embedded online backup captures a committed generation. Account-enrolled services require a coordinated backup. |
+| SQL editor and result grid | No | Yes | The standalone SQL CLI is also available for scripts. |
+| Replication and automatic failover | No | No | Single-owner storage; no multi-node promotion protocol. |
+
+[Try embedded SQL](dotnet/README.md#embedded-sql-and-cli) · [SQL and service compatibility](docs/sql.md) · [Back up and restore](docs/backup.md)
+
 catdb is an embedded transactional key-value database written in Rust. It stores ordered byte keys and byte values, so applications can look up one key or read a range from a consistent snapshot. Multiple threads can update the same database, and successful commits are acknowledged after the log is synchronized.
 
 New databases use a preallocated write-ahead log that checkpoints and grows automatically. Existing databases keep their storage policy on upgrade. [Capacity management and explicit migration](docs/service.md#default-wal-and-upgrades) · [Sustained writes across checkpoints and growth](docs/benchmarks/managed-wal-2026-11-08/README.md)

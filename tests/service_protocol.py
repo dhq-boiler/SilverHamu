@@ -73,6 +73,25 @@ class ServiceTests(unittest.TestCase):
             self.ok(c, op="put", key=key, value=value)
             return self.ok(c, op="commit")
 
+    @unittest.skipUnless(os.getenv("CATDB_SQL_HOST"), "requires the built Catdb.Sql.Host executable")
+    def test_sql_host_and_view_token(self):
+        self.stop()
+        read_token = secrets.token_hex(32)
+        read_secret = self.folder / "read-token"
+        read_secret.write_text(read_token, encoding="utf-8")
+        self.start("--sql-host", os.environ["CATDB_SQL_HOST"], "--read-role", "reader", "--read-token-file", str(read_secret))
+        with Client("127.0.0.1", self.port, self.token) as admin, Client("127.0.0.1", self.port, read_token) as viewer:
+            self.ok(admin, op="sql", sql="CREATE TABLE docs(id INT PRIMARY KEY); INSERT INTO docs VALUES (1); CREATE VIEW visible AS SELECT id FROM docs; GRANT SELECT ON visible TO reader")
+            self.ok(admin, op="begin")
+            self.assertTrue(self.ok(admin, op="sql", sql="INSERT INTO docs VALUES (2)")["in_transaction"])
+            self.ok(admin, op="rollback")
+            rows = self.ok(viewer, op="sql", sql="SELECT id FROM visible")["results"][0]["Rows"]
+            self.assertEqual([row[0]["Text"] for row in rows], ["1"])
+            self.assertFalse(viewer.request(op="sql", role="admin", sql="SELECT id FROM docs")["ok"])
+            self.assertEqual(viewer.request(op="get_latest", key="")["error"], "forbidden")
+            self.ok(admin, op="sql", sql="REVOKE SELECT ON visible FROM reader")
+            self.assertFalse(viewer.request(op="sql", sql="SELECT id FROM visible")["ok"])
+
     def test_st_read_only_snapshot_rejects_mutations_and_survives_updates(self):
         self.seed(); c=self.client(); self.ok(c,op="begin_read")
         self.assertFalse(c.request(op="put",key="01",value="aa")["ok"])

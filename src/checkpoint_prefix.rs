@@ -17,6 +17,8 @@ pub(super) struct CheckpointCursor {
 }
 pub(super) struct CheckpointDraft {
     pub(super) cursor: CheckpointCursor,
+    #[cfg(feature = "fixed-log")]
+    pub(super) layout: Option<CheckpointLog>,
     pub(super) before_bytes: u64,
     pub(super) epoch: u64,
     pub(super) temporary: PathBuf,
@@ -120,18 +122,21 @@ impl Database {
         }
         let sequence = state.sequence;
         let before_bytes = state.wal_bytes;
+        #[cfg(feature = "fixed-log")]
+        let layout = state.file.as_ref().and_then(CheckpointLog::from_file);
         let last_key = state.rows.last_key_value().map(|(key, _)| key.to_vec());
         let path = state.path.clone();
         drop(state);
         drop(writer);
         let temporary = temporary_path(&path);
-        let replacement = Some(
-            OpenOptions::new()
-                .read(true)
-                .write(true)
-                .create_new(true)
-                .open(&temporary)?,
-        );
+        let mut options = OpenOptions::new();
+        options.read(true).write(true).create_new(true);
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::OpenOptionsExt;
+            options.mode(0o600);
+        }
+        let replacement = Some(options.open(&temporary)?);
         let mut draft = CheckpointDraft {
             cursor: CheckpointCursor {
                 #[cfg(all(target_os = "linux", target_pointer_width = "64"))]
@@ -144,6 +149,8 @@ impl Database {
                 chunks: 0,
                 records: 0,
             },
+            #[cfg(feature = "fixed-log")]
+            layout,
             before_bytes,
             epoch,
             temporary,

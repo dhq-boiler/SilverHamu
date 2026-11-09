@@ -722,8 +722,12 @@ impl Database {
     }
 
     pub fn open_with_limits(path: impl AsRef<Path>, limits: ResourceLimits) -> Result<Self> {
+        Self::open_internal(path.as_ref(), limits, false)
+    }
+
+    fn open_internal(path: &Path, limits: ResourceLimits, checkpoint_only: bool) -> Result<Self> {
         let budget = Budget::new(limits.validate()?);
-        let path = database_path(path.as_ref())?;
+        let path = database_path(path)?;
         let owner = ownership(&path)?;
         let mut file = OpenOptions::new().read(true).write(true).open(&path)?;
         file.try_lock().map_err(|e| Error::Locked(e.to_string()))?;
@@ -734,6 +738,9 @@ impl Database {
         let mut header = [0; HEADER_BYTES];
         file.read_exact(&mut header)?;
         validate_wal_header(&header)?;
+        if checkpoint_only && read_u32(&header, 8) != 2 {
+            return Err(Error::Invalid("expected standalone checkpoint backup"));
+        }
         let id = header[16..32].try_into().unwrap();
         let legacy = read_u32(&header, 8) == 1;
         let base = if legacy {
@@ -761,6 +768,9 @@ impl Database {
         let mut previous_key: Option<Vec<u8>> = None;
         let mut offset = HEADER_BYTES as u64;
         while offset < length {
+            if checkpoint_only && checkpoint_remaining == 0 {
+                return Err(Error::Invalid("trailing data in checkpoint backup"));
+            }
             let remaining = length - offset;
             if remaining < PREFIX_BYTES as u64 {
                 if checkpoint_remaining > 0 {

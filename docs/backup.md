@@ -1,5 +1,7 @@
 # Offline backup and restore
 
+For a standalone database that must remain open, its owning process can call `Database::backup` or use the corresponding managed API in Catdb.Sql. This online operation saves the committed key-value snapshot in a CATDBBAK archive. Uncommitted writes and obsolete row versions are excluded. Restore to a **new** destination and verify application data before switching to it. The offline CLI workflow below continues to preserve the original physical bytes. Account-enrolled databases require the coordinated file-set procedure.
+
 Use this procedure for one standalone transaction database, including a service using a shared token. For a service with accounts, stop it and copy the primary database, attached databases, account catalog and ownership markers together. Keep the configured filenames when restoring that set. [Account storage and backup](accounts.md#authentication-and-storage)
 
 ## Back up and restore from the checkout

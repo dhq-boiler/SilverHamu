@@ -4,7 +4,7 @@ mod backup_direct;
 use std::fs::File;
 use std::io::{self, Read, Seek, SeekFrom, Write};
 
-const MAGIC: &[u8; 8] = b"CATDBBAK";
+pub(super) const MAGIC: &[u8; 8] = b"CATDBBAK";
 const BLOCK: usize = 64 * 1024;
 const BATCH: usize = 1024 * 1024;
 const HEADER: usize = 32;

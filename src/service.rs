@@ -1,5 +1,7 @@
 //! Experimental v1 framed JSON service over the embedded transaction engine.
-use crate::transactions::{CheckpointLog, Database, Error, ResourceLimits, ScanLimits, Transaction};
+use crate::transactions::{
+    CheckpointLog, Database, Error, ResourceLimits, ScanLimits, Transaction,
+};
 use serde_json::{Value, json};
 use std::io::{self, Read, Write};
 use std::net::{SocketAddr, TcpListener, TcpStream};
@@ -13,7 +15,9 @@ mod accounts;
 #[path = "service_tls.rs"]
 mod tls;
 pub use accounts::AccountOptions;
+mod sql;
 use accounts::{Accounts, Role};
+pub use sql::{ReadRole, SqlOptions};
 
 pub const MAX_REQUEST: usize = 1024 * 1024;
 pub const MAX_RESPONSE: usize = 2 * 1024 * 1024 + 8192;
@@ -56,6 +60,7 @@ impl Config {
 }
 
 pub struct Server {
+    sql: Option<Arc<SqlOptions>>,
     accounts: Option<Arc<Accounts>>,
     config: Arc<Config>,
     db: Database,
@@ -76,7 +81,7 @@ impl Server {
         config: Config,
         limits: ResourceLimits,
     ) -> Result<Self, Box<dyn std::error::Error>> {
-        Self::open(config, limits, None)
+        Self::open(config, limits, None, None)
     }
 
     pub fn bind_accounts(
@@ -84,13 +89,25 @@ impl Server {
         limits: ResourceLimits,
         accounts: AccountOptions,
     ) -> Result<Self, Box<dyn std::error::Error>> {
-        Self::open(config, limits, Some(accounts))
+        Self::open(config, limits, Some(accounts), None)
+    }
+
+    /// Enables the administrator-configured SQL host on the same database transaction engine.
+    pub fn bind_with_sql(
+        config: Config,
+        limits: ResourceLimits,
+        accounts: Option<AccountOptions>,
+        sql: SqlOptions,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
+        sql.validate(&config.token, accounts.is_some())?;
+        Self::open(config, limits, accounts, Some(Arc::new(sql)))
     }
 
     fn open(
         config: Config,
         limits: ResourceLimits,
         options: Option<AccountOptions>,
+        sql: Option<Arc<SqlOptions>>,
     ) -> Result<Self, Box<dyn std::error::Error>> {
         config.validate_mode(options.is_some())?;
         if config
@@ -208,6 +225,7 @@ impl Server {
             .map(|opts| Accounts::open(&config, &db, limits, opts).map(Arc::new))
             .transpose()?;
         Ok(Self {
+            sql,
             accounts,
             config: Arc::new(config),
             db,
@@ -247,6 +265,7 @@ impl Server {
                     let config = Arc::clone(&self.config);
                     let stopping = Arc::clone(&stop);
                     let accounts = self.accounts.clone();
+                    let sql = self.sql.clone();
                     match thread::Builder::new()
                         .name(client_thread_name())
                         .spawn(move || {
@@ -257,7 +276,14 @@ impl Server {
                                 }
                             }
                             let _permit = Permit(count);
-                            let _ = connection(stream, db, &config, &stopping, accounts.as_deref());
+                            let _ = connection(
+                                stream,
+                                db,
+                                &config,
+                                &stopping,
+                                accounts.as_deref(),
+                                sql.as_deref(),
+                            );
                         }) {
                         Ok(worker) => workers.push(worker),
                         Err(error) => {
@@ -360,6 +386,19 @@ fn send(
 fn error(code: &str) -> Value {
     json!({"ok": false, "error": code})
 }
+fn error_code(e: &Error) -> &'static str {
+    match e {
+        Error::Conflict(_) => "conflict",
+        Error::Invalid(_) => "invalid_request",
+        Error::Limit(_) => "limit",
+        Error::ResourceExhausted(_) => "resource_exhausted",
+        Error::CommitUncertain(_) => "commit_uncertain",
+        Error::CheckpointUncertain(_) => "checkpoint_uncertain",
+        Error::Poisoned => "reopen_required",
+        Error::Io(_) | Error::Locked(_) => "storage_error",
+    }
+}
+
 fn same_token(a: &[u8], b: &[u8]) -> bool {
     let mut difference = a.len() ^ b.len();
     for i in 0..256 {
@@ -491,6 +530,7 @@ fn connection(
     config: &Config,
     stop: &AtomicBool,
     accounts: Option<&Accounts>,
+    sql: Option<&SqlOptions>,
 ) -> io::Result<()> {
     stream.set_nodelay(true)?;
     stream.set_read_timeout(Some(Duration::from_millis(100)))?;
@@ -512,9 +552,10 @@ fn connection(
             stop,
             Some((accounts, peer)),
             &clock,
+            sql,
         );
     }
-    session(stream, db, config, stop, None, &clock)
+    session(stream, db, config, stop, None, &clock, sql)
 }
 
 fn session(
@@ -524,10 +565,12 @@ fn session(
     stop: &AtomicBool,
     accounts: Option<(&Accounts, std::net::IpAddr)>,
     clock: &std::cell::Cell<Instant>,
+    sql: Option<&SqlOptions>,
 ) -> io::Result<()> {
     let deadline = clock.get();
     let mut wire = Wire::default();
     let auth = wire.receive(&mut stream, deadline, stop)?;
+    let mut view_role = None;
     let mut principal = if let Some((accounts, peer)) = accounts {
         let Some((selected, principal)) = accounts.login(&auth, peer) else {
             wire.send(&mut stream, &error("unauthorized"), deadline, stop)?;
@@ -538,9 +581,14 @@ fn session(
         Some(principal)
     } else {
         let token = auth.get("token").and_then(Value::as_str).unwrap_or("");
+        let admin = same_token(token.as_bytes(), &config.token);
+        view_role = sql
+            .and_then(|s| s.read_role.as_ref())
+            .filter(|role| same_token(token.as_bytes(), &role.token))
+            .map(|role| role.name.as_str());
         if auth.get("op").and_then(Value::as_str) != Some("auth")
             || auth.get("version").and_then(Value::as_u64) != Some(1)
-            || !same_token(token.as_bytes(), &config.token)
+            || (!admin && view_role.is_none())
         {
             wire.send(&mut stream, &error("unauthorized"), deadline, stop)?;
             return Ok(());
@@ -548,10 +596,27 @@ fn session(
         None
     };
     drop(auth);
-    let authenticated = match principal.as_ref() {
+    let mut authenticated = match principal.as_ref() {
         Some(user) => json!({"ok":true,"protocol":2,"account_id":hex(&user.id)}),
         None => json!({"ok":true,"protocol":1}),
     };
+    if let Some(user) = &principal {
+        authenticated["role"] = match user.role {
+            Role::Reader => "reader",
+            Role::Writer => "writer",
+            Role::Admin => "admin",
+        }
+        .into();
+    }
+    if sql.is_some() {
+        authenticated["sql"] = principal
+            .as_ref()
+            .is_none_or(|u| u.role.permits("sql"))
+            .into();
+    }
+    if let Some(role) = view_role {
+        authenticated["read_role"] = role.into();
+    }
     wire.send(&mut stream, &authenticated, deadline, stop)?;
     stream.flush()?;
     #[cfg(feature = "lock-timing")]
@@ -580,6 +645,11 @@ fn session(
         if Instant::now() >= deadline || stop.load(Ordering::Acquire) {
             break;
         }
+        if view_role.is_some() && !matches!(request["op"].as_str(), Some("sql" | "ping")) {
+            wire.send(&mut stream, &error("forbidden"), deadline, stop)?;
+            stream.flush()?;
+            continue;
+        }
         if let (Some((accounts, _)), Some(user)) = (accounts, principal.as_mut()) {
             if !accounts.current(&db, user) {
                 wire.send(&mut stream, &error("unauthorized"), deadline, stop)?;
@@ -588,7 +658,11 @@ fn session(
             }
             let op = request["op"].as_str().unwrap_or("");
             let response = if !user.role.permits(op) || request.get("database").is_some() {
-                Some(error("forbidden"))
+                let mut denied = error("forbidden");
+                if op == "sql" {
+                    denied["in_transaction"] = transaction.is_some().into();
+                }
+                Some(denied)
             } else if matches!(op, "create_user" | "set_role") {
                 Some(if transaction.is_some() {
                     error("invalid_request")
@@ -635,7 +709,34 @@ fn session(
             TAIL_SYNC.with(|items| items.borrow_mut().clear());
             crate::transactions::diagnostic_now_ns()
         };
-        let result = dispatch(&db, &mut transaction, &request);
+        let sql_request = request["op"].as_str() == Some("sql");
+        let result = if sql_request {
+            if let Some(options) = sql {
+                sql::execute(
+                    &db,
+                    &mut transaction,
+                    &request,
+                    options,
+                    view_role,
+                    config.transaction_timeout,
+                    deadline,
+                    &mut expires,
+                    stop,
+                    || match (accounts, principal.as_mut()) {
+                        (Some((accounts, _)), Some(user)) => {
+                            accounts.current(&db, user) && user.role.permits("sql")
+                        }
+                        _ => true,
+                    },
+                )
+            } else {
+                Ok(
+                    json!({"ok":false,"error":"sql_unavailable","in_transaction":transaction.is_some()}),
+                )
+            }
+        } else {
+            dispatch(&db, &mut transaction, &request)
+        };
         #[cfg(feature = "lock-timing")]
         let dispatch_finished = crate::transactions::diagnostic_now_ns();
         if transaction.is_some() && expires.is_none() {
@@ -657,16 +758,13 @@ fn session(
                 .is_ok_and(|v| v.get("reopen_required").and_then(Value::as_bool) == Some(true));
         let response = match result {
             Ok(value) => value,
-            Err(e) => error(match e {
-                Error::Conflict(_) => "conflict",
-                Error::Invalid(_) => "invalid_request",
-                Error::Limit(_) => "limit",
-                Error::ResourceExhausted(_) => "resource_exhausted",
-                Error::CommitUncertain(_) => "commit_uncertain",
-                Error::CheckpointUncertain(_) => "checkpoint_uncertain",
-                Error::Poisoned => "reopen_required",
-                Error::Io(_) | Error::Locked(_) => "storage_error",
-            }),
+            Err(e) => {
+                let mut response = error(error_code(&e));
+                if sql_request {
+                    response["in_transaction"] = transaction.is_some().into();
+                }
+                response
+            }
         };
         #[cfg(feature = "lock-timing")]
         let response = if diagnostic
@@ -1369,6 +1467,132 @@ mod tests {
             server.db.begin(),
             Err(Error::ResourceExhausted(_))
         ));
+    }
+
+    #[test]
+    fn sql_capability_follows_native_authority() {
+        assert!(Role::Admin.permits("sql"));
+        assert!(!Role::Reader.permits("sql"));
+        assert!(!Role::Writer.permits("sql"));
+        let options = SqlOptions {
+            host: std::env::current_exe().unwrap(),
+            read_role: Some(ReadRole {
+                name: "published".into(),
+                token: vec![b'r'; 32],
+            }),
+        };
+        assert!(options.validate(&[b'x'; 32], false).is_ok());
+        assert!(options.validate(&[b'r'; 32], false).is_err());
+        assert!(options.validate(&[], true).is_err());
+    }
+
+    #[test]
+    #[ignore = "set CATDB_SQL_HOST to the built Catdb.Sql.Host executable"]
+    fn sql_host_frames_use_session_transaction_and_authenticated_view_role() {
+        struct Script {
+            input: std::io::Cursor<Vec<u8>>,
+            output: Vec<u8>,
+        }
+        impl Read for Script {
+            fn read(&mut self, b: &mut [u8]) -> io::Result<usize> {
+                self.input.read(b)
+            }
+        }
+        impl Write for Script {
+            fn write(&mut self, b: &[u8]) -> io::Result<usize> {
+                self.output.write(b)
+            }
+            fn flush(&mut self) -> io::Result<()> {
+                Ok(())
+            }
+        }
+        let fixture = Fixture::new();
+        let db = fixture.db();
+        let config = Config {
+            bind: "127.0.0.1:0".parse().unwrap(),
+            database: fixture.0.join("state.ndb"),
+            token: vec![b'x'; 32],
+            initialize: false,
+            allow_remote: false,
+            max_connections: 4,
+            request_timeout: Duration::from_secs(10),
+            transaction_timeout: Duration::from_secs(10),
+        };
+        let options = SqlOptions {
+            host: PathBuf::from(std::env::var_os("CATDB_SQL_HOST").expect("CATDB_SQL_HOST")),
+            read_role: Some(ReadRole {
+                name: "published".into(),
+                token: vec![b'r'; 32],
+            }),
+        };
+        options.validate(&config.token, false).unwrap();
+        let run = |token: &str, requests: &[Value]| {
+            let mut bytes = Vec::new();
+            let stop = AtomicBool::new(false);
+            let deadline = Instant::now() + Duration::from_secs(30);
+            send(
+                &mut bytes,
+                &json!({"op":"auth","version":1,"token":token}),
+                deadline,
+                &stop,
+            )
+            .unwrap();
+            for request in requests {
+                send(&mut bytes, request, deadline, &stop).unwrap();
+            }
+            let mut stream = Script {
+                input: std::io::Cursor::new(bytes),
+                output: Vec::new(),
+            };
+            let error = session(
+                &mut stream,
+                db.clone(),
+                &config,
+                &stop,
+                None,
+                &std::cell::Cell::new(deadline),
+                Some(&options),
+            )
+            .unwrap_err();
+            assert_eq!(error.kind(), io::ErrorKind::UnexpectedEof);
+            let mut output = std::io::Cursor::new(stream.output);
+            (0..=requests.len())
+                .map(|_| receive(&mut output, deadline, &stop).unwrap())
+                .collect::<Vec<_>>()
+        };
+        let admin = run(
+            &"x".repeat(32),
+            &[
+                json!({"op":"sql","sql":"CREATE TABLE t(id INT); INSERT INTO t VALUES (1); CREATE VIEW v AS SELECT id FROM t; GRANT SELECT ON v TO published"}),
+                json!({"op":"begin"}),
+                json!({"op":"sql","sql":"INSERT INTO t VALUES (2)"}),
+                json!({"op":"rollback"}),
+            ],
+        );
+        assert!(admin.iter().all(|r| r["ok"] == true), "{admin:?}");
+        assert_eq!(admin[0]["sql"], true);
+        assert_eq!(admin[3]["in_transaction"], true);
+        let reader = run(
+            &"r".repeat(32),
+            &[
+                json!({"op":"get_latest","key":""}),
+                json!({"op":"put_commit","key":"","value":"01"}),
+                json!({"op":"diagnostic_last"}),
+                json!({"op":"sql","role":"admin","sql":"SELECT id FROM t"}),
+                json!({"op":"sql","sql":"SELECT id FROM v"}),
+                json!({"op":"sql","sql":"SHOW VIEWS"}),
+            ],
+        );
+        assert_eq!(reader[0]["read_role"], "published");
+        for denied in &reader[1..=3] {
+            assert_eq!(denied["error"], "forbidden");
+        }
+        assert_eq!(reader[4]["ok"], false);
+        assert_eq!(
+            reader[5]["results"][0]["Rows"],
+            json!([[{"Kind":"NUMBER","Text":"1"}]])
+        );
+        assert_eq!(reader[6]["results"][0]["Rows"][0][0]["Text"], "v");
     }
 
     #[test]

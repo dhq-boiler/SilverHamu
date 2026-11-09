@@ -70,6 +70,26 @@ class AccountsTest(unittest.TestCase):
         return Client("localhost", self.port, username=user, password=password or self.secret,
                       database=db, cafile=str(self.cert))
 
+    @unittest.skipUnless(os.getenv("CATDB_SQL_HOST"), "requires the built Catdb.Sql.Host executable")
+    def test_sql_uses_selected_database_admin_grant(self):
+        self.stop()
+        self.start([*self.flags, "--sql-host", os.environ["CATDB_SQL_HOST"]])
+        with self.login() as admin, self.login(db="second") as second:
+            self.assertTrue(admin.request(op="sql", sql="CREATE TABLE t(id INT)")["ok"])
+            self.assertEqual(second.request(op="sql", sql="SHOW TABLES")["results"][0]["Rows"], [])
+            for role in ("reader", "writer"):
+                self.assertTrue(admin.request(op="create_user", username=role, password=self.secret, role=role)["ok"])
+                with self.login(role) as limited:
+                    denied = limited.request(op="sql", sql="CREATE TABLE blocked(id INT)", role="admin")
+                    self.assertEqual(denied["error"], "forbidden")
+                    self.assertFalse(denied["in_transaction"])
+            self.assertTrue(admin.request(op="create_user", username="sqluser", password=self.secret, role="admin")["ok"])
+            with self.login("sqluser") as changing:
+                self.assertTrue(changing.request(op="sql", sql="BEGIN; INSERT INTO t VALUES (1)")["ok"])
+                self.assertTrue(admin.request(op="set_role", username="sqluser", role="reader")["ok"])
+                self.assertEqual(changing.request(op="sql", sql="COMMIT")["error"], "unauthorized")
+            self.assertEqual(admin.request(op="sql", sql="SELECT COUNT(*) FROM t")["results"][0]["Rows"][0][0]["Text"], "0")
+
     def test_database_grants_and_revocation_of_staged_write(self):
         with self.login() as admin, self.login(db="second") as second:
             for name, role in (("r","reader"),("w","writer"),("a","admin")):

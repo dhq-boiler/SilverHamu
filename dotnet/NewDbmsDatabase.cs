@@ -248,6 +248,40 @@ public sealed class NewDbmsDatabase : IDisposable
         }
     }
 
+    public NewDbmsExport Backup(string destination)
+    {
+        var path = TransactionNative.PathBytes(destination);
+        lock (_gate)
+        {
+            EnsureOpen();
+            try
+            {
+                TransactionNative.Check(TransactionNative.ndb_tx_backup(_handle, path, (ulong)path.Length, out var version, out var count));
+                return new(version, count);
+            }
+            catch (EntryPointNotFoundException error)
+            {
+                throw new NotSupportedException("The native catdb library does not support online backup.", error);
+            }
+        }
+    }
+
+    public static NewDbmsExport Restore(string source, string destination)
+    {
+        TransactionNative.CheckAbi();
+        var backup = TransactionNative.PathBytes(source);
+        var path = TransactionNative.PathBytes(destination);
+        try
+        {
+            TransactionNative.Check(TransactionNative.ndb_tx_restore(backup, (ulong)backup.Length, path, (ulong)path.Length, out var version, out var count));
+            return new(version, count);
+        }
+        catch (EntryPointNotFoundException error)
+        {
+            throw new NotSupportedException("The native catdb library does not support backup restore.", error);
+        }
+    }
+
     public NewDbmsCheckpoint CheckpointDeferredReclaim()
     {
         lock (_gate)
@@ -601,6 +635,10 @@ internal static class TransactionNative
     internal static extern int ndb_tx_rollback(ulong handle);
     [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_checkpoint(DatabaseHandle handle, out ulong version, out ulong records, out ulong before, out ulong after);
+    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int ndb_tx_backup(DatabaseHandle handle, byte[] destination, ulong destinationLength, out ulong version, out ulong records);
+    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int ndb_tx_restore(byte[] source, ulong sourceLength, byte[] destination, ulong destinationLength, out ulong version, out ulong records);
     [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_checkpoint_deferred(DatabaseHandle handle, out ulong version, out ulong records, out ulong before, out ulong after);
     [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]

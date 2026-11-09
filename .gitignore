@@ -11,3 +11,9 @@
 *.wal
 __pycache__/
 *.pyc
+/apps/**/bin/
+/apps/**/obj/
+/apps/.vs/
+/dotnet/**/bin/
+/dotnet/**/obj/
+**/TestResults/

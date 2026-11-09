@@ -117,7 +117,7 @@ impl Role {
             "put" | "delete" | "put_commit" | "delete_commit" | "put_batch_commit" => {
                 self >= Self::Writer
             }
-            "checkpoint" | "create_user" | "set_role" => self == Self::Admin,
+            "checkpoint" | "create_user" | "set_role" | "sql" => self == Self::Admin,
             _ => false,
         }
     }

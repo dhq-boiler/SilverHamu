@@ -1602,6 +1602,27 @@ impl Database {
 
 impl Transaction {
     #[cfg(feature = "service")]
+    pub(crate) fn stage_replica_noop(&mut self) -> Result<()> {
+        // The WAL needs one operation to advance its version. Configuration
+        // entries can arrive while applications own row locks on arbitrary keys.
+        let prefix = b"catdb-raft-noop";
+        let mut key = prefix.to_vec();
+        let state = self.database.state()?;
+        for suffix in 0u64.. {
+            let present = state.rows.get(key.as_slice())
+                .and_then(|versions| visible(versions, self.snapshot))
+                .is_some_and(|v| v.value.is_some());
+            if !present && !state.locked_keys.contains_key(&key) {
+                drop(state);
+                return self.delete(&key);
+            }
+            key.truncate(prefix.len());
+            key.extend_from_slice(&suffix.to_be_bytes());
+        }
+        Err(Error::Limit("replica no-op key space"))
+    }
+
+    #[cfg(feature = "service")]
     pub(crate) fn replication_writes(mut self) -> Result<WriteSet> {
         if !self.writes.is_empty() {
             let state = self.database.state()?;

@@ -93,7 +93,12 @@ fn receive(
     Ok(serde_json::from_slice(&body)?)
 }
 
-pub(super) fn call(address: SocketAddr, key: &hmac::Key, request: &Value) -> io::Result<Value> {
+pub(super) fn call(
+    address: SocketAddr,
+    key: &hmac::Key,
+    request: &Value,
+    verify_endpoint: bool,
+) -> io::Result<Value> {
     let deadline = Instant::now() + TIMEOUT;
     let mut stream = TcpStream::connect_timeout(&address, TIMEOUT)?;
     stream.set_nodelay(true)?;
@@ -101,6 +106,16 @@ pub(super) fn call(address: SocketAddr, key: &hmac::Key, request: &Value) -> io:
     read(&mut stream, &mut challenge[..32], deadline)?;
     challenge[32..].copy_from_slice(&nonce()?);
     write(&mut stream, &challenge[32..], deadline)?;
+    if verify_endpoint {
+        // A newly supplied address must prove its identity before receiving database contents.
+        let hello = serde_json::json!({"group":request["group"],"from":request["from"],"to":request["to"],"endpoint":request["endpoint"],"hello":true});
+        send(&mut stream, key, &challenge, 0, &hello, deadline)?;
+        if receive(&mut stream, key, &challenge, 1, deadline)?["hello"] != true {
+            return Err(io::Error::other("unexpected peer identity response"));
+        }
+        send(&mut stream, key, &challenge, 2, request, deadline)?;
+        return receive(&mut stream, key, &challenge, 3, deadline);
+    }
     send(&mut stream, key, &challenge, 0, request, deadline)?;
     receive(&mut stream, key, &challenge, 1, deadline)
 }
@@ -108,7 +123,7 @@ pub(super) fn call(address: SocketAddr, key: &hmac::Key, request: &Value) -> io:
 pub(super) fn serve(
     mut stream: TcpStream,
     key: &hmac::Key,
-    handle: impl FnOnce(Value) -> io::Result<Value>,
+    handle: impl Fn(Value) -> io::Result<Value>,
 ) -> io::Result<()> {
     let deadline = Instant::now() + TIMEOUT;
     stream.set_nonblocking(false)?;
@@ -118,6 +133,12 @@ pub(super) fn serve(
     write(&mut stream, &challenge[..32], deadline)?;
     read(&mut stream, &mut challenge[32..], deadline)?;
     let request = receive(&mut stream, key, &challenge, 0, deadline)?;
+    if request["hello"] == true {
+        let reply = handle(request)?;
+        send(&mut stream, key, &challenge, 1, &reply, deadline)?;
+        let rpc = receive(&mut stream, key, &challenge, 2, deadline)?;
+        return send(&mut stream, key, &challenge, 3, &handle(rpc)?, deadline);
+    }
     let reply = handle(request)?;
     send(&mut stream, key, &challenge, 1, &reply, deadline)
 }

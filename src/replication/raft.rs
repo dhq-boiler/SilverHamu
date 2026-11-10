@@ -1,3 +1,4 @@
+use super::membership::{Ids, Membership, Phase, Routes, valid_id};
 use super::snapshot::{CHUNK, MAX_IMAGE, Snapshot};
 use serde_json::{Value, json};
 use std::collections::{BTreeMap, BTreeSet};
@@ -37,6 +38,7 @@ pub(super) enum Role {
 }
 
 struct Progress {
+    applied: u64,
     snapshot: Option<Snapshot>,
     offset: usize,
     next: u64,
@@ -56,7 +58,9 @@ impl Progress {
 
 pub(super) struct Raft {
     id: String,
-    members: BTreeSet<String>,
+    bootstrap: Ids,
+    pub(super) membership: Membership,
+    pub(super) config_index: u64,
     hard: HardState,
     role: Role,
     leader: Option<String>,
@@ -75,6 +79,7 @@ pub(super) struct ReadRound {
     term: u64,
     id: u64,
     leader: String,
+    config_index: u64,
     acks: BTreeSet<String>,
 }
 
@@ -117,18 +122,19 @@ impl ReadRound {
             && raft.role == Role::Leader
             && raft.id == self.leader
             && raft.term() == self.term
-            && self.acks.intersection(&raft.members).count() >= raft.majority()
+            && self.config_index == raft.config_index
+            && raft
+                .membership
+                .quorum_index(|id| u64::from(self.acks.contains(id)))
+                == 1
     }
 }
 
 impl Raft {
     pub(super) fn new(id: String, members: Vec<String>, hard: HardState) -> io::Result<Self> {
         if !valid_members(&members)
-            || !members.contains(&id)
-            || hard
-                .voted_for
-                .as_ref()
-                .is_some_and(|vote| !members.contains(vote))
+            || !valid_id(&id)
+            || hard.voted_for.as_ref().is_some_and(|vote| !valid_id(vote))
             || hard.term == 0 && hard.voted_for.is_some()
             || hard.log.len() > MAX_LOG_ENTRIES
             || hard.snapshot.term > hard.term
@@ -156,9 +162,12 @@ impl Raft {
         let mut seed = [0; 8];
         getrandom::getrandom(&mut seed)
             .map_err(|_| io::Error::other("election randomness unavailable"))?;
+        let bootstrap: Ids = members.into_iter().collect();
         let mut raft = Self {
             id,
-            members: members.into_iter().collect(),
+            membership: Membership::bootstrap(bootstrap.clone()),
+            bootstrap,
+            config_index: 0,
             hard,
             role: Role::Follower,
             leader: None,
@@ -172,6 +181,7 @@ impl Raft {
             failed: false,
             incoming: None,
         };
+        raft.refresh_membership()?;
         raft.reset_deadline();
         Ok(raft)
     }
@@ -206,12 +216,118 @@ impl Raft {
             self.entry(index).map(|entry| entry.term)
         }
     }
-    fn majority(&self) -> usize {
-        self.members.len() / 2 + 1
+    // A configuration takes effect as soon as its entry is stored. Rebuild on
+    // truncation or snapshot replacement so an uncommitted change can roll back.
+    pub(super) fn configuration_at(&self, index: u64) -> Option<(u64, Value)> {
+        let count = (index - self.hard.snapshot.index) as usize;
+        self.hard.log[..count]
+            .iter()
+            .enumerate()
+            .rev()
+            .find(|(_, e)| e.command.get("membership").is_some())
+            .map(|(i, e)| (self.hard.snapshot.index + i as u64 + 1, e.command.clone()))
+            .or_else(|| self.hard.snapshot.membership.clone())
+    }
+    fn refresh_membership(&mut self) -> io::Result<()> {
+        match self.configuration_at(self.last_index()) {
+            Some((index, cmd)) => {
+                if index == 0 || index > self.last_index() {
+                    return Err(invalid("invalid membership index"));
+                }
+                self.membership = Membership::parse(&cmd)?;
+                self.config_index = index;
+            }
+            None => {
+                self.membership = Membership::bootstrap(self.bootstrap.clone());
+                self.config_index = 0;
+            }
+        }
+        self.sync_peers();
+        Ok(())
+    }
+    pub(super) fn replication_ids(&self) -> Ids {
+        let mut ids = self.membership.target.clone();
+        if self.membership.phase != Phase::Stable || self.commit_index() < self.config_index {
+            ids.extend(self.membership.old.iter().cloned());
+        }
+        ids.remove(&self.id);
+        ids
+    }
+    fn sync_peers(&mut self) {
+        if self.role != Role::Leader {
+            return;
+        }
+        let ids = self.replication_ids();
+        self.peers.retain(|id, _| ids.contains(id));
+        let next = self.last_index() + 1;
+        for id in ids {
+            self.peers.entry(id).or_insert(Progress {
+                next,
+                matched: 0,
+                applied: 0,
+                snapshot: None,
+                offset: 0,
+            });
+        }
+    }
+    pub(super) fn reconfigure(
+        &mut self,
+        target: Ids,
+        routes: Routes,
+        mut persist: impl FnMut(&HardState, usize) -> io::Result<()>,
+    ) -> io::Result<u64> {
+        self.require_leader()?;
+        let cancel = self.membership.phase == Phase::CatchUp && target == self.membership.old;
+        if (!cancel && self.membership.phase != Phase::Stable)
+            || self.config_index > self.commit_index()
+        {
+            return Err(invalid("membership change in progress"));
+        }
+
+        let change = Membership {
+            phase: if cancel {
+                Phase::Stable
+            } else {
+                Phase::CatchUp
+            },
+            old: self.membership.target.clone(),
+            target,
+            routes,
+        };
+        self.push(change.command(), false, &mut persist)
+    }
+    pub(super) fn advance_membership(
+        &mut self,
+        mut persist: impl FnMut(&HardState, usize) -> io::Result<()>,
+    ) -> io::Result<()> {
+        if self.role != Role::Leader
+            || self.membership.phase == Phase::Stable
+            || self.config_index > self.commit_index()
+            || self.term_at(self.commit_index()) != Some(self.term())
+        {
+            return Ok(());
+        }
+        let mut next = self.membership.clone();
+        next.phase = match next.phase {
+            Phase::CatchUp
+                if next.target.difference(&next.old).all(|id| {
+                    self.peers
+                        .get(id)
+                        .is_some_and(|p| p.applied >= self.config_index)
+                }) =>
+            {
+                Phase::Joint
+            }
+            Phase::Joint => Phase::Stable,
+            _ => return Ok(()),
+        };
+        self.push(next.command(), true, &mut persist)?;
+        Ok(())
     }
     pub(super) fn election_due(&self) -> bool {
         !self.failed
             && self.role != Role::Leader
+            && self.membership.voter(&self.id)
             && self.has_barrier_space()
             && Instant::now() >= self.deadline
     }
@@ -243,7 +359,7 @@ impl Raft {
     }
     fn check_peer(&self, peer: &str) -> io::Result<()> {
         self.healthy()?;
-        if self.id == peer || !self.members.contains(peer) {
+        if self.id == peer || !self.replication_ids().contains(peer) {
             return Err(invalid("unknown remote voter"));
         }
         Ok(())
@@ -294,8 +410,8 @@ impl Raft {
         mut persist: impl FnMut(&HardState, usize) -> io::Result<()>,
     ) -> io::Result<Value> {
         self.healthy()?;
-        if self.role == Role::Leader {
-            return Err(invalid("leader cannot start an election"));
+        if self.role == Role::Leader || !self.membership.voter(&self.id) {
+            return Err(invalid("ineligible candidate"));
         }
         // A full node can still vote and accept a replacement uncommitted suffix.
         // Campaigning without space for its barrier could repeatedly depose a functioning leader.
@@ -328,14 +444,42 @@ impl Raft {
         rpc: &Value,
         mut persist: impl FnMut(&HardState, usize) -> io::Result<()>,
     ) -> io::Result<Value> {
-        self.check_peer(from)?;
+        self.healthy()?;
+        if from == self.id || !valid_id(from) {
+            return Err(invalid("invalid sender"));
+        }
         let term = number(rpc, "term")?;
         if term == 0 {
             return Err(invalid("zero RPC term"));
         }
+        if matches!(rpc["kind"].as_str(), Some("append" | "snapshot"))
+            && !self.membership.voter(from)
+        {
+            // An outgoing leader can finish a committed joint transition. A lagging
+            // member can also hear from a leader elected after its last configuration.
+            let (index, committed) = match self.configuration_at(self.commit_index()) {
+                Some((index, value)) => (index, Membership::parse(&value)?),
+                None => (0, Membership::bootstrap(self.bootstrap.clone())),
+            };
+            if !committed.voter(from) {
+                let newer = rpc["leader_configuration_index"]
+                    .as_u64()
+                    .is_some_and(|n| n > index);
+                let eligible = newer
+                    && Membership::parse(&rpc["leader_configuration"]).is_ok_and(|m| {
+                        (m.voter(from) || m.old.contains(from)) && m.routes.contains_key(&self.id)
+                    });
+                if !eligible {
+                    return Err(invalid("sender outside cluster configuration"));
+                }
+            }
+        }
         match rpc["kind"].as_str() {
             Some("snapshot") => self.receive_snapshot(from, rpc, term, &mut persist),
             Some("vote") => {
+                if !self.membership.voter(from) || !self.membership.voter(&self.id) {
+                    return Ok(json!({"kind":"vote","term":self.term(),"granted":false}));
+                }
                 let last_index = number(rpc, "last_index")?;
                 let last_term = number(rpc, "last_term")?;
                 if (last_index == 0) != (last_term == 0)
@@ -378,29 +522,24 @@ impl Raft {
         if term != self.term() || self.role != Role::Candidate || reply["granted"] != true {
             return Ok(());
         }
+        if !self.membership.voter(peer) {
+            return Ok(());
+        }
         self.votes.insert(peer.to_owned());
-        if self.votes.len() < self.majority() {
+        if self
+            .membership
+            .quorum_index(|id| u64::from(self.votes.contains(id)))
+            == 0
+        {
             return Ok(());
         }
         let next = self.last_index() + 1;
         self.push(Value::Null, true, &mut persist)?;
-        self.peers = self
-            .members
-            .iter()
-            .filter(|id| **id != self.id)
-            .map(|id| {
-                (
-                    id.clone(),
-                    Progress {
-                        next,
-                        matched: 0,
-                        snapshot: None,
-                        offset: 0,
-                    },
-                )
-            })
-            .collect();
         self.role = Role::Leader;
+        self.sync_peers();
+        for p in self.peers.values_mut() {
+            p.next = next;
+        }
         self.leader = Some(self.id.clone());
         Ok(())
     }
@@ -411,6 +550,7 @@ impl Raft {
         noop: bool,
         persist: &mut impl FnMut(&HardState, usize) -> io::Result<()>,
     ) -> io::Result<u64> {
+        let changing = command.get("membership").is_some();
         let bytes = entry_size(&command)?;
         let max_entries = if noop {
             MAX_LOG_ENTRIES
@@ -434,6 +574,9 @@ impl Raft {
         });
         self.entry_bytes.push(bytes);
         self.log_bytes += bytes;
+        if changing {
+            self.refresh_membership()?;
+        }
         self.flush(self.hard.log.len() - 1, persist)?;
         Ok(self.last_index())
     }
@@ -485,6 +628,7 @@ impl Raft {
         self.log_bytes = self.entry_bytes.iter().sum();
         self.hard.commit = self.hard.commit.max(snapshot.index);
         self.hard.snapshot = snapshot;
+        self.refresh_membership()?;
         self.flush(keep, persist)
     }
     fn receive_snapshot(
@@ -557,7 +701,14 @@ impl Raft {
         reply["offset"] = buf.len().into();
         if buf.len() as u64 == size {
             let (_, _, data) = self.incoming.take().unwrap();
-            let snap = Snapshot::new(index, base_term, data);
+            let mut snap = Snapshot::new(index, base_term, data);
+            snap.membership = serde_json::from_value(rpc["membership"].clone())?;
+            if let Some((i, c)) = &snap.membership {
+                if *i == 0 || *i > index {
+                    return Err(invalid("snapshot membership index"));
+                }
+                Membership::parse(c)?;
+            }
             if snap.hash != hash {
                 return Err(invalid("snapshot digest mismatch"));
             }
@@ -584,6 +735,7 @@ impl Raft {
             id: self.round_id,
             term: self.term(),
             leader: self.id.clone(),
+            config_index: self.config_index,
             acks: BTreeSet::from([self.id.clone()]),
         })
     }
@@ -597,6 +749,15 @@ impl Raft {
     }
     pub(super) fn append_for(&self, peer: &str) -> io::Result<Value> {
         self.require_leader()?;
+        let mut request = self.replication_request(peer)?;
+        if self.config_index > 0 && self.peers[peer].matched < self.config_index {
+            request["leader_configuration_index"] = self.config_index.into();
+            request["leader_configuration"] = self.membership.command();
+        }
+        Ok(request)
+    }
+
+    fn replication_request(&self, peer: &str) -> io::Result<Value> {
         let next = self
             .peers
             .get(peer)
@@ -608,7 +769,7 @@ impl Raft {
             let offset = progress.offset;
             let end = (offset + CHUNK).min(snap.bytes.len());
             return Ok(
-                json!({"kind":"snapshot","to":peer,"term":self.term(),"index":snap.index,"base_term":snap.term,"hash":snap.hash,"size":snap.bytes.len(),"offset":offset,"data":crate::service::hex(&snap.bytes[offset..end])}),
+                json!({"kind":"snapshot","to":peer,"term":self.term(),"index":snap.index,"base_term":snap.term,"hash":snap.hash,"membership":snap.membership,"size":snap.bytes.len(),"offset":offset,"data":crate::service::hex(&snap.bytes[offset..end])}),
             );
         }
         let prev = next - 1;
@@ -732,6 +893,12 @@ impl Raft {
         // A shorter or delayed RPC proves nothing about the remaining local suffix.
         let commit = self.commit_index().max(leader_commit.min(matched));
         let changed = truncate.is_some() || commit != self.commit_index();
+        let changed_config = truncate.is_some_and(|k| {
+            self.config_index > self.hard.snapshot.index + k as u64
+                || suffix
+                    .iter()
+                    .any(|(e, _)| e.command.get("membership").is_some())
+        });
         if let Some(keep) = truncate {
             let retained = self.log_bytes - self.entry_bytes[keep..].iter().sum::<usize>();
             let total = retained + suffix.iter().map(|(_, size)| size).sum::<usize>();
@@ -748,6 +915,9 @@ impl Raft {
         }
         if changed {
             self.hard.commit = commit;
+            if changed_config {
+                self.refresh_membership()?;
+            }
             if self
                 .incoming
                 .as_ref()
@@ -783,6 +953,9 @@ impl Raft {
             }
             if reply["installed"] == true {
                 p.matched = p.matched.max(snap.index);
+                p.applied = p
+                    .applied
+                    .max(reply["applied"].as_u64().unwrap_or(0).min(p.matched));
                 p.next = p.matched + 1;
                 p.snapshot = None;
                 p.offset = 0;
@@ -837,14 +1010,29 @@ impl Raft {
             return Err(invalid("invalid append acknowledgment"));
         }
         progress.matched = progress.matched.max(matched);
+        progress.applied = progress
+            .applied
+            .max(reply["applied"].as_u64().unwrap_or(0).min(progress.matched));
         progress.advance_to(matched + 1, self.hard.snapshot.index);
-        let mut matches = self.peers.values().map(|p| p.matched).collect::<Vec<_>>();
-        matches.push(self.last_index());
-        matches.sort_unstable();
-        let majority_index = matches[matches.len() - self.majority()];
+        let majority_index = self.membership.quorum_index(|id| {
+            if id == self.id {
+                self.last_index()
+            } else {
+                self.peers.get(id).map_or(0, |p| p.matched)
+            }
+        });
         if majority_index > self.commit_index() && self.term_at(majority_index) == Some(term) {
+            let switched =
+                self.commit_index() < self.config_index && self.config_index <= majority_index;
             self.hard.commit = majority_index;
             self.flush(self.hard.log.len(), &mut persist)?;
+            if self.membership.phase == Phase::Stable && switched {
+                if !self.membership.voter(&self.id) {
+                    self.defer_leadership();
+                } else {
+                    self.sync_peers();
+                }
+            }
         }
         Ok(true)
     }
@@ -1144,6 +1332,57 @@ mod tests {
             .is_err()
         );
         assert_eq!(node("a", disk).commit_index(), 1);
+    }
+
+    #[test]
+    fn joint_elections_commits_and_reads_each_need_both_majorities() {
+        let change = Membership {
+            phase: Phase::Joint,
+            old: members().into_iter().collect(),
+            target: ["c", "d", "e"].map(str::to_owned).into(),
+            routes: ["a", "b", "c", "d", "e"]
+                .into_iter()
+                .enumerate()
+                .map(|(i, id)| {
+                    let address =
+                        |port| std::net::SocketAddr::from(([127, 0, 0, 1], port + i as u16));
+                    (id.into(), [address(7400), address(7500)])
+                })
+                .collect(),
+        };
+        let hard = HardState {
+            term: 1,
+            commit: 1,
+            log: vec![Entry {
+                term: 1,
+                command: change.command(),
+            }],
+            ..Default::default()
+        };
+        let mut c = node("c", hard.clone());
+        c.start_election(durable).unwrap();
+        let vote = json!({"kind":"vote","granted":true,"term":c.term()});
+        for id in ["a", "b"] {
+            c.vote_reply(id, &vote, durable).unwrap();
+        }
+        assert_eq!(c.role(), Role::Candidate);
+        c.vote_reply("d", &vote, durable).unwrap();
+        assert_eq!(c.role(), Role::Leader);
+        let mut a = node("a", hard.clone());
+        let mut d = node("d", hard.clone());
+        let mut e = node("e", hard);
+        exchange(&mut c, &mut d);
+        exchange(&mut c, &mut e);
+        assert_eq!(c.commit_index(), 1);
+        exchange(&mut c, &mut a);
+        assert_eq!(c.commit_index(), 2);
+        let mut read = c.read_round().unwrap();
+        for peer in [&mut d, &mut e, &mut a] {
+            let sent = c.append_for_round(&peer.id, &read).unwrap();
+            let reply = peer.handle_rpc("c", &sent, durable).unwrap();
+            read.ack(&peer.id, &sent, &reply);
+            assert_eq!(read.ready(&c), peer.id == "a");
+        }
     }
 
     #[test]

@@ -80,6 +80,15 @@ impl Server {
         allow_role_writes: bool,
     ) -> Result<Self, Box<dyn std::error::Error>> {
         config.validate()?;
+        if let Some(admin) = topology.admin_token.as_deref()
+            && (!(32..=256).contains(&admin.len())
+                || same_token(admin, &config.token)
+                || same_token(admin, &peer_token)
+                || sql.as_ref().and_then(|s| s.read_role.as_ref())
+                    .is_some_and(|role| same_token(admin, &role.token)))
+        {
+            return Err("membership administration requires a distinct token".into());
+        }
         if config.bind != topology.client_address()
             || !(32..=256).contains(&peer_token.len())
             || same_token(&config.token, &peer_token)
@@ -497,7 +506,7 @@ fn error_code(e: &Error) -> &'static str {
     }
 }
 
-fn same_token(a: &[u8], b: &[u8]) -> bool {
+pub(crate) fn same_token(a: &[u8], b: &[u8]) -> bool {
     let mut difference = a.len() ^ b.len();
     for i in 0..256 {
         difference |= usize::from(a.get(i).copied().unwrap_or(0) ^ b.get(i).copied().unwrap_or(0));

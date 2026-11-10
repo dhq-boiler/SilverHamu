@@ -356,6 +356,115 @@ class ReplicationTests(ClusterFixture):
             self.verify_data(db, {"aa": "bb"})
 
 
+class OnlineMembershipTests(ClusterFixture):
+    member_count = 5
+
+    def setUp(self):
+        super().setUp()
+        self.write_config(self.config, self.cluster, self.members[:3])
+        self.admin = secrets.token_hex(32)
+        self.admin_file = self.root / "membership.token"
+        self.admin_file.write_text(self.admin, encoding="ascii")
+
+    def command(self, node, config=None, peer_secret=None):
+        if node in ("n4", "n5"):
+            config = self.root / f"{node}.json"
+            joining = next(m for m in self.members if m["id"] == node)
+            config.write_text(json.dumps({"cluster_id": self.cluster, "members": self.members[:3],
+                                          "joining": joining}), encoding="utf-8")
+        return super().command(node, config, peer_secret) + ["--cluster-admin-token-file", str(self.admin_file)]
+
+    def change(self, client, members):
+        index = self.ok(client, "cluster_status")["configuration_index"]
+        return self.ok(client, "cluster_reconfigure", members=members, admin_token=self.admin,
+                       expected_configuration_index=index)
+
+    def stable(self, node, members):
+        status = self.status(node)
+        return (status["membership_phase"] == "stable" and set(status["members"]) == members
+                and int(status["applied_index"]) >= int(status["configuration_index"]))
+
+    def test_expand_three_to_five_then_remove_leader_and_write_on_remaining_three(self):
+        for node in ("n1", "n2", "n3"):
+            self.start(node)
+        with self.discover() as first:
+            leader = self.ok(first, "cluster_status")["node_id"]
+            self.ok(first, "put_commit", key="01", value="aa")
+            for _ in range(128):
+                self.ok(first, "put_commit", key="04", value="dd")
+            self.await_condition("snapshot before expansion", lambda: int(self.status(leader)["snapshot_index"]) > 0)
+            self.assertEqual(first.request(op="cluster_reconfigure", members=self.members)["error"], "forbidden")
+            with self.connect(leader) as locker:
+                self.ok(locker, "begin")
+                self.ok(locker, "lock_keys", keys=[b"catdb-raft-noop".hex()])
+                self.change(first, self.members)
+                self.ok(locker, "rollback")
+            self.assertEqual(self.status(leader)["membership_phase"], "catch_up")
+            self.ok(first, "put_commit", key="02", value="bb")
+            for node in ("n4", "n5"):
+                self.start(node)
+            self.await_condition("all five voters caught up", lambda: all(
+                self.stable(n, set(self.endpoints)) for n in self.servers))
+            for node in ("n4","n5"):
+                self.assertGreater(int(self.status(node)["installed_snapshot_index"]),0)
+            second = next(n for n in ("n1", "n2", "n3") if n != leader)
+            remaining = set(self.endpoints) - {leader, second}
+            self.change(first, [m for m in self.members if m["id"] in remaining])
+            self.await_condition("remaining three voters committed", lambda: all(
+                self.stable(n, remaining) for n in remaining))
+            for removed in (leader, second):
+                with self.connect(removed) as old:
+                    self.assertFalse(old.request(op="get_latest", key="01")["ok"])
+                    self.assertFalse(old.request(op="put_commit", key="03", value="00")["ok"])
+                self.stop(removed)
+        with self.discover() as current:
+            self.assertIn(self.ok(current, "cluster_status")["node_id"], remaining)
+            self.verify_data(current, {"01": "aa", "02": "bb", "03": None})
+            self.ok(current, "put_commit", key="03", value="cc")
+        # The original three voters are now all offline. Only the two new members can elect and read.
+        original = next(n for n in remaining if n not in ("n4", "n5"))
+        self.stop(original)
+        with self.discover() as current:
+            self.assertIn(self.ok(current, "cluster_status")["node_id"], ("n4", "n5"))
+            self.verify_data(current, {"01": "aa", "02": "bb", "03": "cc"})
+            final_index = int(self.ok(current, "cluster_status")["configuration_index"])
+            payload = "ee" * (240 * 1024)
+            for _ in range(19):
+                self.ok(current, "put_commit", key="05", value=payload)
+            self.await_condition("snapshot includes final membership", lambda: all(
+                int(self.status(n)["snapshot_index"]) >= final_index for n in ("n4", "n5")))
+            self.start(original)
+            self.await_condition("retained voter installs the new configuration from a peer snapshot",
+                                 lambda: int(self.status(original)["installed_snapshot_index"]) >= final_index)
+        self.stop_all()
+        for node in remaining:
+            self.start(node)
+        with self.discover() as restarted:
+            self.verify_data(restarted, {"01": "aa", "02": "bb", "03": "cc"})
+            self.assertEqual(set(self.ok(restarted, "cluster_status")["members"]), remaining)
+            self.start(leader)
+            self.assertFalse(self.status(leader)["is_voter"])
+            with self.connect(leader) as retired:
+                self.assertFalse(retired.request(op="put_commit", key="06", value="ff")["ok"])
+            self.ok(restarted, "put_commit", key="06", value="de")
+
+    def test_new_leader_can_cancel_unfinished_learner_catch_up(self):
+        for node in ("n1", "n2", "n3"):
+            self.start(node)
+        with self.discover() as old:
+            primary=self.ok(old,"cluster_status")["node_id"]
+            self.change(old,self.members)
+            self.stop(primary)
+        with self.discover() as leader:
+            self.assertEqual(self.ok(leader,"cluster_status")["membership_phase"],"catch_up")
+            stale=leader.request(op="cluster_reconfigure", members=self.members[:3],admin_token=self.admin,
+                                 expected_configuration_index="0")
+            self.assertEqual(stale["error"],"configuration_changed")
+            self.change(leader,self.members[:3])
+            self.ok(leader,"put_commit",key="01",value="ff")
+            self.verify_data(leader,{"01":"ff"})
+
+
 class FiveMemberTests(ClusterFixture):
     member_count = 5
 

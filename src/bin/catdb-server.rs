@@ -18,6 +18,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     let mut cluster_file = None;
     let mut node_id = None;
     let mut peer_token_file = None;
+    let mut cluster_admin_file = None;
     let mut database = None;
     let mut token_file = None;
     let mut sql_host = None;
@@ -60,6 +61,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             "--cluster-config" => {
                 cluster_file = Some(args.next().ok_or("missing cluster config path")?)
             }
+            "--cluster-admin-token-file" => {
+                cluster_admin_file = Some(args.next().ok_or("missing membership admin token path")?)
+            }
             "--node-id" => node_id = Some(args.next().ok_or("missing node id")?),
             "--peer-token-file" => {
                 peer_token_file = Some(args.next().ok_or("missing peer token path")?)
@@ -94,7 +98,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             "--healthcheck" => check = true,
             "--help" => {
                 println!(
-                    "Replicated token service: --db PATH --token-file PATH --cluster-config FILE --node-id ID --peer-token-file FILE [--init] [--sql-host ABSOLUTE_EXE]"
+                    "Replicated token service: --db PATH --token-file PATH --cluster-config FILE --node-id ID --peer-token-file FILE [--cluster-admin-token-file FILE] [--init] [--sql-host ABSOLUTE_EXE]"
                 );
                 println!(
                     "Account service: --db PATH --tls-cert CERT.pem --tls-key KEY.pem [--attach NAME=EXISTING_DB] [--bootstrap-admin NAME --bootstrap-password-file FILE]"
@@ -171,9 +175,11 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         }
     };
     let replicated = match (cluster_file, node_id, peer_token_file) {
-        (None, None, None) => None,
+        (None, None, None) if cluster_admin_file.is_none() => None,
         (Some(file), Some(node), Some(peer_token)) if !secure && !check => {
-            Some((ClusterConfig::load(std::path::Path::new(&file), &node, remote)?, read_token(peer_token)?))
+            let mut topology=ClusterConfig::load(std::path::Path::new(&file), &node, remote)?;
+            if let Some(path)=cluster_admin_file {topology.set_admin_token(read_token(path)?);}
+            Some((topology, read_token(peer_token)?))
         }
         _ => return Err("cluster mode requires --cluster-config, --node-id, --peer-token-file and token authentication".into()),
     };

@@ -7,6 +7,7 @@ pub(super) const MAX_IMAGE: usize = 128 * 1024 * 1024;
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub(super) struct Snapshot {
+    pub membership: Option<(u64, serde_json::Value)>,
     pub index: u64,
     pub term: u64,
     pub bytes: Arc<Vec<u8>>,
@@ -17,6 +18,7 @@ impl Snapshot {
     pub fn new(index: u64, term: u64, bytes: Vec<u8>) -> Self {
         let hash = crate::service::hex(digest(&SHA256, &bytes).as_ref());
         Self {
+            membership: None,
             index,
             term,
             bytes: Arc::new(bytes),

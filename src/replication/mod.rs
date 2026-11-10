@@ -1,14 +1,16 @@
-//! Fixed-membership consensus for the token-authenticated service.
+//! Replicated membership and consensus for the token-authenticated service.
+mod membership;
 mod raft;
 mod snapshot;
 mod storage;
 mod transport;
 
 use crate::transactions::{Database, Error, ResourceLimits, Transaction};
+use membership::{Ids, Phase, Routes, endpoints, valid_id, validate_routes};
 use raft::{HardState, Raft, ReadRound, Role};
 use ring::hmac;
 use serde_json::{Value, json};
-use std::collections::{BTreeMap, BTreeSet};
+
 use std::io::{self, Read};
 use std::net::{SocketAddr, TcpListener};
 use std::path::Path;
@@ -19,14 +21,20 @@ use std::time::{Duration, Instant};
 use storage::Storage;
 
 pub struct ClusterConfig {
+    pub(crate) admin_token: Option<Vec<u8>>,
     id: String,
     identity: String,
     node: String,
-    members: BTreeMap<String, SocketAddr>,
+    members: Routes,
+    remote: bool,
+    peer: SocketAddr,
     client: SocketAddr,
 }
 
 impl ClusterConfig {
+    pub fn set_admin_token(&mut self, token: Vec<u8>) {
+        self.admin_token = Some(token);
+    }
     pub fn load(path: &Path, node: &str, allow_remote: bool) -> io::Result<Self> {
         let mut bytes = Vec::new();
         std::fs::File::open(path)?
@@ -36,61 +44,45 @@ impl ClusterConfig {
             return Err(io::Error::other("cluster config too large"));
         }
         let config: Value = serde_json::from_slice(&bytes)?;
-        fn id(value: &Value) -> io::Result<&str> {
-            value
+        let cluster = config["cluster_id"]
+            .as_str()
+            .filter(|id| valid_id(id))
+            .ok_or_else(|| io::Error::other("invalid cluster id"))?;
+        let members = endpoints(&config["members"], allow_remote)?;
+        let mut directory = members.clone();
+        if let Some(join) = config.get("joining") {
+            let id = join["id"]
                 .as_str()
-                .filter(|s| {
-                    (1..=128).contains(&s.len())
-                        && s.bytes()
-                            .all(|b| b.is_ascii_alphanumeric() || b"-_.".contains(&b))
-                })
-                .ok_or_else(|| io::Error::other("invalid cluster or member id"))
-        }
-        let cluster = id(&config["cluster_id"])?;
-        let entries = config["members"]
-            .as_array()
-            .filter(|a| matches!(a.len(), 3 | 5))
-            .ok_or_else(|| io::Error::other("configure exactly three or five members"))?;
-        let mut topology = BTreeMap::new();
-        let mut endpoints = BTreeSet::new();
-        let mut members = BTreeMap::new();
-        let mut client = None;
-        for entry in entries {
-            let name = id(&entry["id"])?;
-            let mut address = |field: &str| -> io::Result<SocketAddr> {
-                let addr: SocketAddr = entry[field]
+                .filter(|id| valid_id(id))
+                .ok_or_else(|| io::Error::other("invalid joining id"))?;
+            let addr = |field: &str| {
+                join[field]
                     .as_str()
                     .unwrap_or("")
-                    .parse()
-                    .map_err(io::Error::other)?;
-                if addr.port() == 0
-                    || addr.ip().is_unspecified()
-                    || addr.ip().is_multicast()
-                    || (!allow_remote && !addr.ip().is_loopback())
-                    || !endpoints.insert(addr)
-                {
-                    return Err(io::Error::other(
-                        "cluster endpoints must be distinct, routable addresses; remote endpoints require --allow-remote",
-                    ));
-                }
-                Ok(addr)
+                    .parse::<SocketAddr>()
+                    .map_err(io::Error::other)
             };
-            let peer = address("peer")?;
-            let service = address("client")?;
-            if members.insert(name.to_owned(), peer).is_some() {
-                return Err(io::Error::other("duplicate cluster member"));
-            }
-            topology.insert(name, [peer.to_string(), service.to_string()]);
-            if name == node {
-                client = Some(service);
+            if id != node
+                || directory
+                    .insert(id.into(), [addr("peer")?, addr("client")?])
+                    .is_some()
+            {
+                return Err(io::Error::other("joining must name this new node"));
             }
         }
+        validate_routes(&directory, allow_remote)?;
+        let [peer, client] = *directory
+            .get(node)
+            .ok_or_else(|| io::Error::other("unknown node id"))?;
         Ok(Self {
+            admin_token: None,
             id: cluster.into(),
+            identity: serde_json::to_string(&(cluster, &members))?,
             node: node.into(),
             members,
-            identity: serde_json::to_string(&(cluster, topology))?,
-            client: client.ok_or_else(|| io::Error::other("unknown node id"))?,
+            remote: allow_remote,
+            peer,
+            client,
         })
     }
 
@@ -125,11 +117,16 @@ impl Cluster {
         init: bool,
         limits: ResourceLimits,
     ) -> io::Result<Self> {
-        let listener = TcpListener::bind(config.members[&config.node])?;
+        let listener = TcpListener::bind(config.peer)?;
         listener.set_nonblocking(true)?;
         let ids = config.members.keys().cloned().collect::<Vec<_>>();
+        let disk_identity = if config.members.contains_key(&config.node) {
+            config.identity.clone()
+        } else {
+            serde_json::to_string(&(&config.identity, &config.node, config.peer, config.client))?
+        };
         let (storage, hard) =
-            Storage::open(path, &config.identity, &config.node, &ids, init, limits)?;
+            Storage::open(path, &disk_identity, &config.node, &ids, init, limits)?;
         let database = storage.database();
         let lock_term = AtomicU64::new(hard.term);
         let raft = Raft::new(config.node.clone(), ids, hard)?;
@@ -188,20 +185,51 @@ impl Cluster {
         if request["group"].as_str() != Some(&self.config.identity)
             || request["to"].as_str() != Some(&self.config.node)
             || from == self.config.node
-            || !self.config.members.contains_key(from)
+            || !valid_id(from)
+            || request
+                .get("endpoint")
+                .is_some_and(|v| *v != json!([self.config.peer, self.config.client]))
         {
             return Err(io::Error::other("cluster membership mismatch"));
         }
+        if request["hello"] == true {
+            return Ok(json!({"hello":true}));
+        }
         let mut core = self.lock()?;
         let Core { raft, storage } = &mut *core;
-        raft.handle_rpc(from, &request["rpc"], self.persist(storage))
+        let mut reply = raft.handle_rpc(from, &request["rpc"], self.persist(storage))?;
+        reply["applied"] = storage.applied_index().map_err(io::Error::other)?.into();
+        Ok(reply)
     }
 
     fn exchange(&self, peer: &str, rpc: &Value) -> io::Result<Value> {
+        let (route, dynamic) = {
+            let core = self.lock()?;
+            let route = core
+                .raft
+                .membership
+                .routes
+                .get(peer)
+                .or_else(|| self.config.members.get(peer))
+                .copied()
+                .ok_or_else(|| io::Error::other("unknown peer endpoint"))?;
+            (
+                route,
+                core.raft.config_index != 0
+                    || !rpc["membership"].is_null()
+                    || rpc["entries"].as_array().is_some_and(|es| {
+                        es.iter().any(|e| e["command"].get("membership").is_some())
+                    }),
+            )
+        };
+        if !self.config.remote && !route[0].ip().is_loopback() {
+            return Err(io::Error::other("remote peer disabled"));
+        }
         transport::call(
-            self.config.members[peer],
+            route[0],
             &self.key,
-            &json!({"group":self.config.identity,"from":self.config.node,"to":peer,"rpc":rpc}),
+            &json!({"group":self.config.identity,"from":self.config.node,"to":peer,"endpoint":route,"rpc":rpc}),
+            dynamic || self.config.members.get(peer) != Some(&route),
         )
     }
 
@@ -223,17 +251,12 @@ impl Cluster {
         })
     }
 
-    fn peers(&self) -> impl Iterator<Item = &String> {
-        self.config
-            .members
-            .keys()
-            .filter(|id| *id != &self.config.node)
-    }
-
     fn replicate(&self, mut round: Option<&mut ReadRound>) -> io::Result<()> {
         let requests = {
             let core = self.lock()?;
-            self.peers()
+            core.raft
+                .replication_ids()
+                .iter()
                 .map(|peer| {
                     let rpc = match &round {
                         Some(r) => core.raft.append_for_round(peer, r)?,
@@ -264,6 +287,7 @@ impl Cluster {
                 raft.defer_leadership();
                 return Ok(());
             }
+            raft.advance_membership(self.persist(storage))?;
             if raft.election_due() {
                 Some(raft.start_election(self.persist(storage))?)
             } else {
@@ -272,7 +296,10 @@ impl Cluster {
         };
         if let Some(request) = request {
             let requests = self
-                .peers()
+                .lock()?
+                .raft
+                .replication_ids()
+                .iter()
                 .map(|id| (id.clone(), request.clone()))
                 .collect();
             for (peer, _, reply) in self.broadcast(requests) {
@@ -303,10 +330,11 @@ impl Cluster {
                 raft.entry(index).unwrap().term,
             )
         };
-        let image = snapshot::Snapshot::capture(read, index, term).map_err(io::Error::other)?;
+        let mut image = snapshot::Snapshot::capture(read, index, term).map_err(io::Error::other)?;
         let mut core = self.lock()?;
         let Core { raft, storage } = &mut *core;
         if raft.entry(index).is_some_and(|entry| entry.term == term) {
+            image.membership = raft.configuration_at(index);
             raft.compact(image, &mut self.persist(storage))?;
         }
         Ok(())
@@ -373,11 +401,11 @@ impl Cluster {
             Role::Candidate => "candidate",
         };
         Ok(
-            json!({"ok":true,"cluster_id":self.config.id,"node_id":self.config.node,"role":role,"leader_id":raft.leader(),"term":raft.term().to_string(),"commit_index":raft.commit_index().to_string(),"applied_index":core.storage.applied_index()?.to_string(),"snapshot_index":raft.hard_state().snapshot.index.to_string(),"log_entries":raft.hard_state().log.len(),"installed_snapshot_index":core.storage.installed_snapshot_index().to_string()}),
+            json!({"ok":true,"cluster_id":self.config.id,"node_id":self.config.node,"membership_phase":raft.membership.phase_name(),"configuration_index":raft.config_index.to_string(),"old_members":raft.membership.old,"members":raft.membership.target,"is_voter":raft.membership.voter(&self.config.node),"role":role,"leader_id":raft.leader(),"term":raft.term().to_string(),"commit_index":raft.commit_index().to_string(),"applied_index":core.storage.applied_index()?.to_string(),"snapshot_index":raft.hard_state().snapshot.index.to_string(),"log_entries":raft.hard_state().log.len(),"installed_snapshot_index":core.storage.installed_snapshot_index().to_string()}),
         )
     }
 
-    fn barrier(&self, deadline: Instant) -> Result<u64, &'static str> {
+    fn barrier(&self, deadline: Instant) -> Result<MutexGuard<'_, Core>, &'static str> {
         loop {
             let round = {
                 let mut core = self.lock().map_err(|_| "reopen_required")?;
@@ -398,7 +426,7 @@ impl Cluster {
                     {
                         return Err("resource_exhausted");
                     }
-                    return Ok(core.raft.term());
+                    return Ok(core);
                 }
             } else {
                 let _ = self.replicate(None);
@@ -421,6 +449,15 @@ impl Cluster {
         if op == "cluster_status" {
             return self.status();
         }
+        if op == "cluster_reconfigure"
+            && !self.config.admin_token.as_deref().is_some_and(|admin| {
+                request["admin_token"]
+                    .as_str()
+                    .is_some_and(|t| crate::service::same_token(admin, t.as_bytes()))
+            })
+        {
+            return Ok(crate::service::error("forbidden"));
+        }
         if op == "rollback" {
             *pinned = None;
             return crate::service::dispatch(&self.database, tx, request);
@@ -436,7 +473,7 @@ impl Cluster {
             }
         };
         let deadline = deadline.min(Instant::now() + Duration::from_millis(1250));
-        let term = match self.barrier(deadline) {
+        let mut core = match self.barrier(deadline) {
             Ok(t) => t,
             Err(code) => {
                 tx.take();
@@ -444,14 +481,14 @@ impl Cluster {
                 return Ok(crate::service::error(code));
             }
         };
-        let mut core = self.lock().map_err(Error::Io)?;
-        if core.raft.role() != Role::Leader
-            || core.raft.term() != term
-            || (tx.is_some() && *pinned != Some(term))
-        {
+        let term = core.raft.term();
+        if tx.is_some() && *pinned != Some(term) {
             tx.take();
             *pinned = None;
             return Ok(crate::service::error("not_leader"));
+        }
+        if op == "cluster_reconfigure" {
+            return self.reconfigure(core, tx.is_some(), request, deadline);
         }
         let mutating = match op {
             "put_commit" | "delete_commit" if tx.is_none() => {
@@ -514,6 +551,78 @@ impl Cluster {
             }
         })?;
         drop(core);
+        self.await_commit(term, index, deadline)?;
+        Ok(json!({"ok":true,"version":index.to_string()}))
+    }
+    fn reconfigure(
+        &self,
+        mut core: MutexGuard<'_, Core>,
+        active: bool,
+        request: &Value,
+        deadline: Instant,
+    ) -> ClientResult {
+        let term = core.raft.term();
+        if active {
+            return Err(Error::Invalid("membership change inside transaction"));
+        }
+        let target = endpoints(&request["members"], self.config.remote)
+            .map_err(|_| Error::Invalid("invalid target membership"))?;
+        let ids: Ids = target.keys().cloned().collect();
+        let Core { raft, storage } = &mut *core;
+        if request["expected_configuration_index"]
+            .as_str()
+            .and_then(|v| v.parse::<u64>().ok())
+            != Some(raft.config_index)
+        {
+            return Ok(crate::service::error("configuration_changed"));
+        }
+        let mut routes = target;
+        let mut known = raft.membership.target.clone();
+        if raft.membership.phase != Phase::Stable {
+            known.extend(raft.membership.old.iter().cloned());
+        }
+        for id in &known {
+            let old = *raft
+                .membership
+                .routes
+                .get(id)
+                .or_else(|| self.config.members.get(id))
+                .ok_or(Error::Invalid("missing peer route"))?;
+            if routes
+                .insert(id.clone(), old)
+                .is_some_and(|proposed| proposed != old)
+            {
+                return Err(Error::Invalid("member endpoints cannot change"));
+            }
+        }
+        validate_routes(&routes, self.config.remote)
+            .map_err(|_| Error::Invalid("duplicate or invalid endpoint"))?;
+        if ids == raft.membership.target {
+            return Ok(
+                json!({"ok":true,"phase":raft.membership.phase_name(),"configuration_index":raft.config_index.to_string()}),
+            );
+        }
+        let cancel = raft.membership.phase == Phase::CatchUp && ids == raft.membership.old;
+        if (!cancel && raft.membership.phase != Phase::Stable)
+            || raft.config_index > raft.commit_index()
+        {
+            return Ok(crate::service::error("membership_change_in_progress"));
+        }
+        let index = raft
+            .reconfigure(ids, routes, self.persist(storage))
+            .map_err(|e| {
+                if self.healthy() && e.kind() == io::ErrorKind::StorageFull {
+                    Error::Limit("replicated log capacity")
+                } else {
+                    Error::CommitUncertain(e)
+                }
+            })?;
+        drop(core);
+        self.await_commit(term, index, deadline)?;
+        Ok(json!({"ok":true,"phase":"accepted","configuration_index":index.to_string()}))
+    }
+
+    fn await_commit(&self, term: u64, index: u64, deadline: Instant) -> Result<(), Error> {
         loop {
             let _ = self.replicate(None);
             let core = self.lock().map_err(Error::CommitUncertain)?;
@@ -529,7 +638,7 @@ impl Cluster {
                     .map_err(|e| Error::CommitUncertain(io::Error::other(e)))?
                     >= index
             {
-                return Ok(json!({"ok":true,"version":index.to_string()}));
+                return Ok(());
             }
             drop(core);
             if Instant::now() >= deadline {

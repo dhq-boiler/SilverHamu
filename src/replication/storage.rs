@@ -40,6 +40,10 @@ fn hex(value: &Value, maximum: usize) -> io::Result<Vec<u8>> {
 type WriteSet = Vec<(Vec<u8>, Option<Vec<u8>>)>;
 
 fn decode_command(command: &Value) -> io::Result<(WriteSet, usize)> {
+    if command.get("membership").is_some() {
+        super::membership::Membership::parse(command)?;
+        return Ok((Vec::new(), serde_json::to_vec(command)?.len()));
+    }
     if command.is_null() {
         return Ok((Vec::new(), 4));
     }
@@ -101,6 +105,7 @@ fn chunk_key(bank: u64, chunk: usize) -> Vec<u8> {
 }
 
 struct Durable {
+    dynamic: bool,
     base: u64,
     bank: u64,
     term: u64,
@@ -110,10 +115,11 @@ struct Durable {
 }
 
 pub(super) struct Storage {
+    dynamic_signature: Vec<u8>,
     origin: Mutex<(u64, u64, bool)>,
     data: Database,
     journal: Database,
-    member_ids: HashSet<String>,
+
     // An uncertain write must not be followed by a vote or another apply in this process.
     durable: Mutex<Option<Durable>>,
 }
@@ -137,7 +143,7 @@ impl Storage {
         if cluster.is_empty()
             || ids.len() != membership.len()
             || ids.contains("")
-            || !ids.contains(node)
+            || !super::membership::valid_id(node)
         {
             return Err(invalid("invalid replica identity"));
         }
@@ -201,7 +207,11 @@ impl Storage {
             .get(CONFIG)
             .map_err(io::Error::other)?
             .ok_or_else(|| invalid("missing replica configuration"))?;
-        if serde_json::from_slice::<Value>(&config)? != signature {
+        let config: Value = serde_json::from_slice(&config)?;
+        let mut dynamic_signature = signature.clone();
+        dynamic_signature["format"] = 2.into();
+        let dynamic = config == dynamic_signature;
+        if !dynamic && config != signature {
             return Err(invalid(
                 "replica node, cluster or fixed membership mismatch",
             ));
@@ -234,6 +244,12 @@ impl Storage {
                 data.extend_from_slice(&chunk);
             }
             snapshot = Snapshot::new(idx, term, data);
+            if let Some(bytes) = reader
+                .get(b"snapshot/membership")
+                .map_err(io::Error::other)?
+            {
+                snapshot.membership = serde_json::from_slice(&bytes)?;
+            }
             if snapshot.hash != hash {
                 return Err(invalid("snapshot checksum"));
             }
@@ -250,7 +266,7 @@ impl Storage {
         }
         let vote = match header.get("vote") {
             Some(Value::Null) => None,
-            Some(Value::String(id)) if ids.contains(id) => Some(id.clone()),
+            Some(Value::String(id)) if super::membership::valid_id(id) => Some(id.clone()),
             _ => return Err(invalid("invalid persisted vote")),
         };
         let mut state = HardState {
@@ -287,11 +303,13 @@ impl Storage {
         }
         drop(reader);
         let store = Self {
+            dynamic_signature: serde_json::to_vec(&dynamic_signature)?,
             origin: Mutex::new(origin),
             data,
             journal,
-            member_ids: ids,
+
             durable: Mutex::new(Some(Durable {
+                dynamic,
                 base,
                 bank,
                 term: state.term,
@@ -334,7 +352,7 @@ impl Storage {
                 || state
                     .voted_for
                     .as_ref()
-                    .is_some_and(|v| !self.member_ids.contains(v))
+                    .is_some_and(|v| !super::membership::valid_id(v))
                 || (state.term == durable.term
                     && durable.voted_for.is_some()
                     && state.voted_for != durable.voted_for)
@@ -367,7 +385,24 @@ impl Storage {
                 }
             }
             let mut tx = self.journal.begin().map_err(io::Error::other)?;
+            // Older binaries must refuse this journal even after the configuration
+            // entry has been compacted into a snapshot they cannot interpret.
+            if !durable.dynamic
+                && (state.snapshot.membership.is_some()
+                    || state.log[common..]
+                        .iter()
+                        .any(|e| e.command.get("membership").is_some()))
+            {
+                tx.put(CONFIG, &self.dynamic_signature)
+                    .map_err(io::Error::other)?;
+                durable.dynamic = true;
+            }
             if moved {
+                tx.put(
+                    b"snapshot/membership",
+                    &serde_json::to_vec(&state.snapshot.membership)?,
+                )
+                .map_err(io::Error::other)?;
                 tx.put(
                     IMAGE,
                     &serde_json::to_vec(&(
@@ -474,13 +509,7 @@ impl Storage {
             ));
         }
         if writes.is_empty() {
-            // Empty native commits do not advance the version. Re-stage exactly the
-            // observed value (or its absence) so even an occupied key remains unchanged.
-            let key = b"catdb-raft-noop";
-            match tx.get(key)? {
-                Some(value) => tx.put(key, &value)?,
-                None => tx.delete(key)?,
-            }
+            tx.stage_replica_noop()?;
         } else {
             for (key, value) in writes {
                 match value {

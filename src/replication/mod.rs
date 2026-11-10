@@ -92,6 +92,7 @@ impl ClusterConfig {
 }
 
 struct Core {
+    transfer_vote: Option<Value>,
     raft: Raft,
     storage: Storage,
 }
@@ -133,7 +134,11 @@ impl Cluster {
         Ok(Self {
             config,
             key: hmac::Key::new(hmac::HMAC_SHA256, token),
-            core: Mutex::new(Core { raft, storage }),
+            core: Mutex::new(Core {
+                raft,
+                storage,
+                transfer_vote: None,
+            }),
             operations: Mutex::new(()),
             lock_term,
             failed: AtomicBool::new(false),
@@ -195,8 +200,29 @@ impl Cluster {
         if request["hello"] == true {
             return Ok(json!({"hello":true}));
         }
+        if request["rpc"]["kind"] == "transfer_status" {
+            let term = request["rpc"]["term"]
+                .as_u64()
+                .ok_or_else(|| io::Error::other("missing elected term"))?;
+            return self.maintenance_quorum(from, term);
+        }
         let mut core = self.lock()?;
-        let Core { raft, storage } = &mut *core;
+        let Core {
+            raft,
+            storage,
+            transfer_vote,
+        } = &mut *core;
+        let rpc = &request["rpc"];
+        if rpc["kind"] == "timeout_now" {
+            let vote = raft.transfer_election(
+                from,
+                rpc,
+                storage.applied_index().map_err(io::Error::other)?,
+                self.persist(storage),
+            )?;
+            *transfer_vote = Some(vote);
+            return Ok(json!({"started":true}));
+        }
         let mut reply = raft.handle_rpc(from, &request["rpc"], self.persist(storage))?;
         reply["applied"] = storage.applied_index().map_err(io::Error::other)?.into();
         Ok(reply)
@@ -251,12 +277,20 @@ impl Cluster {
         })
     }
 
-    fn replicate(&self, mut round: Option<&mut ReadRound>) -> io::Result<()> {
+    fn replicate(&self, round: Option<&mut ReadRound>) -> io::Result<()> {
+        self.replicate_except(round, None)
+    }
+    fn replicate_except(
+        &self,
+        mut round: Option<&mut ReadRound>,
+        excluded: Option<&str>,
+    ) -> io::Result<()> {
         let requests = {
             let core = self.lock()?;
             core.raft
                 .replication_ids()
                 .iter()
+                .filter(|id| Some(id.as_str()) != excluded)
                 .map(|peer| {
                     let rpc = match &round {
                         Some(r) => core.raft.append_for_round(peer, r)?,
@@ -268,7 +302,7 @@ impl Cluster {
         };
         for (peer, request, reply) in self.broadcast(requests) {
             let mut core = self.lock()?;
-            let Core { raft, storage } = &mut *core;
+            let Core { raft, storage, .. } = &mut *core;
             if raft.append_reply(&peer, &request, &reply, self.persist(storage))?
                 && let Some(round) = round.as_deref_mut()
             {
@@ -278,17 +312,47 @@ impl Cluster {
         Ok(())
     }
 
+    fn maintenance_quorum(&self, departing: &str, term: u64) -> io::Result<Value> {
+        let mut round = {
+            let mut core = self.lock()?;
+            if core.raft.term() != term
+                || core.raft.membership.phase != Phase::Stable
+                || !core.raft.membership.voter(departing)
+            {
+                return Err(io::Error::other("obsolete transfer probe"));
+            }
+            core.raft.read_round()?
+        };
+        round.exclude(departing);
+        self.replicate_except(Some(&mut round), Some(departing))?;
+        let core = self.lock()?;
+        let commit = core.raft.commit_index();
+        Ok(
+            json!({"ready":round.ready(&core.raft) && core.storage.applied_index().map_err(io::Error::other)?==commit,
+                  "term":core.raft.term(),"commit":commit}),
+        )
+    }
+
     fn tick(&self) -> io::Result<()> {
         let request = {
             let mut core = self.lock()?;
-            let Core { raft, storage } = &mut *core;
+            let Core {
+                raft,
+                storage,
+                transfer_vote,
+            } = &mut *core;
             self.storage_result(storage.retry_apply(raft.hard_state()))?;
             if storage.applied_index().map_err(io::Error::other)? < raft.commit_index() {
                 raft.defer_leadership();
                 return Ok(());
             }
             raft.advance_membership(self.persist(storage))?;
-            if raft.election_due() {
+            if let Some(vote) = transfer_vote
+                .take()
+                .filter(|vote| raft.role() == Role::Candidate && vote["term"] == raft.term())
+            {
+                Some(vote)
+            } else if raft.election_due() {
                 Some(raft.start_election(self.persist(storage))?)
             } else {
                 None
@@ -304,7 +368,7 @@ impl Cluster {
                 .collect();
             for (peer, _, reply) in self.broadcast(requests) {
                 let mut core = self.lock()?;
-                let Core { raft, storage } = &mut *core;
+                let Core { raft, storage, .. } = &mut *core;
                 raft.vote_reply(&peer, &reply, self.persist(storage))?;
             }
         }
@@ -332,7 +396,7 @@ impl Cluster {
         };
         let mut image = snapshot::Snapshot::capture(read, index, term).map_err(io::Error::other)?;
         let mut core = self.lock()?;
-        let Core { raft, storage } = &mut *core;
+        let Core { raft, storage, .. } = &mut *core;
         if raft.entry(index).is_some_and(|entry| entry.term == term) {
             image.membership = raft.configuration_at(index);
             raft.compact(image, &mut self.persist(storage))?;
@@ -449,7 +513,7 @@ impl Cluster {
         if op == "cluster_status" {
             return self.status();
         }
-        if op == "cluster_reconfigure"
+        if matches!(op, "cluster_reconfigure" | "cluster_transfer_leader")
             && !self.config.admin_token.as_deref().is_some_and(|admin| {
                 request["admin_token"]
                     .as_str()
@@ -472,6 +536,7 @@ impl Cluster {
                 Err(std::sync::TryLockError::WouldBlock) => thread::sleep(Duration::from_millis(5)),
             }
         };
+        let request_deadline = deadline;
         let deadline = deadline.min(Instant::now() + Duration::from_millis(1250));
         let mut core = match self.barrier(deadline) {
             Ok(t) => t,
@@ -489,6 +554,12 @@ impl Cluster {
         }
         if op == "cluster_reconfigure" {
             return self.reconfigure(core, tx.is_some(), request, deadline);
+        }
+        if op == "cluster_transfer_leader" {
+            if tx.is_some() {
+                return Err(Error::Invalid("transfer inside a transaction"));
+            }
+            return self.transfer_leader(core, request, request_deadline);
         }
         let mutating = match op {
             "put_commit" | "delete_commit" if tx.is_none() => {
@@ -539,7 +610,7 @@ impl Cluster {
         let command = json!({"writes":pairs});
         storage::validate_command(&command)
             .map_err(|_| Error::Limit("replicated transaction size"))?;
-        let Core { raft, storage } = &mut *core;
+        let Core { raft, storage, .. } = &mut *core;
         if Instant::now() >= deadline {
             return Ok(crate::service::error("request_timeout"));
         }
@@ -554,6 +625,80 @@ impl Cluster {
         self.await_commit(term, index, deadline)?;
         Ok(json!({"ok":true,"version":index.to_string()}))
     }
+    fn transfer_leader(
+        &self,
+        core: MutexGuard<'_, Core>,
+        request: &Value,
+        deadline: Instant,
+    ) -> ClientResult {
+        let target = request["target"]
+            .as_str()
+            .ok_or(Error::Invalid("missing target voter"))?;
+        let raft = &core.raft;
+        let term = raft.term();
+        if request["expected_term"]
+            .as_str()
+            .and_then(|v| v.parse::<u64>().ok())
+            != Some(term)
+        {
+            return Ok(crate::service::error("term_changed"));
+        }
+        if raft.membership.phase != Phase::Stable {
+            return Ok(crate::service::error("membership_change_in_progress"));
+        }
+        if target == self.config.node || !raft.membership.voter(target) {
+            return Ok(crate::service::error("invalid_transfer_target"));
+        }
+        let index = raft.commit_index();
+        let command = json!({"kind":"timeout_now","term":term,"configuration_index":raft.config_index,"index":index});
+        drop(core);
+        let deadline = deadline.min(Instant::now() + Duration::from_secs(5));
+        loop {
+            let core = self.lock().map_err(Error::Io)?;
+            if core.raft.role() != Role::Leader || core.raft.term() != term {
+                return Ok(crate::service::error("not_leader"));
+            }
+            if Instant::now() >= deadline {
+                return Ok(crate::service::error("target_not_ready"));
+            }
+            if core.raft.transfer_ready(target) {
+                break;
+            }
+            drop(core);
+            let _ = self.replicate(None);
+            thread::sleep(Duration::from_millis(20));
+        }
+        if !self
+            .maintenance_quorum(&self.config.node, term)
+            .is_ok_and(|s| s["ready"] == true)
+            || Instant::now() >= deadline
+        {
+            return Ok(crate::service::error("maintenance_quorum_unavailable"));
+        }
+        // A lost reply can follow a durable self-vote. Observe the outcome instead of replaying the trigger.
+        let _ = self.exchange(target, &command);
+        while Instant::now() < deadline {
+            let observed = {
+                let core = self.lock().map_err(Error::Io)?;
+                (core.raft.term() > term && core.raft.leader() == Some(target))
+                    .then_some(core.raft.term())
+            };
+            if let Some(elected) = observed
+                && let Ok(status) =
+                    self.exchange(target, &json!({"kind":"transfer_status","term":elected}))
+                && status["ready"] == true
+                && status["term"] == elected
+                && status["commit"].as_u64().is_some_and(|n| n >= index)
+            {
+                return Ok(
+                    json!({"ok":true,"leader_id":target,"term":elected.to_string(),"commit_index":status["commit"].as_u64().unwrap().to_string()}),
+                );
+            }
+            thread::sleep(Duration::from_millis(25));
+        }
+        Ok(crate::service::error("transfer_uncertain"))
+    }
+
     fn reconfigure(
         &self,
         mut core: MutexGuard<'_, Core>,
@@ -568,7 +713,7 @@ impl Cluster {
         let target = endpoints(&request["members"], self.config.remote)
             .map_err(|_| Error::Invalid("invalid target membership"))?;
         let ids: Ids = target.keys().cloned().collect();
-        let Core { raft, storage } = &mut *core;
+        let Core { raft, storage, .. } = &mut *core;
         if request["expected_configuration_index"]
             .as_str()
             .and_then(|v| v.parse::<u64>().ok())

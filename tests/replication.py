@@ -379,6 +379,40 @@ class OnlineMembershipTests(ClusterFixture):
         return self.ok(client, "cluster_reconfigure", members=members, admin_token=self.admin,
                        expected_configuration_index=index)
 
+    def test_planned_transfer_to_specified_voter_before_old_leader_shutdown(self):
+        for node in ("n1", "n2", "n3"):
+            self.start(node)
+        with self.discover() as old:
+            before = self.ok(old, "cluster_status")
+            source = before["node_id"]
+            target = next(n for n in ("n3", "n2") if n != source)
+            request = dict(op="cluster_transfer_leader", target=target, expected_term=before["term"])
+            self.assertEqual(old.request(**request)["error"], "forbidden")
+            request["admin_token"] = self.admin
+            for invalid in (source, "n4"):
+                self.assertEqual(old.request(**{**request, "target": invalid})["error"], "invalid_transfer_target")
+            self.assertEqual(old.request(**{**request, "expected_term":"0"})["error"], "term_changed")
+            other = next(n for n in ("n1","n2","n3") if n not in (source,target))
+            self.stop(other)
+            self.assertEqual(old.request(**request)["error"], "maintenance_quorum_unavailable")
+            self.assertEqual(self.status(source)["term"], before["term"])
+            self.start(other)
+            self.stop(target)
+            version = int(self.ok(old, "put_commit", key="11", value="aa")["version"])
+            self.assertEqual(old.request(**request)["error"], "target_not_ready")
+            self.ok(old, "put_commit", key="22", value="bb")
+            self.start(target)
+            transfer = self.ok(old, **request)
+            self.assertEqual(transfer["leader_id"], target)
+            self.assertGreater(int(transfer["term"]), int(before["term"]))
+            self.assertGreater(int(transfer["commit_index"]), version)
+            self.assertEqual(self.status(target)["role"], "leader")
+            self.stop(source)
+        with self.connect(target) as new:
+            self.verify_data(new, {"11": "aa", "22": "bb"})
+            self.ok(new, "put_commit", key="33", value="cc")
+            self.verify_data(new, {"33": "cc"})
+
     def stable(self, node, members):
         status = self.status(node)
         return (status["membership_phase"] == "stable" and set(status["members"]) == members

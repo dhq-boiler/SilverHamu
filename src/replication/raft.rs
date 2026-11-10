@@ -105,6 +105,9 @@ fn entry_size(command: &Value) -> io::Result<usize> {
 }
 
 impl ReadRound {
+    pub(super) fn exclude(&mut self, id: &str) {
+        self.acks.remove(id);
+    }
     pub(super) fn ack(&mut self, peer: &str, sent: &Value, reply: &Value) {
         if sent["to"].as_str() == Some(peer)
             && sent["term"].as_u64() == Some(self.term)
@@ -370,6 +373,36 @@ impl Raft {
             return Err(io::Error::other("not leader"));
         }
         Ok(())
+    }
+
+    pub(super) fn transfer_ready(&self, target: &str) -> bool {
+        self.peers
+            .get(target)
+            .is_some_and(|p| p.matched == self.last_index() && p.applied >= self.commit_index())
+    }
+
+    pub(super) fn transfer_election(
+        &mut self,
+        from: &str,
+        rpc: &Value,
+        applied: u64,
+        persist: impl FnMut(&HardState, usize) -> io::Result<()>,
+    ) -> io::Result<Value> {
+        if self.role != Role::Follower
+            || self.leader() != Some(from)
+            || rpc["term"] != self.term()
+            || self.membership.phase != Phase::Stable
+            || !self.membership.voter(from)
+            || !self.membership.voter(&self.id)
+            || rpc["configuration_index"] != self.config_index
+            || self.config_index > self.commit_index()
+            || rpc["index"] != self.last_index()
+            || self.last_index() != self.commit_index()
+            || applied != self.commit_index()
+        {
+            return Err(invalid("stale transfer or target not caught up"));
+        }
+        self.start_election(persist)
     }
     fn follower(&mut self) {
         self.role = Role::Follower;
@@ -1332,6 +1365,31 @@ mod tests {
             .is_err()
         );
         assert_eq!(node("a", disk).commit_index(), 1);
+    }
+
+    #[test]
+    fn timeout_now_requires_the_recognized_leader_term_configuration_and_applied_log() {
+        let mut a = node("a", HardState::default());
+        let mut b = node("b", HardState::default());
+        elect(&mut a, &mut b);
+        exchange(&mut a, &mut b);
+        exchange(&mut a, &mut b);
+        let term = a.term();
+        let index = a.commit_index();
+        let cmd = json!({"term":term,"configuration_index":0,"index":index});
+        assert!(b.transfer_election("c", &cmd, index, durable).is_err());
+        assert!(b.transfer_election("a", &cmd, index - 1, durable).is_err());
+        for key in ["configuration_index", "term", "index"] {
+            let mut stale = cmd.clone();
+            stale[key] = 999.into();
+            assert!(b.transfer_election("a", &stale, index, durable).is_err());
+        }
+        assert_eq!(b.term(), term);
+        assert_eq!(
+            b.transfer_election("a", &cmd, index, durable).unwrap()["term"],
+            term + 1
+        );
+        assert!(b.transfer_election("a", &cmd, index, durable).is_err());
     }
 
     #[test]

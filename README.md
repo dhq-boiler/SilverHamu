@@ -20,6 +20,7 @@
 | Back up and restore a standalone database | Yes | Yes | Offline backup preserves the physical file. Embedded online backup captures a committed generation. Account-enrolled services require a coordinated backup. |
 | SQL editor and result grid | No | Yes | The standalone SQL CLI is also available for scripts. |
 | [Replication and automatic failover](docs/replication.md) | Yes (token service) | No | Three or five voters replicate commits and elect a leader. [Online membership changes](docs/replication.md#change-membership-online) can add nodes or remove the current leader. Joining and returning nodes catch up from snapshots and the remaining log. |
+| [Planned leader transfer](docs/replication.md#transfer-leadership-before-maintenance) | Yes (token service) | No | Select a caught-up voter and confirm that it can reach a majority without the departing leader before stopping that server. |
 
 [Try embedded SQL](dotnet/README.md#embedded-sql-and-cli) · [SQL and service compatibility](docs/sql.md) · [Back up and restore](docs/backup.md)
 

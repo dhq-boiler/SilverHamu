@@ -124,3 +124,20 @@ A successful `accepted` response records the requested transition. Poll `cluster
 To shrink back to three, call `change([m for m in target if m["id"] in keep])` with the three IDs to retain in `keep`. Keep the old and target majorities available through the transition. Confirm the stable configuration on the surviving leader, update clients' trusted seed addresses, then stop the removed processes. An offline removed member may still report its previous local configuration. Keep its database and journal together if the identity will be used again. Active transactions on a departing leader must be reopened after the election.
 
 Membership controls voting and replication. A retired machine still holds its local data and any shared credentials provisioned on it. Decommission it through the same access-control and storage procedures used for other credential-bearing servers.
+
+## Transfer leadership before maintenance
+
+Send `cluster_transfer_leader` to the current leader using the cluster admin token. Choose another voter in the stable configuration. The request takes the leader's observed term so an obsolete maintenance request cannot trigger a later election.
+
+```python
+with Client.connect_leader(seeds, client_token, cluster_id="books") as db:
+    status = db.request(op="cluster_status")
+    departing = status["node_id"]
+    result = db.request(op="cluster_transfer_leader", target="n2",
+                        expected_term=status["term"], admin_token=admin_token)
+    print(departing, result["leader_id"], result["term"], result["commit_index"])
+```
+
+The source serializes data operations while the target catches up. It checks for a majority excluding itself, then asks the target to start a normal election. Success means the source observed the specified successor in a newer term and the successor confirmed a fresh quorum excluding the source, with its current-term commit applied. You can then stop the departing server and reconnect to the successor. The voting configuration stays the same. Transactions opened on the old leader must be restarted.
+
+If the target cannot catch up (`target_not_ready`) or stopping the source would leave too few reachable voters (`maintenance_quorum_unavailable`), the source returns before triggering the election. If the reply is lost or returns `transfer_uncertain`, keep the source running and verify the leader and surviving quorum before maintenance. Allow a client timeout above the five-second handoff window.

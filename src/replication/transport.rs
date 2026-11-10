@@ -99,7 +99,7 @@ pub(super) fn call(
     request: &Value,
     verify_endpoint: bool,
 ) -> io::Result<Value> {
-    let deadline = Instant::now() + TIMEOUT;
+    let deadline = response_deadline(Instant::now() + TIMEOUT, request);
     let mut stream = TcpStream::connect_timeout(&address, TIMEOUT)?;
     stream.set_nodelay(true)?;
     let mut challenge = [0; 64];
@@ -137,8 +137,19 @@ pub(super) fn serve(
         let reply = handle(request)?;
         send(&mut stream, key, &challenge, 1, &reply, deadline)?;
         let rpc = receive(&mut stream, key, &challenge, 2, deadline)?;
+        let deadline = response_deadline(deadline, &rpc);
         return send(&mut stream, key, &challenge, 3, &handle(rpc)?, deadline);
     }
+    let deadline = response_deadline(deadline, &request);
     let reply = handle(request)?;
     send(&mut stream, key, &challenge, 1, &reply, deadline)
+}
+
+fn response_deadline(deadline: Instant, request: &Value) -> Instant {
+    // Verifying the post-maintenance quorum requires another bounded peer round trip.
+    if request["rpc"]["kind"] == "transfer_status" {
+        deadline + TIMEOUT * 2
+    } else {
+        deadline
+    }
 }

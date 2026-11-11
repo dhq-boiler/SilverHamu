@@ -1,7 +1,7 @@
 version: 3
 title: SilverHamu
 createdAt: 2026-11-09T15:31:25.7166025Z
-modifiedAt: 2026-11-11T08:34:23.696213Z
+modifiedAt: 2026-11-11T08:49:53.447739Z
 tasks:
 - id: sql-semantic-types
   title: SQLで日時・金額・識別子の意味を保証する
@@ -203,4 +203,4 @@ tasks:
     title: 各公開先へ配布して取得可能であることを確認する
     estimateHours: 2
     remainingHours: 2
-    notes: Goとnpmを公開確認済み。npmは先生のstage承認後、レジストリの0.2.0とshasum f1e42e6ccc70bf1c20e0c8d9b314d26c7f00f33aの一致を確認。PyPIはinvalid-publisherで停止。RubyはActions 42986418412がubuntu-24.04の割当待ちを継続。ubuntu-latestへ切り替えて再実行し、Ruby・RubyGemsの固定バージョンと検証済みSHA-256による成果物照合は維持する。NuGetとMaven CentralはCLI公開認証が未設定。先生の指示によりデスクトップ・ブラウザー自動操作を停止し、CLIとActionsのみで進める。
+    notes: Goとnpmを公開確認済み。npmはレジストリの0.2.0とshasum f1e42e6ccc70bf1c20e0c8d9b314d26c7f00f33aが一致し、公開パッケージの実TCP/TLS・トランザクション・認証拒否も成功。検証済み9成果物をGitHub Release clients/v0.2.0へ公開。先生がPyPI・RubyGems・NuGetのTrusted Publisherを登録済み。PyPI 42986050943・Ruby 42988156757・NuGet 42989049653は公開ジョブの割当待ち。Rubyは再ビルドと既定SHA-256照合が成功。Javaは4成果物のハッシュ・GAVを確認し、署名とCentral公開ワークフローを追加（cc5ef05）。ローカルGPG agentは起動不能で署名試験は未完了。Centralトークンと本番署名鍵の環境Secrets登録を先生へ依頼中。外部待ちの完了時刻は不明。画面操作は使わずCLIとActionsだけで進める。

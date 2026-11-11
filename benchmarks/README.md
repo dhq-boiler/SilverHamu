@@ -1,12 +1,12 @@
 # Reproducible API comparisons
 
 This is an **experimental, client-observed microbenchmark**, not a SQL benchmark,
-TPC result, engine-only speed limit, or claim of product equivalence. catdb does
+TPC result, engine-only speed limit, or claim of product equivalence. SilverHamu does
 not provide the relational features of the SQL systems in this comparison.
 
 ## Current one-request API refresh
 
-Use `--single-request` to measure the current catdb service single-operation API.
+Use `--single-request` to measure the current SilverHamu service single-operation API.
 Use `--image` to select a freshly built comparison harness without replacing old
 images. The default adapter remains legacy for historical reproduction.
 [Refreshed comparison commands and limits](peer-refresh/README.md).
@@ -72,13 +72,13 @@ benchmark Dockerfile. This image is a test tool, not the production service imag
 - Defaults are retained except the explicit durability, isolation and memory
   settings below. Internal caches and implementation costs are not identical.
   No checkpoint is explicitly requested during timed cases; each engine's normal
-  automatic maintenance remains enabled. catdb is checkpointed after bulk load.
+  automatic maintenance remains enabled. SilverHamu is checkpointed after bulk load.
 
 ## Durability and isolation settings
 
 | Product | Configuration |
 |---|---|
-| catdb | Release build, group commit enabled, normal sync-before-acknowledgement path; optimistic serializable transactions. The service additionally uses its built-in wake-on-four policy; the C ABI exposes group-commit enablement only. |
+| SilverHamu | Release build, group commit enabled, normal sync-before-acknowledgement path; optimistic serializable transactions. The service additionally uses its built-in wake-on-four policy; the C ABI exposes group-commit enablement only. |
 | SQLite | WAL, `synchronous=FULL`, 64 MiB page-cache target, 120 s busy timeout; explicit transactions |
 | PostgreSQL | `fsync=on`, `synchronous_commit=on`, SERIALIZABLE; other server settings default |
 | MySQL / InnoDB | `innodb_flush_log_at_trx_commit=1`, `sync_binlog=1`, SERIALIZABLE; binary log setting recorded |
@@ -96,8 +96,8 @@ and [Oracle COMMIT semantics](https://docs.oracle.com/en/database/oracle/oracle-
 
 ## Interpretation limits
 
-Python's GIL, drivers, serialization (catdb service uses hex JSON), round trips,
-container networking and CPU quotas can limit results. The native catdb adapter
+Python's GIL, drivers, serialization (SilverHamu service uses hex JSON), round trips,
+container networking and CPU quotas can limit results. The native SilverHamu adapter
 uses ctypes; SQLite uses Python's built-in sqlite3 extension. SQL drivers are
 psycopg, PyMySQL and python-oracledb thin mode. They do not have equal overhead.
 Four-thread throughput can be lower than one-thread throughput even for a scalable

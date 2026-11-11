@@ -4,11 +4,11 @@ In this warm-cache client benchmark, each request reads one key, returns 100 con
 
 The default build led PostgreSQL 18.6 and Oracle Free on lookup and range throughput at both connection counts. Four-client durable update throughput rose from 972.4 to 1,071.1/s (+10.1%) and p99 fell from 6.131 to 5.501 ms. Both peers still completed more four-client updates. The paired throughput gains were 80.7%, 1.4% and 2.5%, so a stable 10% improvement on another machine cannot be inferred.
 
-At sixteen clients the default build completed 2,352.4 durable updates/s, ahead of PostgreSQL and behind Oracle Free. Before/after throughput was nearly flat and default p99 worsened from 9.159 to 9.862 ms. The larger-group option reached 2,325.7/s and 10.776 ms p99. It remains opt-in: the improvement seen in the short screening run did not carry over to the final comparison. Oracle Free also had lower sixteen-client range p99 even though catdb completed more ranges per second.
+At sixteen clients the default build completed 2,352.4 durable updates/s, ahead of PostgreSQL and behind Oracle Free. Before/after throughput was nearly flat and default p99 worsened from 9.159 to 9.862 ms. The larger-group option reached 2,325.7/s and 10.776 ms p99. It remains opt-in: the improvement seen in the short screening run did not carry over to the final comparison. Oracle Free also had lower sixteen-client range p99 even though SilverHamu completed more ranges per second.
 
 ## Results
 
-| Operation | Clients | catdb before | catdb default | catdb wide-cohort | PostgreSQL | Oracle Free |
+| Operation | Clients | SilverHamu before | SilverHamu default | SilverHamu wide-cohort | PostgreSQL | Oracle Free |
 |---|---:|---:|---:|---:|---:|---:|
 | Key lookup | 4 | 7,226.0 | 7,327.0 | 7,377.9 | 2,326.1 | 5,387.7 |
 | Key lookup | 16 | 6,822.5 | 6,807.1 | 6,809.6 | 1,517.4 | 5,231.5 |
@@ -23,7 +23,7 @@ Completed operations per second, median of three runs. Each server and the share
 
 ### Client p99 latency in milliseconds
 
-| Operation | Clients | catdb before | catdb default | catdb wide-cohort | PostgreSQL | Oracle Free |
+| Operation | Clients | SilverHamu before | SilverHamu default | SilverHamu wide-cohort | PostgreSQL | Oracle Free |
 |---|---:|---:|---:|---:|---:|---:|
 | Key lookup | 4 | 1.282 | 1.225 | 1.270 | 3.062 | 1.279 |
 | Key lookup | 16 | 5.698 | 5.715 | 5.715 | 17.745 | 6.326 |
@@ -44,7 +44,7 @@ An allocation-instrumented Windows probe measured **809 to 307 allocations** and
 
 ## Conditions and verification
 
-All 720,000 logical operations completed. There were 0 serialization retries: catdb before 0, catdb default 0, catdb wide-cohort 0, PostgreSQL 0, Oracle Free 0. All 120 full-content checks passed, including 15 checks after a server restart. Every product produced the same ordered key/value hash after each corresponding stage in each repetition. The verifier recomputes the percentiles and rates from the raw samples.
+All 720,000 logical operations completed. There were 0 serialization retries: SilverHamu before 0, SilverHamu default 0, SilverHamu wide-cohort 0, PostgreSQL 0, Oracle Free 0. All 120 full-content checks passed, including 15 checks after a server restart. Every product produced the same ordered key/value hash after each corresponding stage in each repetition. The verifier recomputes the percentiles and rates from the raw samples.
 
 The database held 100,000 synthetic records with eight-byte keys and 256-byte values. Each operation used its own transaction. Four or sixteen persistent connections ran 8,000 operations per case. Each fixture used a fresh volume and deterministic seeds. Writers updated disjoint key sets. Product and case order changed between repetitions. The client started timing after warmup and waited for each response before submitting the next request on that connection. This measures service APIs, including their different wire protocols and drivers. Joins, adversarial contention, mixed production workloads and power loss were outside this workload.
 

@@ -118,7 +118,7 @@ See [all diagnostic distributions](observer/diagnosis.json),
   commits in two syncs and exact values after reopen. Process crashes do not
   prove protection against power loss or storage firmware failures.
 
-The [implementation CI](https://github.com/dhq-boiler/catdb/actions/runs/41882479578)
+The [implementation CI](https://github.com/dhq-boiler/SilverHamu/actions/runs/41882479578)
 passed on Windows and Linux, including protocol, C ABI and Clippy checks; the
 container job also passed. Locally, the Linux Rust suite, 13 real-process service
 tests, 30 C ABI checks and the concurrent diagnostic-timestamp test passed.
@@ -135,9 +135,9 @@ References were checked on 2026-11-05.
   commit delay. [XLogFlush](https://github.com/postgres/postgres/blob/REL_18_STABLE/src/backend/access/transam/xlog.c)
   waits for WAL ownership and rechecks whether another process already flushed
   the needed position. This supports measuring group formation before increasing
-  fixed waits; it is not a claim that catdb now implements PostgreSQL's WAL.
+  fixed waits; it is not a claim that SilverHamu now implements PostgreSQL's WAL.
 - [InnoDB 8.4 log writer/flusher source](https://github.com/mysql/mysql-server/blob/8.4/storage/innobase/log/log0write.cc)
-  separates writing, durable flush progress and notification. catdb retains its
+  separates writing, durable flush progress and notification. SilverHamu retains its
   existing coordinator because a separate background flusher would add another
   lifecycle and failure path; that larger change is not justified by this result.
 - [SQLite WAL](https://www.sqlite.org/wal.html) permits readers alongside a writer,
@@ -147,9 +147,9 @@ References were checked on 2026-11-05.
 ## Limits and next question
 
 The old PostgreSQL and Oracle results are historical context, not rerun in this
-paired experiment. The improvement does not establish that catdb overtook them.
+paired experiment. The improvement does not establish that SilverHamu overtook them.
 The original [all-product figures](../2026-11-05/README.md) remain unchanged and
-show the old catdb implementation. Storage synchronization still dominates the
+show the old SilverHamu implementation. Storage synchronization still dominates the
 remaining update time; this change does not make each sync faster. Higher client
 counts, hot-key conflicts, production checkpoint load, other devices and an
 independent client implementation require separate evaluation. Do not extrapolate

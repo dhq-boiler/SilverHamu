@@ -2,7 +2,7 @@
 
 <img src="assets/branding/ginhamu_profile.png" alt="SilverHamu — ギンハムちゃんの横顔" width="144">
 
-Formerly **catdb**. SilverHamu combines the silver bullet ambition with Hamu, a coined name derived from hamster. See [migration and compatibility](docs/rebranding.md) for renamed commands and SDKs, unpublished package names, and identifiers retained for existing databases.
+SilverHamu combines the silver bullet ambition with Hamu, a coined name derived from hamster. See [migration and compatibility](docs/rebranding.md) for renamed commands and SDKs, unpublished package names, and identifiers retained for existing databases.
 
 ![Status: Experimental](https://img.shields.io/badge/status-Experimental-orange)
 
@@ -124,8 +124,8 @@ Embed silverhamu in Rust, C or C#, or connect to its authenticated TCP service f
 With Rust 1.89 or newer, run the embedded example:
 
 ```sh
-git clone https://github.com/dhq-boiler/catdb.git
-cd silverhamu
+git clone https://github.com/dhq-boiler/SilverHamu.git
+cd SilverHamu
 cargo run --locked --release --example basic
 ```
 
@@ -133,7 +133,7 @@ The example creates `example.ndb` in the current directory, commits `hello → w
 
 ```toml
 [dependencies]
-newdbms = { package = "silverhamu", git = "https://github.com/dhq-boiler/catdb.git" }
+newdbms = { package = "silverhamu", git = "https://github.com/dhq-boiler/SilverHamu.git" }
 ```
 
 To try the service instead, run these commands from the cloned repository with Python 3 and Docker Compose installed:

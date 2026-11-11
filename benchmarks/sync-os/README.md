@@ -11,7 +11,7 @@ python benchmarks/sync-os/analyze.py C:/scratch/catdb-sync-os
 python benchmarks/sync-os/test_analysis.py
 ```
 
-The output directory must not already exist. The workload uses a unique disposable Docker volume and internal network. Never use a production database or run unrelated catdb servers during collection: scheduler filters identify the `silverhamu-server` and `catdb-client` thread names. Synchronization counts must agree exactly or attribution fails.
+The output directory must not already exist. The workload uses a unique disposable Docker volume and internal network. Never use a production database or run unrelated SilverHamu servers during collection: scheduler filters identify the `silverhamu-server` and `catdb-client` thread names. Synchronization counts must agree exactly or attribution fails.
 
 The collector requires a Linux kernel with tracefs, fsync, scheduler and block tracepoints. Docker Desktop's Linux VM supplied these in this run. The collector alone gets `SYS_ADMIN`, a private tracefs mount and host PID view; the DB remains non-root with its existing resource limits. No `--privileged`, host sysctl, global trace instance or storage policy change is used. A unique trace instance is enabled only around each workload; data are exported after tracing stops. No data values, authentication tokens or file paths are captured by these events. Raw traces do contain guest process names, thread IDs, block addresses and kernel symbols.
 

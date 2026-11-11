@@ -73,7 +73,7 @@ Build benchmarks/aged-writer/Dockerfile as catdb-aged-writer and use the observe
 
 ## Other database products
 
-A separate four-client workload used 100,000 rows, 256-byte values and 1,024 durable single-key updates, in three runs per product or interface. catdb's service and C ABI both use the aged writer priority feature. This workload has different checkpoint activity from the million-row comparison. All runs verified the full digest after restart.
+A separate four-client workload used 100,000 rows, 256-byte values and 1,024 durable single-key updates, in three runs per product or interface. SilverHamu's service and C ABI both use the aged writer priority feature. This workload has different checkpoint activity from the million-row comparison. All runs verified the full digest after restart.
 
 ![Embedded interfaces](peers/embedded.svg)
 

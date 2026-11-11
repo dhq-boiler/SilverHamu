@@ -66,4 +66,4 @@ python benchmarks/scaled-gate/run_independent.py --fifo --equal-publications raw
 python benchmarks/scaled-gate/report_equal.py raw report
 ~~~
 
-[Timed sources](https://github.com/dhq-boiler/catdb/tree/2deeac0a56485fc5177c20ec60ddba5df9b024f2). The reporter also accepts the published compressed logs. The timing probes are confined to Linux test builds with the default feature set or FIFO. Their cost is included in both arms; it was not subtracted.
+[Timed sources](https://github.com/dhq-boiler/SilverHamu/tree/2deeac0a56485fc5177c20ec60ddba5df9b024f2). The reporter also accepts the published compressed logs. The timing probes are confined to Linux test builds with the default feature set or FIFO. Their cost is included in both arms; it was not subtracted.

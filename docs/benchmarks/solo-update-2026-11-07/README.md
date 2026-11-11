@@ -85,7 +85,7 @@ rewind/reuse until the necessary readers finish. FULL still requests WAL sync on
 every commit. See [SQLite WAL documentation](https://www.sqlite.org/wal.html).
 That mechanism is a plausible explanation for the sensitivity, **not a proven
 attribution**: checkpoint attempts, file growth, cache/locking and storage behavior
-can all contribute. catdb's current Linux path appends its log; its production
+can all contribute. SilverHamu's current Linux path appends its log; its production
 space-reservation default is Windows-only. These facts suggest comparing durable
 reuse versus extension directly, before changing persistence format or resuming
 long OS-event searches. Prior fixed-log experiments needed an additional durable
@@ -102,7 +102,7 @@ the same plan. Empty initial and missing-key cases are checked as well.
 
 All 12 Rust runs record exactly 8000 sync attempts per timed cohort (96,000 total).
 C ABI and SQLite syscall counts were not instrumented and are null, never zero.
-The real sync remains in both catdb commit paths. Existing Rust library safety
+The real sync remains in both SilverHamu commit paths. Existing Rust library safety
 tests passed 67, with 10 explicit performance tests ignored, including pre-sync
 publication and persistence-failure behavior. Clippy passed with/without diagnostic
 features. Three phase-validator tests reject impossible durations or ordering.

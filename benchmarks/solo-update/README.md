@@ -1,6 +1,6 @@
 # Single-writer isolation experiment
 
-This measures current catdb without changing engine code or defaults. All variants
+This measures current SilverHamu without changing engine code or defaults. All variants
 use the same precomputed 8-byte key /256-byte value update schedule. The primary
 conditions are C ABI group on/off, Rust group on/off, and SQLite WAL/FULL; separate
 Rust lock-timing builds measure observation overhead and per-request phases.

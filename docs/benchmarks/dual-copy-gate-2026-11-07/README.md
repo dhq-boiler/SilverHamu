@@ -33,7 +33,7 @@ The anchor is checked against this probe's fixed epoch and capacity. Damaged or
 unsupported anchors are rejected without modification; anchor repair, generation
 rotation, checkpoint publication and segment reuse are **not implemented**.
 The format is a four-record standalone experiment using repeated-byte payloads,
-not catdb's key/value API or production concurrency machinery.
+not SilverHamu's key/value API or production concurrency machinery.
 
 ## Results
 

@@ -64,7 +64,7 @@ added. A missing commit response can still mean a committed transaction.
 - Existing engine tests cover persistence failure, partial WAL, conflict detection,
   resource budgets and recovery through the same commit implementation. Windows,
   Linux, fixed-log compatibility, C ABI and container tests passed in
-  [implementation CI](https://github.com/dhq-boiler/catdb/actions/runs/41928761537).
+  [implementation CI](https://github.com/dhq-boiler/SilverHamu/actions/runs/41928761537).
 - Actual power loss and faulty storage were not simulated. This is not a new
   durability certification or an across-product performance ranking.
 

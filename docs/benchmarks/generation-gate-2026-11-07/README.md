@@ -108,7 +108,7 @@ probe with synthetic complete-state records.
 
 ## Remaining work and scope limits
 
-- No catdb production source, default, API or existing database file was changed.
+- No SilverHamu production source, default, API or existing database file was changed.
 - No 100k-row benchmark or throughput/p99 chart was generated in this stage.
 - Variable-sized keys, values and transactions, concurrent updates/readers,
   real engine conflict detection, resource budgeting and platform compatibility

@@ -1,6 +1,6 @@
 # Container resource envelope
 
-This experiment measures the **unchanged default catdb service** under Docker
+This experiment measures the **unchanged default SilverHamu service** under Docker
 CPU quotas and memory limits. It is not a comparison with other DBMS products,
 a cold-cache test, or a claim that a container emulates a dedicated small PC.
 

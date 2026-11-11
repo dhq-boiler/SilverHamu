@@ -8,21 +8,21 @@ Each cell reports the median of three runs. Throughput counts completed transact
 
 | Service | 4 clients, updates/s | 4 clients, p99 ms | 16 clients, updates/s | 16 clients, p99 ms |
 |---|---:|---:|---:|---:|
-| catdb append | 1,076.6 | 5.682 | 2,422.0 | 8.818 |
-| catdb redo | 1,882.3 | 3.182 | 4,720.3 | 5.115 |
+| SilverHamu append | 1,076.6 | 5.682 | 2,422.0 | 8.818 |
+| SilverHamu redo | 1,882.3 | 3.182 | 4,720.3 | 5.115 |
 | PostgreSQL 18.6 | 1,324.1 | 4.693 | 1,634.3 | 15.155 |
 | Oracle 26ai Free | 1,223.2 | 5.430 | 3,925.5 | 6.979 |
 
 ![Median and minimum to maximum across the three runs](comparison.svg)
 
-| Clients | catdb redo trial rates | Paired wins over PostgreSQL | Paired wins over Oracle |
+| Clients | SilverHamu redo trial rates | Paired wins over PostgreSQL | Paired wins over Oracle |
 |---:|---|---:|---:|
 | 4 | 1,846.6 / 1,904.7 / 1,882.3 | 3/3 | 3/3 |
 | 16 | 4,724.9 / 4,720.3 / 4,676.4 | 3/3 | 3/3 |
 
-100,000 ordered eight-byte keys with 256-byte values. Disjoint random keys per writer, warm cache, one key replacement and one durable commit per operation. Every service and its client had a two-CPU quota and 4 GiB of memory. Each case contained 8,000 updates. The driver changed product and case order between repetitions on the same Docker Desktop/WSL2 host. All services used fresh Docker named volumes on the same storage. The throughput interval excludes initial load, prewriting the arena, conversion, full verification and restart. catdb performed no checkpoint during these 8,000-update timed cases. The figures do not include the cost of periodic checkpoints in a long-running workload. These rates describe these API calls, client and storage configuration.
+100,000 ordered eight-byte keys with 256-byte values. Disjoint random keys per writer, warm cache, one key replacement and one durable commit per operation. Every service and its client had a two-CPU quota and 4 GiB of memory. Each case contained 8,000 updates. The driver changed product and case order between repetitions on the same Docker Desktop/WSL2 host. All services used fresh Docker named volumes on the same storage. The throughput interval excludes initial load, prewriting the arena, conversion, full verification and restart. SilverHamu performed no checkpoint during these 8,000-update timed cases. The figures do not include the cost of periodic checkpoints in a long-running workload. These rates describe these API calls, client and storage configuration.
 
-The final study completed 192,000 transactions. The latency records and all 48 full-database checks, including 12 restarts, were verified independently against the seeded workload. Final operation errors were zero. Serialization retries by service were catdb append 0, catdb redo 0, PostgreSQL 18.6 0, Oracle 26ai Free 2. A retry used the same key and value and remained inside the original latency. PostgreSQL used fsync=on and synchronous_commit=on. Oracle used WAIT, IMMEDIATE and INITRANS=16. Both SQL services used SERIALIZABLE. catdb returned success after synchronizing the log. [Measured settings and images](comparison/environment.json) · [Per-trial results](comparison/results.json) · [Independent audit](comparison/independent-audit.json).
+The final study completed 192,000 transactions. The latency records and all 48 full-database checks, including 12 restarts, were verified independently against the seeded workload. Final operation errors were zero. Serialization retries by service were SilverHamu append 0, SilverHamu redo 0, PostgreSQL 18.6 0, Oracle 26ai Free 2. A retry used the same key and value and remained inside the original latency. PostgreSQL used fsync=on and synchronous_commit=on. Oracle used WAIT, IMMEDIATE and INITRANS=16. Both SQL services used SERIALIZABLE. SilverHamu returned success after synchronizing the log. [Measured settings and images](comparison/environment.json) · [Per-trial results](comparison/results.json) · [Independent audit](comparison/independent-audit.json).
 
 ## Where the time went
 
@@ -39,7 +39,7 @@ Four writers already filled nearly every four-request group with the append WAL.
 
 ## Persistence and recovery
 
-Format 4 prewrites its data area plus four 64 KiB witness slots. Each small commit group appends its ordinary catdb frames within the prewritten area. It writes two complete checksummed copies of that group to alternating locations, then performs one data synchronization. Only a successful sync permits MVCC publication and an acknowledgement. Two prior-generation slots remain intact during the write. When encoded frames exceed 65,456 bytes, payload is synchronized before writing and synchronizing end-only witnesses.
+Format 4 prewrites its data area plus four 64 KiB witness slots. Each small commit group appends its ordinary SilverHamu frames within the prewritten area. It writes two complete checksummed copies of that group to alternating locations, then performs one data synchronization. Only a successful sync permits MVCC publication and an acknowledgement. Two prior-generation slots remain intact during the write. When encoded frames exceed 65,456 bytes, payload is synchronized before writing and synchronizing end-only witnesses.
 
 On reopen, record identity, checksums, generations, bounds and WAL contents are validated. A healthy witness can supply the latest small group while the main copy is checked. Contradictory intact records fail closed. Repairs and abandoned-tail cleanup are synchronized before writable reuse. Reopen scratch is charged against the actual resource budget. Checkpoints atomically preserve the format. Capacity exhaustion is a recoverable refusal: checkpoint or explicitly expand the data area. [Configuration, capacity and compatible builds](../../service.md#preallocated-wal-with-recovery-copies).
 
@@ -54,7 +54,7 @@ Every success response was matched to its exact value after reopen. An in-flight
 
 ## Reproduce
 
-Build two comparison images from this tree. Use a fresh output directory for each invocation. The runner checks the catdb on-disk format after startup. The 64 MiB capacity in this run was chosen for this dataset. A database converted to format 4 subsequently requires a compatible build.
+Build two comparison images from this tree. Use a fresh output directory for each invocation. The runner checks the SilverHamu on-disk format after startup. The 64 MiB capacity in this run was chosen for this dataset. A database converted to format 4 subsequently requires a compatible build.
 
 ```sh
 docker build -f benchmarks/Dockerfile -t catdb-append:study .

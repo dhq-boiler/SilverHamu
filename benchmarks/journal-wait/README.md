@@ -11,7 +11,7 @@ python benchmarks/journal-wait/test_analysis.py
 python benchmarks/journal-wait/check_export_failure.py C:/scratch/journal-export-failure
 ```
 
-Output folders must be new. Synthetic data remain in disposable Docker volumes. Do not run unrelated catdb services during tracing; scheduler filters use thread names. The collector alone uses SYS_ADMIN to mount tracefs and create a unique instance; no global tracing policy is changed. It is bounded to 180 seconds and 16 MiB per CPU. The analyzer rejects loss, incomplete phases, wrong transaction IDs and missing wakeups. Stack collection is checked absent. Guest scheduler timestamps and block completions do not measure the Windows host or physical device.
+Output folders must be new. Synthetic data remain in disposable Docker volumes. Do not run unrelated SilverHamu services during tracing; scheduler filters use thread names. The collector alone uses SYS_ADMIN to mount tracefs and create a unique instance; no global tracing policy is changed. It is bounded to 180 seconds and 16 MiB per CPU. The analyzer rejects loss, incomplete phases, wrong transaction IDs and missing wakeups. Stack collection is checked absent. Guest scheduler timestamps and block completions do not measure the Windows host or physical device.
 
 The journal partition is start-to-end on the same device, transaction and journal thread. Equal journal/fsync counts do not prove ownership. Blocked time stays unclassified as to underlying I/O versus worker/lock waits. No nearest-event matching is performed for block requests; partial completion and flush-sector differences make that unsafe here.
 

@@ -119,7 +119,7 @@ transactions may appear after recovery; partial transactions may not.
 - Final layout: 11 dedicated Rust tests plus two ignored subprocess helpers;
   Linux service protocol (including four-writer kill/restart): 13 passed;
   C ABI compatibility checks: 30 passed; clippy passed.
-- [Implementation CI](https://github.com/dhq-boiler/catdb/actions/runs/41896592381)
+- [Implementation CI](https://github.com/dhq-boiler/SilverHamu/actions/runs/41896592381)
   tests standard and fixed-log builds on Windows/Linux, including service and
   C ABI compatibility, plus the standard Docker lifecycle.
 

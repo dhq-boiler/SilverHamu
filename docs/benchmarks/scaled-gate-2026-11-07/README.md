@@ -1,6 +1,6 @@
 # Dual records and region reuse at 100k and 1M rows
 
-This is a Linux-only test store, not a catdb format or deployable durability option. The control is the current catdb WAL. Each path performs real synchronization. This compares complete single-writer paths; the prototype has neither the production MVCC implementation nor its general-purpose limits.
+This is a Linux-only test store, not a SilverHamu format or deployable durability option. The control is the current SilverHamu WAL. Each path performs real synchronization. This compares complete single-writer paths; the prototype has neither the production MVCC implementation nor its general-purpose limits.
 
 ![Checkpoint-inclusive results](comparison.svg)
 

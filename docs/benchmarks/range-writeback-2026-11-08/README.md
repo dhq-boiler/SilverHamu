@@ -62,7 +62,7 @@ Measured workload image: `sha256:2337b0574843a6928ba6e86d15efc56dace19caefc9d5b5
 
 ## Separate released-interface comparison
 
-Fresh measurements using 100,000 rows, four clients, 1,024 durable single-key updates and three runs per product. The workload verifies a full digest after restart. This product suite uses the regular catdb build and does not run the experimental range-hinted checkpoints. The million-row maintenance workload above has different operations and publication requirements. To reproduce this separate panel, build benchmarks/Dockerfile without extra features, run benchmarks/run.py with --image IMAGE --single-request --four-updates --rows 100000 --ops 1024 --reps 3 --out PRODUCTS, then run benchmarks/scaled-gate/report_prewrite_products.py PRODUCTS FIGURES.
+Fresh measurements using 100,000 rows, four clients, 1,024 durable single-key updates and three runs per product. The workload verifies a full digest after restart. This product suite uses the regular SilverHamu build and does not run the experimental range-hinted checkpoints. The million-row maintenance workload above has different operations and publication requirements. To reproduce this separate panel, build benchmarks/Dockerfile without extra features, run benchmarks/run.py with --image IMAGE --single-request --four-updates --rows 100000 --ops 1024 --reps 3 --out PRODUCTS, then run benchmarks/scaled-gate/report_prewrite_products.py PRODUCTS FIGURES.
 
 ![Embedded product comparison](peers/embedded.svg)
 

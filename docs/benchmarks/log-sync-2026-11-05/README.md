@@ -14,19 +14,19 @@ API measurements, not general DBMS rankings or engine-only ceilings.
 
 | API | Clients | ops/s | p50 ms | p95 ms | p99 ms |
 |---|---:|---:|---:|---:|---:|
-| catdb before | 1 | 238.0 | 4.300 | 5.051 | 6.320 |
-| catdb after | 1 | 239.0 | 4.259 | 4.959 | 6.309 |
+| SilverHamu before | 1 | 238.0 | 4.300 | 5.051 | 6.320 |
+| SilverHamu after | 1 | 239.0 | 4.259 | 4.959 | 6.309 |
 | PostgreSQL | 1 | 481.9 | 1.847 | 2.837 | 3.251 |
 | Oracle Free | 1 | 430.9 | 2.102 | 3.149 | 4.029 |
-| catdb before | 4 | 567.8 | 6.837 | 8.031 | 9.880 |
-| catdb after | 4 | 776.4 | 5.146 | 6.196 | 7.230 |
+| SilverHamu before | 4 | 567.8 | 6.837 | 8.031 | 9.880 |
+| SilverHamu after | 4 | 776.4 | 5.146 | 6.196 | 7.230 |
 | PostgreSQL | 4 | 1182.7 | 3.487 | 4.135 | 5.721 |
 | Oracle Free | 4 | 1080.8 | 3.747 | 4.555 | 6.229 |
 
 ## Gap to peers
 
-- postgres: catdb reaches 65.6% of its update throughput, up from 48.0%. The absolute throughput gap shrinks by 33.9%.
-- oracle: catdb reaches 71.8% of its update throughput, up from 52.5%. The absolute throughput gap shrinks by 40.7%.
+- postgres: SilverHamu reaches 65.6% of its update throughput, up from 48.0%. The absolute throughput gap shrinks by 33.9%.
+- oracle: SilverHamu reaches 71.8% of its update throughput, up from 52.5%. The absolute throughput gap shrinks by 40.7%.
 
 PostgreSQL and Oracle Free remain faster here. They were rerun in the same
 experiment; comparisons do not mix this run with the older workstation results.
@@ -140,7 +140,7 @@ and [methodology/reproduction](../../../benchmarks/log-sync/README.md).
   incomplete logs and subprocess termination around synchronization/publication.
   Policy boundary tests cover empty/small/full groups and hint expiry. A gated
   sync test proves no early successful response or uncommitted visibility.
-- [Implementation CI](https://github.com/dhq-boiler/catdb/actions/runs/41890144568)
+- [Implementation CI](https://github.com/dhq-boiler/SilverHamu/actions/runs/41890144568)
   passed on Windows and Linux, including service/C ABI checks and the Docker
   restart test.
 - Process termination and fault injection are not real power-loss testing.

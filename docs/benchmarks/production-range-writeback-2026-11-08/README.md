@@ -85,7 +85,7 @@ The 9 MiB fixture injects a storage-full error after snapshot writing, then exit
 
 ## Released interfaces and other products
 
-The separate workload uses 100,000 rows, 256-byte values, four clients and 1,024 single-key synchronous updates. Each of the three runs per interface verified the full digest after restart. catdb uses its normal default settings in this suite. It does not schedule the 63 checkpoints used to measure the new option.
+The separate workload uses 100,000 rows, 256-byte values, four clients and 1,024 single-key synchronous updates. Each of the three runs per interface verified the full digest after restart. SilverHamu uses its normal default settings in this suite. It does not schedule the 63 checkpoints used to measure the new option.
 
 ![Embedded products](peers/embedded.svg)
 

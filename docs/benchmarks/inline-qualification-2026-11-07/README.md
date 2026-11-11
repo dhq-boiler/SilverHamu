@@ -3,7 +3,7 @@
 **Adopted for memory efficiency.** `inline-key` joins `inline-latest` in the default
 feature set. The pre-agreed numerical gate passed in both key shapes, with safety,
 API compatibility and rollback checks passing. This is not a universal latency or
-recovery-speed improvement, and catdb remains Experimental.
+recovery-speed improvement, and SilverHamu remains Experimental.
 
 | Median of three trials | Short Vec | Short inline | Mixed Vec | Mixed inline |
 |---|---:|---:|---:|---:|

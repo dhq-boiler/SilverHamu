@@ -2,7 +2,7 @@
 
 ## Dense database backups
 
-On a closed format-4 database, the updated `catdb backup` outperformed a synchronized OS copy at both measured data densities on Windows and Linux. The table shows **median backup time** over 18 trials per method, including process startup, file synchronization and publication. Occupancy is the share of the physical database covered by nonzero 64 KiB blocks.
+On a closed format-4 database, the updated `silverhamu backup` outperformed a synchronized OS copy at both measured data densities on Windows and Linux. The table shows **median backup time** over 18 trials per method, including process startup, file synchronization and publication. Occupancy is the share of the physical database covered by nonzero 64 KiB blocks.
 
 | Environment | Occupancy | OS copy | Previous archive | Updated archive | Time saved vs. copy | Faster than copy |
 |---|---:|---:|---:|---:|---:|---:|
@@ -41,9 +41,9 @@ Measured on Windows build 26100, NTFS, AMD Ryzen 9 5950X, Rust 1.99.1. The refer
 | Profile | Method | Archive MiB | Backup ms | Restore ms | Open and first read ms | Restore + first read ms |
 |---|---|---:|---:|---:|---:|---:|
 | Spare | OS copy / reference engine | 128.25 | 129.88 | 131.00 | 110.55 | 247.30 |
-| Spare | catdb archive / updated engine | 2.32 | 48.40 | 123.38 | 34.35 | 157.35 |
+| Spare | SilverHamu archive / updated engine | 2.32 | 48.40 | 123.38 | 34.35 | 157.35 |
 | Dense | OS copy / reference engine | 64.25 | 55.02 | 54.52 | 112.92 | 168.20 |
-| Dense | catdb archive / updated engine | 57.25 | 59.52 | 61.31 | 102.92 | 165.12 |
+| Dense | SilverHamu archive / updated engine | 57.25 | 59.52 | 61.31 | 102.92 | 165.12 |
 
 Times are medians of six trials. On the spare database the archive backup was 2.68× as fast by median, with times ranging from 44.47 to 212.95 ms. The reference copy ranged from 119.77 to 144.99 ms. Restoring this archive and reading a committed value took less time in all six comparisons. On the dense database the ordinary copy was faster at backup and at restore. Faster reopening brought the overall dense restore and first read within 2% of the reference. [Individual trials, ranges and executable hashes](windows-results.json)
 
@@ -54,9 +54,9 @@ The same two datasets and 24 alternating trials ran in a Linux Docker container 
 | Profile | Method | Backup ms | Restore ms | Open and first read ms | Restore + first read ms |
 |---|---|---:|---:|---:|---:|
 | Spare | OS copy / reference engine | 55.07 | 63.10 | 62.08 | 128.57 |
-| Spare | catdb archive / updated engine | 49.61 | 48.22 | 13.16 | 62.55 |
+| Spare | SilverHamu archive / updated engine | 49.61 | 48.22 | 13.16 | 62.55 |
 | Dense | OS copy / reference engine | 47.97 | 44.71 | 101.91 | 145.96 |
-| Dense | catdb archive / updated engine | 53.26 | 34.80 | 95.11 | 130.38 |
+| Dense | SilverHamu archive / updated engine | 53.26 | 34.80 | 95.11 | 130.38 |
 
 The updated engine reads and checks the unused end of a format-4 WAL in larger batches when its memory budget permits. This also improves opening a regular database file with unused capacity. The separate timing columns show how much of the end-to-end change came from opening the restored database. [Linux trials and executable hashes](linux-results.json)
 

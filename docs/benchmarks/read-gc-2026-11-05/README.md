@@ -96,7 +96,7 @@ large-value boundaries, and refusal/recovery under retained-data pressure withou
 logging rejected writes. Existing conflict, checkpoint, persistence-failure,
 subprocess-crash, Rust/C ABI and service compatibility tests remain in place.
 Windows/Linux, ordinary/fixed-log feature combinations and Docker passed
-[implementation CI](https://github.com/dhq-boiler/catdb/actions/runs/41933922562).
+[implementation CI](https://github.com/dhq-boiler/SilverHamu/actions/runs/41933922562).
 This is not a real power-cut test or a production reliability certification.
 
 ## Decision and remaining work

@@ -4,7 +4,7 @@
 reduces data-state mutex acquisitions from **3 to 2 per read** without changing
 snapshot semantics or the collection scheduler. The improvement does not reliably
 translate into lower read p99, worst wait and total reclamation time together.
-Production snapshot tracking is restored at `0755213`; its [five CI jobs](https://github.com/dhq-boiler/catdb/actions/runs/41965900906) also pass.
+Production snapshot tracking is restored at `0755213`; its [five CI jobs](https://github.com/dhq-boiler/SilverHamu/actions/runs/41965900906) also pass.
 
 ## What changed and why it is safe
 
@@ -100,7 +100,7 @@ See [all service medians](service/table.md), [all worst responses](service/maxim
   enable/disable races, owner release, checkpoints, persistence failures and
   process termination around durable publication.
 - The exact atomic prototype passes the local full `service,fixed-log` suite and
-  [all five CI jobs](https://github.com/dhq-boiler/catdb/actions/runs/41965553592),
+  [all five CI jobs](https://github.com/dhq-boiler/SilverHamu/actions/runs/41965553592),
   including Windows/Linux, C ABI, background-enabled protocol tests and Docker.
   Prototype 1 passed runtime tests but its first CI failed the nested-if lint;
   prototype 2 fixes that lint. Process-crash checks are not actual power-loss

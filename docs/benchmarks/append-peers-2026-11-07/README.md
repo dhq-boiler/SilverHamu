@@ -34,18 +34,18 @@ Means in milliseconds over 1,024 requests per path in a separate profiled execut
 
 | Engine / driver | Durable updates/s | p99 ms |
 |:---|---:|---:|
-| catdb prototype / before | 135.33 | 54.21 |
-| catdb prototype / after | 198.49 | 29.59 |
-| catdb embedded (C ABI) | 774.45 | 7.90 |
+| SilverHamu prototype / before | 135.33 | 54.21 |
+| SilverHamu prototype / after | 198.49 | 29.59 |
+| SilverHamu embedded (C ABI) | 774.45 | 7.90 |
 | SQLite | 318.08 | 5.18 |
-| catdb service | 1,084.52 | 5.60 |
+| SilverHamu service | 1,084.52 | 5.60 |
 | PostgreSQL | 1,330.93 | 4.43 |
 | MySQL | 368.04 | 21.93 |
 | Oracle Free | 1,183.71 | 5.32 |
 
 Native prototype throughput varied widely across repetitions (before: 244.5 / 115.4 / 135.3; after: 231.3 / 198.5 / 82.2 updates/s). The candidate had higher throughput in one of the three paired trials. The median alone obscures that variability.
 
-The peer workload is intentionally a separate 100,000-row single-key test. Every engine receives the same eight-byte key stream, 256-byte values, 1,024 durable updates and four clients. Random keys are partitioned by client with the same seeds and stamps. Per-client warm-up uses 50 reads, then a common start. Each participant is measured three times. The embedded prototypes use a Rust test binary calling native MVCC. SQLite and shipped catdb embedded use Python via sqlite3 and the C ABI. The service chart uses the released service path in this checkout plus PostgreSQL, MySQL and Oracle Free with the existing Python benchmark adapters; each client and server container receives 2 CPUs/4 GiB. Storage-engine performance and driver costs both affect these numbers. SQL Server remains outside the published suite pending disclosure permission. The prototype uses 1,024 log slots so no scheduled checkpoint falls inside the peer update window. Each run checks all final rows after reopen. The product harness also checks full digests before and after restart. [Product versions, durability settings and verification records](products/environment.json), [samples](products/results.json), [native comparison trials](native/results.json).
+The peer workload is intentionally a separate 100,000-row single-key test. Every engine receives the same eight-byte key stream, 256-byte values, 1,024 durable updates and four clients. Random keys are partitioned by client with the same seeds and stamps. Per-client warm-up uses 50 reads, then a common start. Each participant is measured three times. The embedded prototypes use a Rust test binary calling native MVCC. SQLite and shipped SilverHamu embedded use Python via sqlite3 and the C ABI. The service chart uses the released service path in this checkout plus PostgreSQL, MySQL and Oracle Free with the existing Python benchmark adapters; each client and server container receives 2 CPUs/4 GiB. Storage-engine performance and driver costs both affect these numbers. SQL Server remains outside the published suite pending disclosure permission. The prototype uses 1,024 log slots so no scheduled checkpoint falls inside the peer update window. Each run checks all final rows after reopen. The product harness also checks full digests before and after restart. [Product versions, durability settings and verification records](products/environment.json), [samples](products/results.json), [native comparison trials](native/results.json).
 
 ## Safety and reproduction
 

@@ -1,6 +1,6 @@
 # Count and maximum-generation index experiment
 
-This is an isolated, single-threaded, in-memory prototype. It does not change catdb's transaction engine, WAL, service API, or persistence format. It is not a new durability claim.
+This is an isolated, single-threaded, in-memory prototype. It does not change SilverHamu's transaction engine, WAL, service API, or persistence format. It is not a new durability claim.
 
 ## Decision
 

@@ -56,4 +56,4 @@ python benchmarks/scaled-gate/run_independent.py raw
 python benchmarks/scaled-gate/report_independent.py raw report
 ~~~
 
-The reporter also reads the compressed traces published here. [Measured source](https://github.com/dhq-boiler/catdb/tree/aad0990102f93facbb02c52960ad6866980a8557).
+The reporter also reads the compressed traces published here. [Measured source](https://github.com/dhq-boiler/SilverHamu/tree/aad0990102f93facbb02c52960ad6866980a8557).

@@ -10,24 +10,24 @@ All numbers below are medians of three independent runs, not pooled percentiles.
 
 | Service API | Four-client updates/s | Update p99 ms | Key lookups/s | 100-row reads/s |
 |---|---:|---:|---:|---:|
-| catdb, one request | 1,133.3 | 5.078 | 8,046.5 | 3,612.9 |
+| SilverHamu, one request | 1,133.3 | 5.078 | 8,046.5 | 3,612.9 |
 | PostgreSQL | 1,297.9 | 5.547 | 2,553.9 | 1,843.1 |
 | MySQL | 374.2 | 19.081 | 2,435.8 | 194.2 |
 | Oracle Free | 1,280.0 | 5.371 | 6,026.3 | 3,027.6 |
 
-catdb leads the four-client lookup and 100-row read paths in this particular
+SilverHamu leads the four-client lookup and 100-row read paths in this particular
 client benchmark. PostgreSQL and Oracle Free complete more four-client durable
-updates, while catdb's median update p99 is lower. PostgreSQL's update throughput
+updates, while SilverHamu's median update p99 is lower. PostgreSQL's update throughput
 varied substantially across repetitions; the min/max whiskers retain this variation.
-The MySQL adapter uses PyMySQL, and catdb uses hex JSON: driver and materialization
+The MySQL adapter uses PyMySQL, and SilverHamu uses hex JSON: driver and materialization
 costs are included, so these differences cannot be attributed solely to engines.
 
-For embedded single-client updates, SQLite achieves 596.5/s versus catdb 303.5/s,
-and p99 3.570ms versus 5.143ms. At four clients catdb completes more updates
+For embedded single-client updates, SQLite achieves 596.5/s versus SilverHamu 303.5/s,
+and p99 3.570ms versus 5.143ms. At four clients SilverHamu completes more updates
 (787.4/s versus 583.1/s), but has worse p99 (8.133ms versus 3.846ms). The single-client
-100-row read p99 also favors SQLite, despite catdb having higher throughput.
+100-row read p99 also favors SQLite, despite SilverHamu having higher throughput.
 
-The same current catdb binary with the legacy adapter achieved 883.5
+The same current SilverHamu binary with the legacy adapter achieved 883.5
 four-client updates/s versus 1,133.3 through the one-request adapter.
 The supplementary legacy runs followed the main comparison, rather than being
 interleaved; environmental drift limits causal interpretation. Both full timing
@@ -49,7 +49,7 @@ Oracle also documents group commit and distinct WAIT/NOWAIT semantics in
 [COMMIT](https://docs.oracle.com/en/database/oracle/oracle-database/26/sqlrf/COMMIT.html).
 
 This run explicitly uses WAIT and IMMEDIATE; it does not relax durability to win
-latency. catdb already uses logging, group commit and deferred data checkpointing.
+latency. SilverHamu already uses logging, group commit and deferred data checkpointing.
 The high-level design alone therefore does not explain the remaining gap.
 This benchmark collects client latency, not Oracle LGWR waits or OS I/O traces:
 it cannot prove whether remaining differences arise from log I/O, scheduling,
@@ -58,7 +58,7 @@ must not be generalized to Enterprise Edition, RAC or Exadata.
 
 ## Conditions and versions
 
-- Current catdb engine source: `ecc1029e678d45c410bad6e65fd2298debf70c9f`.
+- Current SilverHamu engine source: `ecc1029e678d45c410bad6e65fd2298debf70c9f`.
   Only comparison adapters/reporting changed for this run; no engine tuning.
   Default inline-latest is enabled; wire-buffer, inline-key and diagnostics are off.
 - 100,000 synthetic ordered eight-byte keys, 256-byte values; uniform random hit
@@ -79,12 +79,12 @@ must not be generalized to Enterprise Edition, RAC or Exadata.
   client container and are graphed separately from embedded tests. This is not
   the 1-CPU/512MiB experiment. Fresh named volumes; no Windows bind-mounted DBs.
 - One product at a time; ordinary host activity is not fully isolated. Caches
-  are warmed by verification. Normal automatic maintenance is enabled; catdb is
+  are warmed by verification. Normal automatic maintenance is enabled; SilverHamu is
   checkpointed after load. No explicit timed checkpoint or cold-read claim.
 - SQLite WAL/FULL, PostgreSQL fsync/synchronous_commit on, MySQL flush-at-commit=1
   and sync_binlog=1, Oracle WAIT/IMMEDIATE. SQL adapters request SERIALIZABLE except
   Oracle bulk initialization; that label does not make anomaly guarantees equal.
-  catdb requests sync-before-success. Storage must honor synchronization.
+  SilverHamu requests sync-before-success. Storage must honor synchronization.
 
 Exact engine banners, Python packages, image digests and configuration queries:
 [main environment](main/environment.json). These are the available installed
@@ -96,7 +96,7 @@ is 3.40.1. See [the shared method](../../../benchmarks/README.md) for adapter de
 All **1,008,000 operations** across 126 main/supplementary cases completed without
 operation errors or retries. All **168 full-content checks** passed, including
 21 reopen/restart checks. Deterministic final key/value hashes match across products
-and across both catdb service paths. Missing keys, empty ranges, last-record bounds
+and across both SilverHamu service paths. Missing keys, empty ranges, last-record bounds
 and empty initial databases were checked. A preliminary 1000-row/100-operation
 smoke also passed for all six API paths before performance runs began.
 

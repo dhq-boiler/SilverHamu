@@ -51,11 +51,11 @@ python benchmarks/scaled-gate/run_independent.py --fifo raw
 python benchmarks/scaled-gate/report_independent.py raw report
 ~~~
 
-The reporter accepts original or published compressed logs. [Timed implementation revision](https://github.com/dhq-boiler/catdb/tree/706b0765d0b974ea39464b2f9d7b55255827c2f9).
+The reporter accepts original or published compressed logs. [Timed implementation revision](https://github.com/dhq-boiler/SilverHamu/tree/706b0765d0b974ea39464b2f9d7b55255827c2f9).
 
 ## Fresh product benchmark
 
-100k rows, 256-byte values, four clients, 1,024 synchronous single-key updates, three trials per engine. The catdb C ABI and server binaries **include the FIFO feature**. This separate workload has different checkpoint conditions from the million-row stress test. The runner checked the full digest after restart. [Medians](products.csv), [versions, settings and raw latencies](raw/products/).
+100k rows, 256-byte values, four clients, 1,024 synchronous single-key updates, three trials per engine. The SilverHamu C ABI and server binaries **include the FIFO feature**. This separate workload has different checkpoint conditions from the million-row stress test. The runner checked the full digest after restart. [Medians](products.csv), [versions, settings and raw latencies](raw/products/).
 
 ![Embedded updates](embedded.svg)
 

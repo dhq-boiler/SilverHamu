@@ -2,21 +2,21 @@
 
 **Experimental.** This measures the end-to-end paths in the checked-in Python
 harness, not every workload or the maximum performance of each database engine.
-The engine source is catdb commit `60a67085f3f90cf8518106146d0c5a09e902ccbd`;
+The engine source is SilverHamu commit `60a67085f3f90cf8518106146d0c5a09e902ccbd`;
 benchmark source hashes and exact image identities are in [environment.json](environment.json).
 
 ## Observations from this run
 
-- Embedded single-client lookup: catdb's C ABI path reached a median **190,941
+- Embedded single-client lookup: SilverHamu's C ABI path reached a median **190,941
   ops/s**, versus **85,106 ops/s** for bundled SQLite 3.40.1 (about 2.24x).
   This comparison includes the different Python binding costs.
-- Embedded four-client update: catdb reached **647 ops/s** versus SQLite's
+- Embedded four-client update: SilverHamu reached **647 ops/s** versus SQLite's
   **540 ops/s**, but its p99 was **8.937 ms** versus **4.085 ms**. Higher throughput
-  did not mean lower tail latency; catdb also had a wider run-to-run spread.
-- Service four-client update: catdb reached **335 ops/s**, versus PostgreSQL's
-  **1,298 ops/s** and Oracle Free's **1,196 ops/s**. catdb's p99 was **16.319 ms**
+  did not mean lower tail latency; SilverHamu also had a wider run-to-run spread.
+- Service four-client update: SilverHamu reached **335 ops/s**, versus PostgreSQL's
+  **1,298 ops/s** and Oracle Free's **1,196 ops/s**. SilverHamu's p99 was **16.319 ms**
   versus **5.124 ms** and **5.645 ms**, respectively. This is a clear improvement
-  area for this catdb service path, not evidence that catdb wins every workload.
+  area for this SilverHamu service path, not evidence that SilverHamu wins every workload.
 - Four-client read scaling differs sharply by adapter. Python/driver effects
   prevent attributing that difference solely to the database engine.
 
@@ -44,7 +44,7 @@ verified by `benchmarks/validate.py`. This does not test power-loss durability.
 
 | Product | Measured version |
 |---|---|
-| catdb | 0.1.0, source commit above |
+| SilverHamu | 0.1.0, source commit above |
 | SQLite | 3.40.1, bundled with the Python/Debian client image |
 | PostgreSQL | 18.6 |
 | MySQL | 8.4.13 (InnoDB; binary logging enabled) |
@@ -59,7 +59,7 @@ image digests are recorded for each repetition.
 
 100,000 records with eight-byte ordered binary keys and 256-byte values. 8,000
 operations per case, one or four closed-loop clients, three repetitions. There
-are six API paths: catdb C ABI, SQLite, catdb TCP, PostgreSQL, MySQL and Oracle Free.
+are six API paths: SilverHamu C ABI, SQLite, SilverHamu TCP, PostgreSQL, MySQL and Oracle Free.
 Read transactions roll back after materializing results; update transactions wait
 for a durable acknowledgement. Full transaction/API cost is included.
 

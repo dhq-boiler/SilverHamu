@@ -1,7 +1,7 @@
 # Refreshed product comparison
 
 This reuses the original seeded operation generator, client threads, SQL adapters,
-durability settings and full-content/restart checks. Only catdb's timed service
+durability settings and full-content/restart checks. Only SilverHamu's timed service
 adapter changes when `--single-request` is supplied: get_latest, scan_latest and
 put_commit complete one operation in one protocol request. Initialization and
 verification deliberately continue through the explicit transaction API. Each
@@ -22,14 +22,14 @@ python benchmarks/peer-refresh/report.py artifacts/peer-new
 
 Pre-existing product images are required as documented in ../README.md. Preserve
 the recorded digests for exact version reproduction. The legacy supplement runs
-after the product comparison; it is not interleaved with the main catdb samples,
+after the product comparison; it is not interleaved with the main SilverHamu samples,
 so environmental drift can contribute to the difference. Both use exactly the
 same service and embedded binaries. No response-time observation is treated as an
 engine-only measurement or proof of a specific internal bottleneck.
 
 Verification perspectives:
 - EQ: every final key/value compared with the deterministic update stamps across
-  all products and both catdb API paths; no silent retries or no-op updates.
+  all products and both SilverHamu API paths; no silent retries or no-op updates.
 - BV: empty initial database, missing key, empty range and last-record range.
 - ST: updates visible after commit, full checks after each case and reopen.
 - ER: failures are retained and stop the run; failed conditions are not plotted as

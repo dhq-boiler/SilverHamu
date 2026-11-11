@@ -19,4 +19,4 @@ byte[]? value = client.GetLatest(key);
 
 `GetLatest`, `PutCommit` and `DeleteCommit` execute a single operation. Start a transaction with `Begin` or `BeginRead`, use `Get`, `Put` and `Delete`, then call `Commit` or `Rollback`. A transaction belongs to its connection. Use separate clients for concurrent transactions. Missing keys return `null` and stored empty values return zero-length arrays.
 
-`Request(new { op = "ping" })` returns a `JsonElement` for any wire operation. Server errors expose `SilverHamuServerException.Code`. An interrupted exchange closes the connection and a submitted write may have committed. [Wire protocol](https://github.com/dhq-boiler/catdb/blob/main/docs/service.md#wire-format)
+`Request(new { op = "ping" })` returns a `JsonElement` for any wire operation. Server errors expose `SilverHamuServerException.Code`. An interrupted exchange closes the connection and a submitted write may have committed. [Wire protocol](https://github.com/dhq-boiler/SilverHamu/blob/main/docs/service.md#wire-format)

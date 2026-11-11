@@ -77,7 +77,7 @@ preparation buffers cannot be reserved. Existing tests preserve write/read/range
 conflicts, old generations, lifecycle/resource recovery, checkpointing, persistence
 failures and process termination around durable publication.
 
-The prototype passes local tests and [all five CI jobs](https://github.com/dhq-boiler/catdb/actions/runs/41969847057),
+The prototype passes local tests and [all five CI jobs](https://github.com/dhq-boiler/SilverHamu/actions/runs/41969847057),
 including Windows/Linux, service/fixed-log, C ABI, background-enabled protocol
 checks and Docker. Process-crash testing is not actual power-loss certification.
 

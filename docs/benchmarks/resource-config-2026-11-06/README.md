@@ -87,7 +87,7 @@ changes, retained-budget boundaries and reopen refusal, staged/dependency/buffer
 refusal and subsequent recovery, old snapshots, conflict detection and existing
 crash-recovery tests.
 
-[CI run 42125518466](https://github.com/dhq-boiler/catdb/actions/runs/42125518466)
+[CI run 42125518466](https://github.com/dhq-boiler/SilverHamu/actions/runs/42125518466)
 finished with all 15 jobs passing. Its first attempt had one failure in the
 unchanged fake-adapter backlog test: the assertion expected one failed request
 in the first batch but observed two. The failed job passed when rerun without

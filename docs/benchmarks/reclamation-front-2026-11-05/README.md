@@ -75,8 +75,8 @@ write/read/range conflicts, resource recovery, worker lifecycle, checkpointing,
 persistence failure and child-process termination tests.
 
 Both candidates pass local full `service,fixed-log` tests and Clippy. Candidate
-CI [41971111288](https://github.com/dhq-boiler/catdb/actions/runs/41971111288) and
-follow-up CI [41971642720](https://github.com/dhq-boiler/catdb/actions/runs/41971642720)
+CI [41971111288](https://github.com/dhq-boiler/SilverHamu/actions/runs/41971111288) and
+follow-up CI [41971642720](https://github.com/dhq-boiler/SilverHamu/actions/runs/41971642720)
 pass all five jobs, including Windows/Linux, C ABI, background-enabled service
 protocol cases and Docker. These process-crash checks are not actual power-loss
 certification.

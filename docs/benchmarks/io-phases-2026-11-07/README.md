@@ -1,4 +1,4 @@
-# Matched catdb / SQLite durable-I/O comparison
+# Matched SilverHamu / SQLite durable-I/O comparison
 
 **The observed gap tracks the cost of synchronization while extending versus
 reusing the log, not fewer sync calls in SQLite. No engine/default was changed.**
@@ -6,7 +6,7 @@ This follows the [single-writer isolation study](../solo-update-2026-11-07/READM
 
 100,000 synthetic rows / 256-byte values / one writer / 2 CPU / 4 GiB;
 8,000 updates per fixture, three repeats with reversed/rotated condition order.
-Each fixture uses a new Docker named volume. catdb uses its default group commit;
+Each fixture uses a new Docker named volume. SilverHamu uses its default group commit;
 SQLite uses WAL/FULL. Primary conditions have no retained reader during timing.
 SQLite with an initial retained reader is a separate sensitivity condition.
 
@@ -27,7 +27,7 @@ individual request in any trial. All samples, including adverse trials, remain.
 ![Throughput, p99 and all trial maxima](comparison.svg)
 
 The ordinary catdb/SQLite results reproduce the gap: 282.846 versus 548.048
-updates/s. Traced catdb median throughput differs by +0.5%; ordinary SQLite by
+updates/s. Traced SilverHamu median throughput differs by +0.5%; ordinary SQLite by
 -1.8%, with SQLite p99 increasing from 3.777 to 3.969 ms (+5.1%). These differences
 are observations, not a precise estimate of instrumentation cost.
 
@@ -46,7 +46,7 @@ physical-device service time. Requests writing the main database are separated.
 
 | Observed class | Requests per trial | Sync elapsed, ms |
 |---|---:|---:|
-| catdb, extending log | 8,000 | 3.199 |
+| SilverHamu, extending log | 8,000 | 3.199 |
 | SQLite, extending WAL without DB write | 999 | 3.240 |
 | SQLite, reusing space without DB write | 6,993 | 1.554 |
 | SQLite, main-database write/checkpoint | 8 | 12.921 |
@@ -76,20 +76,20 @@ are per 8,000-update fixture; real calls are never skipped.
 
 | Trace condition | Sync calls | Observed write bytes |
 |---|---:|---:|
-| catdb | 8,000 `fsync` | 2,536,000 log bytes |
+| SilverHamu | 8,000 `fsync` | 2,536,000 log bytes |
 | SQLite | 8,024 `fdatasync` | 32,960,256 WAL + 30,552,064–30,597,120 DB bytes |
 | SQLite, retained reader | 8,001 `fdatasync` | 32,960,032 WAL + 8 explicit shared-memory bytes |
 
 Ordinary SQLite has 8,016 WAL syncs plus 8 DB syncs. It performs **more**, not
-fewer, sync calls than catdb in this workload and writes more application bytes,
+fewer, sync calls than SilverHamu in this workload and writes more application bytes,
 yet is faster overall. Memory-mapped writes and physical block/media amplification
 are not measured by these totals. File extension totals are 2,536,000 bytes for
-catdb, 4,120,032 for ordinary SQLite, and 32,992,800 across the pinned SQLite files.
+SilverHamu, 4,120,032 for ordinary SQLite, and 32,992,800 across the pinned SQLite files.
 An extension is a logical EOF change, not a separate physical allocation timer.
 
 ## What remains outside the measured calls
 
-| Median of per-run means, ms/request | catdb traced | SQLite traced |
+| Median of per-run means, ms/request | SilverHamu traced | SQLite traced |
 |---|---:|---:|
 | Begin + update preparation (enclosing phase) | 0.009441 | 0.028271 |
 | Commit (enclosing phase) | 3.502523 | 1.810647 |
@@ -98,7 +98,7 @@ An extension is a logical EOF change, not a separate physical allocation timer.
 | Residual outside observed I/O | 0.303102 | 0.045734 |
 
 The enclosing phases and I/O phases are **alternative partitions**, not additive.
-Medians across runs also need not sum exactly. catdb residual includes group
+Medians across runs also need not sum exactly. SilverHamu residual includes group
 collection, validation/encoding, publication, Python/wrapper work and scheduling.
 The preceding study measured collection near 0.273 ms using engine diagnostics;
 we do not subtract that number from this independent run. SQLite page search,
@@ -155,5 +155,5 @@ The compressed per-trial JSON files retain every numeric request/event, syntheti
 hash and check outcome; the plan files contain only synthetic keys/stamps.
 The base image is `sha256:1473ef47248f65ee13b65ee6685a0e0896149d2ad3df879fa8909348c1561d56`,
 matching the previous study's recorded binary/source environment. The new observer
-image ID is recorded separately. SQLite is 3.40.1; catdb is the unchanged release
+image ID is recorded separately. SQLite is 3.40.1; SilverHamu is the unchanged release
 engine built with Rust 1.89 and the service feature, accessed locally via C ABI.

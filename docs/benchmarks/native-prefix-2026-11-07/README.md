@@ -51,11 +51,11 @@ python benchmarks/scaled-gate/run_native_prefix.py --stage 1m --out raw
 python benchmarks/scaled-gate/report_native_prefix.py raw report
 ~~~
 
-The reporter also reads published compressed logs. Timing used the linked implementation revision. The shipping source moves the prefix routines into their own module and limits temporary-path cleanup to its owner. A subsequent on/off smoke run verifies the final build. [Final enabled smoke test](raw/smoke-on.txt), [disabled](raw/smoke-off.txt). [Timed source revision](https://github.com/dhq-boiler/catdb/tree/f09b283970eac0aef9cf78bdee1c2b60a78c55c9).
+The reporter also reads published compressed logs. Timing used the linked implementation revision. The shipping source moves the prefix routines into their own module and limits temporary-path cleanup to its owner. A subsequent on/off smoke run verifies the final build. [Final enabled smoke test](raw/smoke-on.txt), [disabled](raw/smoke-off.txt). [Timed source revision](https://github.com/dhq-boiler/SilverHamu/tree/f09b283970eac0aef9cf78bdee1c2b60a78c55c9).
 
 ## Product reference
 
-A separate campaign uses 100k rows, 256-byte values, four clients and 1,024 synchronous updates, three repetitions per engine. Production catdb C ABI and service callers use ordinary checkpoints. This comparison provides context; only the native million-row chart times the new Rust API. The product runner verifies complete digests after restart. [Medians](products.csv), [versions and raw data](raw/products/).
+A separate campaign uses 100k rows, 256-byte values, four clients and 1,024 synchronous updates, three repetitions per engine. Production SilverHamu C ABI and service callers use ordinary checkpoints. This comparison provides context; only the native million-row chart times the new Rust API. The product runner verifies complete digests after restart. [Medians](products.csv), [versions and raw data](raw/products/).
 
 ![Embedded products](embedded.svg)
 

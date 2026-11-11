@@ -1,7 +1,7 @@
 # Matched durable-I/O observations
 
 This is a single-writer diagnostic, not a production tracing library. It retains
-the existing catdb engine, C ABI, group-commit default and SQLite WAL/FULL settings.
+the existing SilverHamu engine, C ABI, group-commit default and SQLite WAL/FULL settings.
 The previous `solo-update` image supplies identical engine binaries and adapters.
 
 ## Reproduce
@@ -31,7 +31,7 @@ Do not build or benchmark other programs concurrently.
 - Each fixture has 100,000 synthetic rows and 256-byte values, 2 CPU, 4 GiB RAM,
   equal memory/swap limits (no swap allowance), a new Docker named volume, no
   network, and one issuing thread. Three repeats reverse/rotate six conditions:
-  catdb, SQLite, SQLite with an initial old reader, each plain/traced.
+  SilverHamu, SQLite, SQLite with an initial old reader, each plain/traced.
 - A deterministic plan has 8,000 updates; prepare (`begin` plus `put`) and commit
   intervals use the same monotonic clock as the observer. Request timers exclude
   trace activation/deactivation; throughput includes this overhead and appending
@@ -46,7 +46,7 @@ Do not build or benchmark other programs concurrently.
   excludes log rotation/new-file tracing; it is not a universal syscall tracer.
   Direct syscalls, hidden libc calls, read/lock/allocation calls and SQLite's
   internal checkpoint functions are not separately observed. Every request must
-  have an observed successful sync; catdb must have exactly one. Reconstructed
+  have an observed successful sync; SilverHamu must have exactly one. Reconstructed
   file lengths must match final lengths. These checks detect specific omissions,
   not all theoretically possible missing I/O.
 - “Growth” means an observed write extends logical EOF. It does not mean physical

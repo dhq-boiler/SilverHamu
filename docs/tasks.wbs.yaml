@@ -1,7 +1,7 @@
 version: 3
 title: SilverHamu
 createdAt: 2026-11-09T15:31:25.7166025Z
-modifiedAt: 2026-11-11T07:47:57.3697931Z
+modifiedAt: 2026-11-11T08:01:55.888123Z
 tasks:
 - id: sql-semantic-types
   title: SQLで日時・金額・識別子の意味を保証する
@@ -183,3 +183,9 @@ tasks:
     estimateHours: 1
     remainingHours: 0
     notes: 新しいソリューションでVS 2026 Debugビルド成功。SQLテスト253件成功をTRXで確認。新ソリューションからデバッグ起動しUI自動化でギンハムちゃんのロゴを確認。今回の269ファイルをステージ済みでdiff --check成功。未追跡の既存2スクリプトは除外し保持。コミット実行が残作業。続いてmainへコミット完了（Unify the database product identity under SilverHamu）。GitHub名・originは未変更、pushは行っていない。
+
+- id: silverhamu-documentation-names
+  title: 資料の製品名とリポジトリ参照をSilverHamuに揃える
+  estimateHours: 1
+  remainingHours: 0
+  notes: 本文・表の製品名、GitHubリンク、現在の作業先を更新。移行表の旧名、環境変数・保存形式・計測キー・実行オプション・既存Goモジュールパスは保持し、Goの旧パスが残る理由を追記。計測値と相対リンクの保持、旧製品名の本文残存、git diff --checkを検証。過去の図版と原データは保持。Kudaki MCPが公開されておらずKudakiプロセスも未起動のため停止時fallbackで記録。次回起動時にMCPで再反映する。

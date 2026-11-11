@@ -131,7 +131,7 @@ off and on: no successful reply or uncommitted visibility before sync, and
 confirmed records recover after failure. The complete service suite also runs
 with the background option enabled in CI.
 
-[Final implementation CI](https://github.com/dhq-boiler/catdb/actions/runs/41952589201)
+[Final implementation CI](https://github.com/dhq-boiler/SilverHamu/actions/runs/41952589201)
 passed Windows/Linux, ordinary/fixed-log feature combinations, C ABI and Docker.
 Performance was measured in Docker/Linux; native Windows/PALV and mobile
 performance were not measured. Process exits and fault injection do not prove

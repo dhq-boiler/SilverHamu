@@ -1,4 +1,4 @@
-# catdb work-elision audit — 2026-11-05
+# SilverHamu work-elision audit — 2026-11-05
 
 Baseline: `8b39b88`; both preceding production/documentation CI runs succeeded.
 Scope: transactions, service dispatch, group commit, reclamation, transaction C ABI and export. No format change or PALV deployment is part of this batch.

@@ -23,7 +23,7 @@ Ownerでは、提供された回し車GIFを処理中だけ画面中央に表示
 
 スクリプトの実行名、SDKのimport・型名、プロジェクト参照を新名へ更新する。旧CLI名と旧SDK名の別名は提供しない。ビルド済みの旧実行ファイルが残る場合は、新名の出力を明示して実行する。
 
-新しい配布名のレジストリ公開・予約は、このファイル変更には含まれない。未公開の版はチェックアウトからビルドする。GitHubリポジトリは引き続き `dhq-boiler/catdb` のため、Git URLとGoモジュールパスは従来のまま。作業ディレクトリ `C:\Git\catdb` も変更しない。
+新しい配布名のレジストリ公開・予約は、このファイル変更には含まれない。未公開の版はチェックアウトからビルドする。GitHubリポジトリは `dhq-boiler/SilverHamu` へ改名済みで、資料内のGit URLも更新した。現在の作業ディレクトリは `C:\Git\SilverHamu`。Goモジュールは `clients/go/go.mod` の宣言に合わせて `github.com/dhq-boiler/catdb/clients/go` を引き続き使用する。リポジトリの改名だけではGoモジュールパスは変わらないため、インストール例とimportもこの宣言に合わせる。
 
 Ownerは `apps/SilverHamu.Owner.sln` から開く。ソリューション内のプロジェクトと出力は `SilverHamu.*`。ネイティブDLLの場所を指定するMSBuildプロパティは `SilverHamuNativePath`。旧名のソリューション・プロジェクト・SDKソースは新名へ移行し、旧名のビルドキャッシュは削除した。
 
@@ -36,6 +36,6 @@ Ownerは `apps/SilverHamu.Owner.sln` から開く。ソリューション内の�
 - Rustライブラリ名 `newdbms`、ネイティブDLL名とC ABI。
 - 設定・テスト・運用スクリプトの `CATDB_*` 環境変数。
 - WindowsのアプリケーションID `dev.catdb.owner`。
-- 過去の実験記録・計測データと、比較用の `catdb` 計測キー。
+- 過去の計測データと、比較用の `catdb` 計測キー、実験用のイメージ名・実行オプション。資料の本文・表では製品の表示名をSilverHamuに統一し、数値や原データは変更しない。
 
 DBの変換や再作成は不要。プロトコルのバージョンも変更しない。

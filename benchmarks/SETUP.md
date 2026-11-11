@@ -4,7 +4,7 @@ Date: 2026-11-05 (Japan time). These preparation runs are **not** included in th
 performance charts.
 
 1. A 1,000-record, 100-operation, one-repetition smoke run passed all six cases
-   and full-content/reopen checks for catdb embedded, SQLite, catdb TCP,
+   and full-content/reopen checks for SilverHamu embedded, SQLite, SilverHamu TCP,
    PostgreSQL and MySQL. Oracle initialization failed: the Free Lite image has no
    `USERS` tablespace. A dedicated disposable tablespace was added. An unnecessary
    attempt to grant access to `v_$version` also failed, leaving an already-created

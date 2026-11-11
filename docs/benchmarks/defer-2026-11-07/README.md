@@ -1,6 +1,6 @@
 # Delaying the next speculative write for an invalidated page range
 
-[Source used for all nine timings](https://github.com/dhq-boiler/catdb/tree/a40f71e7f62c7161993ab261878763850e0abb90/benchmarks/scaled-gate). A committed update invalidates any matching prepared page. The candidate remembers up to 96 such range keys until the next successful directory publication. Other eligible ranges may still be prepared. A range that stays hot gets rebuilt by the foreground scan; a range that cools may miss an opportunity for early reuse. The suppression set is bounded and resets on publication or reopen. Commit sync, old readers and recovery use the existing paths.
+[Source used for all nine timings](https://github.com/dhq-boiler/SilverHamu/tree/a40f71e7f62c7161993ab261878763850e0abb90/benchmarks/scaled-gate). A committed update invalidates any matching prepared page. The candidate remembers up to 96 such range keys until the next successful directory publication. Other eligible ranges may still be prepared. A range that stays hot gets rebuilt by the foreground scan; a range that cools may miss an opportunity for early reuse. The suppression set is bounded and resets on publication or reopen. Commit sync, old readers and recovery use the existing paths.
 
 ## Four writers, one million rows
 
@@ -47,7 +47,7 @@ Use SCALED_VARIANT=prewrite for the immediate pilot. Add PREWRITE_COUNTS=1 and D
 
 ## Product reference
 
-100k rows, 256-byte values, four clients, 1,024 synchronous updates per run, three trials per product. All reopened digests matched. These charts use the released catdb interfaces. The native prototype is timed in the million-row checkpoint workload above. [Product medians](products.csv), [drivers, versions and raw samples](raw/products/).
+100k rows, 256-byte values, four clients, 1,024 synchronous updates per run, three trials per product. All reopened digests matched. These charts use the released SilverHamu interfaces. The native prototype is timed in the million-row checkpoint workload above. [Product medians](products.csv), [drivers, versions and raw samples](raw/products/).
 
 ![Embedded updates](embedded.svg)
 

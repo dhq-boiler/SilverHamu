@@ -1,4 +1,4 @@
-# FIFO delta persistence connected to catdb MVCC
+# FIFO delta persistence connected to SilverHamu MVCC
 
 With native MVCC on both paths, FIFO delta persistence measured **293.2 transactions/s**, p99 **84.2 ms**, and worst request **149.7 ms**. WAL measured 203.4 transactions/s, 579.1 ms and 1,511.1 ms. End RSS was 769 MiB for the prototype and 409 MiB for WAL. The candidate reduced p99 and maximum latency in every pair. Throughput improved in two pairs; the third measured 189.56 versus 190.70 transactions/s.
 

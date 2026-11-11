@@ -15,7 +15,7 @@ Each variant ran 1,024 multi-key updates against one million rows with a pinned 
 
 ## How the next writer is selected
 
-The design question came from PostgreSQL 18.6, whose XLogFlush rechecks the flushed WAL position after a competing writer finishes. A separate earlier single-run probe counted 1,024 WAL syncs for 1,024 commits at one client and 512 at four clients, with fsync on, synchronous_commit on, commit_delay zero and fdatasync. The PostgreSQL counter is instance-wide. catdb uses its own validation and paired-frame protocol. [PostgreSQL 18.6 WAL source](https://github.com/postgres/postgres/blob/REL_18_6/src/backend/access/transam/xlog.c).
+The design question came from PostgreSQL 18.6, whose XLogFlush rechecks the flushed WAL position after a competing writer finishes. A separate earlier single-run probe counted 1,024 WAL syncs for 1,024 commits at one client and 512 at four clients, with fsync on, synchronous_commit on, commit_delay zero and fdatasync. The PostgreSQL counter is instance-wide. SilverHamu uses its own validation and paired-frame protocol. [PostgreSQL 18.6 WAL source](https://github.com/postgres/postgres/blob/REL_18_6/src/backend/access/transam/xlog.c).
 
 An idle queue immediately elects its first caller. While that group runs, later callers enqueue their transactions. At handoff the oldest pending caller takes the already-present FIFO prefix that fits four transactions, 512 KiB of encoded data and 4,096 physical operations including a generation marker. The pending queue separately caps at 32 requests and 4 MiB of estimated encoded updates. Those caps govern group selection and queued payload; RSS also includes MVCC versions, request objects, log assembly and file buffers. Full queues and oversized requests return a resource error before publication. No timer fills an incomplete group, and no permanent worker or spin loop is needed. Notifications wake callers to check either their own outcome or their eligibility to lead. Transactions validate against native MVCC state and all earlier accepted writes in the group, using the same validation and publication core as the production group-commit path.
 
@@ -33,16 +33,16 @@ The controlled arrival tests pause the first sync to place independent and confl
 
 | Engine / driver | Updates/s | p99 ms |
 |:---|---:|---:|
-| catdb FIFO (Rust) | 187.02 | 31.01 |
-| catdb embedded (C ABI) | 696.58 | 8.31 |
+| SilverHamu FIFO (Rust) | 187.02 | 31.01 |
+| SilverHamu embedded (C ABI) | 696.58 | 8.31 |
 | SQLite | 308.09 | 5.72 |
-| catdb service | 1,042.16 | 6.20 |
+| SilverHamu service | 1,042.16 | 6.20 |
 | PostgreSQL | 1,329.55 | 4.27 |
 | MySQL | 355.26 | 19.22 |
 | Oracle Free | 1,199.94 | 5.47 |
-| catdb grouped (Rust) | 487.02 | 13.74 |
+| SilverHamu grouped (Rust) | 487.02 | 13.74 |
 
-The peer suite uses 100k rows, 8-byte keys, 256-byte values, four clients and 1,024 single-key durable updates. Each client writes its own deterministic key partition. Full verification after reopen checks every key and value across all repetitions. Each container has 2 CPUs and 4 GiB. Native prototypes run through a Rust test binary and use the same key/stamp sequence as the Python API benchmark for released catdb, SQLite, PostgreSQL, MySQL and Oracle Free. The service chart measures the shipped catdb service. SQL Server's previously recorded publication restriction still applies to this suite. [Native trials](native/results.json), [product metadata and verification](products/environment.json), [product trials](products/results.json).
+The peer suite uses 100k rows, 8-byte keys, 256-byte values, four clients and 1,024 single-key durable updates. Each client writes its own deterministic key partition. Full verification after reopen checks every key and value across all repetitions. Each container has 2 CPUs and 4 GiB. Native prototypes run through a Rust test binary and use the same key/stamp sequence as the Python API benchmark for released SilverHamu, SQLite, PostgreSQL, MySQL and Oracle Free. The service chart measures the shipped SilverHamu service. SQL Server's previously recorded publication restriction still applies to this suite. [Native trials](native/results.json), [product metadata and verification](products/environment.json), [product trials](products/results.json).
 
 ## Reproduction
 

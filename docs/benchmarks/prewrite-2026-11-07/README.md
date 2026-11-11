@@ -1,6 +1,6 @@
 # Prewriting committed MVCC ranges before checkpoint publication
 
-[Measured Rust sources](https://github.com/dhq-boiler/catdb/tree/7151adaf8091198fe13205adb6b5f9ed4d17e19b/benchmarks/scaled-gate). The prototype stages sealed 64 KiB pages in free paired slots. A subsequent commit invalidates every staged source range it touches. The foreground checkpoint reuses surviving references, rebuilds the other ranges, syncs the page file, then publishes the directory. The log still syncs on commit. Restart ignores unreferenced slots. The design was inspired by the division of work between DBW and LGWR in [Oracle Database Concepts](https://docs.oracle.com/en/database/oracle/oracle-database/19/cncpt/process-architecture.html). catdb retains the existing page-file sync before publishing the root. The storage format and production defaults are unchanged.
+[Measured Rust sources](https://github.com/dhq-boiler/SilverHamu/tree/7151adaf8091198fe13205adb6b5f9ed4d17e19b/benchmarks/scaled-gate). The prototype stages sealed 64 KiB pages in free paired slots. A subsequent commit invalidates every staged source range it touches. The foreground checkpoint reuses surviving references, rebuilds the other ranges, syncs the page file, then publishes the directory. The log still syncs on commit. Restart ignores unreferenced slots. The design was inspired by the division of work between DBW and LGWR in [Oracle Database Concepts](https://docs.oracle.com/en/database/oracle/oracle-database/19/cncpt/process-architecture.html). SilverHamu retains the existing page-file sync before publishing the root. The storage format and production defaults are unchanged.
 
 ## Four writers on one million rows
 
@@ -53,7 +53,7 @@ python benchmarks/scaled-gate/report_prewrite.py pilot.txt raw/1m report
 
 ## Current cross-product reference
 
-The independent product benchmark uses 100,000 rows, 256-byte values, four clients and 1,024 synchronous single-key updates, three trials per engine. catdb uses its published C ABI and service interfaces. The prewrite prototype only exists in the native test backend; the million-row chart above measures it. Database checksums agree after reopening in each repetition.
+The independent product benchmark uses 100,000 rows, 256-byte values, four clients and 1,024 synchronous single-key updates, three trials per engine. SilverHamu uses its published C ABI and service interfaces. The prewrite prototype only exists in the native test backend; the million-row chart above measures it. Database checksums agree after reopening in each repetition.
 
 ![Embedded product comparison](embedded.svg)
 

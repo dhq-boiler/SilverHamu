@@ -1,7 +1,7 @@
 # Default service under CPU and memory constraints
 
 The experiment exposed a **service configuration limit before an OS memory
-limit**: all 18 one-million-row attempts were rejected by catdb's default resource
+limit**: all 18 one-million-row attempts were rejected by SilverHamu's default resource
 budget, including the 2-GiB containers. No engine optimization or default change
 was made. The result is not evidence that a million rows need more than 2 GiB.
 

@@ -1,7 +1,7 @@
 version: 3
 title: SilverHamu
 createdAt: 2026-11-09T15:31:25.7166025Z
-modifiedAt: 2026-11-11T08:49:53.447739Z
+modifiedAt: 2026-11-11T09:39:59.738747Z
 tasks:
 - id: sql-semantic-types
   title: SQLで日時・金額・識別子の意味を保証する
@@ -202,5 +202,5 @@ tasks:
   - id: silverhamu-clients-release-020-publish
     title: 各公開先へ配布して取得可能であることを確認する
     estimateHours: 2
-    remainingHours: 2
-    notes: Goとnpmを公開確認済み。npmはレジストリの0.2.0とshasum f1e42e6ccc70bf1c20e0c8d9b314d26c7f00f33aが一致し、公開パッケージの実TCP/TLS・トランザクション・認証拒否も成功。検証済み9成果物をGitHub Release clients/v0.2.0へ公開。先生がPyPI・RubyGems・NuGetのTrusted Publisherを登録済み。PyPI 42986050943・Ruby 42988156757・NuGet 42989049653は公開ジョブの割当待ち。Rubyは再ビルドと既定SHA-256照合が成功。Javaは4成果物のハッシュ・GAVを確認し、署名とCentral公開ワークフローを追加（cc5ef05）。ローカルGPG agentは起動不能で署名試験は未完了。Centralトークンと本番署名鍵の環境Secrets登録を先生へ依頼中。外部待ちの完了時刻は不明。画面操作は使わずCLIとActionsだけで進める。
+    remainingHours: 1
+    notes: Go・npm・PyPI・RubyGems・Maven Centralの0.2.0を公開取得確認済み。npm・Python・Rubyは公開パッケージで実TCP/TLS・トランザクション・認証拒否が成功。PyPIの5テストも成功。JavaはCentral上の4成果物が検証済みバイト列と一致し、公開鍵CADB74EB9FC1DD21A8B3A9B7005CE62130C96F71で全署名を検証（Actions 42992548344、deployment ddd0ed94-fd85-440e-b416-8f0c2723ee8f）。NuGetはActions 42989049653成功・サーバー受理済み、公開フィードは未反映で所有者向け検証状態を先生へ確認中。GitHub Release clients/v0.2.0に成果物・署名・公開鍵・ハッシュを配布。重複した旧CI9本を中止し配布待ちを解消、最新版CIは維持。残作業はNuGetの取得・内容一致確認。サーバー待ち時間は不明。画面操作は行わずCLIとActionsのみ使用。

@@ -1,0 +1,76 @@
+name: Publish .NET client to NuGet
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Client version in the verified GitHub release
+        required: true
+        type: string
+      sha256:
+        description: SHA-256 of the tested NuGet package
+        required: true
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: publish-silverhamu-dotnet-client
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: nuget
+      url: https://www.nuget.org/packages/SilverHamu.Client/
+    permissions:
+      id-token: write
+    env:
+      RELEASE_VERSION: ${{ inputs.version }}
+      EXPECTED_SHA: ${{ inputs.sha256 }}
+    steps:
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Download and verify the tested release package
+        shell: python
+        run: |
+          import hashlib, io, json, os, pathlib, re, urllib.request, zipfile
+          import xml.etree.ElementTree as ET
+          version = os.environ['RELEASE_VERSION']
+          expected = os.environ['EXPECTED_SHA']
+          assert re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+', version), 'invalid version'
+          assert re.fullmatch(r'[0-9a-f]{64}', expected), 'invalid SHA-256'
+          name = f'SilverHamu.Client.{version}.nupkg'
+          base = f'https://github.com/dhq-boiler/SilverHamu/releases/download/clients/v{version}/'
+          with urllib.request.urlopen(base + 'release-manifest.json', timeout=60) as response:
+              manifest = json.load(response)
+          assert manifest['version'] == version
+          assert manifest['files'][name]['sha256'] == expected, 'release manifest mismatch'
+          with urllib.request.urlopen(base + name, timeout=60) as response:
+              package = response.read()
+          assert hashlib.sha256(package).hexdigest() == expected, 'package hash mismatch'
+          with zipfile.ZipFile(io.BytesIO(package)) as archive:
+              specs = [entry for entry in archive.namelist() if entry.endswith('.nuspec')]
+              assert len(specs) == 1
+              metadata = ET.fromstring(archive.read(specs[0]))
+              ns = {'n': metadata.tag.split('}')[0][1:]}
+              assert metadata.find('n:metadata/n:id', ns).text == 'SilverHamu.Client'
+              assert metadata.find('n:metadata/n:version', ns).text == version
+          pathlib.Path('dist').mkdir()
+          pathlib.Path('dist', name).write_bytes(package)
+          print(f'Verified {name}: {expected}')
+      - name: Get a short-lived NuGet API key
+        id: login
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841
+        with:
+          user: dhq_boiler
+      - name: Publish the verified package
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: dotnet nuget push "dist/SilverHamu.Client.$RELEASE_VERSION.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json

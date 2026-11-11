@@ -1,7 +1,7 @@
 version: 3
 title: SilverHamu
 createdAt: 2026-11-09T15:31:25.7166025Z
-modifiedAt: 2026-11-11T08:10:17.957559Z
+modifiedAt: 2026-11-11T08:34:23.696213Z
 tasks:
 - id: sql-semantic-types
   title: SQLで日時・金額・識別子の意味を保証する
@@ -197,8 +197,10 @@ tasks:
   - id: silverhamu-clients-release-020-prepare
     title: 配布名・バージョン・成果物と導入例を検証する
     estimateHours: 2
-    remainingHours: 2
+    remainingHours: 0
+    notes: コミットb0c52f2。6言語のビルドと実TCP/TLS相互運用がActions 42985641185で成功。9配布成果物のSHA-256を検証。Go v0.2.0は新モジュールパスで公開プロキシから取得確認済み。
   - id: silverhamu-clients-release-020-publish
     title: 各公開先へ配布して取得可能であることを確認する
     estimateHours: 2
     remainingHours: 2
+    notes: Goとnpmを公開確認済み。npmは先生のstage承認後、レジストリの0.2.0とshasum f1e42e6ccc70bf1c20e0c8d9b314d26c7f00f33aの一致を確認。PyPIはinvalid-publisherで停止。RubyはActions 42986418412がubuntu-24.04の割当待ちを継続。ubuntu-latestへ切り替えて再実行し、Ruby・RubyGemsの固定バージョンと検証済みSHA-256による成果物照合は維持する。NuGetとMaven CentralはCLI公開認証が未設定。先生の指示によりデスクトップ・ブラウザー自動操作を停止し、CLIとActionsのみで進める。

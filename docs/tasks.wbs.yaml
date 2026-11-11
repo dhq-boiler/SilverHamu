@@ -1,7 +1,7 @@
 version: 3
 title: SilverHamu
 createdAt: 2026-11-09T15:31:25.7166025Z
-modifiedAt: 2026-11-11T16:53:00.4591217Z
+modifiedAt: 2026-11-11T18:04:17.211611Z
 tasks:
 - id: silverhamu-release-020
   title: 全変更をコミットしSilverHamu v0.2.0の検証済み配布物を公開する
@@ -11,12 +11,12 @@ tasks:
     title: バージョン・配布手順・リリースノートを整え全変更をコミットする
     estimateHours: 1
     remainingHours: 0
-    notes: 全83ファイルを04d69c1にコミットしてmainへpush済み。本体・Owner・SQLを0.2.0に更新し、検証・配布用workflowとリリースノートを追加。Releaseビルド・SQL618テスト・C ABI35テスト成功。Docker配布用ビルド成功。既存CIのmanaged-walベンチマークで旧トークン配置が残る問題を検出し修正中。
+    notes: 全83ファイルを04d69c1にコミットしてmainへpush済み。本体・Owner・SQLを0.2.0に更新し、検証・配布用workflowとリリースノートを追加。Releaseビルド・SQL618テスト・C ABI35テスト成功。Docker配布用ビルド成功。既存CIのmanaged-walベンチマークで旧トークン配置が残る問題を検出し修正済み。
   - id: silverhamu-release-020-publish
     title: 配布物を検証してタグとGitHub Releaseを公開する
     estimateHours: 1
-    remainingHours: 1
-    notes: 配布workflow 43067351307のWindows／Linux／Docker全ジョブ成功、SQL統合成功、Windows Owner自己完結起動成功。追加CIの大量レプリケーション2件がDebugで期限超過となることを再現し、Releaseでは同一試験成功を確認。配布構成でレプリケーションを検証するようCIを修正し、配布workflowにも全レプリケーション試験を追加して再検証する。
+    remainingHours: 0
+    notes: v0.2.0を0f303cd22b15e5b7389b31d27aeba4877a098ef0にタグ付けして公開。https://github.com/dhq-boiler/SilverHamu/releases/tag/v0.2.0 。最終配布workflow 43070648509のWindows／Linux／Docker／publish全ジョブ成功。修正済みCI 43070521457は全35ジョブ成功、SQL統合43070521400も成功。両OSのネイティブ全試験・Releaseサービスのレプリケーション全11試験（SQLホスト指定の1件は別統合CIで成功）・C ABI試験、SQL／Owner618テスト、Windows Owner自己完結起動とZIP内容を検証。4配布物とSHA256SUMSを公開し、GitHub資産のdigestと各チェックサムの完全一致、Latest指定、正式公開状態、タグ参照先をAPIで確認。既存クライアント0.2.0は再公開せず維持。
 - id: silverhamu-readme-benchmark-legend
   title: READMEのベンチマーク画像の凡例をsilverhamuに更新する
   estimateHours: 0.25

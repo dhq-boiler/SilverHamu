@@ -15,7 +15,7 @@ internal sealed record ArchiveCell(byte StorageClass, byte[] Data);
 
 internal sealed record ArchiveTablePage(int TableIndex, long Offset, long NextOffset, long TotalRows, SqlResult Result, bool PreviewTruncated);
 
-internal sealed class ArchiveTableReader : IDisposable
+internal sealed partial class ArchiveTableReader : IDisposable
 {
     public const int PageSize = 100;
     private const long CacheLimit = 512L * 1024 * 1024;
@@ -24,6 +24,7 @@ internal sealed class ArchiveTableReader : IDisposable
     private readonly string cacheDirectory;
     private readonly Encoding textEncoding;
     private readonly Dictionary<string, Snapshot> snapshots = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, (long Bytes, DateTime Modified)> sourceVersions = new(StringComparer.OrdinalIgnoreCase);
     private long cachedBytes;
     private long access;
     private bool disposed;
@@ -33,6 +34,7 @@ internal sealed class ArchiveTableReader : IDisposable
 
     public string ArchiveDirectory { get; }
     public ArchiveCatalog Manifest { get; }
+    public byte[] ManifestBytes { get; }
 
     private sealed record Snapshot(string Path, long Bytes, DateTime SourceWriteTime, long Used);
 
@@ -55,14 +57,17 @@ internal sealed class ArchiveTableReader : IDisposable
             SnapshotFile("library.ndb", 8 * 1024 * 1024);
             using (var database = NewDbmsDatabase.Open(Path.Combine(cacheDirectory, "library.ndb"), new NewDbmsResourceLimits()))
             using (var transaction = database.BeginTransaction())
-                Manifest = JsonSerializer.Deserialize<ArchiveCatalog>(transaction.Get("palv/import/manifest/v1"u8.ToArray()) ?? throw new MissingCatalogException()) ?? throw new InvalidDataException("PALVマニフェストが不正です。");
+            {
+                ManifestBytes = transaction.Get("palv/import/manifest/v1"u8.ToArray()) ?? throw new MissingCatalogException();
+                Manifest = JsonSerializer.Deserialize<ArchiveCatalog>(ManifestBytes) ?? throw new InvalidDataException(L.Get("ThePALVManifestIsInvalid"));
+            }
             ValidateManifest(Manifest);
             textEncoding = Manifest.TextEncoding switch
             {
                 "UTF-8" => new UTF8Encoding(false, true),
                 "UTF-16le" => new UnicodeEncoding(false, false, true),
                 "UTF-16be" => new UnicodeEncoding(true, false, true),
-                _ => throw new InvalidDataException("PALVアーカイブの文字エンコーディングが未対応です。")
+                _ => throw new InvalidDataException(L.Get("ThePALVArchiveCharacterEncodingIsNotSupported"))
             };
         }
         catch { Directory.Delete(cacheDirectory, recursive: true); throw; }
@@ -73,7 +78,7 @@ internal sealed class ArchiveTableReader : IDisposable
         FileSystemInfo? item = Directory.Exists(path) ? new DirectoryInfo(path) : new FileInfo(path);
         while (item is not null && item.FullName.Length >= root.Length)
         {
-            if (item.Exists && (item.Attributes & FileAttributes.ReparsePoint) != 0) throw new InvalidDataException("リンク・リパースポイントを経由するPALV参照は使用できません。");
+            if (item.Exists && (item.Attributes & FileAttributes.ReparsePoint) != 0) throw new InvalidDataException(L.Get("PALVReferencesThroughLinksOrReparsePointsCannot"));
             item = item is DirectoryInfo directory ? directory.Parent : ((FileInfo)item).Directory;
         }
     }
@@ -81,18 +86,18 @@ internal sealed class ArchiveTableReader : IDisposable
     private static void ValidateManifest(ArchiveCatalog manifest)
     {
         if (manifest.Format != 1 || manifest.Tables is null || manifest.Tables.Length > 4096 || manifest.Tables.Select(x => x.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count() != manifest.Tables.Length)
-            throw new InvalidDataException("PALVのテーブル定義が不正です。");
+            throw new InvalidDataException(L.Get("ThePALVTableDefinitionIsInvalid"));
         foreach (var table in manifest.Tables)
         {
-            if (string.IsNullOrWhiteSpace(table.Name) || table.Columns is null || table.Columns.Length is < 1 or > 512 || table.Rows < 0 || table.Segments is null || table.Columns.Any(c => string.IsNullOrWhiteSpace(c.Name))) throw new InvalidDataException("PALVの列定義または行数が不正です。");
+            if (string.IsNullOrWhiteSpace(table.Name) || table.Columns is null || table.Columns.Length is < 1 or > 512 || table.Rows < 0 || table.Segments is null || table.Columns.Any(c => string.IsNullOrWhiteSpace(c.Name))) throw new InvalidDataException(L.Get("ThePALVColumnDefinitionOrRowCountIs"));
             long expected = 0;
             foreach (var segment in table.Segments)
             {
                 if (string.IsNullOrWhiteSpace(segment.File) || Path.GetFileName(segment.File) != segment.File || segment.File.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 || segment.File.Contains('/') || segment.File.Contains('\\') || !segment.File.StartsWith("table-", StringComparison.Ordinal) || !segment.File.EndsWith(".ndb", StringComparison.Ordinal) || segment.Start != expected || segment.Rows < 0 || segment.Rows > table.Rows - expected)
-                    throw new InvalidDataException("PALVの分割ファイル定義が不正です。");
+                    throw new InvalidDataException(L.Get("ThePALVSegmentDefinitionIsInvalid"));
                 expected += segment.Rows;
             }
-            if (expected != table.Rows) throw new InvalidDataException("PALVのテーブル行数と分割ファイル範囲が一致しません。");
+            if (expected != table.Rows) throw new InvalidDataException(L.Get("ThePALVTableRowCountDoesNotMatch"));
         }
     }
 
@@ -101,11 +106,14 @@ internal sealed class ArchiveTableReader : IDisposable
         var source = Path.Combine(ArchiveDirectory, file);
         RejectLinks(ArchiveDirectory, source);
         var info = new FileInfo(source);
-        if (!info.Exists) throw new FileNotFoundException("PALVの分割ファイルが見つかりません。", file);
-        if (info.Length > maxBytes) throw new InvalidDataException($"閲覧用コピーのファイル上限を超えています: {file}");
+        if (!info.Exists) throw new FileNotFoundException(L.Get("APALVSegmentFileWasNotFound"), file);
+        if (sourceVersions.TryGetValue(file, out var version) && (version.Bytes != info.Length || version.Modified != info.LastWriteTimeUtc))
+            throw new InvalidDataException(L.Get("ThePALVArchiveChangedWhileBrowsingReopenThe"));
+        sourceVersions.TryAdd(file, (info.Length, info.LastWriteTimeUtc));
+        if (info.Length > maxBytes) throw new InvalidDataException(L.Get("TheBrowsingCopyExceedsTheFileSizeLimit", file));
         if (snapshots.TryGetValue(file, out var cached))
         {
-            if (info.Length != cached.Bytes || info.LastWriteTimeUtc != cached.SourceWriteTime) throw new InvalidDataException("閲覧中にPALVアーカイブが変更されました。参照ファイルを開き直してください。");
+            if (info.Length != cached.Bytes || info.LastWriteTimeUtc != cached.SourceWriteTime) throw new InvalidDataException(L.Get("ThePALVArchiveChangedWhileBrowsingReopenThe"));
             snapshots[file] = cached with { Used = ++access }; return cached.Path;
         }
         while (cachedBytes + info.Length > CacheLimit)
@@ -122,15 +130,15 @@ internal sealed class ArchiveTableReader : IDisposable
             // Opening originals with the native API can recover/truncate a WAL; only private copies may be opened that way.
             using var input = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read);
             using var output = new FileStream(target, FileMode.CreateNew, FileAccess.Write, FileShare.None);
-            if (input.Length != info.Length) throw new IOException("コピー開始時にアーカイブが変更されました。");
+            if (input.Length != info.Length) throw new IOException(L.Get("TheArchiveChangedWhenCopyingStarted"));
             input.CopyTo(output);
             info.Refresh();
-            if (info.Length != expectedLength || info.LastWriteTimeUtc != expectedWriteTime) throw new IOException("コピー中にアーカイブが変更されました。");
+            if (info.Length != expectedLength || info.LastWriteTimeUtc != expectedWriteTime) throw new IOException(L.Get("TheArchiveChangedDuringCopying"));
         }
         catch (IOException error)
         {
             if (File.Exists(target)) File.Delete(target);
-            throw new IOException($"アーカイブを安定した状態で読み取れません: {file}。他のプロセスで使用中かファイルが変更されています。", error);
+            throw new IOException(L.Get("CouldNotReadAStableArchiveAnotherProcess", file), error);
         }
         snapshots.Add(file, new(target, expectedLength, expectedWriteTime, ++access)); cachedBytes += expectedLength;
         return target;
@@ -166,7 +174,7 @@ internal sealed class ArchiveTableReader : IDisposable
                 using var transaction = database.BeginTransaction();
                 while (position < Math.Min(segmentEnd, requestedEnd))
                 {
-                    var encoded = transaction.Get(RowKey(tableIndex, position)) ?? throw new InvalidDataException($"行が欠落しています: {table.Name} / {position}");
+                    var encoded = transaction.Get(RowKey(tableIndex, position)) ?? throw new InvalidDataException(L.Get("MissingRow", table.Name, position));
                     if (bytes + encoded.Length > 8 * 1024 * 1024 && values.Count > 0) return Page();
                     bytes += encoded.Length;
                     var row = Decode(encoded, table.Columns.Length);
@@ -175,11 +183,11 @@ internal sealed class ArchiveTableReader : IDisposable
             }
             return Page();
 
-            ArchiveTablePage Page() => new(tableIndex, offset, position, table.Rows, new(table.Columns.Select(c => c.Name).ToArray(), values, $"{table.Name}: {values.Count} 行（全{table.Rows:N0}行）"), truncated);
+            ArchiveTablePage Page() => new(tableIndex, offset, position, table.Rows, new(table.Columns.Select(c => c.Name).ToArray(), values, L.Get("RowsNTotal", table.Name, values.Count, table.Rows)), truncated);
         }
     });
 
-    private static byte[] RowKey(int table, long row)
+    internal static byte[] RowKey(int table, long row)
     {
         var key = new byte[13]; key[0] = 1;
         System.Buffers.Binary.BinaryPrimitives.WriteInt32BigEndian(key.AsSpan(1), table);
@@ -213,12 +221,12 @@ internal sealed class ArchiveTableReader : IDisposable
             case 2: return new("NUMBER", BitConverter.Int64BitsToDouble(BinaryPrimitives.ReadInt64LittleEndian(cell.Data)).ToString("R", CultureInfo.InvariantCulture));
             case 3:
                 var text = textEncoding.GetString(cell.Data);
-                if (preview && text.Length > 4096) { truncated = true; var end = char.IsHighSurrogate(text[4095]) ? 4095 : 4096; return SqlValue.String(text[..end] + $"… ({text.Length:N0}文字)"); }
+                if (preview && text.Length > 4096) { truncated = true; var end = char.IsHighSurrogate(text[4095]) ? 4095 : 4096; return SqlValue.String(text[..end] + L.Get("NCharacters", text.Length)); }
                 return SqlValue.String(text);
             case 4:
                 if (preview && cell.Data.Length > 256) { truncated = true; return new("BLOB", Convert.ToHexString(cell.Data.AsSpan(0, 256)) + $"… ({cell.Data.Length:N0} bytes)"); }
                 return new("BLOB", Convert.ToHexString(cell.Data));
-            default: throw new InvalidDataException("PALVの保存型が不正です。");
+            default: throw new InvalidDataException(L.Get("ThePALVStorageTypeIsInvalid"));
         }
     }
 

@@ -91,7 +91,7 @@ An explicit `ON` accepts a scalar boolean predicate. Equalities between inputs c
 
 `EXPLAIN` inspects metadata without executing the SELECT against stored rows. To measure execution, use `EXPLAIN ANALYZE` on a SELECT or WITH query. It executes the query once and returns the measurements in place of the query results. Execution errors, such as division by zero, propagate normally. Both forms are available on full SQL connections and in Owner's read-only folder mode. View-only service tokens cannot inspect plans.
 
-In a folder session, `ANALYZE Book_3` collects statistics in memory. Closing or reopening the folder clears them. For a large segmented archive the row count comes from the manifest and the column estimates use sampled rows. To inspect a concrete read, run `EXPLAIN SELECT * FROM Book_3 WHERE PublishDate IS NOT NULL LIMIT 10` and then prefix the same query with `EXPLAIN ANALYZE` to measure it. A simple limit can stop the scan early; an unfiltered `COUNT(*)` on a segmented archive can use the manifest count without reading table rows.
+In a folder session, `ANALYZE Book_3` collects statistics in memory. Closing or reopening the folder clears them. For a large segmented archive the row count comes from the manifest and the column estimates use sampled rows. To inspect a concrete read, run `EXPLAIN SELECT * FROM Book_3 WHERE PublishDate IS NOT NULL FETCH FIRST 10 ROWS ONLY` and then prefix the same query with `EXPLAIN ANALYZE` to measure it. A simple limit can stop the scan early; an unfiltered `COUNT(*)` on a segmented archive can use the manifest count without reading table rows.
 
 ```sql
 EXPLAIN ANALYZE SELECT product_id FROM prices WHERE price > 100 ORDER BY product_id;
@@ -181,3 +181,14 @@ ORDER BY sensor, sample_no;
 For a view-only application on a token-based service, configure `--sql-host`, `--read-role app_viewer` and `--read-token-file <private-file>`, with role writes disabled (the default). Give the application only this role token. An administrator publishes a view with `GRANT SELECT ON public_books TO app_viewer`. The application can query its granted views and list them with `SHOW VIEWS`. Direct key reads, range scans, base-table queries and writes are denied. Once `REVOKE SELECT ON public_books FROM app_viewer` commits, the next query on an already authenticated connection is denied too. An account-mode database `reader` grant permits raw key reads and is unsuitable for this role. Use loopback or an encrypted tunnel for token-mode connections.
 
 An administrator can run `GRANT UPDATE ON public_books TO editor` and later `REVOKE UPDATE ON public_books FROM editor`. An embedded host supplies the authenticated role to `ExecuteRoleAsync(sql, role)`. On the token-based SQL service, configure the role and enable `--allow-role-writes` to use these grants. The read-only APIs continue to accept only view queries. For an updatable filtered view, UPDATE and DELETE select only visible rows. INSERT uses the exposed columns and the underlying table's defaults and constraints.
+
+Owner's single-SELECT folder results are fully read and saved to a temporary result file before the first page appears. There is no implicit 4,096-row result limit for a simple archive SELECT. The result grid shows 100 loaded rows per page, the total row count and absolute row numbers. Previous, Next and Last page read this saved result without rerunning SQL. The displayed full-load time includes reading, query evaluation and saving all selected rows, and remains unchanged when navigating pages. `EXPLAIN ANALYZE` on a simple archive SELECT also measures the full result unless an explicit limit is given. Sorting and aggregation retain the 128 MiB intermediate memory budget; joins, CTEs and subqueries retain their intermediate-row safeguards. Writable SQL tables retain their 4,096-row storage limit. `TOP`, `LIMIT`, `OFFSET` and `FETCH` accept nonnegative 32-bit integers; explicit limits still bound the result.
+
+Use SQL-standard row limiting for SELECT queries:
+
+```sql
+SELECT * FROM Book_3 ORDER BY ID FETCH FIRST 100 ROWS ONLY;
+SELECT * FROM Book_3 ORDER BY ID OFFSET 4096 ROWS FETCH NEXT 100 ROWS ONLY;
+```
+
+`FIRST` and `NEXT` have the same meaning, as do `ROW` and `ROWS`. Omitting the fetch count means one row. Write `OFFSET` before `FETCH`, and use `ORDER BY` when a stable subset is needed. The UI's page buttons navigate the already loaded result and do not add an OFFSET/FETCH clause or rerun the query. `LIMIT` and `TOP` remain compatibility extensions. See the [SELECT row-limiting syntax and standards notes](https://www.postgresql.org/docs/current/sql-select.html#SQL-LIMIT).

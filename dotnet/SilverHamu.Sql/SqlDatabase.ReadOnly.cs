@@ -4,6 +4,40 @@ namespace SilverHamu.Sql;
 
 public sealed partial class SqlDatabase
 {
+    public static async IAsyncEnumerable<SqlResult> ReadAllReadOnlyAsync(SelectRows query,
+        Func<string, SqlTable> schema, Func<string, IAsyncEnumerable<SqlRow>> scan,
+        Func<string, long?>? rowCount = null)
+    {
+        if (query.Table is null || query.HasQuerySources || query.Joins().Any() || query.IsGrouped ||
+            query.Distinct || query.Order.Count != 0 || query.Projections.Any(p => p.Window is not null))
+        {
+            yield return await QueryReadOnlyAsync(query with { Limit = query.Limit ?? int.MaxValue }, schema, scan, rowCount);
+            yield break;
+        }
+
+        var table = schema(query.Table);
+        var bound = BindSingleSource(query, table);
+        var page = bound with { Where = null, Offset = 0, Limit = 100 };
+        yield return Select(bound, table, [], describeOnly: true);
+        if (bound.Limit == 0) yield break;
+        long skipped = 0, emitted = 0;
+        var rows = new List<SqlRow>(100);
+        await foreach (var row in scan(query.Table))
+        {
+            if (!Matches(bound.Where, row.Values)) continue;
+            if (skipped < bound.Offset) { skipped++; continue; }
+            rows.Add(row);
+            emitted++;
+            if (rows.Count == 100)
+            {
+                yield return Select(page, table, rows);
+                rows.Clear();
+            }
+            if (bound.Limit is { } limit && emitted >= limit) break;
+        }
+        if (rows.Count > 0) yield return Select(page, table, rows);
+    }
+
     public static Task<SqlResult> QueryReadOnlyAsync(SelectRows query, Func<string, SqlTable> schema,
         Func<string, IAsyncEnumerable<SqlRow>> scan, Func<string, long?>? rowCount = null) =>
         ExecuteReadOnlyAsync(query, schema, scan, rowCount, null);
@@ -96,7 +130,7 @@ public sealed partial class SqlDatabase
                 count++;
                 if (countOnly) continue;
                 Retain(selected, row);
-                if (stopEarly && count >= (long)bound.Offset + (bound.Limit ?? MaxRows)) break;
+                if (stopEarly && count >= (long)bound.Offset + (bound.Limit ?? int.MaxValue)) break;
             }
         }
         filter?.Publish();
@@ -106,7 +140,8 @@ public sealed partial class SqlDatabase
             if (read) profile?.Record(step, 1, started); else profile?.Declare(step);
             return ReadOnlyCountResult(bound, table, count, profile);
         }
-        var unfiltered = bound with { Where = null, ProfileSource = profile is null ? null : query with { Where = null } };
+        var unfiltered = bound with { Where = null, Limit = bound.Limit ?? int.MaxValue,
+            ProfileSource = profile is null ? null : query with { Where = null } };
         return Select(unfiltered, table, selected, describeOnly: planning, profile: profile);
     }
 

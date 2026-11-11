@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace SilverHamu.Owner;
 
@@ -7,6 +7,7 @@ public partial class App : Application
 	public App()
 	{
 		InitializeComponent();
+		Services.L.SetLanguage(Services.L.ResolveLanguage(Preferences.Default.Get("Owner.Language", ""), System.Globalization.CultureInfo.CurrentUICulture.Name));
 	}
 
 	protected override Window CreateWindow(IActivationState? activationState)

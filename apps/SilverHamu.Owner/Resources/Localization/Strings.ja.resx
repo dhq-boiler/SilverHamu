@@ -1,0 +1,806 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <data xml:space="preserve" name="EditDiscardReload"><value>破棄して再取得</value></data>
+  <data xml:space="preserve" name="EditCloseConfirm"><value>{0}にはDBへ未反映の変更があります。編集内容を破棄してこのタブを閉じますか？</value></data>
+  <data xml:space="preserve" name="SelectThousandAndEdit"><value>SELECT 1000行して編集</value></data>
+  <data xml:space="preserve" name="SelectAllAndEdit"><value>SELECT 全行して編集</value></data>
+  <data xml:space="preserve" name="ReloadEditResults"><value>結果を再取得</value></data>
+  <data xml:space="preserve" name="EditTabTitle"><value>{0} · 編集 {1}</value></data>
+  <data xml:space="preserve" name="EditSchemaMismatch"><value>表の定義が変わったか、編集できない結果です。テーブルを開き直してください。</value></data>
+  <data xml:space="preserve" name="EditNullNotAllowed"><value>この列にはNULLを指定できません。</value></data>
+  <data xml:space="preserve" name="EditIntegerRequired"><value>この列には整数を入力してください。</value></data>
+  <data xml:space="preserve" name="EditRefreshRequired"><value>再び編集する前に、結果を再取得してください。</value></data>
+  <data xml:space="preserve" name="EditUnsupportedType"><value>この値の型は編集できません: {0}</value></data>
+  <data xml:space="preserve" name="EditUpdatesOnly"><value>このテーブルへの1行INSERT、WHERE付きUPDATE・DELETEを、RETURNING *付きで入力してください。</value></data>
+  <data xml:space="preserve" name="EditAffectedRowMismatch"><value>各文が1行だけ変更したことを確認できず、実行分を取り消しました。RETURNING *を残し、結果を再取得して行の変更・重複を確認してください。</value></data>
+  <data xml:space="preserve" name="EditRollbackFailed"><value>ロールバックの完了を確認できません。再接続してデータを照合してから判断してください。</value></data>
+  <data xml:space="preserve" name="EditConnectionChanged"><value>接続先が変わっています。対象DBで編集タブを開き直してください。</value></data>
+  <data xml:space="preserve" name="EditQueryHint"><value>  行の追加・セル編集・行削除を下のSQLに積みます。実行するまでDBは変更しません。</value></data>
+  <data xml:space="preserve" name="EditSqlPlaceholder"><value>上の表で行を追加・編集・削除すると、ここにINSERT・UPDATE・DELETE文が追加されます。</value></data>
+  <data xml:space="preserve" name="EditWritableTableRequired"><value>編集には書き込み可能なテーブル接続が必要です。フォルダー閲覧とビューはここでは編集できません。</value></data>
+  <data xml:space="preserve" name="EditLoaded"><value>{0}の{1:N0}行を編集用に取得しました。変更は実行するまでSQLの生成だけを行います。</value></data>
+  <data xml:space="preserve" name="EditApplied"><value>変更をまとめて確定しました。結果を再取得します。</value></data>
+  <data xml:space="preserve" name="EditAppliedInTransaction"><value>現在のトランザクション内へ変更を反映しました。COMMITまたはROLLBACKが必要です。</value></data>
+  <data xml:space="preserve" name="EditReloadFailed"><value>更新は成功しましたが結果を再取得できません。二重実行を防ぐため実行済みSQLを消去しました。「結果を再取得」を使ってください: {0}</value></data>
+  <data xml:space="preserve" name="EditReloadTitle"><value>結果を再取得する</value></data>
+  <data xml:space="preserve" name="EditReloadConfirm"><value>表の編集内容とSQLを破棄して、テーブルを再取得しますか？</value></data>
+  <data xml:space="preserve" name="EditCellHelp"><value>下の入力欄にUPDATEを追加します。DBが変更されるのは、実行ボタンを押したときです。</value></data>
+  <data xml:space="preserve" name="EditUseNull"><value>NULLを指定する</value></data>
+  <data xml:space="preserve" name="EditCellValue"><value>セルの新しい値</value></data>
+  <data xml:space="preserve" name="EditStageValue"><value>UPDATEを追加</value></data>
+  <data xml:space="preserve" name="EditCellTitle"><value>{0:N0}行目 · {1}</value></data>
+  <data xml:space="preserve" name="EditResultCell"><value>セルを編集 · F2</value></data>
+  <data xml:space="preserve" name="EditResultHelp"><value>行を追加、ダブルクリック／F2でセル編集、選択行を削除できます。下のSQL実行で反映します。</value></data>
+  <data xml:space="preserve" name="CopyResultSelection"><value>コピー · Ctrl+C</value></data>
+  <data xml:space="preserve" name="CopyResultWithHeaders"><value>ヘッダー付きでコピー · Ctrl+Shift+C</value></data>
+  <data xml:space="preserve" name="SelectAllResultCells"><value>表示中をすべて選択</value></data>
+  <data xml:space="preserve" name="ResultSelectionHelp"><value>セル・行番号を選択。ドラッグ / Shift: 範囲、Ctrl: 追加・解除、Ctrl+C: コピー</value></data>
+  <data xml:space="preserve" name="ResultSelectionCount"><value>{0:N0} セルを選択中</value></data>
+  <data xml:space="preserve" name="ResultSelectionCopied"><value>{0:N0} セルをコピーしました</value></data>
+  <data xml:space="preserve" name="ResultSelectionCopyFailed"><value>コピーできませんでした。再試行してください: {0}</value></data>
+  <data xml:space="preserve" name="ResultCellSelected"><value>選択中</value></data>
+  <data xml:space="preserve" name="ResultCellNotSelected"><value>未選択</value></data>
+  <data xml:space="preserve" name="CloseQueryTab">
+    <value>{0}を閉じる</value>
+  </data>
+  <data xml:space="preserve" name="DiscardQueryTitle">
+    <value>クエリを閉じる</value>
+  </data>
+  <data xml:space="preserve" name="DiscardQueryMessage">
+    <value>{0}には未保存の変更があります。変更を破棄してこのタブを閉じますか？</value>
+  </data>
+  <data xml:space="preserve" name="DiscardQuery">
+    <value>破棄して閉じる</value>
+  </data>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data xml:space="preserve" name="DisconnectedSelectAConnection">
+    <value>未接続 · 接続先を選択してください</value>
+  </data>
+  <data xml:space="preserve" name="NotConnected">
+    <value>接続されていません</value>
+  </data>
+  <data xml:space="preserve" name="Rows">
+    <value>0 行</value>
+  </data>
+  <data xml:space="preserve" name="Ready">
+    <value>待機中</value>
+  </data>
+  <data xml:space="preserve" name="NoTransaction">
+    <value>トランザクションなし</value>
+  </data>
+  <data xml:space="preserve" name="Browse">
+    <value>参照…</value>
+  </data>
+  <data xml:space="preserve" name="SqlEditorHint">
+    <value>  SQL · CREATE TABLE / SELECT / INSERT / UPDATE / DELETE · 通常は文ごとに自動確定</value>
+  </data>
+  <data xml:space="preserve" name="FilterDisplayedResults">
+    <value>表示済みの結果を絞り込み</value>
+  </data>
+  <data xml:space="preserve" name="SilverHamuGinhamuInProfile">
+    <value>SilverHamu — ギンハムちゃんの横顔</value>
+  </data>
+  <data xml:space="preserve" name="Working">
+    <value>処理中…</value>
+  </data>
+  <data xml:space="preserve" name="ASilverHamsterRunningInAWheel">
+    <value>回し車を回す銀色のハムスター</value>
+  </data>
+  <data xml:space="preserve" name="ConnectToService">
+    <value>サービス接続…</value>
+  </data>
+  <data xml:space="preserve" name="OpenDBFile">
+    <value>DBファイルを開く…</value>
+  </data>
+  <data xml:space="preserve" name="NewDB">
+    <value>新規DB…</value>
+  </data>
+  <data xml:space="preserve" name="Backup">
+    <value>バックアップ…</value>
+  </data>
+  <data xml:space="preserve" name="RestoreToNewDB">
+    <value>新規DBへ復元…</value>
+  </data>
+  <data xml:space="preserve" name="KeyValueTools">
+    <value>キー・値の操作…</value>
+  </data>
+  <data xml:space="preserve" name="ExportValuesInRange">
+    <value>範囲の値を出力…</value>
+  </data>
+  <data xml:space="preserve" name="Disconnect">
+    <value>接続解除</value>
+  </data>
+  <data xml:space="preserve" name="Open">
+    <value>開く</value>
+  </data>
+  <data xml:space="preserve" name="Save">
+    <value>保存</value>
+  </data>
+  <data xml:space="preserve" name="ObjectExplorer">
+    <value>オブジェクト エクスプローラー</value>
+  </data>
+  <data xml:space="preserve" name="Run">
+    <value>実行</value>
+  </data>
+  <data xml:space="preserve" name="CompleteCtrlSpace">
+    <value>補完 · Ctrl+Space</value>
+  </data>
+  <data xml:space="preserve" name="BrowseObjects">
+    <value>一覧を取得</value>
+  </data>
+  <data xml:space="preserve" name="Checkpoint">
+    <value>チェックポイント</value>
+  </data>
+  <data xml:space="preserve" name="Results">
+    <value>結果</value>
+  </data>
+  <data xml:space="preserve" name="ExportCSV">
+    <value>CSV 出力</value>
+  </data>
+  <data xml:space="preserve" name="Previous">
+    <value>前へ</value>
+  </data>
+  <data xml:space="preserve" name="Next">
+    <value>次へ</value>
+  </data>
+  <data xml:space="preserve" name="LastPage">
+    <value>最終ページ</value>
+  </data>
+  <data xml:space="preserve" name="CouldNotOpenPageSelection">
+    <value>ページ選択を開けませんでした: {0}</value>
+  </data>
+  <data xml:space="preserve" name="ChooseOrEnterAPageNumber">
+    <value>ページ番号を選択・入力して移動</value>
+  </data>
+  <data xml:space="preserve" name="ConnectToAServiceOpenADBFile">
+    <value>サービス・DBファイル・新規DBから接続先を選べます。</value>
+  </data>
+  <data xml:space="preserve" name="ConnectionTitle">
+    <value>サービスに接続</value>
+  </data>
+  <data xml:space="preserve" name="EnterTheSilverhamuServerConnectionDetails">
+    <value>silverhamu-server の接続先を指定してください。</value>
+  </data>
+  <data xml:space="preserve" name="Host">
+    <value>ホスト</value>
+  </data>
+  <data xml:space="preserve" name="Port">
+    <value>ポート</value>
+  </data>
+  <data xml:space="preserve" name="AuthenticationToken">
+    <value>認証トークン</value>
+  </data>
+  <data xml:space="preserve" name="ChooseTokenFile">
+    <value>トークンファイルを選択…</value>
+  </data>
+  <data xml:space="preserve" name="OpenTokenFile">
+    <value>トークンファイルを開く</value>
+  </data>
+  <data xml:space="preserve" name="TheTokenFileIsTooLarge">
+    <value>トークンファイルが大きすぎます。</value>
+  </data>
+  <data xml:space="preserve" name="TCPVTLSIsNotSupportedUseAn">
+    <value>TCP v1 · TLS非対応。別ホストへ接続する場合は
+暗号化トンネルを利用してください。</value>
+  </data>
+  <data xml:space="preserve" name="Connect">
+    <value>接続する</value>
+  </data>
+  <data xml:space="preserve" name="Cancel">
+    <value>キャンセル</value>
+  </data>
+  <data xml:space="preserve" name="COMMITOrROLLBACKBeforeChangingTheConnection">
+    <value>接続を変更する前に COMMIT または ROLLBACK してください。</value>
+  </data>
+  <data xml:space="preserve" name="EnterAHostAPortFromToAnd">
+    <value>ホスト・1～65535のポート・認証トークンを入力してください。</value>
+  </data>
+  <data xml:space="preserve" name="Service">
+    <value>サービス · {0}:{1}</value>
+  </data>
+  <data xml:space="preserve" name="Connected">
+    <value>接続済み · {0}:{1}</value>
+  </data>
+  <data xml:space="preserve" name="AuthenticatedSQLRunsOnTheSilverhamuServer">
+    <value>認証に成功しました。SQL は silverhamu サーバーで実行します。</value>
+  </data>
+  <data xml:space="preserve" name="AuthenticatedSQLRunsInOwner">
+    <value>認証に成功しました。SQL は Owner で実行します。</value>
+  </data>
+  <data xml:space="preserve" name="ConnectedWithReadRole">
+    <value>閲覧ロール {0} で接続しました。</value>
+  </data>
+  <data xml:space="preserve" name="CreateEmbeddedSilverHamu">
+    <value>組み込みSilverHamuを新規作成</value>
+  </data>
+  <data xml:space="preserve" name="OpenEmbeddedSilverHamu">
+    <value>組み込みSilverHamuを開く</value>
+  </data>
+  <data xml:space="preserve" name="FolderBrowsing">
+    <value>フォルダー閲覧 · {0}</value>
+  </data>
+  <data xml:space="preserve" name="LoadedTables">
+    <value>{0} 件のテーブルを読み込みました。</value>
+  </data>
+  <data xml:space="preserve" name="ThisEmbeddedDBIsAlreadyConnected">
+    <value>この組み込みDBには既に接続しています。</value>
+  </data>
+  <data xml:space="preserve" name="Embedded">
+    <value>● 組み込み / {0}</value>
+  </data>
+  <data xml:space="preserve" name="EmbeddedConnection">
+    <value>組み込み接続 · {0}</value>
+  </data>
+  <data xml:space="preserve" name="OpenALocalDBToBackUp">
+    <value>バックアップするローカルDBを開いてください。</value>
+  </data>
+  <data xml:space="preserve" name="BackUpCommittedLocalDB">
+    <value>確定済みのローカルDBをバックアップ</value>
+  </data>
+  <data xml:space="preserve" name="SavedBackup">
+    <value>バックアップを保存しました: {0}</value>
+  </data>
+  <data xml:space="preserve" name="COMMITOrROLLBACKBeforeOpeningTheRestoredDB">
+    <value>復元先を開く前に COMMIT または ROLLBACK してください。</value>
+  </data>
+  <data xml:space="preserve" name="ChooseABackupToRestore">
+    <value>復元するバックアップを選択</value>
+  </data>
+  <data xml:space="preserve" name="ChooseANewDestinationDB">
+    <value>復元先の新規DBを指定</value>
+  </data>
+  <data xml:space="preserve" name="RestoredBackupToANewDB">
+    <value>バックアップから新しいDBを復元しました: {0}</value>
+  </data>
+  <data xml:space="preserve" name="FolderBrowsingIsReadOnlyOpenADB">
+    <value>フォルダー閲覧は読み取り専用です。トランザクションにはDBファイルを組み込み接続で開いてください。</value>
+  </data>
+  <data xml:space="preserve" name="ManageTransactionsInTheEmbeddedDB">
+    <value>組み込みDBのトランザクションを操作します。</value>
+  </data>
+  <data xml:space="preserve" name="ManageTransactionsInTheConnectedDB">
+    <value>接続先DBのトランザクションを操作します。</value>
+  </data>
+  <data xml:space="preserve" name="FolderBrowsingReadOnlySHOWTABLESSELECTANALYZE">
+    <value>  フォルダー閲覧（読み取り専用） · SHOW TABLES / SELECT / ANALYZE / EXPLAIN / EXPLAIN ANALYZE</value>
+  </data>
+  <data xml:space="preserve" name="SHOWVIEWSSELECTPublishedViewsAreReadOnly">
+    <value>  SHOW VIEWS / SELECT · 公開ビューの読み取り専用</value>
+  </data>
+  <data xml:space="preserve" name="Disconnected">
+    <value>未接続</value>
+  </data>
+  <data xml:space="preserve" name="ClosedTheEmbeddedDBDiscardedUncommittedChangesAnd">
+    <value>組み込みDBを閉じました。未確定の変更を破棄し、所有権を解放しました。</value>
+  </data>
+  <data xml:space="preserve" name="ClosedTheConnectionAndDiscardedUncommittedChanges">
+    <value>接続を閉じました。未確定の変更を破棄しました。</value>
+  </data>
+  <data xml:space="preserve" name="ConnectToAServiceOrOpenADB">
+    <value>サービスへ接続するか、DBファイルを開いてください。</value>
+  </data>
+  <data xml:space="preserve" name="FetchAllNMs">
+    <value>全件取得 {0:N0} ms</value>
+  </data>
+  <data xml:space="preserve" name="FetchedAllNRowsInNMsAnd">
+    <value>全 {0:N0} 行を取得しました（全件取得 {1:N0} ms、一時ファイルへ保存済み）。ページ切り替えではクエリを再実行しません。</value>
+  </data>
+  <data xml:space="preserve" name="SQLCompletedButTheTableListCouldNot">
+    <value>SQL実行は完了しましたが、テーブル一覧を更新できません: {0}</value>
+  </data>
+  <data xml:space="preserve" name="CouldNotReadTheSQLResult">
+    <value>SQL の実行結果を読み取れません。</value>
+  </data>
+  <data xml:space="preserve" name="DisconnectedReconnectRequired">
+    <value>切断 · 再接続が必要</value>
+  </data>
+  <data xml:space="preserve" name="ReconnectRequiredVerifyTheCommitOutcomeAgainstYour">
+    <value>再接続が必要 · 確定結果はデータで照合してください</value>
+  </data>
+  <data xml:space="preserve" name="ConnectionInterruptedReopenTheDBOrReconnect">
+    <value>接続中断 · DBの再オープンまたは再接続が必要です</value>
+  </data>
+  <data xml:space="preserve" name="UncommittedTransaction">
+    <value>● 未確定トランザクション</value>
+  </data>
+  <data xml:space="preserve" name="ConnectToAServiceOrOpenADB086">
+    <value>先にサービスへ接続するか、DBファイルを開いてください。</value>
+  </data>
+  <data xml:space="preserve" name="Completed">
+    <value>{0} 完了</value>
+  </data>
+  <data xml:space="preserve" name="ConnectToADBToRunACheckpoint">
+    <value>チェックポイントを実行する DB に接続してください。</value>
+  </data>
+  <data xml:space="preserve" name="COMMITOrROLLBACKFirst">
+    <value>先に COMMIT または ROLLBACK してください。</value>
+  </data>
+  <data xml:space="preserve" name="CheckpointCompletedGenerationRecords">
+    <value>チェックポイントが完了しました（世代 {0}、{1} 件）。</value>
+  </data>
+  <data xml:space="preserve" name="Query091">
+    <value>クエリ {0}</value>
+  </data>
+  <data xml:space="preserve" name="NewQuery">
+    <value>新しいクエリ</value>
+  </data>
+  <data xml:space="preserve" name="OpenQuery">
+    <value>クエリを開く</value>
+  </data>
+  <data xml:space="preserve" name="TheQueryFileMustBeMiBOrSmaller">
+    <value>クエリファイルは1 MiB以下にしてください。</value>
+  </data>
+  <data xml:space="preserve" name="SaveQuery">
+    <value>クエリを保存</value>
+  </data>
+  <data xml:space="preserve" name="SavedQuery">
+    <value>クエリを保存しました: {0}</value>
+  </data>
+  <data xml:space="preserve" name="FullFilePath">
+    <value>ファイルのフルパス</value>
+  </data>
+  <data xml:space="preserve" name="CouldNotOpenTheFilePickerEnterThe">
+    <value>ファイル選択画面を開けませんでした。フルパスを入力してください。</value>
+  </data>
+  <data xml:space="preserve" name="CouldNotSelectAFile">
+    <value>ファイルを選択できませんでした: {0}</value>
+  </data>
+  <data xml:space="preserve" name="OK">
+    <value>決定</value>
+  </data>
+  <data xml:space="preserve" name="EnterTheFullFilePath">
+    <value>ファイルのフルパスを入力してください。</value>
+  </data>
+  <data xml:space="preserve" name="AFileWithThatNameAlreadyExistsChoose">
+    <value>同名のファイルが存在します。別の名前を指定してください。</value>
+  </data>
+  <data xml:space="preserve" name="FileNotFound">
+    <value>ファイルが見つかりません。</value>
+  </data>
+  <data xml:space="preserve" name="TheDestinationFolderWasNotFound">
+    <value>保存先のフォルダーが見つかりません。</value>
+  </data>
+  <data xml:space="preserve" name="CreateTheDestinationFolderFirstExistingFilesWill">
+    <value>保存先のフォルダーは事前に作成してください。
+既存ファイルへの上書きは実行しません。別の名前で保存してください。</value>
+  </data>
+  <data xml:space="preserve" name="BrowseForAnExistingFileOrEnterThe">
+    <value>参照から既存ファイルを選択するか、フルパスを入力してください。</value>
+  </data>
+  <data xml:space="preserve" name="EnterTheFullPathOfAnExistingFile">
+    <value>既存ファイルのフルパスを入力してください。</value>
+  </data>
+  <data xml:space="preserve" name="Tables">
+    <value>テーブル ({0})</value>
+  </data>
+  <data xml:space="preserve" name="EmbeddedDatabase">
+    <value>⌄  組み込みデータベース</value>
+  </data>
+  <data xml:space="preserve" name="NoConnection">
+    <value>接続先なし</value>
+  </data>
+  <data xml:space="preserve" name="ServiceDatabase">
+    <value>⌄  サービス データベース</value>
+  </data>
+  <data xml:space="preserve" name="RefreshTablesAndViews">
+    <value>テーブル・ビュー一覧を更新</value>
+  </data>
+  <data xml:space="preserve" name="RefreshedTheListObjects">
+    <value>一覧を更新しました（{0} 件）</value>
+  </data>
+  <data xml:space="preserve" name="TablesAndViews">
+    <value>テーブル・ビュー ({0})</value>
+  </data>
+  <data xml:space="preserve" name="CurrentPageNOpenPageSelection">
+    <value>現在 {0:N0} ページ。ページ選択を開く</value>
+  </data>
+  <data xml:space="preserve" name="ResultPagePosition">
+    <value>/ {0:N0} ページ · {1:N0}–{2:N0} / 全 {3:N0} 行（取得済み）</value>
+  </data>
+  <data xml:space="preserve" name="Rows117">
+    <value>{0} / {1} 行</value>
+  </data>
+  <data xml:space="preserve" name="TheResultContainsNoRows">
+    <value>結果は0行です。</value>
+  </data>
+  <data xml:space="preserve" name="NoRowsMatchTheFilter">
+    <value>条件に一致する行がありません。</value>
+  </data>
+  <data xml:space="preserve" name="Error">
+    <value>エラー: {0}</value>
+  </data>
+  <data xml:space="preserve" name="ErrorCheckMessages">
+    <value>エラー · メッセージを確認</value>
+  </data>
+  <data xml:space="preserve" name="SpecifyARowRange">
+    <value>行番号の範囲を指定</value>
+  </data>
+  <data xml:space="preserve" name="CSVExportRange">
+    <value>CSV出力の範囲</value>
+  </data>
+  <data xml:space="preserve" name="FirstRowCountedFromRowOfTheFull">
+    <value>開始行（結果全体の1行目から数えます）</value>
+  </data>
+  <data xml:space="preserve" name="LastRowInclusive">
+    <value>終了行（この行も含みます）</value>
+  </data>
+  <data xml:space="preserve" name="FirstRow">
+    <value>開始行</value>
+  </data>
+  <data xml:space="preserve" name="LastRowInclusive127">
+    <value>終了行（含む）</value>
+  </data>
+  <data xml:space="preserve" name="UseRowNumbersFromTheCachedResultSQL">
+    <value>取得済み結果の行番号で指定します。SQLは再実行しません。
+画面の絞り込み条件はCSVに適用しません。</value>
+  </data>
+  <data xml:space="preserve" name="ChooseDestination">
+    <value>保存先を選ぶ…</value>
+  </data>
+  <data xml:space="preserve" name="EnterWholeNumbersForTheFirstAndLast">
+    <value>開始行・終了行には整数を入力してください。</value>
+  </data>
+  <data xml:space="preserve" name="TheResultContainsNoRowsOnlyColumnHeaders">
+    <value>取得結果は0行です。列名（ヘッダー）のみ出力します。</value>
+  </data>
+  <data xml:space="preserve" name="ExportFromAllNCachedRows">
+    <value>取得済みの全 {0:N0} 行から出力します。</value>
+  </data>
+  <data xml:space="preserve" name="AllRowsN">
+    <value>全件（{0:N0} 行）</value>
+  </data>
+  <data xml:space="preserve" name="CurrentPageRows">
+    <value>現在のページ（0 行）</value>
+  </data>
+  <data xml:space="preserve" name="CurrentPageRowsNNNRows">
+    <value>現在のページ（{0:N0}〜{1:N0} 行・{2:N0} 行）</value>
+  </data>
+  <data xml:space="preserve" name="ThereAreNoResultsToExport">
+    <value>出力する結果がありません。</value>
+  </data>
+  <data xml:space="preserve" name="SaveCSVNRows">
+    <value>CSVに保存（{0:N0} 行）</value>
+  </data>
+  <data xml:space="preserve" name="ExportedNOfNRowsToCSVRows">
+    <value>全 {0:N0} 行のうち {1:N0} 行をCSVへ出力しました（{2:N0}〜{3:N0} 行）: {4}</value>
+  </data>
+  <data xml:space="preserve" name="EnterHexadecimalDigitsInPairs">
+    <value>16進数を2桁ずつ入力してください。</value>
+  </data>
+  <data xml:space="preserve" name="StartKeyHexInclusiveLeaveBlankToStart">
+    <value>開始キー（16進・この値を含む）。空欄で先頭から。</value>
+  </data>
+  <data xml:space="preserve" name="EndKeyHexExclusiveLeaveBlankToInclude">
+    <value>終了キー（16進・この値を含まない）。空欄で末尾まで。</value>
+  </data>
+  <data xml:space="preserve" name="TheEndKeyMustBeAtOrAfter">
+    <value>終了キーは開始キー以降を指定してください。</value>
+  </data>
+  <data xml:space="preserve" name="AnAdministratorDBConnectionIsRequired">
+    <value>管理者のDB接続が必要です。</value>
+  </data>
+  <data xml:space="preserve" name="KeyValueTools144">
+    <value>キー・値の操作</value>
+  </data>
+  <data xml:space="preserve" name="SCANUpToRecordsKiB">
+    <value>SCAN（最大100件・64 KiB）</value>
+  </data>
+  <data xml:space="preserve" name="KeyHex">
+    <value>キー（16進）</value>
+  </data>
+  <data xml:space="preserve" name="UseSQLToModifyKeysInTheSQL">
+    <value>SQL管理領域のキーはSQLから変更してください。</value>
+  </data>
+  <data xml:space="preserve" name="PUTInsertUpdate">
+    <value>PUT（登録・更新）</value>
+  </data>
+  <data xml:space="preserve" name="ValueHexBlankMeansAZeroLengthValue">
+    <value>値（16進）。空欄は長さ0の値です。</value>
+  </data>
+  <data xml:space="preserve" name="Records">
+    <value>{0} 件</value>
+  </data>
+  <data xml:space="preserve" name="RecordsMoreAvailable">
+    <value>{0} 件（続きあり）</value>
+  </data>
+  <data xml:space="preserve" name="KeyNotFound">
+    <value>キーが見つかりません。</value>
+  </data>
+  <data xml:space="preserve" name="Record">
+    <value>1 件</value>
+  </data>
+  <data xml:space="preserve" name="Committed">
+    <value>{0} を確定しました。</value>
+  </data>
+  <data xml:space="preserve" name="ChangesFromAreUncommitted">
+    <value>{0} の変更は未確定です。</value>
+  </data>
+  <data xml:space="preserve" name="OpenALocalEmbeddedDB">
+    <value>ローカルの組み込みDBを開いてください。</value>
+  </data>
+  <data xml:space="preserve" name="ExportCommittedValuesInRangeToASnapshot">
+    <value>確定済み範囲の値をスナップショットへ出力</value>
+  </data>
+  <data xml:space="preserve" name="SaveASnapshotOfValuesWithoutKeys">
+    <value>キーを除く値のスナップショットを保存</value>
+  </data>
+  <data xml:space="preserve" name="SavedValuesSnapshotRecordsDBVersionGenerationID">
+    <value>値のスナップショットを保存しました（{0} 件、DBバージョン {1}、世代ID {2}）。</value>
+  </data>
+  <data xml:space="preserve" name="Go">
+    <value>移動</value>
+  </data>
+  <data xml:space="preserve" name="CouldNotOpenPageSelection161">
+    <value>ページ選択を開けませんでした。</value>
+  </data>
+  <data xml:space="preserve" name="GoToPageNPages">
+    <value>ページへ移動 · 全 {0:N0} ページ</value>
+  </data>
+  <data xml:space="preserve" name="DestinationPageNumber">
+    <value>移動先のページ番号</value>
+  </data>
+  <data xml:space="preserve" name="GoToPageN">
+    <value>{0:N0} ページへ移動</value>
+  </data>
+  <data xml:space="preserve" name="SQLSuggestions">
+    <value>SQL入力候補</value>
+  </data>
+  <data xml:space="preserve" name="SqlCompletionHelp">
+    <value>SQL補完 · ↑↓ 選択 / Tab・Enter 確定 / Esc 閉じる</value>
+  </data>
+  <data xml:space="preserve" name="ThePALVManifestIsInvalid">
+    <value>PALVマニフェストが不正です。</value>
+  </data>
+  <data xml:space="preserve" name="ThePALVArchiveCharacterEncodingIsNotSupported">
+    <value>PALVアーカイブの文字エンコーディングが未対応です。</value>
+  </data>
+  <data xml:space="preserve" name="PALVReferencesThroughLinksOrReparsePointsCannot">
+    <value>リンク・リパースポイントを経由するPALV参照は使用できません。</value>
+  </data>
+  <data xml:space="preserve" name="ThePALVTableDefinitionIsInvalid">
+    <value>PALVのテーブル定義が不正です。</value>
+  </data>
+  <data xml:space="preserve" name="ThePALVColumnDefinitionOrRowCountIs">
+    <value>PALVの列定義または行数が不正です。</value>
+  </data>
+  <data xml:space="preserve" name="ThePALVSegmentDefinitionIsInvalid">
+    <value>PALVの分割ファイル定義が不正です。</value>
+  </data>
+  <data xml:space="preserve" name="ThePALVTableRowCountDoesNotMatch">
+    <value>PALVのテーブル行数と分割ファイル範囲が一致しません。</value>
+  </data>
+  <data xml:space="preserve" name="APALVSegmentFileWasNotFound">
+    <value>PALVの分割ファイルが見つかりません。</value>
+  </data>
+  <data xml:space="preserve" name="TheBrowsingCopyExceedsTheFileSizeLimit">
+    <value>閲覧用コピーのファイル上限を超えています: {0}</value>
+  </data>
+  <data xml:space="preserve" name="ThePALVArchiveChangedWhileBrowsingReopenThe">
+    <value>閲覧中にPALVアーカイブが変更されました。参照ファイルを開き直してください。</value>
+  </data>
+  <data xml:space="preserve" name="TheArchiveChangedWhenCopyingStarted">
+    <value>コピー開始時にアーカイブが変更されました。</value>
+  </data>
+  <data xml:space="preserve" name="TheArchiveChangedDuringCopying">
+    <value>コピー中にアーカイブが変更されました。</value>
+  </data>
+  <data xml:space="preserve" name="CouldNotReadAStableArchiveAnotherProcess">
+    <value>アーカイブを安定した状態で読み取れません: {0}。他のプロセスで使用中かファイルが変更されています。</value>
+  </data>
+  <data xml:space="preserve" name="MissingRow">
+    <value>行が欠落しています: {0} / {1}</value>
+  </data>
+  <data xml:space="preserve" name="RowsNTotal">
+    <value>{0}: {1} 行（全{2:N0}行）</value>
+  </data>
+  <data xml:space="preserve" name="NCharacters">
+    <value>… ({0:N0}文字)</value>
+  </data>
+  <data xml:space="preserve" name="ThePALVStorageTypeIsInvalid">
+    <value>PALVの保存型が不正です。</value>
+  </data>
+  <data xml:space="preserve" name="TheReferenceFileMustBeKiBOrSmaller">
+    <value>参照ファイルは 4 KiB 以下にしてください。</value>
+  </data>
+  <data xml:space="preserve" name="EnterARelativeTargetPathOnASingle">
+    <value>参照先の相対パスを1行で指定してください。</value>
+  </data>
+  <data xml:space="preserve" name="TheTargetIsOutsideTheReferenceFileS">
+    <value>参照先が参照ファイルのフォルダー内にありません。</value>
+  </data>
+  <data xml:space="preserve" name="TheTargetMustBeASilverhamuDatabaseOr">
+    <value>参照先には silverhamu データベースかフォルダーを指定してください。</value>
+  </data>
+  <data xml:space="preserve" name="LinksAndReparsePointsCannotBeUsedIn">
+    <value>参照先にリンクまたはリパースポイントは使用できません。</value>
+  </data>
+  <data xml:space="preserve" name="Table">
+    <value>テーブル</value>
+  </data>
+  <data xml:space="preserve" name="Columns">
+    <value>列数</value>
+  </data>
+  <data xml:space="preserve" name="Rows191">
+    <value>行数</value>
+  </data>
+  <data xml:space="preserve" name="TableList">
+    <value>テーブル一覧</value>
+  </data>
+  <data xml:space="preserve" name="FolderBrowsingSupportsSELECTSHOWTABLESANALYZEEXPLAIN">
+    <value>フォルダー閲覧では SELECT、SHOW TABLES、ANALYZE、EXPLAIN、EXPLAIN ANALYZE を実行できます。</value>
+  </data>
+  <data xml:space="preserve" name="CouldNotGetStatisticsFor">
+    <value>'{0}' の統計を取得できませんでした。</value>
+  </data>
+  <data xml:space="preserve" name="ANALYZESampledNOfNRowsStatisticsAre">
+    <value>ANALYZE {0}: 全 {1:N0} 行のうち {2:N0} 行を調査。このフォルダーを開いている間だけ統計を使用します。</value>
+  </data>
+  <data xml:space="preserve" name="ArchivePageLoadingMadeNoProgressWhileCollecting">
+    <value>統計を収集中の書庫ページの読み込みが進みません。</value>
+  </data>
+  <data xml:space="preserve" name="TableNotFound">
+    <value>テーブルが見つかりません: {0}</value>
+  </data>
+  <data xml:space="preserve" name="MultipleDBsContainATableWithThisName">
+    <value>複数のDBに同名のテーブルがあります。対象のDBを直接開いてください: {0}</value>
+  </data>
+  <data xml:space="preserve" name="LinkedDatabasesCannotBeLoaded">
+    <value>リンクされたデータベースは読み込めません。</value>
+  </data>
+  <data xml:space="preserve" name="ThePageIsOutsideTheCachedResultRange">
+    <value>ページが取得済み結果の範囲外です。</value>
+  </data>
+  <data xml:space="preserve" name="EnterFirstAndLastRowsFromToN">
+    <value>開始行・終了行は1〜{0:N0}の範囲で、開始行≦終了行にしてください。</value>
+  </data>
+  <data xml:space="preserve" name="DatabaseFileFilters">
+    <value>silverhamu データベース・参照ファイル (*.ndb;*.catlink)|*.ndb;*.catlink|silverhamu バックアップ (*.backup)|*.backup|すべてのファイル (*.*)|*.*||</value>
+  </data>
+  <data xml:space="preserve" name="CouldNotOpenTheFilePickerXX">
+    <value>ファイル選択画面を開けませんでした (0x{0:X})。</value>
+  </data>
+  <data xml:space="preserve" name="AllNRowsAreCached">
+    <value>全 {0:N0} 行を取得済みです。</value>
+  </data>
+  <data xml:space="preserve" name="ATransactionIsAlreadyActive">
+    <value>トランザクションは既に開始されています。</value>
+  </data>
+  <data xml:space="preserve" name="ThereIsNoActiveTransaction">
+    <value>トランザクションがありません。</value>
+  </data>
+  <data xml:space="preserve" name="ThisOperationIsNotSupported">
+    <value>未対応の操作です。</value>
+  </data>
+  <data xml:space="preserve" name="SelectFirstThousandRows">
+    <value>SELECT 1000行</value>
+  </data>
+  <data xml:space="preserve" name="SelectAllRows">
+    <value>SELECT 全行</value>
+  </data>
+  <data xml:space="preserve" name="TemplateInstructions">
+    <value>-- {{{{...}}}} を実際の値・条件に置き換えてください。未編集のままでは実行できません。
+</value>
+  </data>
+  <data xml:space="preserve" name="EnterColumn">
+    <value>{{{{列名を入力}}}}</value>
+  </data>
+  <data xml:space="preserve" name="EnterValue">
+    <value>{{{{値を入力}}}}</value>
+  </data>
+  <data xml:space="preserve" name="TemplateValue">
+    <value>{{{{値_{0}}}}}</value>
+  </data>
+  <data xml:space="preserve" name="EnterWHERECondition">
+    <value>{{{{WHERE条件を入力}}}}</value>
+  </data>
+  <data xml:space="preserve" name="TemplateKeyPredicate">
+    <value>{0} = {{{{キー_{1}}}}}</value>
+  </data>
+  <data xml:space="preserve" name="EnterAssignment">
+    <value>{{{{代入を入力}}}}</value>
+  </data>
+  <data xml:space="preserve" name="TemplateAssignment">
+    <value>{0} = {{{{値_{1}}}}}</value>
+  </data>
+  <data xml:space="preserve" name="EnterAPageNumberFromToN">
+    <value>1〜{0:N0}のページ番号を入力してください。</value>
+  </data>
+  <data xml:space="preserve" name="AlreadyConnected">
+    <value>既に接続しています。</value>
+  </data>
+  <data xml:space="preserve" name="ConnectToAService">
+    <value>サービスに接続してください。</value>
+  </data>
+  <data xml:space="preserve" name="CouldNotDetermineTheSQLTransactionStateReconnect">
+    <value>SQL のトランザクション状態を確認できません。再接続してください。</value>
+  </data>
+  <data xml:space="preserve" name="RequestsMustBeMiBOrSmaller">
+    <value>要求は1 MiB以下にしてください。</value>
+  </data>
+  <data xml:space="preserve" name="TheCommitOutcomeIsUnknownDoNotRetry">
+    <value>確定結果が不明です。再送せず、再接続してデータを照合してください。</value>
+  </data>
+  <data xml:space="preserve" name="TheConnectionWasInterruptedReconnect">
+    <value>通信が中断しました。再接続してください。</value>
+  </data>
+  <data xml:space="preserve" name="TheTransactionStateIsUnknown">
+    <value>トランザクション状態が不明です。</value>
+  </data>
+  <data xml:space="preserve" name="TheResponseIsInvalid">
+    <value>応答が不正です。</value>
+  </data>
+  <data xml:space="preserve" name="View">
+    <value>ビュー</value>
+  </data>
+  <data xml:space="preserve" name="Column">
+    <value>列</value>
+  </data>
+  <data xml:space="preserve" name="Variable">
+    <value>変数</value>
+  </data>
+  <data xml:space="preserve" name="Settings">
+    <value>設定</value>
+  </data>
+  <data xml:space="preserve" name="DisplayLanguage">
+    <value>表示言語</value>
+  </data>
+  <data xml:space="preserve" name="LanguageHelp">
+    <value>変更はすぐに反映され、次回起動時にも引き継がれます。</value>
+  </data>
+  <data xml:space="preserve" name="Close">
+    <value>閉じる</value>
+  </data>
+  <data xml:space="preserve" name="EmbeddedCreated">
+    <value>組み込みSilverHamuを作成して開きました: {0}
+トークンとサービスは不要です。生のキー値はSQLテーブルへ自動変換しません。</value>
+  </data>
+  <data xml:space="preserve" name="EmbeddedOpened">
+    <value>組み込みSilverHamuを直接開きました: {0}
+トークンとサービスは不要です。生のキー値はSQLテーブルへ自動変換しません。</value>
+  </data>
+  <data xml:space="preserve" name="ResultRow">
+    <value>行 {0}</value>
+  </data>
+  <data xml:space="preserve" name="RowNumber">
+    <value>行番号</value>
+  </data>
+  <data xml:space="preserve" name="ResizeColumn">
+    <value>{0} の列幅を変更</value>
+  </data>
+  <data xml:space="preserve" name="ResizeColumnHelp">
+    <value>ドラッグで列幅を変更。ダブルクリックまたはEnterで表示中の内容に合わせます。</value>
+  </data>
+  <data xml:space="preserve" name="TokenNotSaved">
+    <value>認証トークン（保存されません）</value>
+  </data>
+  <data xml:space="preserve" name="LoadingFramesMissing">
+    <value>読み込みアニメーションにフレームがありません。</value>
+  </data>
+  <data xml:space="preserve" name="EditInlineHelp"><value>Enterで変更を追加、Escで取消、Shift+Enterで改行。データベースのNULLはNULL切替で指定します。</value></data>
+  <data xml:space="preserve" name="UndoEdit"><value>元に戻す · Ctrl+Z</value></data>
+  <data xml:space="preserve" name="RedoEdit"><value>やり直す · Ctrl+Y</value></data>
+  <data xml:space="preserve" name="EditCellPending"><value>DB未反映</value></data>
+  <data xml:space="preserve" name="EditPendingValue"><value>{0} — DB未反映</value></data>
+  <data xml:space="preserve" name="EditPendingCount"><value>未反映 {0}セル / +{1}行 / −{2}行 · {3}文</value></data>
+  <data xml:space="preserve" name="EditPreviewUpdating"><value>プレビューを同期中…</value></data>
+  <data xml:space="preserve" name="EditPreviewInvalid"><value>SQLと未同期（表は直前の有効な状態）。SQLを修正するか元に戻してください: {0}</value></data>
+  <data xml:space="preserve" name="EditAddRow"><value>行を追加</value></data>
+  <data xml:space="preserve" name="EditDeleteRows"><value>選択行を削除 · Del</value></data>
+  <data xml:space="preserve" name="EditRowAdded"><value>追加予定 — DB未反映</value></data>
+  <data xml:space="preserve" name="EditRowDeleted"><value>削除予定 — DB未反映</value></data>
+  <data xml:space="preserve" name="EditDeletedRow"><value>削除予定の行です。元に戻すかDELETE文を削除すると復元できます。</value></data>
+  <data xml:space="preserve" name="EditRequiredValue"><value>（必須）</value></data>
+  <data xml:space="preserve" name="EditIncompleteRows"><value>追加 {0} 行の必須セルを入力してください（実行前）。</value></data>
+  <data xml:space="preserve" name="EditDuplicateRows"><value>選択行を複製</value></data>
+  <data xml:space="preserve" name="EditDuplicateRowsHelp"><value>現在の値を追加予定行へ複製し、主キー・一意制約の列は未入力にします。必須セルを入力してから実行してください。</value></data>
+  <data xml:space="preserve" name="FolderTransactionHelp"><value>BEGIN・COMMIT・ROLLBACKでフォルダーの更新を管理します。通常DBのトランザクションは1つのDBファイル内に限定されます。</value></data>
+  <data xml:space="preserve" name="FolderSqlHint"><value>フォルダー: SELECT / INSERT / UPDATE / DELETE・BEGIN / COMMIT / ROLLBACK・通常DBは1トランザクションにつき1ファイル</value></data>
+  <data xml:space="preserve" name="FolderSupportedSql"><value>フォルダーではSELECT・INSERT・UPDATE・DELETE・トランザクション・SHOW TABLES・EXPLAIN・ANALYZEを使用できます。</value></data>
+  <data xml:space="preserve" name="FolderReopenAfterCommit"><value>更新は確定しましたが、読込を再開できませんでした。フォルダーを開き直してください。</value></data>
+  <data xml:space="preserve" name="FolderOneDatabasePerTransaction"><value>フォルダーのトランザクションで更新できる通常DBは1ファイルです。別ファイルを更新する前にCOMMITまたはROLLBACKしてください。</value></data>
+</root>

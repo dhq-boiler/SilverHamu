@@ -22,7 +22,7 @@ public sealed class ColumnResizeHandleHandler : ViewHandler<ColumnResizeHandle, 
     protected override void ConnectHandler(ColumnResizeHost platformView)
     {
         base.ConnectHandler(platformView);
-        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(platformView.Handle, $"{VirtualView.ColumnTitle} の列幅を変更");
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(platformView.Handle, global::SilverHamu.Owner.Services.L.Get("ResizeColumn", VirtualView.ColumnTitle));
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(platformView.Handle, VirtualView.AutomationId + "Grip");
         platformView.Handle.DragDelta += OnDragDelta;
         platformView.Handle.KeyDown += OnKeyDown;

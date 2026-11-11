@@ -15,10 +15,10 @@ public sealed class MemorySqlStore
         var op = request["op"]!.ToString();
         if (op == "begin")
         {
-            if (transaction is not null) throw new SilverHamuRequestException("トランザクションは既に開始されています。");
+            if (transaction is not null) throw new SilverHamuRequestException(L.Get("ATransactionIsAlreadyActive"));
             transaction = new(data, StringComparer.Ordinal); return Task.FromResult(result);
         }
-        if (transaction is null) throw new SilverHamuRequestException("トランザクションがありません。");
+        if (transaction is null) throw new SilverHamuRequestException(L.Get("ThereIsNoActiveTransaction"));
         switch (op)
         {
             // This store permits only one open transaction.
@@ -56,7 +56,7 @@ public sealed class MemorySqlStore
                 if (page.Count == 0 && candidates.Count > 0) throw new SilverHamuRequestException("limit");
                 result["next_after"] = page.Count < candidates.Count ? candidates[page.Count - 1].Key : null;
                 result["rows"] = page; break;
-            default: throw new SilverHamuRequestException("未対応の操作です。");
+            default: throw new SilverHamuRequestException(L.Get("ThisOperationIsNotSupported"));
         }
         return Task.FromResult(result);
     }

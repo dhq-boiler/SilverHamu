@@ -1,8 +1,20 @@
 version: 3
 title: SilverHamu
 createdAt: 2026-11-09T15:31:25.7166025Z
-modifiedAt: 2026-11-11T10:04:37.930708Z
+modifiedAt: 2026-11-11T16:53:00.4591217Z
 tasks:
+- id: silverhamu-release-020
+  title: 全変更をコミットしSilverHamu v0.2.0の検証済み配布物を公開する
+  notes: クライアント0.2.0は既に公開済み。本体・Ownerのバージョンを更新し、Windows Owner／サービス・Linuxサービス・DockerイメージとSHA256SUMSをGitHub Releaseへ公開する。Kudaki MCP未公開・停止中のfallback記録。
+  children:
+  - id: silverhamu-release-020-prepare
+    title: バージョン・配布手順・リリースノートを整え全変更をコミットする
+    estimateHours: 1
+    remainingHours: 1
+  - id: silverhamu-release-020-publish
+    title: 配布物を検証してタグとGitHub Releaseを公開する
+    estimateHours: 1
+    remainingHours: 1
 - id: silverhamu-readme-benchmark-legend
   title: READMEのベンチマーク画像の凡例をsilverhamuに更新する
   estimateHours: 0.25
@@ -21,6 +33,163 @@ tasks:
 
 
     Cargoのlib名と計測用manifest、全Rust参照、README依存例、バックアップ文書、ネイティブDLLのC#ロード先・コピー先、Python FFIテスト、CI、Dockerとベンチスクリプトをsilverhamuに統一。C ABI・保存形式・C# NewDbms名前空間・過去の計測記録を保持。Cargo TOML解析、旧Rust参照なし、Python構文解析、MSBuild XML解析、DllImport先、READMEの整合チェックとgit diff --check成功。実行環境でcargo/rustcが見つからず、Docker daemonも未起動のため実ビルド・既存Rustテスト・新DLLでのFFI検証は未実行。残り0.25hはツールチェーン利用可能後の検証見積り（環境準備時間は不明）。
+- id: owner-folder-writes
+  title: フォルダー内の通常DBと書庫の更新・トランザクション・表編集をサポートする
+  notes: 通常SQL DBは対象ファイルへ直接接続し、明示トランザクションは1つの物理DB内に限定して別DB更新を拒否する。書庫は元セグメントを破壊せず新セグメントを作り、library.ndbの目録を1トランザクションで切り替え、既存PALV形式を維持する。未確定変更は照会と表編集に見え、COMMIT／ROLLBACKとSAVEPOINTに対応する。読み取りだけなら元ファイルを変更しない。Kudaki MCP未公開・停止中のfallback記録で次回起動時に再反映する。
+  children:
+  - id: owner-folder-writes-storage
+    title: 通常DBの書込接続と書庫の段階変更・原子的目録更新を実装する
+    estimateHours: 5
+    remainingHours: 0
+    notes: 通常DBは元ファイルへの遅延書込接続とネイティブトランザクションを使用。書庫は変更行を段階保持し、新規セグメント作成後に目録を原子的に切替。UPDATEは対象セグメント、INSERTは追加セグメント、DELETEは連続行番号で再保存。競合目録の上書き拒否と確定成否不明時の再実行防止を実装。旧セグメントは既存読込接続のため保持。
+  - id: owner-folder-writes-ui
+    title: トランザクション操作・編集メニュー・SQL実行と再取得を接続する
+    estimateHours: 2
+    remainingHours: 0
+    notes: フォルダーでBEGIN／COMMIT／ROLLBACKと1000行／全行編集を有効化。編集SQL・行追加削除複製・RETURNING・SAVEPOINTを既存の一括実行に接続。全行編集の暗黙4096行制限を除去し、更新・確定・取消後は他の編集タブを再取得必須にして古い状態での操作を防止。
+  - id: owner-folder-writes-verification
+    title: 永続化・全巻戻し・競合・再開と実画面での編集を確認する
+    estimateHours: 3
+    remainingHours: 0
+    notes: VS 2026 Debugビルド成功。TRX result_20261112_020551で全618テスト成功。通常DBと書庫の永続化・取消・終了時破棄・SAVEPOINT・編集SQL一括実行・競合時全取消・複数DB拒否・4201行編集更新・目録競合・複数セグメント・全削除後再挿入を検証。専用artifactsデータでvs-mcp UIAにより書庫のBEGIN／ROLLBACKと通常DB／書庫の編集メニュー・インライン編集・実行・保存後再取得を確認。ネイティブDLLは現在のソースからreleaseビルド済み。READMEに制限と旧セグメント保持を記載。
+- id: owner-duplicate-empty-keys
+  title: 行複製時に主キー・一意列を未入力にしフォルダー閲覧の制限を説明する
+  notes: 単一・複合主キー、列のUNIQUE、複合・部分UNIQUE索引の参加列をNULLへクリアし、他列の現在値を複製。NOT NULL列は既存の必須入力で実行を止める。フォルダー閲覧は一時コピーまたは書庫の読取経路であり更新接続・トランザクションを持たないことを確認して説明する。フォルダーの更新対応は今回変更しない。Kudaki MCP未公開・停止中のfallback記録で次回起動時に再反映する。
+  children:
+  - id: owner-duplicate-empty-keys-implementation
+    title: キー判定・値クリア・フォーカスと日英文言を更新する
+    estimateHours: 0.75
+    remainingHours: 0
+    notes: IsUniqueColumnで列PRIMARY KEY・UNIQUE、CompositePrimaryKey、Unique索引のColumnNamesを大小文字非区別に集約。複製した配列の該当値だけNULLに置換し元行・通常索引列・他列の型付き値を保持。フォーカスも同じ判定を使い、必須セル検証へ接続。日英ツールチップとREADMEを変更。フォルダー側はCatlinkFolder.ExecuteAsyncの読取SQL限定、ReadSqlCopyAsyncの一時コピー、書庫専用走査とMainPageのfolder条件によるボタン／編集メニュー禁止を確認し説明済み。更新実装は変更していない。
+  - id: owner-duplicate-empty-keys-verification
+    title: 各制約のクリア・未入力検証・実画面と実行を確認する
+    estimateHours: 0.75
+    remainingHours: 0
+    notes: VS 2026 Debugビルド成功、更新した既存テストと追加3ケースを含む全607テスト成功をTRXで確認。複合主キー・列UNIQUE・複合と部分UNIQUE索引の全参加列をクリアし、通常索引列と一般列を保持。UNIQUEの既定値を複製せず、NOT NULLキーは入力必須、NULL可のUNIQUE列はNULLのまま一括実行できること、元の未反映主キー変更は元行に保持して複製側だけクリア、Undo／Redoで未入力値が再現することを検証。vs-mcp UIAで専用verify.ndbのEditUiCasesを複製し、idとUNIQUE NOT NULLのtitleがNULLでINSERTへ入り空のセル入力欄と必須表示、他のamount123.45・activeTRUE・空文字・BLOBが保持され実行無効であることを確認。id30だけ入力後も無効、titleへ新しい値を入れると有効になり、一括実行・再取得・未反映0を確認。既存ユーザーデータは変更していない。
+- id: owner-staged-row-duplicate
+  title: 選択行を複製して未反映INSERTとして追加する
+  notes: 選択行の現在の型付き値を全列複製し、1行ごとのINSERTをSQL欄へ追加する。複数行を1回のUndo単位にし、既存の追加行編集・SQL削除・原子的実行に接続。主キー・一意列も複製し、実行前に表で変更できるようフォーカスと説明を付ける。Kudaki MCP未公開・停止中のfallback記録で次回起動時に再反映する。
+  children:
+  - id: owner-staged-row-duplicate-implementation
+    title: 複製操作・SQLと表・履歴を接続する
+    estimateHours: 1
+    remainingHours: 0
+    notes: 表上部と右クリックに選択行を複製を追加し日英の説明・コピーアイコンを設定。部分セル選択も行へ集約し、重複選択を除いて表示順に複製。現在の型付き値を独立した配列へコピーし1行ごとのINSERTへ変換、一括複製は1回のUndo単位。削除予定行は除外し、絞り込みを解除して新しい行の主キー・一意列へフォーカスする。選択位置はセル確定前に元の結果位置へ対応付け、編集中の値も確定後にコピーする。
+  - id: owner-staged-row-duplicate-verification
+    title: 値の保持・複数行・取消とDBへの遅延反映を確認する
+    estimateHours: 0.75
+    remainingHours: 0
+    notes: VS 2026 Debugビルドと追加8ケースを含む全604テスト成功をTRXで確認。全列の型・NULL・空文字・BLOB・数値・引用符改行を保持しDBには書かないこと、複数選択を順に一度ずつ複製、未反映セル値・追加行の複製、元と複製の編集の独立、SQL削除と行削除の取消、Undo／Redo、重複キー失敗後のキー変更と実行成功、未入力必須値と独立した識別を検証。vs-mcp UIAで最終確認に絞った元id20からボタンで正しく複製しフィルター解除と主キー編集を確認。重複id20の実行エラーでも追加予定行とSQLが残り、id21へ変更してUndo2回／Redo2回で複製とキー編集が往復することを確認。別の通常タブSELECTで実行前id21が0行、実行後は追加され未反映0になることを確認。4行全選択から右クリックの複製でINSERT4文・追加4行となり1回のUndoで全取消、SQL空へ戻ることを確認。専用verify.ndbのみ使用し既存ユーザーデータは変更していない。
+- id: owner-staged-row-insert-delete
+  title: 結果表の行追加・削除をSQLと履歴に積み一括反映する
+  notes: 追加行はセル入力しINSERTを更新、既存行はDELETEを追記し削除予定表示で保持。追加未反映行の削除はINSERT取消。Undo・RedoとSQL削除による巻戻し、必須値未入力時の実行禁止、混在DMLの原子的実行を扱う。Kudaki MCP未公開・停止中のfallbackで記録し次回起動時に再反映する。
+  children:
+  - id: owner-staged-row-model
+    title: 行識別・INSERTとDELETEの生成・SQL再構成と一括実行を実装する
+    estimateHours: 2.5
+    remainingHours: 0
+    notes: 行に安定した識別を持たせ、追加行INSERT内の番号コメントと表の+番号を対応。既定値と必須入力を持つ追加行のセル編集は同じINSERTを更新し、追加予定行の削除はINSERTを取消。既存行DELETEは現在の値でWHEREとRETURNINGを生成し、先行UPDATEのSQL削除時はDELETEも再構成。手入力INSERT・DELETEはSQLエンジンの型評価を使ってプレビューし、単一行の同じテーブルへのINSERT・UPDATE・DELETEのみ原子的に一括実行する。
+  - id: owner-staged-row-ui
+    title: 行追加削除操作と入力・未反映表示・UndoとRedoを接続する
+    estimateHours: 2
+    remainingHours: 0
+    notes: 表上部と右クリックに行追加・選択行削除を追加。部分セル・複数行の選択も行に集約。追加行は緑・+番号、削除予定行は赤・取り消し線・−番号で表示し、削除予定行は編集不可。必須値不足を表示して実行を無効にする。空の追加行は編集中でも削除して取消可能。Undo／Redo、SQL欄のINSERT・DELETE削除、タブ保持に連動。追記SQLの2行目以降が描画されない問題を実画面で発見し、ネイティブTextBoxを複数行設定しCRLFで反映して修正。
+  - id: owner-staged-row-verification
+    title: 混在操作・入力検証・巻戻し・一括反映と失敗時の取消を確認する
+    estimateHours: 1.5
+    remainingHours: 0
+    notes: VS 2026 Debugビルド成功、追加27ケースを含む全596テスト成功をTRXで確認。空表への最初の追加、同内容の複数ドラフト、既定値・NULL・空文字・引用符改行、必須単一／複合キー、追加行取消と識別保持、既存行の複数削除、各SQL削除とUndo／Redo、主キー変更後DELETEの再構成、混在一括実行、競合・重複INSERT・主キーなし重複DELETE・RETURNING欠落の全巻戻し、既存トランザクションのSAVEPOINT、危険なSQLの要求前拒否を検証。vs-mcp UIAで追加行の必須入力と実行無効、セル入力によるINSERT更新、赤い削除予定行とDELETE追記、両操作Undo／Redo、DELETE文削除による行復元、空行の即時取消とSQL空を確認。専用verify.ndbの別タブSELECTで実行前の元データ保持を確認し、INSERT10・UPDATE3・DELETE2の混在反映と再取得を確認。最終版ではINSERT20・UPDATE3・DELETE10の3文を画面で全行確認して実行し、20追加・3の103.00への更新・10削除・未反映0・SQL空を確認。既存ユーザーデータは変更していない。
+- id: owner-edit-history-sync
+  title: 未反映セルの表示とUndo・Redo・SQL欄からの巻戻しを同期する
+  notes: 取得時の値とSQL欄を基準にプレビューを再構成し、途中の生成UPDATE削除では残存操作のWHEREを再構成する。未反映セルに背景色と読み上げ状態を付ける。タブ別にセル・SQL共通の履歴を持ち、実行成功・再取得時にリセットする。Kudaki MCP未公開・プロセス停止中のfallback記録で次回起動時に再反映する。
+  children:
+  - id: owner-edit-history-sync-model
+    title: SQL再構成・セル差分・履歴とその境界条件を実装する
+    estimateHours: 2
+    remainingHours: 0
+    notes: 取得時スナップショットとSQL本文から原子的に再構成。パーサーの文位置・トークンキーで改行・整形・コメント・文字列内セミコロンを区別し、生成操作の削除では残存操作のWHEREを再生成する。手入力UPDATEはSQLエンジンの型変換・代入評価を使う読取専用プレビューへ反映。変更セル数をキャッシュし、キー入力ごとの全行走査を避ける。
+  - id: owner-edit-history-sync-ui
+    title: 背景色・未反映表示・UndoとRedoの操作とSQL同期を実装する
+    estimateHours: 1.5
+    remainingHours: 0
+    notes: 琥珀色の背景・枠を選択時も維持し、ツールチップと読み上げ状態にDB未反映、SQL欄上に未反映セル数と文数を表示。共通履歴をボタン・SQL欄／表のCtrl+Z・Ctrl+Y・Ctrl+Shift+Zで操作し、表のショートカット後もセルへフォーカスを戻す。入力は220msでまとめ、WindowsのCR改行正規化を履歴から除外。無効SQLは直前の有効プレビューと明示し実行・セル編集を停止する。
+  - id: owner-edit-history-sync-verification
+    title: SQL削除・連続編集・取消やり直しとDB反映を検証する
+    estimateHours: 1
+    remainingHours: 0
+    notes: VS 2026 Debugビルドと全569テスト成功をTRXで確認。追加22ケースで先頭・中間・末尾の文削除と実DB反映、主キー変更、同じセルの連続変更、NULL／空文字、全消去、コメント・整形、手入力代入、無効SQLの保持とUndo、分岐によるRedo破棄、タブ別履歴、改行形式、実行失敗後保持／成功後リセットを検証。vs-mcp UIAと実キー入力で2セルの色分け・選択中の区別、ボタンUndo／Redo、SQL削除と表の巻戻し・WHERE補正、SQL欄Ctrl+Z／Ctrl+Y、表で続けてCtrl+Z／Ctrl+Y、全消去と不正SQLの実行無効、タブ移動の保持を確認。専用verify.ndbの通常タブSELECTで実行前は元の99.00を保持し、実行後101.00・SQL空・未反映0・両履歴ボタン無効・通常背景への復帰を実画面確認。既存ユーザーデータは変更していない。
+- id: owner-edit-result-updates
+  title: 結果表を編集してUPDATEを生成し専用タブから一括実行する
+  notes: SELECT 1000行して編集・SELECT全行して編集をテーブルへ追加し、上半分に結果・下半分にSQLを配置する。セル変更ごとにUPDATEを追記するだけでDBは実行ボタンまで変更しない。元の全列の値で競合を検出し、RETURNINGの更新件数が各1行でなければ実行分をロールバック。既存トランザクションはSAVEPOINTで扱う。読み取り専用接続とフォルダー・ビューの編集は対象外。接続切替後の古い編集結果の実行を拒否する。Kudaki MCP未公開・停止中のfallback記録で次回起動時に再反映する。
+  children:
+  - id: owner-edit-result-model
+    title: 型付きセル値・安全なUPDATE生成と原子的な一括実行を実装し検証する
+    estimateHours: 2
+    remainingHours: 0
+    notes: 型・NULL・空文字・引用符・特殊識別子・同一行連続変更・主キー変更に対応。元の全列をWHEREへ含め、RETURNINGの各1行確認とBEGINまたは既存トランザクションのSAVEPOINTで原子的に実行。改行等はUnicode文字列リテラルで1編集1物理行を保持。正常・競合・重複行・制約違反・既存トランザクション・不正SQLを含む全547テスト成功をTRXで確認。
+  - id: owner-edit-result-ui
+    title: 編集タブ・セル編集操作・タブ保持と日英文言を実装する
+    estimateHours: 3
+    remainingHours: 0
+    notes: 上に結果表・下にSQLの編集専用タブ、1000行と全行の編集メニュー、日英文言とアイコンを追加。セルのダブルクリック／F2でセル内TextBoxとNULL切替へ変更し、Enterまたはセル外移動でSQL追記、Escで取消。NULL・文字列NULL・空文字を区別し、NOT NULL・主キーでは切替無効。タブごとの結果・SQL・フィルターを保持。接続変更後の実行を禁止し、再取得／閉じる際は未適用変更の破棄を確認。
+  - id: owner-edit-result-verification
+    title: 実画面で複数セル編集・SQL追記・遅延反映・成功と失敗を確認する
+    estimateHours: 1.5
+    remainingHours: 0
+    notes: VS 2026 Debugビルド成功。vs-mcp UIAで両編集メニューと上下配置、ダブルクリックでセル内編集、NULL切替の38px高、NOT NULLの無効表示を確認。実キー入力でF2・Enter・Escと確定後の再編集、数値不正入力の保持・SQL非追加を確認。専用verify.ndbのみ使用し、複数編集のSQL追記と実行後クリア・再取得、NULL／文字列NULL／空文字の区別、別タブSELECTによる実行前非反映、タブ保持を確認。別タブ更新との競合時に2文全体をロールバックし、外部更新99.00を保持、別行12.50が13.50へ変わらずSQL2文が残ることを確認。再取得の破棄確認後にSQL空・DBの99.00へ復帰。既存ユーザーデータは変更していない。
+- id: owner-frozen-result-row-numbers
+  title: 結果表の行番号列を横スクロール時も左端に固定する
+  estimateHours: 0.5
+  remainingHours: 0
+  notes: ResultLayoutの横スクロール量を行番号セルと左上見出しの変換へ共有し、スクロールを相殺。不透明な背景とZ順序でデータ列が行番号の上へ重なることを防止し、縦方向は同じ行として移動する。VS 2026 Debugビルド成功、最終TRXで497テスト全件成功。vs-mcpで専用DBの25行6列を横に176pxスクロールし、データ列だけ移動して行番号セルのX=611・見出しX=642が不変であることを確認。固定列からの行選択で6セルを選び、隠れた列を含む6列分をコピーして貼付け確認。縦スクロールと列幅自動調整後も固定位置・行の対応が維持されることを画像とUIAで確認。README・git diff --check確認。Kudaki MCP未公開・停止中のfallback記録で次回起動時に再反映する。
+- id: owner-sticky-result-header
+  title: 結果表のヘッダーを縦スクロール時も固定表示する
+  estimateHours: 0.5
+  remainingHours: 0
+  notes: WinUI ListView.Headerを固定行のCanvasへ分離し、本文のScrollViewer.HorizontalOffsetだけを同期。表示幅でクリップし、列幅の共有バインディング・ヘッダー上のホイール転送・選択コピーを維持。VS 2026 Debugビルド成功、TRXで497テスト全件成功。vs-mcpで専用DBの25行6列を縦にスクロールしてヘッダーY座標不変、横スクロールで本文と見出しが同じ80px移動することを確認。列幅自動調整で240→80pxが本文とヘッダーへ同時反映され、スクロール後のセル選択とコピーも成功。README・git diff --check確認。Kudaki MCP未公開・プロセス停止中のfallback記録で次回起動時に再反映する。
+- id: owner-result-selection-copy
+  title: 結果表のセル・複数セル・行・複数行を選択してコピーできるようにする
+  notes: クリック・ドラッグ・Shift範囲・Ctrl追加解除、キーボード移動とCtrl+C、右クリックとコピー操作を提供する。複数セルはタブ区切りで改行・タブ・引用符を保護し、行番号を含めず、ヘッダー付きコピーも選べる。選択は現在表示中のページと絞り込み結果に限定し、再描画時に解除する。Kudaki MCP未公開・プロセス停止中のfallback記録で次回起動時に再反映する。
+  children:
+  - id: owner-result-selection-model
+    title: 選択状態とコピー形式を実装し境界と組合せを検証する
+    estimateHours: 1
+    remainingHours: 0
+    notes: 重複しない矩形領域で選択を管理し、全行・全セルを個別の集合へ展開しない。Shift範囲・Ctrl追加解除・行とセルの混在・任意のセルや行の除外・空値・疎な選択・Unicode・TSVの引用・大規模選択のlong件数・再描画時の解除を追加27ケースで検証。最終TRXで497テスト全件成功。
+  - id: owner-result-selection-ui
+    title: 結果表の選択・操作・見た目・日英表示を実装して実画面で確認する
+    estimateHours: 2
+    remainingHours: 0
+    notes: セル全面に広がる操作領域・選択色・フォーカス枠・選択件数・コピーとヘッダー付きコピー・表示中の全選択・右クリック・日英表示を実装。仮想化した行の再利用に対応し、フォーカス対象だけをTab移動の対象にする。VS 2026 Debugビルド成功。vs-mcpで単一セル・行・表示中全15セル・右クリックコピー・選択解除とコピー無効状態・貼付けたUnicodeとタブ改行引用符を確認。vs-mcpの実入力送信がWinUIへ正しく届かないためcomputer-useの入力を補助に使い、ドラッグ2×2セルと3行、Shift＋矢印、Ctrl+Cでのコピーをvs-mcpの状態・画像・貼付け内容で確認。専用DBのみ使用し、検証入力はSQLへ復元。README・git diff --check確認。Ctrl追加解除は状態モデルのテストと入力イベント実装で確認した範囲。
+- id: owner-close-query-tabs
+  title: クエリタブの右端に閉じるボタンを追加する
+  estimateHours: 0.75
+  remainingHours: 0
+  notes: 各タブ右端に32px幅の独立した×ボタンと日英のツールチップ・読み上げ名を追加。作成・読込・保存時点からの変更は破棄を確認し、改行形式だけの差は無視。非選択タブを閉じても入力を保持し、選択タブは右隣・なければ左隣へ移動、最後は新規タブを生成する。ネストしたボタンも操作抑止の登録を更新し、破棄確認の間は処理中表示を出さない。VS 2026 Debugビルド成功、TRXで470テスト全件成功。vs-mcpで日英の配置と読み上げ名、左・中間・右・最後のタブ削除、確認の取消と破棄、保存済みタブと未編集の複数行ひな形の確認なし閉鎖、専用DBの接続・結果2行・未確定トランザクションの保持を確認。検証トランザクションはROLLBACKし、日本語表示で残した。READMEとgit diff --check確認。Kudaki MCP未公開・停止中のfallback記録で次回起動時に再反映する。
+- id: owner-select-all-template
+  title: 右クリックのSQLひな形へSELECT全行を追加する
+  estimateHours: 0.5
+  remainingHours: 0
+  notes: SELECT 1000行の直後にSELECT全行をテーブル・ビュー共通で追加。日英キャプション・アイコン・識別子の引用を維持し、選択時は新規タブへ制限なしSELECTを挿入して自動実行しない。VS 2026 Debugビルド成功、追加5ケースを含む470テスト全件成功をTRXで確認。1001行のテーブルで通常SELECTは1000行・全行SELECTは1001行を取得。vs-mcpで日英メニュー・テーブル5項目とビュー2項目・新規タブ追加・非実行・専用ビューでの明示実行を確認しREADME更新。Kudaki MCP未公開・停止中のfallback記録で次回起動時に再反映する。
+- id: owner-button-icons
+  title: Ownerの操作ボタンのキャプション左側へアイコンを追加する
+  estimateHours: 1
+  remainingHours: 0
+  notes: Windows標準の単色アイコンをツールバー・設定・ファイルとCSVのダイアログ・クエリタブ・オブジェクト・右クリックメニュー・ページ移動へ適用。ページ番号と単独の＋は維持。MAUI FontImageSourceのシステムフォントURI解決エラーを実画面とDebug出力で確認し、WinUI FontIconの直接描画に変更。キャプションから8pxの間隔を空け、文字色と無効状態を継承し、アイコンは読み上げ対象から除外してボタン名はキャプションへ同期。VS 2026ビルド・全470テスト成功。vs-mcp画像で日英の左アイコン配置、タブの選択色、設定・CSVのアイコンと読み上げ名、既存のSELECT・タブ操作を確認。Kudaki MCP未公開・プロセス停止中のfallback記録で次回起動時に再反映する。
+- id: owner-i18n
+  title: Ownerの表示言語を設定で日本語・英語に切り替える
+  notes: ヘッダーの設定から日本語・Englishを即時切替し選択を保存。初回はOSの表示言語を使い、日本語以外は英語へフォールバック。SQL・オブジェクト名・ユーザーデータ・過去のメッセージ履歴・エンジンとサーバーが返す文言は保持。Kudaki MCP未公開・プロセス停止中のfallback記録で、次回起動時に再反映する。
+  children:
+  - id: owner-i18n-implementation
+    title: 日英文言リソースと設定画面・即時切替・保存を実装する
+    estimateHours: 2
+    remainingHours: 0
+    notes: RESXと明示的な表示カルチャを導入。ボタン・ダイアログ・状態・ページ選択・補完・ひな形・Owner側のエラーを翻訳。表示用バインディングと既存状態からの再描画で更新し、設定を開いている間は背面操作を無効にする。READMEへ範囲と保存方法を記載。
+  - id: owner-i18n-verification
+    title: 文言の整合性・既存テスト・実画面の切替と状態保持を検証する
+    estimateHours: 1
+    remainingHours: 0
+    notes: VS 2026 Debugビルド成功。TRXで全465テスト成功。追加13ケースで保存言語の優先・OS言語フォールバック・両言語全リソースのキーと書式引数・SQL未入力マーカーの保持を確認。vs-mcpで日英の相互切替、専用DB接続・未確定トランザクション・入力文字列・結果2行の保持、英語のCSV画面、結果表の行番号見出しの即時更新、再起動後の英語選択の保持を確認。最後は日本語に戻した。既存ユーザーDBは変更せず、検証専用DBのみ使用。git diff --check成功。
 - id: sql-semantic-types
   title: SQLで日時・金額・識別子の意味を保証する
   notes: 基本型と名前付き独自型を使い分ける。異なるIDの比較・代入を拒否し、制約・型情報がSQLの読み書きと保存を通じて保たれることを終了条件とする。
@@ -201,13 +370,11 @@ tasks:
     estimateHours: 1
     remainingHours: 0
     notes: 新しいソリューションでVS 2026 Debugビルド成功。SQLテスト253件成功をTRXで確認。新ソリューションからデバッグ起動しUI自動化でギンハムちゃんのロゴを確認。今回の269ファイルをステージ済みでdiff --check成功。未追跡の既存2スクリプトは除外し保持。コミット実行が残作業。続いてmainへコミット完了（Unify the database product identity under SilverHamu）。GitHub名・originは未変更、pushは行っていない。
-
 - id: silverhamu-documentation-names
   title: 資料の製品名とリポジトリ参照をSilverHamuに揃える
   estimateHours: 1
   remainingHours: 0
   notes: 本文・表の製品名、GitHubリンク、現在の作業先を更新。移行表の旧名、環境変数・保存形式・計測キー・実行オプション・既存Goモジュールパスは保持し、Goの旧パスが残る理由を追記。計測値と相対リンクの保持、旧製品名の本文残存、git diff --checkを検証。過去の図版と原データは保持。Kudaki MCPが公開されておらずKudakiプロセスも未起動のため停止時fallbackで記録。次回起動時にMCPで再反映する。
-
 - id: silverhamu-clients-release-020
   title: 6言語のクライアントをSilverHamu 0.2.0として配布する
   notes: Python・Node.js・Go・C#・Java・Rubyの全6種類をSilverHamu 0.2.0として各レジストリへ公開し、公開先からの取得を確認済み。配布メタデータとGoモジュールも新リポジトリへ移行。GitHub Release clients/v0.2.0に成果物・署名・公開鍵・ハッシュを配布。Kudaki停止中につきfallbackで記録し次回起動時に再反映する。
@@ -222,3 +389,135 @@ tasks:
     estimateHours: 2
     remainingHours: 0
     notes: 全6種類（Go・npm・PyPI・RubyGems・Maven Central・NuGet）の0.2.0を公開取得確認済み。npm・Python・Rubyは公開パッケージで実TCP/TLS・トランザクション・認証拒否が成功。PyPIの5テストも成功。JavaはCentral上の4成果物が検証済みバイト列と一致し、公開鍵CADB74EB9FC1DD21A8B3A9B7005CE62130C96F71で全署名を検証（Actions 42992548344、deployment ddd0ed94-fd85-440e-b416-8f0c2723ee8f）。NuGetは公開フィードの0.2.0と検証済みライブラリの全ファイル一致を確認。公開パッケージを復元した消費側プロジェクトのReleaseビルドが警告・エラー0件で成功し、不正応答6ケースと実TCP/TLSの読み書き・トランザクションを確認。GitHub Release clients/v0.2.0の配布記録も完了状態へ更新。重複した旧CI9本を中止し配布待ちを解消、最新版CIは維持。画面操作は行わずCLIとActionsのみ使用。
+- id: owner-sdk-020
+  title: Ownerのサービス接続をSilverHamu.Client 0.2.0へ移行する
+  notes: NuGet公開版0.2.0を参照し独自TCPフレーミングを置き換える。同期SDKはUI外で実行し、SQL対応・閲覧ロール・SQLエラー後のトランザクション状態を読み取り専用SHOW VIEWSで引き継ぐ。既存の組み込みDB・フォルダー閲覧は保持。Kudaki停止中のfallback記録で、次回起動時にMCPで再反映する。
+  children:
+  - id: owner-sdk-020-integration
+    title: SDK参照とOwner接続ラッパーを移行する
+    estimateHours: 2
+    remainingHours: 0
+  - id: owner-sdk-020-verification
+    title: 接続・エラー・状態のテストとOwner実画面を確認する
+    estimateHours: 1
+    remainingHours: 0
+    notes: VS 2026 Debugビルド成功。追加した接続テスト22件を含む全275件成功をTRXで確認。KV専用接続・SQL対応と閲覧ロール・SQLエラー前後のトランザクション状態・致命的エラー・通信断・1MiB境界・破棄後・要求直列化を検証。vs-mcpの実画面でSQL管理接続、SELECT、BEGINとROLLBACK、閲覧ロールの許可ビュー表示とSELECTを確認。待機中の試験サーバーのタイムアウトによるIOExceptionでデバッガーが停止したが、再開後に切断表示と再接続を確認。試験サーバーの待機時間を延長しSELECT成功。
+- id: owner-loaded-result-paging
+  title: Book_3の全件取得時間を保って取得済み結果をページ閲覧する
+  notes: ページ移動で追加取得せず、単一SELECTの全結果を最後まで読み一時ファイルへ保存してから初回表示する。元データの読み取り・SQL評価・保存を含む全件取得時間を固定表示し、100行単位の前後・最終ページ移動は保存済み結果だけを使う。書き込みテーブル・JOIN等の中間結果の安全上限は別に保持。Kudaki MCP未公開・プロセス停止中のfallback記録で、次回起動時にMCPで再反映する。
+  children:
+  - id: owner-loaded-result-paging-implementation
+    title: 書庫の全件読み取りと一時結果ファイル・ページ操作を実装する
+    estimateHours: 2
+    remainingHours: 0
+    notes: 単純な書庫SELECTの暗黙4096行制限を撤廃。WHEREと明示LIMIT・OFFSETを保持し100行ずつ評価・保存。ORDER BY等は既存の中間メモリ上限内で全結果を保存する。SQLのTOP・LIMIT・OFFSET・FETCHは非負32bit整数を許可。前へ・次へ・最終ページ、全件数・絶対行番号・取得時間を表示。再実行・一覧表示・切断・終了で一時結果を破棄し、失敗時に部分結果を成功扱いしない。単純な書庫SELECTのEXPLAIN ANALYZEも全件を計測する。
+  - id: owner-loaded-result-paging-verification
+    title: 境界・全件取得・再読込なしのページ移動と実画面を検証する
+    estimateHours: 1
+    remainingHours: 0
+    notes: VS 2026 Debugビルド成功、全305テスト成功をTRXで確認。0・99・100・101・4095・4096・4097・4201行、フィルター・降順・明示LIMIT・大きなOFFSET・NULLと型保持・読み取り失敗を検証。4201行のBook_3書庫を閉じた後も末尾と先頭を取得でき元ファイルが不変であることを確認。実画面のBook_3は全20979行を269msで取得済み、210ページ目の20901〜20979行まで表示、末尾で次へと最終ページが無効。前へで戻っても全件取得時間269msが維持されることをvs-mcp UIAと画像で確認。標準SQLのFETCH FIRST/NEXT・OFFSET ROW/ROWS・件数省略・4096行超・構文エラーも検証。Ownerが生成する件数指定SQLと資料はFETCHを基本とし、LIMIT/TOPは互換構文として保持。最終ビルド後にOwnerを再起動し実行状態で残している。
+- id: owner-sql-completion
+  title: クエリ入力欄でSQLキーワードとスキーマ名を補完する
+  notes: 開いている接続・フォルダーのローカルスキーマを使い、SQLキーワード・テーブル・ビュー・列を候補にする。標準SQLの二重引用符で識別子を挿入し、文字列・コメント・IME変換中は補完しない。Kudaki MCP未公開・プロセス停止中のfallback記録で、次回起動時にMCPで再反映する。
+  children:
+  - id: owner-sql-completion-implementation
+    title: 候補生成とエディターの候補一覧・確定操作を実装する
+    estimateHours: 2
+    remainingHours: 0
+    notes: 大文字小文字を区別しない前方一致、FROM/JOIN位置とテーブル別名に応じた候補、カーソル上の単語置換、引用名のエスケープに対応。Ctrl+Space・補完ボタン、上下選択、Tab/Enter・候補クリックの確定、Esc終了を実装。完全一致した単語では自動候補を閉じ、Shift付きの改行・移動とIME操作を妨げない。接続切替時の候補更新とイベント解除を実装。複雑なネストのスコープ解決とサービスの閲覧ビューの未取得列定義の問い合わせは対象外。
+  - id: owner-sql-completion-verification
+    title: 文字位置と文脈のテスト・実画面での候補挿入を確認する
+    estimateHours: 1
+    remainingHours: 0
+    notes: VS 2026 Debugビルド成功。補完20ケースを含む全325テスト成功をTRXで確認。単語の先頭・途中、引用識別子、文字列・コメント境界、複数文、別名、スキーマ切替、重複候補、完全一致候補の抑制を検証。vs-mcp UIAと画像でキーワード候補表示、SELECTへの単語置換、Book_3とPublishDateの引用付き挿入、確定後に候補が閉じることを確認。OSへのキー送信によるショートカット操作・IME実変換は確認できておらず、ネイティブイベントの接続と抑制処理を実装・ビルド確認した範囲。Ownerは起動状態で残す。
+  - id: owner-sql-completion-aliases
+    title: WHERE直後の候補へテーブル別名を変数として追加する
+    estimateHours: 0.5
+    remainingHours: 0
+    notes: FROM Book_3 bとAS bの別名を変数として優先表示。WHERE・AND・OR・ON・HAVING直後の空欄でも自動候補を表示し、通常の別名はbのまま、引用した別名は二重引用符付きで挿入する。未取得スキーマでも別名を提示でき、別の文・テーブル入力位置・ドット後の列候補には別名を混ぜない。追加5ケースを含む全330テスト成功とVS 2026ビルド成功を確認。再起動後のUI Automation応答待ちはデバッガー実行状態を確認してOwnerを再起動し解消。vs-mcpで指定のSELECT * FROM Book_3 b WHEREの末尾にカーソルを置き、先頭候補がb・変数となることを実画面のUIAで確認。
+  - id: owner-sql-completion-writes
+    title: UPDATE・DELETE・INSERTの文脈に合う補完候補を提示する
+    estimateHours: 1
+    remainingHours: 0
+    notes: UPDATEの対象表・SET・代入先・値式・WHERE、DELETEのFROM・対象表・WHERE、INSERTのINTO・対象表・列リスト・VALUES・SELECT/WITHを区別。指定済みの更新先と挿入列を候補から除外し、括弧内のカンマ・文字列・コメント・引用したキーワード名を識別する。INSERT SELECTの候補は読取元の列を使い、VALUES内は列名を出さず値形式・完成した値の区切りを提示。補完33ケースを追加し全363テスト成功、VS 2026 Debugビルド成功をTRXとBuild出力で確認。vs-mcp実画面でUPDATE SETの対象列、DELETE WHERE PuのPublishDate、INSERT列指定でTitleを除いたIdとPublishDate、VALUES内の値形式を確認。SQLは実行せず候補表示のみ確認した。識別子の二重引用符は現在の一律引用を保持し、通常名では必須ではないことをユーザーへ説明済み。
+  - id: owner-sql-completion-conditional-quotes
+    title: 通常の識別子はそのまま補完し必要な名前だけ引用する
+    estimateHours: 0.5
+    remainingHours: 0
+    notes: SELECT・UPDATE・DELETE・INSERTのテーブル／列候補で引用判定を共有。英字・日本語等の文字またはアンダースコアで始まり文字・数字・アンダースコアのみの通常名は引用せず、それ以外と予約語を二重引用符で囲み内部の引用符を重ねる。補完候補のキーワード一覧とは分離したSQL:2023予約語409語とTOP/LIMITを大小文字非区別で判定し、公式資料の改行用不可視文字は除去して固定リスト化。通常名・予約語・空白・記号・数字始まり・既存の引用符内からの補完・DML共通動作の25ケースを追加し、VS 2026 Debugビルドと全388テスト成功。vs-mcpの実画面でSELECT * FROM Book_3とWHERE PublishDateへ引用符なしで補完されることを確認。SQLは実行せず、元データを変更していない。
+- id: owner-new-query-plus-tab
+  title: 新しいクエリ操作をタブ列の末尾の＋へ移す
+  estimateHours: 0.25
+  remainingHours: 0
+  notes: 上部ツールバーの新しいクエリボタンを削除し、RenderTabsで既存クエリの右端に＋ボタンを配置。42px幅、ツールチップ・読み上げ名は新しいクエリとする。VS 2026 Debugビルド成功。vs-mcpで＋を2回押してクエリ1・2・3・＋の順序と横位置を画像・UIAで確認し、タブ切替時にSELECT 3の編集内容が保持されることも確認。Kudaki MCP未公開・プロセス停止中のfallback記録で次回起動時に再反映する。
+- id: owner-embedded-transactions
+  title: 組み込みDBのトランザクション操作と状態を画面で明確にする
+  estimateHours: 1
+  remainingHours: 0
+  notes: 既存の組み込みDBエンジンはBEGIN/COMMIT/ROLLBACK対応済み。OwnerのSQL実行と要求成功・失敗後の状態をEmbeddedSilverHamuStore.InTransactionへ同期し、未開始時はBEGINのみ、未確定時はCOMMIT/ROLLBACKのみ有効にする。フォルダー閲覧は読み取り専用と明示しトランザクションボタンを無効表示。VS 2026ビルドと全388テスト成功。vs-mcpで専用の新規.ndbを作り、BEGINボタン後のINSERTをROLLBACKして0件、別INSERTをCOMMITして再オープン後も1件、SQL欄のBEGIN/INSERT/ROLLBACKで確定済み1件のみ残ること、未確定表示とボタン状態を実画面確認。書庫モードの読み取り専用表示と3ボタン無効も確認し、最後は専用組み込みDBへ戻した。既存ユーザーデータは更新していない。Kudaki MCP未公開・停止中のfallbackで記録し次回起動時に再反映する。
+- id: owner-object-query-context-menu
+  title: テーブルとビューの右クリックからクエリタブを生成する
+  notes: メニュー選択はSQLを実行せず、既存タブの入力を保存して新しいタブへひな形を追加する。テーブルはSELECT 1000行・INSERT・UPDATE・DELETE、ビューはSELECT 1000行のみ。未編集の更新系ひな形はSQLとして無効なマーカーで必ず構文エラーにする。Kudaki MCP未公開・停止中のfallback記録で次回起動時に再反映する。
+  children:
+  - id: owner-object-query-context-menu-implementation
+    title: コンテキストメニューと未編集では実行不能なSQLひな形を実装する
+    estimateHours: 1.5
+    remainingHours: 0
+    notes: ネイティブContextFlyoutをテーブル・ビューへ設定し、選択時は新規クエリタブへ追加。SELECTはFETCH FIRST 1000 ROWS ONLY。INSERTは列一覧と値、UPDATEは主キー以外の代入とWHERE、DELETEはWHEREを生成する。単一・複合主キーをWHEREへ反映し、主キーなしやメタデータ未取得でも未入力マーカーを残す。識別子の必要時のみ引用する規則を補完と共有。入力欄のCR改行で先頭行コメントがSQL全体を隠す問題を修正し、パーサーと補完がCR/LF/CRLFに対応。
+  - id: owner-object-query-context-menu-verification
+    title: ひな形の安全性と新規タブ追加・実画面のメニューを確認する
+    estimateHours: 1
+    remainingHours: 0
+    notes: VS 2026 Debugビルド成功、全407テスト成功をTRXで確認。テーブル4項目・ビュー1項目、1000行制限、特殊名、主キーなし・複合主キー・列不明、未編集の全更新系ひな形がDB要求0件で失敗すること、編集後の構文と3改行形式を検証。vs-mcpでテーブル・ビューの右クリックメニュー、INSERT/UPDATE/DELETE/SELECTの新規タブ追加、選択時の非実行を確認。専用組み込み検証DBで未編集INSERTの構文エラーを確認し、ひな形のマーカーを埋めてINSERT・UPDATE・DELETE各1行が成功、最後のSELECTで元の確定済み1行のみ残ることを確認。既存ユーザーデータは更新していない。
+- id: owner-csv-export-range
+  title: 取得済み結果からCSVの全件・現在ページ・行範囲を指定して出力する
+  notes: SQLを再実行せず、保存済み全結果を対象にする。範囲は結果全体の1始まり・両端を含む行番号。画面フィルターは適用しないことを明示する。Kudaki MCP未公開・停止中のfallback記録で次回起動時に再反映する。
+  children:
+  - id: owner-csv-export-range-implementation
+    title: 出力範囲選択と結果キャッシュからの逐次CSV保存を実装する
+    estimateHours: 2
+    remainingHours: 0
+    notes: 全件・現在ページ・1始まり両端込み行範囲の選択画面を追加し、取得済みキャッシュの範囲読み取りと逐次CSV出力を実装。0件はヘッダーのみ、範囲外・逆順・非整数は保存前に拒否。UTF-8 BOMとCSVの引用規則を保持し、同一フォルダーの一時ファイルへ完了後に非上書きで配置する。
+  - id: owner-csv-export-range-verification
+    title: ページ境界・入力検証・CSV形式・実画面の保存を確認する
+    estimateHours: 1
+    remainingHours: 0
+    notes: VS 2026 Debugビルドと全432テスト成功をTRXで確認。追加25ケースで全件・現在ページ・範囲、100行境界・4096行超・0件・逆順・範囲外・巨大行番号、CSV引用符と日本語改行、保存失敗時の部分ファイル削除・既存ファイル保持を検証。vs-mcpで専用205行DBを作り、フォルダーの取得済み2ページ目から全205行・現在101〜200行・範囲99〜102行・0件ヘッダーのみのCSVを保存し、Python csvで内容と件数を確認。範囲0の拒否とキャンセル、表示ページと全件取得時間の維持も確認。検証用DBのみ使用し既存ユーザーデータは変更していない。
+- id: owner-explorer-remove-note
+  title: オブジェクトエクスプローラー下部の説明を削除する
+  estimateHours: 0.25
+  remainingHours: 0
+  notes: 下部のSILVERHAMU EMBEDDED/SERVICE見出しと説明文、専用112px行を削除し、一覧の表示領域を拡大。読み取り専用表示はSQL入力欄下に保持。VS 2026 Debugビルド成功、vs-mcpのフォルダー閲覧画面で説明ブロックがなくなったことを画像確認。Kudaki MCP未公開・停止中のfallback記録で次回起動時に再反映する。
+- id: owner-page-jump-popup
+  title: 現在ページ番号から任意ページへ移動できるポップアップを追加する
+  notes: 現在ページの数字をボタンにし、1つのテキストボックスから直接指定できるようにする。番号ボタンは1〜10を縦、11〜20を右隣、21〜30をさらに右と並べる。ページ数に応じて横へ拡大し、画面幅を超える場合は横スクロール。取得済み結果だけを読みSQLを再実行しない。Kudaki MCP未公開・停止中のfallback記録で次回起動時に再反映する。
+  children:
+  - id: owner-page-jump-popup-implementation
+    title: ページ位置ボタンと直接入力・10行ずつの番号選択を実装する
+    estimateHours: 1.5
+    remainingHours: 0
+    notes: 現在ページをボタン化し、直接入力と10行ずつ右へ並ぶ番号ボタンを実装。WinUIの既定ポップアップ高さを上書きし10番目まで表示。ホイールを入力欄・見出し・余白を含むパネルで受け、縦の余地があれば縦、通常は横へ移動する。空白部分もヒットテスト対象とした。
+  - id: owner-page-jump-popup-verification
+    title: 番号の並び・直接入力・境界・大量ページ・実画面を確認する
+    estimateHours: 1
+    remainingHours: 0
+    notes: VS 2026ビルド成功と全452テスト成功をTRXで確認。番号列の1〜10、11〜20、21〜30の配置と最下段が収まることをUIAで確認。Image_3の6099ページで0の拒否、6099への直接移動、21の番号ボタンで移動、取得済みデータの表示を確認。vs-mcpのPostMessageによるホイール送信ではスクロール変化を観測できず、ホイールの実入力による検証は未確認。
+- id: owner-busy-animation-stall
+  title: 大きなImage_3のSELECT中に回し車が停止する原因を修正する
+  notes: Zドライブの書庫でユーザー報告。読込中にGIFが1周目以降停止する現象をvs-mcp画像で再現。UIタイマーは動作し最大間隔244ms、GC停止16msで、WinUIのBitmapImageはIsPlaying=trueのままフレームを更新しなかった。元GIFの12フレームを展開し表示時間に沿って繰り返す方式に変更。Kudaki MCP未公開・停止中のfallback記録で次回起動時に再反映する。停止修正後にユーザーから滑らかさの指摘あり。元素材は各110ms・約9fpsで脚のポーズのつながりに粗さがあり、素材の再制作は行っていない。
+  children:
+  - id: owner-busy-animation-stall-investigation
+    title: UIスレッド停止とGIF再生停止を切り分けて修正する
+    estimateHours: 1
+    remainingHours: 0
+    notes: 専用LoadingAnimationでGIFを一度だけデコードし、キャッシュした12フレームをUIタイマーで循環。非表示・完了・エラー・アンロード時は停止し、Windowsのアニメーション無効設定を保持。調査用heartbeatコードは削除。
+  - id: owner-busy-animation-stall-verification
+    title: 実データのSELECT中にアニメが継続することを確認する
+    estimateHours: 0.5
+    remainingHours: 0
+    notes: VS 2026 Debugビルド成功、全452テスト成功。Z:\AのImage_3全609880行のSELECTで4秒超の14回の連続画像がすべて変化し、1.32秒の1周期を超えて動作継続することと完了時の非表示を確認。ユーザーからも停止が解消したことを確認。
+- id: owner-loading-gif-smooth-loop
+  title: 回し車GIFの中間コマとループ境界を整える
+  estimateHours: 4
+  remainingHours: 0
+  notes: 最初のGIFの絵と大きく走る動きが理想とのユーザー指定に従い元絵へ復帰。元12コマのうち最初の8コマを7・8・1・2・3・4・5・6の順に循環させ、途中から先頭へ飛ぶ構成を修正。各110ms・1周0.88秒・約9.1fps・4段階各2コマ。元の全不透明RGB値と透過の完全保持、8コマ・表示時間・無限ループを検証。輪郭の崩れる動画補間案と、脚が小さく不自然に流れる部品化方式は不採用としartifactsへ退避。最初のGIFと再構成スクリプトはapps/SilverHamu.Owner/Resources/Animationに保存。4列プレビューはartifacts/owner-animation-review/original-restored-preview.png。VS 2026ビルド成功、ソースと配置済みGIFのSHA256一致、Image_3全件SELECTの4秒超14連続画像で再生継続とエラーなしを確認。ユーザーから「すばらしい！」と採用確認済み。Kudaki MCP未公開・停止中のfallback記録で次回起動時に再反映する。

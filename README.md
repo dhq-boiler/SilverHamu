@@ -32,7 +32,7 @@ SilverHamu combines the silver bullet ambition with Hamu, a coined name derived 
 
 ### SQL syntax matrix
 
-These labels cover common SQL forms in the shared `SilverHamu.Sql` engine used by silverhamu and Windows Owner. Each label applies to the form shown. In Owner, a folder opened through `.catlink` supports read-only queries, query plans and session-local table statistics.
+These labels cover common SQL forms in the shared `SilverHamu.Sql` engine used by silverhamu and Windows Owner. Each label applies to the form shown. In Owner, a folder opened through `.catlink` supports queries, staged table editing, INSERT/UPDATE/DELETE, transactions, query plans and session-local table statistics. Transactions across ordinary SQL databases are limited to one physical database file; PALV archive updates publish new segments through an atomic catalog switch.
 
 <details>
 <summary>Queries, expressions and joins</summary>
@@ -197,3 +197,7 @@ A separate silverhamu workload with 2 KiB values included automatic checkpoints 
 - [All benchmark studies](docs/benchmarks/)
 
 </details>
+
+## Downloads
+
+[SilverHamu v0.2.0](https://github.com/dhq-boiler/SilverHamu/releases/tag/v0.2.0) includes Windows x64 Owner and service packages, Linux x64 service binaries, and a Linux amd64 Docker image. See the [release notes](docs/releases/v0.2.0.md) for setup, changes, and update limitations.

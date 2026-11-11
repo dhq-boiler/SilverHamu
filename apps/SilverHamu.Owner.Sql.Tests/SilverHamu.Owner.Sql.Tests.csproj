@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <IsTestProject>true</IsTestProject>
@@ -8,14 +8,34 @@
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="../SilverHamu.Owner/Services/Localization.cs" Link="Services/Localization.cs" />
+    <Compile Include="../SilverHamu.Owner/Services/ResultSelection.cs" Link="Services/ResultSelection.cs" />
+    <Compile Include="../SilverHamu.Owner/Services/TableEditSession.cs" Link="Services/TableEditSession.cs" />
+    <Compile Include="../SilverHamu.Owner/Services/TableEditSession.History.cs" Link="Services/TableEditSession.History.cs" />
+    <Compile Include="../SilverHamu.Owner/Services/TableEditSession.Rows.cs" Link="Services/TableEditSession.Rows.cs" />
+    <EmbeddedResource Include="../SilverHamu.Owner/Resources/Localization/Strings*.resx">
+      <Link>Resources/Localization/%(Filename)%(Extension)</Link>
+      <ManifestResourceName>SilverHamu.Owner.Resources.Localization.%(Filename)</ManifestResourceName>
+    </EmbeddedResource>
     <ProjectReference Include="../../dotnet/SilverHamu.Sql/SilverHamu.Sql.csproj" />
     <Compile Include="../../dotnet/NewDbmsSnapshot.cs" Link="Native/NewDbmsSnapshot.cs" />
     <Compile Include="../SilverHamu.Owner/Services/MemorySqlStore.cs" Link="Services/MemorySqlStore.cs" />
-    <Compile Include="../SilverHamu.Owner/Services/SilverHamuClient.cs" Link="Services/SilverHamuClient.cs" />
+    <Compile Include="../SilverHamu.Owner/Services/ServiceConnection.cs" Link="Services/ServiceConnection.cs" />
     <Compile Include="../SilverHamu.Owner/Services/Catlink.cs" Link="Services/Catlink.cs" />
     <Compile Include="../SilverHamu.Owner/Services/CatlinkFolder.cs" Link="Services/CatlinkFolder.cs" />
+    <Compile Include="../SilverHamu.Owner/Services/LoadedQueryResult.cs" Link="Services/LoadedQueryResult.cs" />
+    <Compile Include="../SilverHamu.Owner/Services/CsvExport.cs" Link="Services/CsvExport.cs" />
+    <Compile Include="../SilverHamu.Owner/Services/PageNumbers.cs" Link="Services/PageNumbers.cs" />
+    <Compile Include="../SilverHamu.Owner/Services/SqlCompletion.cs" Link="Services/SqlCompletion.cs" />
+    <Compile Include="../SilverHamu.Owner/Services/SqlReservedWords.cs" Link="Services/SqlReservedWords.cs" />
+    <Compile Include="../SilverHamu.Owner/Services/SqlIdentifiers.cs" Link="Services/SqlIdentifiers.cs" />
+    <Compile Include="../SilverHamu.Owner/Services/ObjectQueryTemplates.cs" Link="Services/ObjectQueryTemplates.cs" />
     <Compile Include="../SilverHamu.Owner/Services/ArchiveTableReader.cs" Link="Services/ArchiveTableReader.cs" />
+    <Compile Include="../SilverHamu.Owner/Services/CatlinkFolder.Writes.cs" Link="Services/CatlinkFolder.Writes.cs" />
+    <Compile Include="../SilverHamu.Owner/Services/ArchiveTableReader.Writes.cs" Link="Services/ArchiveTableReader.Writes.cs" />
+    <Compile Include="../SilverHamu.Owner/Services/ArchiveFolderTransaction.cs" Link="Services/ArchiveFolderTransaction.cs" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+    <PackageReference Include="SilverHamu.Client" Version="[0.2.0]" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" PrivateAssets="all" />
   </ItemGroup>

@@ -1,0 +1,137 @@
+name: Release SilverHamu
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release version tag
+        required: true
+        default: v0.2.0
+        type: string
+
+      ref:
+        description: Commit, branch, or tag to build
+        required: true
+        default: main
+        type: string
+      publish:
+        description: Publish only when the tag already points to the verified source
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  binaries:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify version and tag
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: python scripts/package-release.py check
+      - name: Test native storage and service
+        run: cargo test --locked --features service --lib --tests -- --test-threads=1
+      - name: Build native binaries
+        run: cargo build --locked --release --features service --lib --bin silverhamu --bin silverhamu-server
+      - name: Test native ABI
+        run: python -m unittest discover -s tests -p "*ffi_checks.py"
+      - name: Test SQL and Owner services
+        if: runner.os == 'Windows'
+        run: dotnet test apps/SilverHamu.Owner.Sql.Tests/SilverHamu.Owner.Sql.Tests.csproj --configuration Release --logger trx
+      - name: Publish SQL host
+        shell: bash
+        run: |
+          rid=linux-x64
+          if [[ "$RUNNER_OS" == Windows ]]; then rid=win-x64; fi
+          dotnet publish dotnet/SilverHamu.Sql.Host/SilverHamu.Sql.Host.csproj -c Release -r "$rid" --self-contained true -o artifacts/release/host
+      - name: Build self-contained Windows Owner
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          dotnet workload install maui-windows
+          if ($LASTEXITCODE -ne 0) { throw 'MAUI installation failed' }
+          dotnet publish apps/SilverHamu.Owner/SilverHamu.Owner.csproj -c Release -r win-x64 --self-contained true -p:WindowsAppSDKSelfContained=true -o artifacts/release/owner
+          if ($LASTEXITCODE -ne 0) { throw 'Owner publish failed' }
+          $process = Start-Process artifacts/release/owner/SilverHamu.Owner.exe -PassThru -WindowStyle Hidden
+          Start-Sleep -Seconds 10
+          if ($process.HasExited) { throw "Owner exited during startup with $($process.ExitCode)" }
+          Stop-Process -Id $process.Id
+      - name: Package binaries
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: python scripts/package-release.py package
+      - uses: actions/upload-artifact@v4
+        with:
+          name: binaries-${{ runner.os }}
+          path: artifacts/release/downloads/*
+          if-no-files-found: error
+
+  docker:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build and verify image
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          python scripts/package-release.py check
+          version="${RELEASE_TAG#v}"
+          docker build -t "silverhamu:$version" .
+          docker run --rm --entrypoint /bin/sh "silverhamu:$version" -c 'test -x /usr/local/bin/silverhamu-server && test -x /usr/local/bin/silverhamu && test "$(id -u)" = 10001'
+          mkdir -p artifacts/release/downloads
+          docker save "silverhamu:$version" | gzip > "artifacts/release/downloads/silverhamu-$version-linux-amd64-docker.tar.gz"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docker
+          path: artifacts/release/downloads/*
+          if-no-files-found: error
+
+  publish:
+    if: inputs.publish
+    needs: [binaries, docker]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts/release/downloads
+          merge-multiple: true
+      - name: Verify complete downloads and publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          python scripts/package-release.py check
+          git fetch origin "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
+          test "$(git rev-parse HEAD)" = "$(git rev-parse "$RELEASE_TAG^{commit}")"
+          python scripts/package-release.py checksums
+          gh release create "$RELEASE_TAG" artifacts/release/downloads/* --verify-tag --latest --title "SilverHamu $RELEASE_TAG" --notes-file "docs/releases/$RELEASE_TAG.md"

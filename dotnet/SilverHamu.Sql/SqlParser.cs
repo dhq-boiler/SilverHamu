@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 
 namespace SilverHamu.Sql;
 
@@ -13,14 +13,26 @@ public sealed partial class SqlParser
     private SqlParser(string sql) { source = sql; tokens = Lex(sql); }
     public static IReadOnlyList<SqlStatement> Parse(string sql) => Parse(sql, triggerBody: false);
 
+    public sealed record ParsedStatement(SqlStatement Statement, int Start, int Length, string Key);
+    public static IReadOnlyList<ParsedStatement> ParseWithSource(string sql) => ParseCore(sql, triggerBody: false, includeSource: true);
+
     internal static IReadOnlyList<SqlStatement> Parse(string sql, bool triggerBody)
+    {
+        var statements = ParseCore(sql, triggerBody, includeSource: false);
+        if (statements.Count == 0) throw new SqlException("SQL文を入力してください。");
+        return statements.Select(item => item.Statement).ToArray();
+    }
+
+    private static IReadOnlyList<ParsedStatement> ParseCore(string sql, bool triggerBody, bool includeSource)
     {
         if (sql.Length > 1024 * 1024) throw new SqlException("SQLは1 MiB以下にしてください。");
         var parser = new SqlParser(sql) { inTriggerBody = triggerBody };
-        var statements = new List<SqlStatement>();
+        var statements = new List<ParsedStatement>();
         while (!parser.End)
         {
             if (parser.Match(";")) continue;
+            int startToken = parser.current;
+            int start = parser.tokens[startToken].Position;
             parser.conditionCount = 0;
             parser.compoundCount = 0;
             var statement = parser.Statement();
@@ -29,11 +41,16 @@ public sealed partial class SqlParser
                 statement = statement with { ExpressionBindings = parser.bindings };
                 parser.bindings = new();
             }
-            statements.Add(statement);
+            int end = parser.End ? sql.Length : parser.tokens[parser.current].Position;
+            string key = !includeSource ? "" : string.Concat(parser.tokens.Skip(startToken).Take(parser.current - startToken).Select(token =>
+            {
+                var text = token.Kind is "word" or "identifier" ? token.Text.ToUpperInvariant() : token.Text;
+                return token.Kind + ":" + text.Length + ":" + text;
+            }));
+            statements.Add(new(statement, start, end - start, key));
             if (!parser.End) parser.Expect(";");
             if (statements.Count > 100) throw new SqlException("1回の実行は100文までです。");
         }
-        if (statements.Count == 0) throw new SqlException("SQL文を入力してください。");
         return statements;
     }
 
@@ -479,7 +496,7 @@ public sealed partial class SqlParser
     {
         var distinct = Match("DISTINCT");
         int? limit = null;
-        if (Match("TOP")) { var parentheses = Match("("); limit = Integer(0, 4096); if (parentheses) Expect(")"); }
+        if (Match("TOP")) { var parentheses = Match("("); limit = Integer(0, int.MaxValue); if (parentheses) Expect(")"); }
         var projections = new List<SqlProjection>();
         do
         {
@@ -579,18 +596,18 @@ public sealed partial class SqlParser
         var limit = query.Limit;
         var order = new List<SqlOrder>();
         if (Match("ORDER")) { Expect("BY"); do { order.Add(OrderTerm()); } while (Match(",")); }
-        if (Match("LIMIT")) { if (limit is not null) throw Error("TOPとLIMITは併用できません。"); limit = Integer(0, 4096); }
+        if (Match("LIMIT")) { if (limit is not null) throw Error("TOPとLIMITは併用できません。"); limit = Integer(0, int.MaxValue); }
         var offset = 0;
         if (Match("OFFSET"))
         {
-            offset = Integer(0, 4096);
+            offset = Integer(0, int.MaxValue);
             if (!Match("ROW")) Match("ROWS");
         }
         if (Match("FETCH"))
         {
             if (limit.HasValue) throw Error("FETCH cannot be combined with TOP or LIMIT.");
             if (!Match("FIRST")) Expect("NEXT");
-            limit = Peek.Kind == "number" ? Integer(0, 4096) : 1;
+            limit = Peek.Kind == "number" ? Integer(0, int.MaxValue) : 1;
             if (!Match("ROW")) Expect("ROWS");
             Expect("ONLY");
         }
@@ -705,8 +722,10 @@ public sealed partial class SqlParser
         {
             var start = i; var c = sql[i];
             if (char.IsWhiteSpace(c)) { i++; continue; }
-            if (c == '-' && i + 1 < sql.Length && sql[i + 1] == '-') { while (i < sql.Length && sql[i] != '\n') i++; continue; }
+            if (c == '-' && i + 1 < sql.Length && sql[i + 1] == '-') { while (i < sql.Length && sql[i] is not ('\n' or '\r')) i++; continue; }
             if (c == '/' && i + 1 < sql.Length && sql[i + 1] == '*') { var end = sql.IndexOf("*/", i + 2, StringComparison.Ordinal); if (end < 0) throw new SqlException($"SQL位置 {i + 1}: コメントが閉じられていません。"); i = end + 2; continue; }
+            bool unicodeString = c is 'U' or 'u' && i + 2 < sql.Length && sql[i + 1] == '&' && sql[i + 2] == '\'';
+            if (unicodeString) { i += 2; c = '\''; }
             if (c is '\'' or '"' or '[')
             {
                 var close = c == '[' ? ']' : c; var value = new StringBuilder(); i++; var closed = false;
@@ -716,7 +735,7 @@ public sealed partial class SqlParser
                     else value.Append(sql[i++]);
                 }
                 if (!closed) throw new SqlException($"SQL位置 {start + 1}: 引用符が閉じられていません。");
-                tokens.Add(new(value.ToString(), c == '\'' ? "string" : "identifier", start));
+                tokens.Add(new(unicodeString ? DecodeUnicodeString(value.ToString(), start) : value.ToString(), c == '\'' ? "string" : "identifier", start));
             }
             else if (char.IsLetter(c) || c == '_') { i++; while (i < sql.Length && (char.IsLetterOrDigit(sql[i]) || sql[i] == '_')) i++; tokens.Add(new(sql[start..i], "word", start)); }
             else if (char.IsDigit(c) || c == '.' && i + 1 < sql.Length && char.IsDigit(sql[i + 1])) { i++; while (i < sql.Length && (char.IsDigit(sql[i]) || sql[i] is '.' or 'e' or 'E' || sql[i] is '+' or '-' && sql[i - 1] is 'e' or 'E')) i++; tokens.Add(new(sql[start..i], "number", start)); }

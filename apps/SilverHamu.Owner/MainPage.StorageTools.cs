@@ -1,3 +1,4 @@
+using SilverHamu.Owner.Services;
 using System.Text.Json.Nodes;
 using SilverHamu.Sql;
 
@@ -11,33 +12,33 @@ public sealed partial class MainPage
 
     private async Task<string?> AskHexAsync(string title, string label, int maxBytes)
     {
-        var text = await DisplayPromptAsync(title, label, "決定", "キャンセル", maxLength: maxBytes * 2);
+        var text = await DisplayPromptAsync(title, label, L.Get("OK"), L.Get("Cancel"), maxLength: maxBytes * 2);
         if (text is null) return null;
         try { return Convert.ToHexString(Convert.FromHexString(text.Trim())); }
-        catch (FormatException) { throw new InvalidOperationException("16進数を2桁ずつ入力してください。"); }
+        catch (FormatException) { throw new InvalidOperationException(L.Get("EnterHexadecimalDigitsInPairs")); }
     }
 
     private async Task<(string Start, string? End)?> AskRangeAsync(string title)
     {
-        var start = await AskHexAsync(title, "開始キー（16進・この値を含む）。空欄で先頭から。", 1024);
+        var start = await AskHexAsync(title, L.Get("StartKeyHexInclusiveLeaveBlankToStart"), 1024);
         if (start is null) return null;
-        var end = await AskHexAsync(title, "終了キー（16進・この値を含まない）。空欄で末尾まで。", 1024);
+        var end = await AskHexAsync(title, L.Get("EndKeyHexExclusiveLeaveBlankToInclude"), 1024);
         if (end is null) return null;
         if (end.Length > 0 && string.CompareOrdinal(start, end) > 0)
-            throw new InvalidOperationException("終了キーは開始キー以降を指定してください。");
+            throw new InvalidOperationException(L.Get("TheEndKeyMustBeAtOrAfter"));
         return (start, end.Length == 0 ? null : end);
     }
 
     private async Task RawKvAsync()
     {
-        if (!CanUseRawStore) throw new InvalidOperationException("管理者のDB接続が必要です。");
-        var op = await DisplayActionSheetAsync("キー・値の操作", "キャンセル", null, "GET", "SCAN", "PUT", "DELETE");
+        if (!CanUseRawStore) throw new InvalidOperationException(L.Get("AnAdministratorDBConnectionIsRequired"));
+        var op = await DisplayActionSheetAsync(L.Get("KeyValueTools144"), L.Get("Cancel"), null, "GET", "SCAN", "PUT", "DELETE");
         if (op is not ("GET" or "SCAN" or "PUT" or "DELETE")) return;
         var request = new JsonObject { ["op"] = op.ToLowerInvariant() };
         var write = op is "PUT" or "DELETE";
         if (op == "SCAN")
         {
-            var range = await AskRangeAsync("SCAN（最大100件・64 KiB）");
+            var range = await AskRangeAsync(L.Get("SCANUpToRecordsKiB"));
             if (range is null) return;
             request["start"] = range.Value.Start;
             request["end"] = range.Value.End;
@@ -47,14 +48,14 @@ public sealed partial class MainPage
         }
         else
         {
-            var key = await AskHexAsync(op, "キー（16進）", 1024);
+            var key = await AskHexAsync(op, L.Get("KeyHex"), 1024);
             if (key is null) return;
             if (write && Convert.FromHexString(key).AsSpan().StartsWith("_catdb_owner/"u8))
-                throw new InvalidOperationException("SQL管理領域のキーはSQLから変更してください。");
+                throw new InvalidOperationException(L.Get("UseSQLToModifyKeysInTheSQL"));
             request["key"] = key;
             if (op == "PUT")
             {
-                var value = await AskHexAsync("PUT（登録・更新）", "値（16進）。空欄は長さ0の値です。", 256 * 1024);
+                var value = await AskHexAsync(L.Get("PUTInsertUpdate"), L.Get("ValueHexBlankMeansAZeroLengthValue"), 256 * 1024);
                 if (value is null) return;
                 request["value"] = value;
             }
@@ -78,14 +79,14 @@ public sealed partial class MainPage
             var rows = response["rows"]!.AsArray().Select(pair => new[] {
                 new SqlValue("BLOB", pair![0]!.ToString()), new SqlValue("BLOB", pair[1]!.ToString())
             }).ToArray();
-            result = new(["key", "value"], rows, response["next_after"] is null ? $"{rows.Length} 件" : $"{rows.Length} 件（続きあり）");
+            result = new(["key", "value"], rows, response["next_after"] is null ? L.Get("Records", rows.Length) : L.Get("RecordsMoreAvailable", rows.Length));
         }
         else if (op == "GET")
         {
             var value = response["value"];
-            result = new(["value"], value is null ? [] : [new[] { new SqlValue("BLOB", value.ToString()) }], value is null ? "キーが見つかりません。" : "1 件");
+            result = new(["value"], value is null ? [] : [new[] { new SqlValue("BLOB", value.ToString()) }], value is null ? L.Get("KeyNotFound") : L.Get("Record"));
         }
-        else result = new([], [], ownTransaction ? $"{op} を確定しました。" : $"{op} の変更は未確定です。");
+        else result = new([], [], ownTransaction ? L.Get("Committed", op) : L.Get("ChangesFromAreUncommitted", op));
         filter.Text = "";
         RenderRows();
         Log(result.Message);
@@ -94,14 +95,14 @@ public sealed partial class MainPage
     private async Task ExportSnapshotAsync()
     {
         var store = embedded;
-        if (store is null || IsReadRole) throw new InvalidOperationException("ローカルの組み込みDBを開いてください。");
-        var range = await AskRangeAsync("確定済み範囲の値をスナップショットへ出力");
+        if (store is null || IsReadRole) throw new InvalidOperationException(L.Get("OpenALocalEmbeddedDB"));
+        var range = await AskRangeAsync(L.Get("ExportCommittedValuesInRangeToASnapshot"));
         if (range is null) return;
-        var path = await PickPathAsync("キーを除く値のスナップショットを保存", Path.ChangeExtension(store.DatabasePath, ".snapshot"), true);
+        var path = await PickPathAsync(L.Get("SaveASnapshotOfValuesWithoutKeys"), Path.ChangeExtension(store.DatabasePath, ".snapshot"), true);
         if (path is null) return;
         var generation = Guid.NewGuid();
         var info = await store.ExportSnapshotAsync(path, generation, Convert.FromHexString(range.Value.Start),
             range.Value.End is null ? null : Convert.FromHexString(range.Value.End));
-        Log($"値のスナップショットを保存しました（{info.Records} 件、DBバージョン {info.Version}、世代ID {generation}）。");
+        Log(L.Get("SavedValuesSnapshotRecordsDBVersionGenerationID", info.Records, info.Version, generation));
     }
 }

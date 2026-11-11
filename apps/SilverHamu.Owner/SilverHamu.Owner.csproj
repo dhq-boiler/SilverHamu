@@ -9,8 +9,9 @@
     <Nullable>enable</Nullable>
     <ApplicationTitle>SilverHamu Owner</ApplicationTitle>
     <ApplicationId>dev.catdb.owner</ApplicationId>
-    <ApplicationDisplayVersion>0.1.0</ApplicationDisplayVersion>
-    <ApplicationVersion>1</ApplicationVersion>
+    <ApplicationDisplayVersion>0.2.0</ApplicationDisplayVersion>
+    <Version>0.2.0</Version>
+    <ApplicationVersion>2</ApplicationVersion>
     <WindowsPackageType>None</WindowsPackageType>
     <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
@@ -20,10 +21,11 @@
     <MauiIcon Include="Resources\AppIcon\appicon.png" Color="#102029" BaseSize="456,456" />
     <MauiSplashScreen Include="Resources\Splash\splash.png" Color="#102029" BaseSize="128,128" />
     <MauiImage Include="Resources\Images\silverhamu.png" BaseSize="456,456" />
-    <MauiImage Include="Resources\Images\silverhamu_loading.gif" Resize="False" />
+    <MauiAsset Include="Resources\Images\silverhamu_loading.gif" LogicalName="silverhamu_loading.gif" />
     <MauiFont Include="Resources\Fonts\*" />
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
+    <PackageReference Include="SilverHamu.Client" Version="[0.2.0]" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../dotnet/SilverHamu.Sql/SilverHamu.Sql.csproj" />

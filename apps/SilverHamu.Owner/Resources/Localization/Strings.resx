@@ -1,0 +1,806 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <data xml:space="preserve" name="EditDiscardReload"><value>Discard and reload</value></data>
+  <data xml:space="preserve" name="EditCloseConfirm"><value>{0} has changes not yet applied to the database. Discard them and close this tab?</value></data>
+  <data xml:space="preserve" name="SelectThousandAndEdit"><value>SELECT 1000 rows and edit</value></data>
+  <data xml:space="preserve" name="SelectAllAndEdit"><value>SELECT all rows and edit</value></data>
+  <data xml:space="preserve" name="ReloadEditResults"><value>Reload results</value></data>
+  <data xml:space="preserve" name="EditTabTitle"><value>{0} · Edit {1}</value></data>
+  <data xml:space="preserve" name="EditSchemaMismatch"><value>The table schema has changed or cannot be edited. Reopen the table.</value></data>
+  <data xml:space="preserve" name="EditNullNotAllowed"><value>This column does not allow NULL.</value></data>
+  <data xml:space="preserve" name="EditIntegerRequired"><value>Enter a whole number for this column.</value></data>
+  <data xml:space="preserve" name="EditRefreshRequired"><value>Reload the results before editing again.</value></data>
+  <data xml:space="preserve" name="EditUnsupportedType"><value>This value type cannot be edited: {0}</value></data>
+  <data xml:space="preserve" name="EditUpdatesOnly"><value>Use single-row INSERT, UPDATE with WHERE, or DELETE with WHERE for this table, keeping RETURNING *.</value></data>
+  <data xml:space="preserve" name="EditAffectedRowMismatch"><value>Could not confirm exactly one affected row per statement. The batch was rolled back. Keep RETURNING * and reload to check changed or duplicate rows.</value></data>
+  <data xml:space="preserve" name="EditRollbackFailed"><value>Rollback could not be confirmed. Reconnect and verify your data before retrying.</value></data>
+  <data xml:space="preserve" name="EditConnectionChanged"><value>The connection has changed. Open a new edit tab on the intended DB.</value></data>
+  <data xml:space="preserve" name="EditQueryHint"><value>  Add/edit/delete rows to stage INSERT/UPDATE/DELETE below. The database changes only when you run the batch.</value></data>
+  <data xml:space="preserve" name="EditSqlPlaceholder"><value>Row changes above generate INSERT, UPDATE and DELETE statements here.</value></data>
+  <data xml:space="preserve" name="EditWritableTableRequired"><value>Editing requires a writable table connection. Folder browsing and views are read-only here.</value></data>
+  <data xml:space="preserve" name="EditLoaded"><value>Loaded {1:N0} rows from {0} for editing. Changes only prepare SQL until you run the batch.</value></data>
+  <data xml:space="preserve" name="EditApplied"><value>Changes committed. Reloading the result.</value></data>
+  <data xml:space="preserve" name="EditAppliedInTransaction"><value>Changes applied inside the current transaction. COMMIT or ROLLBACK is still required.</value></data>
+  <data xml:space="preserve" name="EditReloadFailed"><value>The updates succeeded, but results could not be reloaded. The executed SQL was cleared to prevent replay. Reload results: {0}</value></data>
+  <data xml:space="preserve" name="EditReloadTitle"><value>Reload results?</value></data>
+  <data xml:space="preserve" name="EditReloadConfirm"><value>Discard the staged cell changes and SQL, then read the table again?</value></data>
+  <data xml:space="preserve" name="EditCellHelp"><value>This adds an UPDATE to the SQL editor. The DB changes only when you run the batch.</value></data>
+  <data xml:space="preserve" name="EditUseNull"><value>Set to NULL</value></data>
+  <data xml:space="preserve" name="EditCellValue"><value>New cell value</value></data>
+  <data xml:space="preserve" name="EditStageValue"><value>Add UPDATE</value></data>
+  <data xml:space="preserve" name="EditCellTitle"><value>Row {0:N0} · {1}</value></data>
+  <data xml:space="preserve" name="EditResultCell"><value>Edit cell · F2</value></data>
+  <data xml:space="preserve" name="EditResultHelp"><value>Add rows, double-click/F2 to edit, or delete selected rows. Run the SQL below to apply.</value></data>
+  <data xml:space="preserve" name="CopyResultSelection"><value>Copy · Ctrl+C</value></data>
+  <data xml:space="preserve" name="CopyResultWithHeaders"><value>Copy with headers · Ctrl+Shift+C</value></data>
+  <data xml:space="preserve" name="SelectAllResultCells"><value>Select displayed results</value></data>
+  <data xml:space="preserve" name="ResultSelectionHelp"><value>Select cells or row numbers. Drag / Shift: range · Ctrl: add/remove · Ctrl+C: copy</value></data>
+  <data xml:space="preserve" name="ResultSelectionCount"><value>{0:N0} cells selected</value></data>
+  <data xml:space="preserve" name="ResultSelectionCopied"><value>Copied {0:N0} cells</value></data>
+  <data xml:space="preserve" name="ResultSelectionCopyFailed"><value>Could not copy. Try again: {0}</value></data>
+  <data xml:space="preserve" name="ResultCellSelected"><value>Selected</value></data>
+  <data xml:space="preserve" name="ResultCellNotSelected"><value>Not selected</value></data>
+  <data xml:space="preserve" name="CloseQueryTab">
+    <value>Close {0}</value>
+  </data>
+  <data xml:space="preserve" name="DiscardQueryTitle">
+    <value>Close query?</value>
+  </data>
+  <data xml:space="preserve" name="DiscardQueryMessage">
+    <value>{0} has unsaved changes. Discard the changes and close this tab?</value>
+  </data>
+  <data xml:space="preserve" name="DiscardQuery">
+    <value>Discard and close</value>
+  </data>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data xml:space="preserve" name="DisconnectedSelectAConnection">
+    <value>Disconnected · Select a connection</value>
+  </data>
+  <data xml:space="preserve" name="NotConnected">
+    <value>Not connected</value>
+  </data>
+  <data xml:space="preserve" name="Rows">
+    <value>0 rows</value>
+  </data>
+  <data xml:space="preserve" name="Ready">
+    <value>Ready</value>
+  </data>
+  <data xml:space="preserve" name="NoTransaction">
+    <value>No transaction</value>
+  </data>
+  <data xml:space="preserve" name="Browse">
+    <value>Browse…</value>
+  </data>
+  <data xml:space="preserve" name="SqlEditorHint">
+    <value>  SQL · CREATE TABLE / SELECT / INSERT / UPDATE / DELETE · Each statement commits automatically</value>
+  </data>
+  <data xml:space="preserve" name="FilterDisplayedResults">
+    <value>Filter displayed results</value>
+  </data>
+  <data xml:space="preserve" name="SilverHamuGinhamuInProfile">
+    <value>SilverHamu — Ginhamu in profile</value>
+  </data>
+  <data xml:space="preserve" name="Working">
+    <value>Working…</value>
+  </data>
+  <data xml:space="preserve" name="ASilverHamsterRunningInAWheel">
+    <value>A silver hamster running in a wheel</value>
+  </data>
+  <data xml:space="preserve" name="ConnectToService">
+    <value>Connect to service…</value>
+  </data>
+  <data xml:space="preserve" name="OpenDBFile">
+    <value>Open DB file…</value>
+  </data>
+  <data xml:space="preserve" name="NewDB">
+    <value>New DB…</value>
+  </data>
+  <data xml:space="preserve" name="Backup">
+    <value>Backup…</value>
+  </data>
+  <data xml:space="preserve" name="RestoreToNewDB">
+    <value>Restore to new DB…</value>
+  </data>
+  <data xml:space="preserve" name="KeyValueTools">
+    <value>Key/value tools…</value>
+  </data>
+  <data xml:space="preserve" name="ExportValuesInRange">
+    <value>Export values in range…</value>
+  </data>
+  <data xml:space="preserve" name="Disconnect">
+    <value>Disconnect</value>
+  </data>
+  <data xml:space="preserve" name="Open">
+    <value>Open</value>
+  </data>
+  <data xml:space="preserve" name="Save">
+    <value>Save</value>
+  </data>
+  <data xml:space="preserve" name="ObjectExplorer">
+    <value>Object Explorer</value>
+  </data>
+  <data xml:space="preserve" name="Run">
+    <value>Run</value>
+  </data>
+  <data xml:space="preserve" name="CompleteCtrlSpace">
+    <value>Complete · Ctrl+Space</value>
+  </data>
+  <data xml:space="preserve" name="BrowseObjects">
+    <value>Browse</value>
+  </data>
+  <data xml:space="preserve" name="Checkpoint">
+    <value>Checkpoint</value>
+  </data>
+  <data xml:space="preserve" name="Results">
+    <value>Results</value>
+  </data>
+  <data xml:space="preserve" name="ExportCSV">
+    <value>Export CSV</value>
+  </data>
+  <data xml:space="preserve" name="Previous">
+    <value>Previous</value>
+  </data>
+  <data xml:space="preserve" name="Next">
+    <value>Next</value>
+  </data>
+  <data xml:space="preserve" name="LastPage">
+    <value>Last page</value>
+  </data>
+  <data xml:space="preserve" name="CouldNotOpenPageSelection">
+    <value>Could not open page selection: {0}</value>
+  </data>
+  <data xml:space="preserve" name="ChooseOrEnterAPageNumber">
+    <value>Choose or enter a page number</value>
+  </data>
+  <data xml:space="preserve" name="ConnectToAServiceOpenADBFile">
+    <value>Connect to a service, open a DB file, or create a new DB.</value>
+  </data>
+  <data xml:space="preserve" name="ConnectionTitle">
+    <value>Connect to service</value>
+  </data>
+  <data xml:space="preserve" name="EnterTheSilverhamuServerConnectionDetails">
+    <value>Enter the silverhamu-server connection details.</value>
+  </data>
+  <data xml:space="preserve" name="Host">
+    <value>Host</value>
+  </data>
+  <data xml:space="preserve" name="Port">
+    <value>Port</value>
+  </data>
+  <data xml:space="preserve" name="AuthenticationToken">
+    <value>Authentication token</value>
+  </data>
+  <data xml:space="preserve" name="ChooseTokenFile">
+    <value>Choose token file…</value>
+  </data>
+  <data xml:space="preserve" name="OpenTokenFile">
+    <value>Open token file</value>
+  </data>
+  <data xml:space="preserve" name="TheTokenFileIsTooLarge">
+    <value>The token file is too large.</value>
+  </data>
+  <data xml:space="preserve" name="TCPVTLSIsNotSupportedUseAn">
+    <value>TCP v1 · TLS is not supported. Use an encrypted tunnel
+when connecting to another host.</value>
+  </data>
+  <data xml:space="preserve" name="Connect">
+    <value>Connect</value>
+  </data>
+  <data xml:space="preserve" name="Cancel">
+    <value>Cancel</value>
+  </data>
+  <data xml:space="preserve" name="COMMITOrROLLBACKBeforeChangingTheConnection">
+    <value>COMMIT or ROLLBACK before changing the connection.</value>
+  </data>
+  <data xml:space="preserve" name="EnterAHostAPortFromToAnd">
+    <value>Enter a host, a port from 1 to 65535, and an authentication token.</value>
+  </data>
+  <data xml:space="preserve" name="Service">
+    <value>Service · {0}:{1}</value>
+  </data>
+  <data xml:space="preserve" name="Connected">
+    <value>Connected · {0}:{1}</value>
+  </data>
+  <data xml:space="preserve" name="AuthenticatedSQLRunsOnTheSilverhamuServer">
+    <value>Authenticated. SQL runs on the silverhamu server.</value>
+  </data>
+  <data xml:space="preserve" name="AuthenticatedSQLRunsInOwner">
+    <value>Authenticated. SQL runs in Owner.</value>
+  </data>
+  <data xml:space="preserve" name="ConnectedWithReadRole">
+    <value>Connected with read role {0}.</value>
+  </data>
+  <data xml:space="preserve" name="CreateEmbeddedSilverHamu">
+    <value>Create embedded SilverHamu</value>
+  </data>
+  <data xml:space="preserve" name="OpenEmbeddedSilverHamu">
+    <value>Open embedded SilverHamu</value>
+  </data>
+  <data xml:space="preserve" name="FolderBrowsing">
+    <value>Folder browsing · {0}</value>
+  </data>
+  <data xml:space="preserve" name="LoadedTables">
+    <value>Loaded {0} tables.</value>
+  </data>
+  <data xml:space="preserve" name="ThisEmbeddedDBIsAlreadyConnected">
+    <value>This embedded DB is already connected.</value>
+  </data>
+  <data xml:space="preserve" name="Embedded">
+    <value>● Embedded / {0}</value>
+  </data>
+  <data xml:space="preserve" name="EmbeddedConnection">
+    <value>Embedded connection · {0}</value>
+  </data>
+  <data xml:space="preserve" name="OpenALocalDBToBackUp">
+    <value>Open a local DB to back up.</value>
+  </data>
+  <data xml:space="preserve" name="BackUpCommittedLocalDB">
+    <value>Back up committed local DB</value>
+  </data>
+  <data xml:space="preserve" name="SavedBackup">
+    <value>Saved backup: {0}</value>
+  </data>
+  <data xml:space="preserve" name="COMMITOrROLLBACKBeforeOpeningTheRestoredDB">
+    <value>COMMIT or ROLLBACK before opening the restored DB.</value>
+  </data>
+  <data xml:space="preserve" name="ChooseABackupToRestore">
+    <value>Choose a backup to restore</value>
+  </data>
+  <data xml:space="preserve" name="ChooseANewDestinationDB">
+    <value>Choose a new destination DB</value>
+  </data>
+  <data xml:space="preserve" name="RestoredBackupToANewDB">
+    <value>Restored backup to a new DB: {0}</value>
+  </data>
+  <data xml:space="preserve" name="FolderBrowsingIsReadOnlyOpenADB">
+    <value>Folder browsing is read-only. Open a DB file as an embedded connection to use transactions.</value>
+  </data>
+  <data xml:space="preserve" name="ManageTransactionsInTheEmbeddedDB">
+    <value>Manage transactions in the embedded DB.</value>
+  </data>
+  <data xml:space="preserve" name="ManageTransactionsInTheConnectedDB">
+    <value>Manage transactions in the connected DB.</value>
+  </data>
+  <data xml:space="preserve" name="FolderBrowsingReadOnlySHOWTABLESSELECTANALYZE">
+    <value>  Folder browsing (read-only) · SHOW TABLES / SELECT / ANALYZE / EXPLAIN / EXPLAIN ANALYZE</value>
+  </data>
+  <data xml:space="preserve" name="SHOWVIEWSSELECTPublishedViewsAreReadOnly">
+    <value>  SHOW VIEWS / SELECT · Published views are read-only</value>
+  </data>
+  <data xml:space="preserve" name="Disconnected">
+    <value>Disconnected</value>
+  </data>
+  <data xml:space="preserve" name="ClosedTheEmbeddedDBDiscardedUncommittedChangesAnd">
+    <value>Closed the embedded DB, discarded uncommitted changes, and released ownership.</value>
+  </data>
+  <data xml:space="preserve" name="ClosedTheConnectionAndDiscardedUncommittedChanges">
+    <value>Closed the connection and discarded uncommitted changes.</value>
+  </data>
+  <data xml:space="preserve" name="ConnectToAServiceOrOpenADB">
+    <value>Connect to a service or open a DB file.</value>
+  </data>
+  <data xml:space="preserve" name="FetchAllNMs">
+    <value>Fetch all: {0:N0} ms</value>
+  </data>
+  <data xml:space="preserve" name="FetchedAllNRowsInNMsAnd">
+    <value>Fetched all {0:N0} rows in {1:N0} ms and cached them in a temporary file. Changing pages does not rerun the query.</value>
+  </data>
+  <data xml:space="preserve" name="SQLCompletedButTheTableListCouldNot">
+    <value>SQL completed, but the table list could not be refreshed: {0}</value>
+  </data>
+  <data xml:space="preserve" name="CouldNotReadTheSQLResult">
+    <value>Could not read the SQL result.</value>
+  </data>
+  <data xml:space="preserve" name="DisconnectedReconnectRequired">
+    <value>Disconnected · Reconnect required</value>
+  </data>
+  <data xml:space="preserve" name="ReconnectRequiredVerifyTheCommitOutcomeAgainstYour">
+    <value>Reconnect required · Verify the commit outcome against your data</value>
+  </data>
+  <data xml:space="preserve" name="ConnectionInterruptedReopenTheDBOrReconnect">
+    <value>Connection interrupted · Reopen the DB or reconnect</value>
+  </data>
+  <data xml:space="preserve" name="UncommittedTransaction">
+    <value>● Uncommitted transaction</value>
+  </data>
+  <data xml:space="preserve" name="ConnectToAServiceOrOpenADB086">
+    <value>Connect to a service or open a DB file first.</value>
+  </data>
+  <data xml:space="preserve" name="Completed">
+    <value>{0} completed</value>
+  </data>
+  <data xml:space="preserve" name="ConnectToADBToRunACheckpoint">
+    <value>Connect to a DB to run a checkpoint.</value>
+  </data>
+  <data xml:space="preserve" name="COMMITOrROLLBACKFirst">
+    <value>COMMIT or ROLLBACK first.</value>
+  </data>
+  <data xml:space="preserve" name="CheckpointCompletedGenerationRecords">
+    <value>Checkpoint completed (generation {0}, {1} records).</value>
+  </data>
+  <data xml:space="preserve" name="Query091">
+    <value>Query {0}</value>
+  </data>
+  <data xml:space="preserve" name="NewQuery">
+    <value>New query</value>
+  </data>
+  <data xml:space="preserve" name="OpenQuery">
+    <value>Open query</value>
+  </data>
+  <data xml:space="preserve" name="TheQueryFileMustBeMiBOrSmaller">
+    <value>The query file must be 1 MiB or smaller.</value>
+  </data>
+  <data xml:space="preserve" name="SaveQuery">
+    <value>Save query</value>
+  </data>
+  <data xml:space="preserve" name="SavedQuery">
+    <value>Saved query: {0}</value>
+  </data>
+  <data xml:space="preserve" name="FullFilePath">
+    <value>Full file path</value>
+  </data>
+  <data xml:space="preserve" name="CouldNotOpenTheFilePickerEnterThe">
+    <value>Could not open the file picker. Enter the full path.</value>
+  </data>
+  <data xml:space="preserve" name="CouldNotSelectAFile">
+    <value>Could not select a file: {0}</value>
+  </data>
+  <data xml:space="preserve" name="OK">
+    <value>OK</value>
+  </data>
+  <data xml:space="preserve" name="EnterTheFullFilePath">
+    <value>Enter the full file path.</value>
+  </data>
+  <data xml:space="preserve" name="AFileWithThatNameAlreadyExistsChoose">
+    <value>A file with that name already exists. Choose another name.</value>
+  </data>
+  <data xml:space="preserve" name="FileNotFound">
+    <value>File not found.</value>
+  </data>
+  <data xml:space="preserve" name="TheDestinationFolderWasNotFound">
+    <value>The destination folder was not found.</value>
+  </data>
+  <data xml:space="preserve" name="CreateTheDestinationFolderFirstExistingFilesWill">
+    <value>Create the destination folder first.
+Existing files will not be overwritten. Save with a different name.</value>
+  </data>
+  <data xml:space="preserve" name="BrowseForAnExistingFileOrEnterThe">
+    <value>Browse for an existing file or enter the full path.</value>
+  </data>
+  <data xml:space="preserve" name="EnterTheFullPathOfAnExistingFile">
+    <value>Enter the full path of an existing file.</value>
+  </data>
+  <data xml:space="preserve" name="Tables">
+    <value>Tables ({0})</value>
+  </data>
+  <data xml:space="preserve" name="EmbeddedDatabase">
+    <value>⌄  Embedded database</value>
+  </data>
+  <data xml:space="preserve" name="NoConnection">
+    <value>No connection</value>
+  </data>
+  <data xml:space="preserve" name="ServiceDatabase">
+    <value>⌄  Service database</value>
+  </data>
+  <data xml:space="preserve" name="RefreshTablesAndViews">
+    <value>Refresh tables and views</value>
+  </data>
+  <data xml:space="preserve" name="RefreshedTheListObjects">
+    <value>Refreshed the list ({0} objects).</value>
+  </data>
+  <data xml:space="preserve" name="TablesAndViews">
+    <value>Tables and views ({0})</value>
+  </data>
+  <data xml:space="preserve" name="CurrentPageNOpenPageSelection">
+    <value>Current page: {0:N0}. Open page selection</value>
+  </data>
+  <data xml:space="preserve" name="ResultPagePosition">
+    <value>/ {0:N0} pages · {1:N0}–{2:N0} / {3:N0} total rows (cached)</value>
+  </data>
+  <data xml:space="preserve" name="Rows117">
+    <value>{0} / {1} rows</value>
+  </data>
+  <data xml:space="preserve" name="TheResultContainsNoRows">
+    <value>The result contains no rows.</value>
+  </data>
+  <data xml:space="preserve" name="NoRowsMatchTheFilter">
+    <value>No rows match the filter.</value>
+  </data>
+  <data xml:space="preserve" name="Error">
+    <value>Error: {0}</value>
+  </data>
+  <data xml:space="preserve" name="ErrorCheckMessages">
+    <value>Error · Check messages</value>
+  </data>
+  <data xml:space="preserve" name="SpecifyARowRange">
+    <value>Specify a row range</value>
+  </data>
+  <data xml:space="preserve" name="CSVExportRange">
+    <value>CSV export range</value>
+  </data>
+  <data xml:space="preserve" name="FirstRowCountedFromRowOfTheFull">
+    <value>First row (counted from row 1 of the full result)</value>
+  </data>
+  <data xml:space="preserve" name="LastRowInclusive">
+    <value>Last row (inclusive)</value>
+  </data>
+  <data xml:space="preserve" name="FirstRow">
+    <value>First row</value>
+  </data>
+  <data xml:space="preserve" name="LastRowInclusive127">
+    <value>Last row (inclusive)</value>
+  </data>
+  <data xml:space="preserve" name="UseRowNumbersFromTheCachedResultSQL">
+    <value>Use row numbers from the cached result. SQL will not run again.
+The display filter does not apply to CSV exports.</value>
+  </data>
+  <data xml:space="preserve" name="ChooseDestination">
+    <value>Choose destination…</value>
+  </data>
+  <data xml:space="preserve" name="EnterWholeNumbersForTheFirstAndLast">
+    <value>Enter whole numbers for the first and last rows.</value>
+  </data>
+  <data xml:space="preserve" name="TheResultContainsNoRowsOnlyColumnHeaders">
+    <value>The result contains no rows. Only column headers will be exported.</value>
+  </data>
+  <data xml:space="preserve" name="ExportFromAllNCachedRows">
+    <value>Export from all {0:N0} cached rows.</value>
+  </data>
+  <data xml:space="preserve" name="AllRowsN">
+    <value>All rows ({0:N0})</value>
+  </data>
+  <data xml:space="preserve" name="CurrentPageRows">
+    <value>Current page (0 rows)</value>
+  </data>
+  <data xml:space="preserve" name="CurrentPageRowsNNNRows">
+    <value>Current page (rows {0:N0}–{1:N0}; {2:N0} rows)</value>
+  </data>
+  <data xml:space="preserve" name="ThereAreNoResultsToExport">
+    <value>There are no results to export.</value>
+  </data>
+  <data xml:space="preserve" name="SaveCSVNRows">
+    <value>Save CSV ({0:N0} rows)</value>
+  </data>
+  <data xml:space="preserve" name="ExportedNOfNRowsToCSVRows">
+    <value>Exported {1:N0} of {0:N0} rows to CSV (rows {2:N0}–{3:N0}): {4}</value>
+  </data>
+  <data xml:space="preserve" name="EnterHexadecimalDigitsInPairs">
+    <value>Enter hexadecimal digits in pairs.</value>
+  </data>
+  <data xml:space="preserve" name="StartKeyHexInclusiveLeaveBlankToStart">
+    <value>Start key (hex, inclusive). Leave blank to start at the beginning.</value>
+  </data>
+  <data xml:space="preserve" name="EndKeyHexExclusiveLeaveBlankToInclude">
+    <value>End key (hex, exclusive). Leave blank to include the rest.</value>
+  </data>
+  <data xml:space="preserve" name="TheEndKeyMustBeAtOrAfter">
+    <value>The end key must be at or after the start key.</value>
+  </data>
+  <data xml:space="preserve" name="AnAdministratorDBConnectionIsRequired">
+    <value>An administrator DB connection is required.</value>
+  </data>
+  <data xml:space="preserve" name="KeyValueTools144">
+    <value>Key/value tools</value>
+  </data>
+  <data xml:space="preserve" name="SCANUpToRecordsKiB">
+    <value>SCAN (up to 100 records / 64 KiB)</value>
+  </data>
+  <data xml:space="preserve" name="KeyHex">
+    <value>Key (hex)</value>
+  </data>
+  <data xml:space="preserve" name="UseSQLToModifyKeysInTheSQL">
+    <value>Use SQL to modify keys in the SQL management area.</value>
+  </data>
+  <data xml:space="preserve" name="PUTInsertUpdate">
+    <value>PUT (insert/update)</value>
+  </data>
+  <data xml:space="preserve" name="ValueHexBlankMeansAZeroLengthValue">
+    <value>Value (hex). Blank means a zero-length value.</value>
+  </data>
+  <data xml:space="preserve" name="Records">
+    <value>{0} records</value>
+  </data>
+  <data xml:space="preserve" name="RecordsMoreAvailable">
+    <value>{0} records (more available)</value>
+  </data>
+  <data xml:space="preserve" name="KeyNotFound">
+    <value>Key not found.</value>
+  </data>
+  <data xml:space="preserve" name="Record">
+    <value>1 record</value>
+  </data>
+  <data xml:space="preserve" name="Committed">
+    <value>Committed {0}.</value>
+  </data>
+  <data xml:space="preserve" name="ChangesFromAreUncommitted">
+    <value>Changes from {0} are uncommitted.</value>
+  </data>
+  <data xml:space="preserve" name="OpenALocalEmbeddedDB">
+    <value>Open a local embedded DB.</value>
+  </data>
+  <data xml:space="preserve" name="ExportCommittedValuesInRangeToASnapshot">
+    <value>Export committed values in range to a snapshot</value>
+  </data>
+  <data xml:space="preserve" name="SaveASnapshotOfValuesWithoutKeys">
+    <value>Save a snapshot of values without keys</value>
+  </data>
+  <data xml:space="preserve" name="SavedValuesSnapshotRecordsDBVersionGenerationID">
+    <value>Saved values snapshot ({0} records, DB version {1}, generation ID {2}).</value>
+  </data>
+  <data xml:space="preserve" name="Go">
+    <value>Go</value>
+  </data>
+  <data xml:space="preserve" name="CouldNotOpenPageSelection161">
+    <value>Could not open page selection.</value>
+  </data>
+  <data xml:space="preserve" name="GoToPageNPages">
+    <value>Go to page · {0:N0} pages</value>
+  </data>
+  <data xml:space="preserve" name="DestinationPageNumber">
+    <value>Destination page number</value>
+  </data>
+  <data xml:space="preserve" name="GoToPageN">
+    <value>Go to page {0:N0}</value>
+  </data>
+  <data xml:space="preserve" name="SQLSuggestions">
+    <value>SQL suggestions</value>
+  </data>
+  <data xml:space="preserve" name="SqlCompletionHelp">
+    <value>SQL completion · ↑↓ Select / Tab・Enter Accept / Esc Close</value>
+  </data>
+  <data xml:space="preserve" name="ThePALVManifestIsInvalid">
+    <value>The PALV manifest is invalid.</value>
+  </data>
+  <data xml:space="preserve" name="ThePALVArchiveCharacterEncodingIsNotSupported">
+    <value>The PALV archive character encoding is not supported.</value>
+  </data>
+  <data xml:space="preserve" name="PALVReferencesThroughLinksOrReparsePointsCannot">
+    <value>PALV references through links or reparse points cannot be used.</value>
+  </data>
+  <data xml:space="preserve" name="ThePALVTableDefinitionIsInvalid">
+    <value>The PALV table definition is invalid.</value>
+  </data>
+  <data xml:space="preserve" name="ThePALVColumnDefinitionOrRowCountIs">
+    <value>The PALV column definition or row count is invalid.</value>
+  </data>
+  <data xml:space="preserve" name="ThePALVSegmentDefinitionIsInvalid">
+    <value>The PALV segment definition is invalid.</value>
+  </data>
+  <data xml:space="preserve" name="ThePALVTableRowCountDoesNotMatch">
+    <value>The PALV table row count does not match the segment ranges.</value>
+  </data>
+  <data xml:space="preserve" name="APALVSegmentFileWasNotFound">
+    <value>A PALV segment file was not found.</value>
+  </data>
+  <data xml:space="preserve" name="TheBrowsingCopyExceedsTheFileSizeLimit">
+    <value>The browsing copy exceeds the file size limit: {0}</value>
+  </data>
+  <data xml:space="preserve" name="ThePALVArchiveChangedWhileBrowsingReopenThe">
+    <value>The PALV archive changed while browsing. Reopen the reference file.</value>
+  </data>
+  <data xml:space="preserve" name="TheArchiveChangedWhenCopyingStarted">
+    <value>The archive changed when copying started.</value>
+  </data>
+  <data xml:space="preserve" name="TheArchiveChangedDuringCopying">
+    <value>The archive changed during copying.</value>
+  </data>
+  <data xml:space="preserve" name="CouldNotReadAStableArchiveAnotherProcess">
+    <value>Could not read a stable archive: {0}. Another process is using it or the file is changing.</value>
+  </data>
+  <data xml:space="preserve" name="MissingRow">
+    <value>Missing row: {0} / {1}</value>
+  </data>
+  <data xml:space="preserve" name="RowsNTotal">
+    <value>{0}: {1} rows ({2:N0} total)</value>
+  </data>
+  <data xml:space="preserve" name="NCharacters">
+    <value>… ({0:N0} characters)</value>
+  </data>
+  <data xml:space="preserve" name="ThePALVStorageTypeIsInvalid">
+    <value>The PALV storage type is invalid.</value>
+  </data>
+  <data xml:space="preserve" name="TheReferenceFileMustBeKiBOrSmaller">
+    <value>The reference file must be 4 KiB or smaller.</value>
+  </data>
+  <data xml:space="preserve" name="EnterARelativeTargetPathOnASingle">
+    <value>Enter a relative target path on a single line.</value>
+  </data>
+  <data xml:space="preserve" name="TheTargetIsOutsideTheReferenceFileS">
+    <value>The target is outside the reference file's folder.</value>
+  </data>
+  <data xml:space="preserve" name="TheTargetMustBeASilverhamuDatabaseOr">
+    <value>The target must be a silverhamu database or folder.</value>
+  </data>
+  <data xml:space="preserve" name="LinksAndReparsePointsCannotBeUsedIn">
+    <value>Links and reparse points cannot be used in the target path.</value>
+  </data>
+  <data xml:space="preserve" name="Table">
+    <value>Table</value>
+  </data>
+  <data xml:space="preserve" name="Columns">
+    <value>Columns</value>
+  </data>
+  <data xml:space="preserve" name="Rows191">
+    <value>Rows</value>
+  </data>
+  <data xml:space="preserve" name="TableList">
+    <value>Table list</value>
+  </data>
+  <data xml:space="preserve" name="FolderBrowsingSupportsSELECTSHOWTABLESANALYZEEXPLAIN">
+    <value>Folder browsing supports SELECT, SHOW TABLES, ANALYZE, EXPLAIN, and EXPLAIN ANALYZE.</value>
+  </data>
+  <data xml:space="preserve" name="CouldNotGetStatisticsFor">
+    <value>Could not get statistics for '{0}'.</value>
+  </data>
+  <data xml:space="preserve" name="ANALYZESampledNOfNRowsStatisticsAre">
+    <value>ANALYZE {0}: sampled {2:N0} of {1:N0} rows. Statistics are used only while this folder is open.</value>
+  </data>
+  <data xml:space="preserve" name="ArchivePageLoadingMadeNoProgressWhileCollecting">
+    <value>Archive page loading made no progress while collecting statistics.</value>
+  </data>
+  <data xml:space="preserve" name="TableNotFound">
+    <value>Table not found: {0}</value>
+  </data>
+  <data xml:space="preserve" name="MultipleDBsContainATableWithThisName">
+    <value>Multiple DBs contain a table with this name. Open the target DB directly: {0}</value>
+  </data>
+  <data xml:space="preserve" name="LinkedDatabasesCannotBeLoaded">
+    <value>Linked databases cannot be loaded.</value>
+  </data>
+  <data xml:space="preserve" name="ThePageIsOutsideTheCachedResultRange">
+    <value>The page is outside the cached result range.</value>
+  </data>
+  <data xml:space="preserve" name="EnterFirstAndLastRowsFromToN">
+    <value>Enter first and last rows from 1 to {0:N0}, with first row ≤ last row.</value>
+  </data>
+  <data xml:space="preserve" name="DatabaseFileFilters">
+    <value>silverhamu databases and references (*.ndb;*.catlink)|*.ndb;*.catlink|silverhamu backups (*.backup)|*.backup|All files (*.*)|*.*||</value>
+  </data>
+  <data xml:space="preserve" name="CouldNotOpenTheFilePickerXX">
+    <value>Could not open the file picker (0x{0:X}).</value>
+  </data>
+  <data xml:space="preserve" name="AllNRowsAreCached">
+    <value>All {0:N0} rows are cached.</value>
+  </data>
+  <data xml:space="preserve" name="ATransactionIsAlreadyActive">
+    <value>A transaction is already active.</value>
+  </data>
+  <data xml:space="preserve" name="ThereIsNoActiveTransaction">
+    <value>There is no active transaction.</value>
+  </data>
+  <data xml:space="preserve" name="ThisOperationIsNotSupported">
+    <value>This operation is not supported.</value>
+  </data>
+  <data xml:space="preserve" name="SelectFirstThousandRows">
+    <value>SELECT 1000 rows</value>
+  </data>
+  <data xml:space="preserve" name="SelectAllRows">
+    <value>SELECT all rows</value>
+  </data>
+  <data xml:space="preserve" name="TemplateInstructions">
+    <value>-- {{{{...}}}} must be replaced with actual values or conditions. Unedited templates cannot run.
+</value>
+  </data>
+  <data xml:space="preserve" name="EnterColumn">
+    <value>{{{{enter_column}}}}</value>
+  </data>
+  <data xml:space="preserve" name="EnterValue">
+    <value>{{{{enter_value}}}}</value>
+  </data>
+  <data xml:space="preserve" name="TemplateValue">
+    <value>{{{{value_{0}}}}}</value>
+  </data>
+  <data xml:space="preserve" name="EnterWHERECondition">
+    <value>{{{{enter_WHERE_condition}}}}</value>
+  </data>
+  <data xml:space="preserve" name="TemplateKeyPredicate">
+    <value>{0} = {{{{key_{1}}}}}</value>
+  </data>
+  <data xml:space="preserve" name="EnterAssignment">
+    <value>{{{{enter_assignment}}}}</value>
+  </data>
+  <data xml:space="preserve" name="TemplateAssignment">
+    <value>{0} = {{{{value_{1}}}}}</value>
+  </data>
+  <data xml:space="preserve" name="EnterAPageNumberFromToN">
+    <value>Enter a page number from 1 to {0:N0}.</value>
+  </data>
+  <data xml:space="preserve" name="AlreadyConnected">
+    <value>Already connected.</value>
+  </data>
+  <data xml:space="preserve" name="ConnectToAService">
+    <value>Connect to a service.</value>
+  </data>
+  <data xml:space="preserve" name="CouldNotDetermineTheSQLTransactionStateReconnect">
+    <value>Could not determine the SQL transaction state. Reconnect.</value>
+  </data>
+  <data xml:space="preserve" name="RequestsMustBeMiBOrSmaller">
+    <value>Requests must be 1 MiB or smaller.</value>
+  </data>
+  <data xml:space="preserve" name="TheCommitOutcomeIsUnknownDoNotRetry">
+    <value>The commit outcome is unknown. Do not retry. Reconnect and verify your data.</value>
+  </data>
+  <data xml:space="preserve" name="TheConnectionWasInterruptedReconnect">
+    <value>The connection was interrupted. Reconnect.</value>
+  </data>
+  <data xml:space="preserve" name="TheTransactionStateIsUnknown">
+    <value>The transaction state is unknown.</value>
+  </data>
+  <data xml:space="preserve" name="TheResponseIsInvalid">
+    <value>The response is invalid.</value>
+  </data>
+  <data xml:space="preserve" name="View">
+    <value>View</value>
+  </data>
+  <data xml:space="preserve" name="Column">
+    <value>Column</value>
+  </data>
+  <data xml:space="preserve" name="Variable">
+    <value>Variable</value>
+  </data>
+  <data xml:space="preserve" name="Settings">
+    <value>Settings</value>
+  </data>
+  <data xml:space="preserve" name="DisplayLanguage">
+    <value>Display language</value>
+  </data>
+  <data xml:space="preserve" name="LanguageHelp">
+    <value>Changes apply immediately and are saved for the next launch.</value>
+  </data>
+  <data xml:space="preserve" name="Close">
+    <value>Close</value>
+  </data>
+  <data xml:space="preserve" name="EmbeddedCreated">
+    <value>Created and opened embedded SilverHamu: {0}
+No token or service is required. Raw key/value data is not automatically converted into SQL tables.</value>
+  </data>
+  <data xml:space="preserve" name="EmbeddedOpened">
+    <value>Opened embedded SilverHamu: {0}
+No token or service is required. Raw key/value data is not automatically converted into SQL tables.</value>
+  </data>
+  <data xml:space="preserve" name="ResultRow">
+    <value>Row {0}</value>
+  </data>
+  <data xml:space="preserve" name="RowNumber">
+    <value>Row</value>
+  </data>
+  <data xml:space="preserve" name="ResizeColumn">
+    <value>Resize column {0}</value>
+  </data>
+  <data xml:space="preserve" name="ResizeColumnHelp">
+    <value>Drag to resize. Double-click or press Enter to fit the displayed contents.</value>
+  </data>
+  <data xml:space="preserve" name="TokenNotSaved">
+    <value>Authentication token (not saved)</value>
+  </data>
+  <data xml:space="preserve" name="LoadingFramesMissing">
+    <value>The loading animation contains no frames.</value>
+  </data>
+  <data xml:space="preserve" name="EditInlineHelp"><value>Enter: stage change. Esc: cancel. Shift+Enter: new line. Use the NULL toggle for a database NULL.</value></data>
+  <data xml:space="preserve" name="UndoEdit"><value>Undo · Ctrl+Z</value></data>
+  <data xml:space="preserve" name="RedoEdit"><value>Redo · Ctrl+Y</value></data>
+  <data xml:space="preserve" name="EditCellPending"><value>Not yet applied to the database</value></data>
+  <data xml:space="preserve" name="EditPendingValue"><value>{0} — Not yet applied to the database</value></data>
+  <data xml:space="preserve" name="EditPendingCount"><value>Pending {0} cells / +{1} rows / −{2} rows · {3} statements</value></data>
+  <data xml:space="preserve" name="EditPreviewUpdating"><value>Updating preview…</value></data>
+  <data xml:space="preserve" name="EditPreviewInvalid"><value>Preview out of sync; showing the last valid state. Fix the SQL or undo: {0}</value></data>
+  <data xml:space="preserve" name="EditAddRow"><value>Add row</value></data>
+  <data xml:space="preserve" name="EditDeleteRows"><value>Delete selected rows · Del</value></data>
+  <data xml:space="preserve" name="EditRowAdded"><value>Pending INSERT — not applied to the database</value></data>
+  <data xml:space="preserve" name="EditRowDeleted"><value>Pending DELETE — not applied to the database</value></data>
+  <data xml:space="preserve" name="EditDeletedRow"><value>This row is marked for deletion. Undo or remove its DELETE statement to restore it.</value></data>
+  <data xml:space="preserve" name="EditRequiredValue"><value>(required)</value></data>
+  <data xml:space="preserve" name="EditIncompleteRows"><value>{0} added rows need required values. Fill their cells before running.</value></data>
+  <data xml:space="preserve" name="EditDuplicateRows"><value>Duplicate selected rows</value></data>
+  <data xml:space="preserve" name="EditDuplicateRowsHelp"><value>Copy current values into pending INSERT rows, clearing primary and unique key columns. Fill required fields before running.</value></data>
+  <data xml:space="preserve" name="FolderTransactionHelp"><value>Manage folder updates with BEGIN, COMMIT and ROLLBACK. SQL database transactions use one database file.</value></data>
+  <data xml:space="preserve" name="FolderSqlHint"><value>Folder: SELECT / INSERT / UPDATE / DELETE · BEGIN / COMMIT / ROLLBACK · one SQL DB file per transaction</value></data>
+  <data xml:space="preserve" name="FolderSupportedSql"><value>Folders support SELECT, INSERT, UPDATE, DELETE, transactions, SHOW TABLES, EXPLAIN and ANALYZE.</value></data>
+  <data xml:space="preserve" name="FolderReopenAfterCommit"><value>Changes were committed, but reading could not resume. Reopen the folder.</value></data>
+  <data xml:space="preserve" name="FolderOneDatabasePerTransaction"><value>A folder transaction can update only one SQL database file. COMMIT or ROLLBACK before updating another file.</value></data>
+</root>

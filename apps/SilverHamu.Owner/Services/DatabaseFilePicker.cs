@@ -12,7 +12,7 @@ internal static class DatabaseFilePicker
         var selection = new OpenFileName
         {
             Owner = WinRT.Interop.WindowNative.GetWindowHandle(window),
-            Filter = "silverhamu データベース・参照ファイル (*.ndb;*.catlink)\0*.ndb;*.catlink\0silverhamu バックアップ (*.backup)\0*.backup\0すべてのファイル (*.*)\0*.*\0\0",
+            Filter = L.Get("DatabaseFileFilters").Replace('|', '\0'),
             FilterIndex = Path.GetExtension(currentPath).ToLowerInvariant() switch { ".ndb" => 1, ".backup" => 2, _ => 3 },
             File = Marshal.AllocHGlobal(32768 * sizeof(char)),
             MaxFile = 32768,
@@ -26,7 +26,7 @@ internal static class DatabaseFilePicker
             selection.StructSize = Marshal.SizeOf<OpenFileName>();
             if (GetOpenFileName(selection)) return Marshal.PtrToStringUni(selection.File);
             var error = CommDlgExtendedError();
-            if (error != 0) throw new Win32Exception((int)error, $"ファイル選択画面を開けませんでした (0x{error:X})。");
+            if (error != 0) throw new Win32Exception((int)error, L.Get("CouldNotOpenTheFilePickerXX", error));
             return null;
         }
         finally { Marshal.FreeHGlobal(selection.File); }

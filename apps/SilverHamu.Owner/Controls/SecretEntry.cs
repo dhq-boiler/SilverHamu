@@ -17,7 +17,7 @@ public sealed class SecretEntryHandler : ViewHandler<SecretEntry, PasswordBox>
     };
 
     public SecretEntryHandler() : base(SecretMapper) { }
-    protected override PasswordBox CreatePlatformView() => new() { PlaceholderText = "認証トークン（保存されません）", PasswordRevealMode = PasswordRevealMode.Hidden };
+    protected override PasswordBox CreatePlatformView() => new() { PlaceholderText = global::SilverHamu.Owner.Services.L.Get("TokenNotSaved"), PasswordRevealMode = PasswordRevealMode.Hidden };
     protected override void ConnectHandler(PasswordBox platformView)
     {
         base.ConnectHandler(platformView);

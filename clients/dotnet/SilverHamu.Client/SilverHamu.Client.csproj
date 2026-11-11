@@ -8,9 +8,9 @@
     <Description>.NET client for the silverhamu TCP service with binary keys and values, durable writes, transactions and TLS account authentication.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <RepositoryUrl>https://github.com/dhq-boiler/catdb</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/dhq-boiler/catdb</PackageProjectUrl>
-    <Version>0.1.0</Version>
+    <RepositoryUrl>https://github.com/dhq-boiler/SilverHamu</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/dhq-boiler/SilverHamu</PackageProjectUrl>
+    <Version>0.2.0</Version>
   </PropertyGroup>
   <ItemGroup>
     <None Include="../README.md" Pack="true" PackagePath="/" />

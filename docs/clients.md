@@ -5,11 +5,11 @@ Start a silverhamu service with the [quick start](../README.md#quick-start), the
 | Language | Runtime | Install or reference |
 |---|---|---|
 | [Python](../clients/python/README.md) | Python 3.10+ | Install `silverhamu-service-client` and import `silverhamu_client`. |
-| [JavaScript and TypeScript](../clients/node/README.md) | Node.js 18+ | Run `npm install silverhamu-client@0.1.0`. The package includes TypeScript declarations. |
-| [Go](../clients/go/README.md) | Go 1.22+ | Run `go get github.com/dhq-boiler/catdb/clients/go@v0.1.0`. |
+| [JavaScript and TypeScript](../clients/node/README.md) | Node.js 18+ | Run `npm install silverhamu-client@0.2.0`. The package includes TypeScript declarations. |
+| [Go](../clients/go/README.md) | Go 1.22+ | Run `go get github.com/dhq-boiler/SilverHamu/clients/go@v0.2.0`. |
 | [C#](../clients/dotnet/README.md) | .NET 10 | Use `SilverHamu.Client` or add a project reference to `clients/dotnet/SilverHamu.Client/SilverHamu.Client.csproj`. |
-| [Java](../clients/java/README.md) | Java 17+ | Add the Maven dependency `io.github.dhq-boiler:silverhamu-client:0.1.0`. |
-| [Ruby](../clients/ruby/README.md) | Ruby 3.1+ | Run `gem install silverhamu-client -v 0.1.0` and load it with `require "silverhamu"`. |
+| [Java](../clients/java/README.md) | Java 17+ | Add the Maven dependency `io.github.dhq-boiler:silverhamu-client:0.2.0`. |
+| [Ruby](../clients/ruby/README.md) | Ruby 3.1+ | Run `gem install silverhamu-client -v 0.2.0` and load it with `require "silverhamu"`. |
 
 Each client provides point reads, durable single-key writes and deletes, read-only and read/write transactions, commit and rollback. Keys and values are bytes. An absent key and an empty value are distinct. A raw request method exposes other server operations, including paginated range scans. Keep a multi-page snapshot on the same connection and use separate connections for independent concurrent transactions. [Wire operations, limits and error codes](service.md#wire-format)
 

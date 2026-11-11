@@ -3,7 +3,7 @@
 Install the package in a Python 3.10 or newer environment. The client uses the Python standard library at runtime.
 
 ```sh
-python -m pip install silverhamu-service-client==0.1.0
+python -m pip install silverhamu-service-client==0.2.0
 ```
 
 Connect to a running silverhamu service and set `CATDB_TOKEN` to its shared token. [Starting a server](https://github.com/dhq-boiler/SilverHamu#quick-start)

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "silverhamu-service-client"
-version = "0.1.0"
+version = "0.2.0"
 description = "Python client for the silverhamu TCP service with durable writes, transactions and TLS account authentication"
 authors = [{ name = "dhq_boiler and contributors" }]
 readme = "clients/python/README.md"
@@ -13,8 +13,8 @@ license = "MIT"
 license-files = ["LICENSE"]
 
 [project.urls]
-Repository = "https://github.com/dhq-boiler/catdb"
-Documentation = "https://github.com/dhq-boiler/catdb/blob/main/docs/service.md"
+Repository = "https://github.com/dhq-boiler/SilverHamu"
+Documentation = "https://github.com/dhq-boiler/SilverHamu/blob/main/docs/service.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["clients/python/src/silverhamu_client"]

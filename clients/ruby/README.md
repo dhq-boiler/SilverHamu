@@ -3,10 +3,10 @@
 Use Ruby 3.1 or later. Install the client from RubyGems.org:
 
 ```sh
-gem install silverhamu-client -v 0.1.0
+gem install silverhamu-client -v 0.2.0
 ```
 
-With Bundler, add `gem "silverhamu-client", "~> 0.1.0"` to your Gemfile and run `bundle install`. Load the client with `require "silverhamu"`.
+With Bundler, add `gem "silverhamu-client", "~> 0.2.0"` to your Gemfile and run `bundle install`. Load the client with `require "silverhamu"`.
 
 ```ruby
 require "silverhamu"

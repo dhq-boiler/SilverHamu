@@ -5,10 +5,10 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.dhq-boiler</groupId>
   <artifactId>silverhamu-client</artifactId>
-  <version>0.1.0</version>
+  <version>0.2.0</version>
   <name>silverhamu Java client</name>
   <description>Java client for the silverhamu TCP service with binary keys and values, durable writes, transactions and TLS account authentication.</description>
-  <url>https://github.com/dhq-boiler/catdb/tree/main/clients/java</url>
+  <url>https://github.com/dhq-boiler/SilverHamu/tree/main/clients/java</url>
   <licenses>
     <license>
       <name>MIT License</name>
@@ -24,10 +24,10 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:git:https://github.com/dhq-boiler/catdb.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/dhq-boiler/catdb.git</developerConnection>
-    <tag>clients/java/v0.1.0</tag>
-    <url>https://github.com/dhq-boiler/catdb</url>
+    <connection>scm:git:https://github.com/dhq-boiler/SilverHamu.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/dhq-boiler/SilverHamu.git</developerConnection>
+    <tag>clients/java/v0.2.0</tag>
+    <url>https://github.com/dhq-boiler/SilverHamu</url>
   </scm>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

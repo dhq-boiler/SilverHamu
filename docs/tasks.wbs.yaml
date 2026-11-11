@@ -1,7 +1,7 @@
 version: 3
 title: SilverHamu
 createdAt: 2026-11-09T15:31:25.7166025Z
-modifiedAt: 2026-11-11T08:01:55.888123Z
+modifiedAt: 2026-11-11T08:10:17.957559Z
 tasks:
 - id: sql-semantic-types
   title: SQLで日時・金額・識別子の意味を保証する
@@ -189,3 +189,16 @@ tasks:
   estimateHours: 1
   remainingHours: 0
   notes: 本文・表の製品名、GitHubリンク、現在の作業先を更新。移行表の旧名、環境変数・保存形式・計測キー・実行オプション・既存Goモジュールパスは保持し、Goの旧パスが残る理由を追記。計測値と相対リンクの保持、旧製品名の本文残存、git diff --checkを検証。過去の図版と原データは保持。Kudaki MCPが公開されておらずKudakiプロセスも未起動のため停止時fallbackで記録。次回起動時にMCPで再反映する。
+
+- id: silverhamu-clients-release-020
+  title: 6言語のクライアントをSilverHamu 0.2.0として配布する
+  notes: Python・Node.js・Go・C#・Java・Rubyが対象。配布メタデータとGoモジュールを新リポジトリへ揃え、成果物検証後に各レジストリで公開を確認する。Kudaki停止中につきfallbackで記録し次回起動時に再反映する。
+  children:
+  - id: silverhamu-clients-release-020-prepare
+    title: 配布名・バージョン・成果物と導入例を検証する
+    estimateHours: 2
+    remainingHours: 2
+  - id: silverhamu-clients-release-020-publish
+    title: 各公開先へ配布して取得可能であることを確認する
+    estimateHours: 2
+    remainingHours: 2

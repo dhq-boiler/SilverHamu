@@ -6,7 +6,7 @@ Use Java 17 or later and add this dependency to your application's POM. Maven re
 <dependency>
   <groupId>io.github.dhq-boiler</groupId>
   <artifactId>silverhamu-client</artifactId>
-  <version>0.1.0</version>
+  <version>0.2.0</version>
 </dependency>
 ```
 

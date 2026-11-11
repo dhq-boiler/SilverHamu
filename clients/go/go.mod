@@ -1,3 +1,3 @@
-module github.com/dhq-boiler/catdb/clients/go
+module github.com/dhq-boiler/SilverHamu/clients/go
 
 go 1.22

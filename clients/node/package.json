@@ -1,13 +1,13 @@
 {
   "name": "silverhamu-client",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Node.js client for the silverhamu TCP service",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dhq-boiler/catdb.git",
+    "url": "git+https://github.com/dhq-boiler/SilverHamu.git",
     "directory": "clients/node"
   },
-  "homepage": "https://github.com/dhq-boiler/catdb/tree/main/clients/node#readme",
+  "homepage": "https://github.com/dhq-boiler/SilverHamu/tree/main/clients/node#readme",
   "type": "module",
   "exports": {
     ".": {

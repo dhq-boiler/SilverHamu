@@ -3,7 +3,7 @@
 SilverHamu.Client connects a .NET 10 application to the silverhamu TCP service. Install the package from your application directory.
 
 ```sh
-dotnet package add SilverHamu.Client --version 0.1.0
+dotnet package add SilverHamu.Client --version 0.2.0
 ```
 
 ```csharp

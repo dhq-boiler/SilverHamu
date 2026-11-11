@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/dhq-boiler/catdb/clients/go"
+	"github.com/dhq-boiler/SilverHamu/clients/go"
 )
 
 func must[T any](value T, err error) T {

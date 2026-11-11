@@ -3,7 +3,7 @@
 Install the ES module in a JavaScript or TypeScript application running Node.js 18 or later. TypeScript with `module: "NodeNext"` reads the included type declarations.
 
 ```sh
-npm install silverhamu-client@0.1.0
+npm install silverhamu-client@0.2.0
 ```
 
 Start a silverhamu service and set `CATDB_TOKEN` to its shared token before running this example. [Server quick start](https://github.com/dhq-boiler/SilverHamu#quick-start)

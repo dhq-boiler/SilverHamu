@@ -2,10 +2,10 @@
 
 Install the Go 1.22+ client from your application's module directory. The client uses the standard library and its package name is `silverhamu`.
 
-The repository is now [SilverHamu](https://github.com/dhq-boiler/SilverHamu), while the module path in `go.mod` remains `github.com/dhq-boiler/catdb/clients/go`. Keep that path in installation commands and imports until the module itself is migrated.
+The repository is now [SilverHamu](https://github.com/dhq-boiler/SilverHamu), while the module path in `go.mod` remains `github.com/dhq-boiler/SilverHamu/clients/go`. Keep that path in installation commands and imports until the module itself is migrated.
 
 ```sh
-go get github.com/dhq-boiler/catdb/clients/go@v0.1.0
+go get github.com/dhq-boiler/SilverHamu/clients/go@v0.2.0
 ```
 
 ```go
@@ -16,7 +16,7 @@ import (
     "os"
     "time"
 
-    "github.com/dhq-boiler/catdb/clients/go"
+    "github.com/dhq-boiler/SilverHamu/clients/go"
 )
 
 func main() {

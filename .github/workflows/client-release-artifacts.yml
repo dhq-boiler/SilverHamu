@@ -1,0 +1,95 @@
+name: Build client release artifacts
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Client version to build and verify
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      RELEASE_VERSION: ${{ inputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.x'
+          cache: false
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199
+        with:
+          ruby-version: '3.4.9'
+          rubygems: '3.6.9'
+          bundler: none
+      - name: Check release metadata
+        shell: python
+        run: |
+          import json, os, pathlib, tomllib, xml.etree.ElementTree as ET
+          version = os.environ['RELEASE_VERSION']
+          assert tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'] == version
+          assert json.loads(pathlib.Path('clients/node/package.json').read_text())['version'] == version
+          assert ET.parse('clients/java/pom.xml').getroot().find('{http://maven.apache.org/POM/4.0.0}version').text == version
+          assert ET.parse('clients/dotnet/SilverHamu.Client/SilverHamu.Client.csproj').find('.//Version').text == version
+          assert pathlib.Path('clients/go/go.mod').read_text().splitlines()[0] == 'module github.com/dhq-boiler/SilverHamu/clients/go'
+      - run: cargo build --locked --features service --bin silverhamu-server
+      - name: Build and test Python distributions
+        run: |
+          python -m pip install build twine
+          python -m build
+          python -m twine check --strict dist/*
+          python -m pip install dist/*.whl
+          python -I clients/python/test_client.py
+      - name: Build Node and Ruby distributions
+        env:
+          SOURCE_DATE_EPOCH: '0'
+          TZ: UTC
+        run: |
+          npm pack ./clients/node --pack-destination dist
+          npx --yes --package typescript@5.7.3 tsc --noEmit --strict --target ES2022 --module NodeNext clients/node/example.ts
+          cd clients/ruby
+          umask 022
+          gem build --strict silverhamu-client.gemspec --output "../../dist/silverhamu-client-$RELEASE_VERSION.gem"
+          ruby -rrubygems/package -e 'abort "wrong gem version" unless Gem::Package.new(ARGV[0]).spec.version.to_s == ENV.fetch("RELEASE_VERSION")' "../../dist/silverhamu-client-$RELEASE_VERSION.gem"
+      - name: Build Go client
+        working-directory: clients/go
+        run: |
+          go test ./...
+          mkdir -p ../../artifacts
+          go build -o ../../artifacts/go-smoke ./cmd/smoke
+      - name: Build .NET and Java distributions
+        run: |
+          dotnet pack clients/dotnet/SilverHamu.Client/SilverHamu.Client.csproj -c Release -o dist
+          dotnet build clients/dotnet/smoke/Smoke.csproj -c Release
+          dotnet clients/dotnet/smoke/bin/Release/net10.0/Smoke.dll --check-malformed-replies
+          mvn -B -f clients/java/pom.xml -Pcentral-release verify dependency:copy-dependencies
+          cp clients/java/target/silverhamu-client-*.jar dist/
+          cp clients/java/pom.xml "dist/silverhamu-client-$RELEASE_VERSION.pom"
+      - run: python tests/language_clients.py
+      - run: sha256sum dist/* | tee dist/SHA256SUMS
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: silverhamu-clients-${{ inputs.version }}
+          path: dist/
+          if-no-files-found: error

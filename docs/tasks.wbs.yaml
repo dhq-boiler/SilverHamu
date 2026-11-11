@@ -16,6 +16,7 @@ tasks:
     title: 配布物を検証してタグとGitHub Releaseを公開する
     estimateHours: 1
     remainingHours: 1
+    notes: 配布workflow 43067351307のWindows／Linux／Docker全ジョブ成功、SQL統合成功、Windows Owner自己完結起動成功。追加CIの大量レプリケーション2件がDebugで期限超過となることを再現し、Releaseでは同一試験成功を確認。配布構成でレプリケーションを検証するようCIを修正し、配布workflowにも全レプリケーション試験を追加して再検証する。
 - id: silverhamu-readme-benchmark-legend
   title: READMEのベンチマーク画像の凡例をsilverhamuに更新する
   estimateHours: 0.25

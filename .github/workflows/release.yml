@@ -52,6 +52,10 @@ jobs:
         run: cargo test --locked --features service --lib --tests -- --test-threads=1
       - name: Build native binaries
         run: cargo build --locked --release --features service --lib --bin silverhamu --bin silverhamu-server
+      - name: Test replication with the release service
+        env:
+          CATDB_SERVER: ${{ github.workspace }}/target/release/silverhamu-server${{ runner.os == 'Windows' && '.exe' || '' }}
+        run: python tests/replication.py
       - name: Test native ABI
         run: python -m unittest discover -s tests -p "*ffi_checks.py"
       - name: Test SQL and Owner services

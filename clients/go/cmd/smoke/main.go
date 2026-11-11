@@ -32,15 +32,15 @@ func require(ok bool, what string) {
 func main() {
 	address := net.JoinHostPort(os.Getenv("CATDB_HOST"), os.Getenv("CATDB_PORT"))
 	const timeout = 10 * time.Second
-	var c *catdb.Client
+	var c *silverhamu.Client
 	if token := os.Getenv("CATDB_TOKEN"); token != "" {
-		c = must(catdb.DialToken(address, token, timeout))
+		c = must(silverhamu.DialToken(address, token, timeout))
 	} else {
 		var ca []byte
 		if path := os.Getenv("CATDB_CA_FILE"); path != "" {
 			ca = must(os.ReadFile(path))
 		}
-		c = must(catdb.DialAccount(address, os.Getenv("CATDB_USER"), os.Getenv("CATDB_PASSWORD"), "main", ca, timeout))
+		c = must(silverhamu.DialAccount(address, os.Getenv("CATDB_USER"), os.Getenv("CATDB_PASSWORD"), "main", ca, timeout))
 	}
 	defer c.Close()
 	must(c.Ping())
@@ -69,7 +69,7 @@ func main() {
 	require(empty != nil && len(empty) == 0, "committed empty value")
 	check(c.Rollback())
 	_, err := c.Commit()
-	var rejected *catdb.ServerError
+	var rejected *silverhamu.ServerError
 	require(errors.As(err, &rejected) && rejected.Code == "invalid_request", "missing server error code")
 	must(c.DeleteCommit(private))
 	must(c.PutCommit(key, value))

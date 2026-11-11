@@ -1,17 +1,17 @@
 # SQL, Owner and compatibility
 
-The Rust engine owns the database and its WAL. The optional .NET 10 library `Catdb.Sql` implements SQL using the same transactional key-value API. Tables, rows, indexes, views, procedures and view grants are stored in the database. The Windows Owner application and the standalone CLI share this SQL implementation. [Embedded API and CLI example](../dotnet/README.md#embedded-sql-and-cli)
+The Rust engine owns the database and its WAL. The optional .NET 10 library `SilverHamu.Sql` implements SQL using the same transactional key-value API. Tables, rows, indexes, views, procedures and view grants are stored in the database. The Windows Owner application and the standalone CLI share this SQL implementation. [Embedded API and CLI example](../dotnet/README.md#embedded-sql-and-cli)
 
 ## Upgrade an existing database
 
-- Existing public catdb databases keep their configured WAL policy. The SQL layer recognizes the original NewDBMS SQL catalog. A database containing only application key-value pairs initially shows no SQL tables.
+- Existing public silverhamu databases keep their configured WAL policy. The SQL layer recognizes the original NewDBMS SQL catalog. A database containing only application key-value pairs initially shows no SQL tables.
 - Use an up-to-date SQL writer for schemas that use constraints, indexes or view grants. Direct writes into SQL's reserved `_catdb_owner/` namespace bypass those invariants.
 - The CLI and GUI work with the database file directly. Close the current owning process before opening the same file in another one. For simultaneous remote clients, run the service.
 - SQL features in this checkout require building the matching native library and managed project. Published client package versions and the default container image have their own capabilities.
 
 ## Server-side SQL
 
-Build the server with `cargo build --release --locked --features service --bin catdb-server` and build the standalone SQL host. Add `--sql-host <absolute-path-to-Catdb.Sql.Host>` to the server's normal startup command. On Windows use the host's `.exe`. Keep its build output together. The server owns the transaction; the configured host interprets the SQL and requests the necessary operations over private pipes.
+Build the server with `cargo build --release --locked --features service --bin silverhamu-server` and build the standalone SQL host. Add `--sql-host <absolute-path-to-SilverHamu.Sql.Host>` to the server's normal startup command. On Windows use the host's `.exe`. Keep its build output together. The server owns the transaction; the configured host interprets the SQL and requests the necessary operations over private pipes.
 
 Keep existing TLS database grants when upgrading. A client must check the authenticated server capabilities before submitting SQL. Raw key-value access, direct file ownership and a grant to read one SQL view have different permission boundaries. [Service accounts](accounts.md)
 

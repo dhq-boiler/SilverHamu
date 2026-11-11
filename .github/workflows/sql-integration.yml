@@ -10,8 +10,8 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 30
     env:
-      CATDB_SERVER: ${{ github.workspace }}/target/release/catdb-server.exe
-      CATDB_SQL_HOST: ${{ github.workspace }}/dotnet/Catdb.Sql.Host/bin/Release/net10.0/Catdb.Sql.Host.exe
+      CATDB_SERVER: ${{ github.workspace }}/target/release/silverhamu-server.exe
+      CATDB_SQL_HOST: ${{ github.workspace }}/dotnet/SilverHamu.Sql.Host/bin/Release/net10.0/SilverHamu.Sql.Host.exe
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -22,11 +22,11 @@ jobs:
         with:
           python-version: '3.12'
       - name: Build the native library and service
-        run: cargo build --locked --release --features service --lib --bin catdb-server
+        run: cargo build --locked --release --features service --lib --bin silverhamu-server
       - name: Build the SQL host
-        run: dotnet build dotnet/Catdb.Sql.Host/Catdb.Sql.Host.csproj --configuration Release
+        run: dotnet build dotnet/SilverHamu.Sql.Host/SilverHamu.Sql.Host.csproj --configuration Release
       - name: Test the SQL engine and embedded storage
-        run: dotnet test apps/Catdb.Owner.Sql.Tests/Catdb.Owner.Sql.Tests.csproj --configuration Release
+        run: dotnet test apps/SilverHamu.Owner.Sql.Tests/SilverHamu.Owner.Sql.Tests.csproj --configuration Release
       - name: Test SQL transactions and view grants over TCP
         run: python tests/service_protocol.py ServiceTests.test_sql_host_and_view_token ServiceTests.test_for_update_excludes_another_writer_until_transaction_end
       - name: Test SQL data and view grants across a leader failure

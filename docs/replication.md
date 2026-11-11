@@ -4,7 +4,7 @@ The token-authenticated service can host one database on three or five voting no
 
 ## Start three nodes
 
-Build the service with `cargo build --release --locked --features service --bin catdb-server`. The example runs three processes on one host. To tolerate loss of a host, place each member on a separate machine with its own durable disk.
+Build the service with `cargo build --release --locked --features service --bin silverhamu-server`. The example runs three processes on one host. To tolerate loss of a host, place each member on a separate machine with its own durable disk.
 
 Save this configuration as `cluster.json` and give every member the same file. Use a unique cluster ID and stable numeric client and peer addresses.
 
@@ -21,12 +21,12 @@ Save this configuration as `cluster.json` and give every member the same file. U
 
 Create two independently generated secrets, each 32–256 UTF-8 bytes, and distribute them over a secure channel. Give clients access to `client.token` and restrict `peer.token` to the servers. Peers authenticate requests and replies using HMAC-SHA256 and fresh connection challenges. Remote deployment requires `--allow-remote` and an encrypted, access-controlled network or tunnel for **both** ports. Cluster traffic contains database contents.
 
-Run one command per terminal. On Windows the executable is `target\release\catdb-server.exe`.
+Run one command per terminal. On Windows the executable is `target\release\silverhamu-server.exe`.
 
 ```shell
-catdb-server --cluster-config cluster.json --node-id n1 --db n1.ndb --init --token-file client.token --peer-token-file peer.token
-catdb-server --cluster-config cluster.json --node-id n2 --db n2.ndb --init --token-file client.token --peer-token-file peer.token
-catdb-server --cluster-config cluster.json --node-id n3 --db n3.ndb --init --token-file client.token --peer-token-file peer.token
+silverhamu-server --cluster-config cluster.json --node-id n1 --db n1.ndb --init --token-file client.token --peer-token-file peer.token
+silverhamu-server --cluster-config cluster.json --node-id n2 --db n2.ndb --init --token-file client.token --peer-token-file peer.token
+silverhamu-server --cluster-config cluster.json --node-id n3 --db n3.ndb --init --token-file client.token --peer-token-file peer.token
 ```
 
 The service binds the client address for its node. To serve SQL, configure the same SQL host version and role-token policy on every node with `--sql-host` and the usual role options. Schema, grants and row changes share the same replicated transaction log. TLS accounts, attached databases and the benchmark-only batch protocol are outside the cluster service. Embedded databases and Windows Owner retain their existing single-node behavior.
@@ -37,7 +37,7 @@ The Python client accepts a trusted list of **client** addresses. It checks the 
 
 ```python
 from pathlib import Path
-from catdb_client import Client
+from silverhamu_client import Client
 
 seeds = [("127.0.0.1", port) for port in (7401, 7402, 7403)]
 token = Path("client.token").read_text().rstrip("\r\n")
@@ -91,14 +91,14 @@ for i in (4, 5):
 Start the two new processes on fresh paths with the cluster's client, peer and administration credentials and the same SQL host and role policy as the current voters.
 
 ```shell
-catdb-server --cluster-config n4.json --node-id n4 --db n4.ndb --init --token-file client.token --peer-token-file peer.token --cluster-admin-token-file admin.token
-catdb-server --cluster-config n5.json --node-id n5 --db n5.ndb --init --token-file client.token --peer-token-file peer.token --cluster-admin-token-file admin.token
+silverhamu-server --cluster-config n4.json --node-id n4 --db n4.ndb --init --token-file client.token --peer-token-file peer.token --cluster-admin-token-file admin.token
+silverhamu-server --cluster-config n5.json --node-id n5 --db n5.ndb --init --token-file client.token --peer-token-file peer.token --cluster-admin-token-file admin.token
 ```
 
 Send the full desired set of three or five endpoints to the leader. Existing members retain their IDs and addresses. The expected configuration index protects a later change from an obsolete administration request.
 
 ```python
-from catdb_client import Client
+from silverhamu_client import Client
 
 seeds = [("127.0.0.1", port) for port in range(7401, 7406)]
 client_token = Path("client.token").read_text().rstrip("\r\n")

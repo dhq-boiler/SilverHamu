@@ -179,7 +179,7 @@ python benchmarks/backlog/report.py artifacts/backlog-window docs/benchmarks/bac
 python benchmarks/backlog/report.py artifacts/backlog-comparison docs/benchmarks/backlog-2026-11-05
 python benchmarks/backlog/report.py artifacts/backlog-overhead docs/benchmarks/backlog-2026-11-05/overhead
 cargo test --features service,backlog-batch,benchmark-metrics,sync-stall -- --test-threads=1
-cargo build --features service,backlog-batch,benchmark-metrics,sync-stall --bin catdb-server
+cargo build --features service,backlog-batch,benchmark-metrics,sync-stall --bin silverhamu-server
 python benchmarks/backlog/test_protocol.py
 python benchmarks/backlog/test_schedule.py
 python benchmarks/backlog/test_report.py

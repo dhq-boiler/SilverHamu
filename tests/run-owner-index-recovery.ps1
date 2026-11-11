@@ -1,14 +1,14 @@
-# Run under PowerShell 7 (.NET 10) after building Catdb.Owner.Sql.Tests for the selected configuration.
+# Run under PowerShell 7 (.NET 10) after building SilverHamu.Owner.Sql.Tests for the selected configuration.
 param([string] $WriterDirectory, [ValidateSet('Debug','Release')][string] $Configuration = 'Debug')
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot
-$output = Join-Path $root "apps/Catdb.Owner.Sql.Tests/bin/$Configuration/net10.0"
+$output = Join-Path $root "apps/SilverHamu.Owner.Sql.Tests/bin/$Configuration/net10.0"
 $env:PATH = "$output;$env:PATH"
-Add-Type -Path (Join-Path $output 'Catdb.Sql.dll')
+Add-Type -Path (Join-Path $output 'SilverHamu.Sql.dll')
 
 function Open-TestDatabase($directory, [bool] $create) {
     $path = Join-Path $directory 'index.ndb'
-    return [Catdb.Sql.CatdbSqlConnection]::OpenAsync($path, $create).GetAwaiter().GetResult()
+    return [SilverHamu.Sql.SilverHamuSqlConnection]::OpenAsync($path, $create).GetAwaiter().GetResult()
 }
 
 if ($WriterDirectory) {
@@ -30,7 +30,7 @@ DELETE FROM t WHERE id=5;
     return
 }
 
-$directory = (New-Item -ItemType Directory -Path (Join-Path ([IO.Path]::GetTempPath()) ("catdb-index-recovery-" + [guid]::NewGuid()))).FullName
+$directory = (New-Item -ItemType Directory -Path (Join-Path ([IO.Path]::GetTempPath()) ("silverhamu-index-recovery-" + [guid]::NewGuid()))).FullName
 & (Get-Process -Id $PID).Path -NoProfile -File $PSCommandPath -WriterDirectory $directory -Configuration $Configuration
 if ($LASTEXITCODE -eq 0 -or !(Test-Path (Join-Path $directory 'ready'))) { throw 'Writer did not reach the crash point.' }
 $sql = Open-TestDatabase $directory $false

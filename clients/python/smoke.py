@@ -1,6 +1,6 @@
 import os
 
-from catdb_client import CatdbError, Client
+from silverhamu_client import SilverHamuError, Client
 
 env = os.environ
 auth = ({"token": env["CATDB_TOKEN"]} if "CATDB_TOKEN" in env else
@@ -28,7 +28,7 @@ with Client(env["CATDB_HOST"], int(env["CATDB_PORT"]), **auth) as db:
         db.rollback()
         try:
             db.commit()
-        except CatdbError as error:
+        except SilverHamuError as error:
             assert error.code == "invalid_request", error.code
         else:
             raise AssertionError("commit without a transaction succeeded")

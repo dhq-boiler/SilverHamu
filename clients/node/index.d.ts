@@ -5,7 +5,7 @@ export type ConnectOptions = Connection & (
 );
 export type Request = { op: string; [key: string]: unknown };
 export type Reply = { ok: true; [key: string]: unknown };
-export class CatdbError extends Error {
+export class SilverHamuError extends Error {
   constructor(code: string);
   readonly code: string;
 }

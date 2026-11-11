@@ -37,7 +37,7 @@ def main():
     diagnostic=['-e','CATDB_DIAGNOSTICS=1'] if profile else []
     if args.redo_log_bytes is not None:
      diagnostic.extend(['-e',f'CATDB_EXPERIMENTAL_REDO_LOG_BYTES={args.redo_log_bytes}'])
-    run('docker','run','-d','--name',server,*common,'--network-alias','database','--user','10001:10001',*diagnostic,variants[variant],'catdb-server','--db','/data/catdb.wal','--bind','0.0.0.0:7400','--allow-remote','--token-file','/data/token','--transaction-timeout-secs','3600');owned.append(server)
+    run('docker','run','-d','--name',server,*common,'--network-alias','database','--user','10001:10001',*diagnostic,variants[variant],'silverhamu-server','--db','/data/catdb.wal','--bind','0.0.0.0:7400','--allow-remote','--token-file','/data/token','--transaction-timeout-secs','3600');owned.append(server)
     for attempt in range(30):
      try:entry['checks'].append({'stage':'initial',**execute('verify')});break
      except RuntimeError:

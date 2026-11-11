@@ -10,7 +10,7 @@ import time
 import uuid
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-spec = importlib.util.spec_from_file_location("client", ROOT / "scripts/catdb-client.py")
+spec = importlib.util.spec_from_file_location("client", ROOT / "scripts/silverhamu-client.py")
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 
@@ -24,9 +24,9 @@ def docker(*args, check=True):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--image", default="catdb:local")
+    parser.add_argument("--image", default="silverhamu:local")
     image = parser.parse_args().image
-    name = "catdb-check-" + uuid.uuid4().hex[:12]
+    name = "silverhamu-check-" + uuid.uuid4().hex[:12]
     volume = name + "-data"
     (ROOT / "artifacts").mkdir(exist_ok=True)
     folder = pathlib.Path(tempfile.mkdtemp(prefix="service-container-", dir=ROOT / "artifacts"))
@@ -37,7 +37,7 @@ def main():
     docker("volume", "create", volume)
 
     def start(*server_args):
-        docker("run", "--detach", "--name", name, "--read-only", "--cap-drop", "ALL", "--security-opt", "no-new-privileges:true", "--stop-timeout", "10", "-p", "127.0.0.1::7400", "--mount", f"type=volume,source={volume},target=/data", "--mount", f"type=bind,source={secret},target=/run/secrets/catdb_token,readonly", image, *server_args)
+        docker("run", "--detach", "--name", name, "--read-only", "--cap-drop", "ALL", "--security-opt", "no-new-privileges:true", "--stop-timeout", "10", "-p", "127.0.0.1::7400", "--mount", f"type=volume,source={volume},target=/data", "--mount", f"type=bind,source={secret},target=/run/secrets/silverhamu_token,readonly", image, *server_args)
         port = int(docker("port", name, "7400/tcp").stdout.strip().rsplit(":", 1)[1])
         deadline = time.monotonic() + 20
         while True:
@@ -62,7 +62,7 @@ def main():
         chunks = docker("exec", name, "od", "-An", "-t", "u4", "-j40", "-N4", "/data/state.ndb")
         assert int(fmt.stdout) == 4 and int(chunks.stdout) & (1 << 31)
         passed.append("New database uses managed WAL format 4 without environment settings")
-        docker("exec", name, "catdb-server", "--healthcheck", "--token-file", "/run/secrets/catdb_token")
+        docker("exec", name, "silverhamu-server", "--healthcheck", "--token-file", "/run/secrets/silverhamu_token")
         state = json.loads(docker("inspect", name).stdout)[0]
         assert state["HostConfig"]["ReadonlyRootfs"]
         passed.append("Docker non-root, readonly root filesystem, authenticated healthcheck")
@@ -101,9 +101,9 @@ def main():
         for args in (("backup", "/data/state.ndb", "/data/check.catbak"),
                      ("restore", "/data/check.catbak", "/data/restored.ndb")):
             docker("run", "--rm", "--network", "none", "--read-only", "--cap-drop", "ALL",
-                   "--mount", mount, "--entrypoint", "catdb", image, *args)
+                   "--mount", mount, "--entrypoint", "silverhamu", image, *args)
         port = start("--db", "/data/restored.ndb", "--bind", "0.0.0.0:7400",
-                     "--allow-remote", "--token-file", "/run/secrets/catdb_token")
+                     "--allow-remote", "--token-file", "/run/secrets/silverhamu_token")
         with module.Client("127.0.0.1", port, token) as client:
             assert ok(client, op="scan_latest", start="")["rows"] == [["01", "aabb"], ["03", "cc"]]
             ok(client, op="put_commit", key="05", value="ee")

@@ -33,7 +33,7 @@ jobs:
           python-version: '3.12'
       # Subprocess crash fixtures must not overlap other tests' file-lock lifetimes.
       - run: cargo test --locked ${{ matrix.cargo_args }} --features "${{ matrix.features }}" -- --test-threads=1
-      - run: cargo build --locked ${{ matrix.cargo_args }} --features "${{ matrix.features }}" --bin catdb-server
+      - run: cargo build --locked ${{ matrix.cargo_args }} --features "${{ matrix.features }}" --bin silverhamu-server
       - if: contains(matrix.features, 'lock-timing')
         run: python benchmarks/commit-breakdown/test_diagnostics.py
         env:
@@ -110,7 +110,7 @@ jobs:
           python tests/storage_transition.py target/compat-deque/release/newdbms.dll target/release/newdbms.dll
           python tests/key_storage_transition.py target/compat-deque/release/newdbms.dll target/release/newdbms.dll
 
-      - run: cargo clippy --locked ${{ matrix.cargo_args }} --features "${{ matrix.features }}" --lib --bin catdb-server -- -D warnings
+      - run: cargo clippy --locked ${{ matrix.cargo_args }} --features "${{ matrix.features }}" --lib --bin silverhamu-server -- -D warnings
       - if: contains(matrix.features, 'history-metrics')
         run: cargo clippy --locked ${{ matrix.cargo_args }} --features "${{ matrix.features }}" --bin history-capacity-bench -- -D warnings
   container:
@@ -120,6 +120,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: docker build -t catdb:local .
+      - run: docker build -t silverhamu:local .
       - run: python tests/service_container.py
-      - run: python benchmarks/managed-wal/run.py --image catdb:local --out artifacts/managed-smoke --clients 4 --keys 256 --passes 5 --epoch 16 --value-bytes 16384
+      - run: python benchmarks/managed-wal/run.py --image silverhamu:local --out artifacts/managed-smoke --clients 4 --keys 256 --passes 5 --epoch 16 --value-bytes 16384

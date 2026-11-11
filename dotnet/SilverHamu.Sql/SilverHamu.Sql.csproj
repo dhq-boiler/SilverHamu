@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <SilverHamuNativeName Condition="$([MSBuild]::IsOSPlatform('Windows'))">newdbms.dll</SilverHamuNativeName>
+    <SilverHamuNativeName Condition="$([MSBuild]::IsOSPlatform('Linux'))">libnewdbms.so</SilverHamuNativeName>
+    <SilverHamuNativeName Condition="$([MSBuild]::IsOSPlatform('OSX'))">libnewdbms.dylib</SilverHamuNativeName>
+    <SilverHamuNativePath Condition="'$(SilverHamuNativePath)' == ''">$(MSBuildThisFileDirectory)../../target/release/$(SilverHamuNativeName)</SilverHamuNativePath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../NewDbmsDatabase.cs" Link="Native/NewDbmsDatabase.cs" />
+    <Content Include="$(SilverHamuNativePath)" Link="$(SilverHamuNativeName)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <Target Name="RequireSilverHamuNative" BeforeTargets="PrepareForBuild" Condition="!Exists('$(SilverHamuNativePath)')">
+    <Error Text="The silverhamu native library is missing. Run cargo build --locked --release --lib at the repository root or set SilverHamuNativePath to the built library." />
+  </Target>
+</Project>

@@ -6,6 +6,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../Catdb.Client/Catdb.Client.csproj" />
+    <ProjectReference Include="../SilverHamu.Client/SilverHamu.Client.csproj" />
   </ItemGroup>
 </Project>

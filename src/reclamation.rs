@@ -109,7 +109,7 @@ impl Reclaimer {
             let shared = state.clone();
             let counters = self.counters.clone();
             let handle = thread::Builder::new()
-                .name("catdb-reclaim".into())
+                .name("silverhamu-reclaim".into())
                 .spawn(move || run(shared, signal, counters))?;
             *worker = Some(Worker { stop, handle });
             self.enabled.store(true, Ordering::Release);

@@ -6,4 +6,4 @@
 !benchmarks/
 !benchmarks/**
 !scripts/
-!scripts/catdb-client.py
+!scripts/silverhamu-client.py

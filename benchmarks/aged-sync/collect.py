@@ -4,7 +4,7 @@ from identity import target_ids,exportable
 root=pathlib.Path('/trace');out=pathlib.Path('/control');parent=int(os.environ['TARGET_SUPERVISOR'])
 subprocess.run(['mount','-t','tracefs','tracefs',str(root)],check=True)
 children=pathlib.Path(f'/proc/{parent}/task/{parent}/children').read_text().split()
-servers=[int(p) for p in children if pathlib.Path(f'/proc/{p}/comm').read_text().strip()=='catdb-server']
+servers=[int(p) for p in children if pathlib.Path(f'/proc/{p}/comm').read_text().strip()=='silverhamu-server']
 assert len(servers)==1,servers
 tag=os.environ['TARGET_THREAD_NAME'];assert re.fullmatch(r'[a-z0-9-]{1,15}',tag)
 pid=servers[0];tids=sorted(int(p.name) for p in pathlib.Path(f'/proc/{pid}/task').iterdir())

@@ -1,7 +1,7 @@
 version: 3
-title: catdb
+title: SilverHamu
 createdAt: 2026-11-09T15:31:25.7166025Z
-modifiedAt: 2026-11-10T07:56:51.2681111Z
+modifiedAt: 2026-11-11T07:47:57.3697931Z
 tasks:
 - id: sql-semantic-types
   title: SQLで日時・金額・識別子の意味を保証する
@@ -122,3 +122,64 @@ tasks:
   estimateHours: 4
   remainingHours: 0
   notes: 指定した投票ノードへの引き継ぎを実装。Windowsの3台構成で旧リーダー停止後に新リーダーで確定値を読み、新しい書き込みを確定。残存過半数の不足や追従不能時の拒否を確認。Rust全体再実行229件、実TCPクラスタ試験11件成功。
+- id: silveremu-rebrand
+  title: catdbをsilveremuへリブランドする
+  notes: 製品名はsilveremu（銀＋エミュー）。CLI、Owner、各言語SDK、CI、現行ドキュメントを整合させ、ビルドと既存テストおよびOwner表示で確認する。既存DBのキー・保存形式、ネイティブABI、旧参照ファイルは互換性のため維持。作業ツリーとGit remote、過去の実験記録は現状を維持し、GitHub改名やレジストリ公開は別作業。実装・検証完了。GoとJavaはローカルツールチェーン不在のため実行未確認。
+  children:
+  - id: silveremu-rebrand-files
+    title: 製品表示・実行名・SDKと参照を更新する
+    estimateHours: 3
+    remainingHours: 0
+    notes: CLIをsilveremu・silveremu-serverへ変更。Owner、SQL層と6言語SDK、CI・Docker・現行文書の参照を更新。銀色エミューのSVGと画面表示を追加。既存ソリューションのパスとGit URL、保存形式・環境変数・ABIは維持し、移行手順をdocs/rebranding.mdへ記載。
+  - id: silveremu-rebrand-verify
+    title: ビルド・既存テスト・Owner画面で検証する
+    estimateHours: 2
+    remainingHours: 0
+    notes: VS 2026 Debugビルド成功。SQLテスト253件、Rustテスト229件、Python配布wheelとテスト5件、サービス23件とSQLホスト連携1件が成功。Python・Node.js・Ruby・.NETの実TCP/TLS、認証拒否、旧版DBとCATDBBAK読込を確認。OwnerはUI自動操作で作成・書込・再オープン・SELECTとエミュー表示を確認。Python構文、プロジェクト参照、Markdownリンク、git diff --checkも確認。
+- id: silverhamu-rebrand
+  title: 製品名をSilverHamuへ変更する
+  notes: 正式表記はSilverHamu、CLIとパッケージはsilverhamu。Silverは銀の弾丸、Hamuはハムスター由来の造語。直前のSilveremu変更を更新し、既存DB・バックアップ・環境変数・ネイティブABIとの互換性を維持する。銀色ハムスターの静止SVGを反映する。追加依頼により、提供された回し車GIFをOwnerの処理中表示へ組み込む。外部公開・商標調査は別作業。既存のユーザー変更を保持する。
+  children:
+  - id: silverhamu-rebrand-files
+    title: 製品表示・コード・SDK・静止アイコンを変更する
+    estimateHours: 2
+    remainingHours: 0
+    notes: 表示名SilverHamu、コード上のSilverHamu.*、CLI・配布名silverhamuへ更新。6言語SDK、CI・Docker・参照パスと移行文書を更新し、銀色ハムスターの静止SVGを反映。保存形式・CATDB_*・newdbms ABI・Git URL・既存ソリューションのパスは維持。
+  - id: silverhamu-rebrand-verify
+    title: ビルド・既存テスト・Owner表示とデータ互換性を確認する
+    estimateHours: 1
+    remainingHours: 0
+    notes: VS 2026ビルド成功、SQLテスト253件（TRX確認）、Rustテスト229件、Python wheelとテスト5件、サービス23件＋SQLホスト統合1件成功。Python・Node.js・Ruby・.NET SDKの実TCP/TLS・認証拒否成功。旧catdbのDBとCATDBBAKバックアップをSilverHamuで読み込み確認。Markdownリンクとgit diff --check確認。Go・Javaはツールチェーン不在で実行未確認。
+  - id: silverhamu-owner-loading-gif
+    title: 提供された回し車GIFをOwnerの処理中表示へ組み込む
+    estimateHours: 1
+    remainingHours: 0
+    notes: DownloadsのハムスターGIFを元データのままリソースへ追加。処理中のみ表示・再生し、完了とエラーで停止・非表示にする。Windowsのアニメーション設定を尊重し、停止中も処理中の文字を表示する。実UIで再生と完了復帰を確認する。ユーザー指定により右上ではなく画面中央へ配置。ファイル選択の入力待ちには重ねず、操作を妨げない。完了。元GIFのSHA256一致、ビルドと実画面の中央160px表示を確認。応答を6秒遅延させたSELECTで処理中表示と操作抑止、正常終了・エラー時の非表示と操作復帰を確認。ファイル選択欄が操作可能で、入力待ちにはGIFが出ないことも確認。
+- id: silverhamu-ginhamu-logo
+  title: ギンハムちゃんの横顔をSilverHamuの製品ロゴにする
+  notes: 提供GIFのキャラクターと色鉛筆タッチを維持した右向き横顔。銀色の毛・白いほっぺ・ピンクの頬・丸い耳を継承し、回し車・文字・背景は省く。透過PNGを製品素材として保存し、Ownerのヘッダー・アプリアイコン・スプラッシュへ反映。処理中GIFは保持する。
+  children:
+  - id: silverhamu-ginhamu-logo-art
+    title: GIFを参照して透過の色鉛筆ロゴを制作する
+    estimateHours: 1
+    remainingHours: 0
+    notes: GIFを参照し組み込みimage_genで色鉛筆の右向き横顔を生成。透過RGBA 1254px角。assets/branding/ginhamu_profile.pngを原本として保存し、生成プロンプトと由来を同ディレクトリのREADMEに記録。
+  - id: silverhamu-ginhamu-logo-apply
+    title: ロゴをOwnerへ反映してビルドと画面を確認する
+    estimateHours: 1
+    remainingHours: 0
+    notes: Ownerのヘッダー・アプリアイコン・スプラッシュとルートREADMEへ反映。VS 2026 Debugビルド成功、デバッグ起動後のUI自動化とスクリーンショットで44pxのロゴ表示を確認。透過と3つの配布PNGの原本一致、処理中GIFのSHA256不変、git diff --checkを確認。
+- id: silverhamu-repository-adoption
+  title: SilverHamuを正式なリポジトリ構成へ反映する
+  notes: ユーザー依頼により旧名ソリューションをSilverHamu.Owner.slnへ変更し、現行参照とローカル作業指示を更新。旧Catdb・Silveremuの生成物だけのディレクトリを確認して削除。既存データ互換識別子・Git URL・過去の計測記録は保持。GitHubリポジトリ名はユーザーが後で変更する。関連差分を検証しコミットする。既存の未追跡2スクリプトは保持・コミット対象外。
+  children:
+  - id: silverhamu-repository-cleanup
+    title: 正式なファイル名と参照へ統一して旧生成物を削除する
+    estimateHours: 1
+    remainingHours: 0
+    notes: 起動先をapps/SilverHamu.Owner.slnへ変更しOwner README・移行手順・ローカルAGENTSを更新。旧名のソースパスはすべて新名へ移行済み。ソースがないことと作業ツリー内の絶対パスを検証後、旧名ディレクトリ13件とビルド出力765件を削除。過去の計測記録とGit URL、互換性の識別子は維持。
+  - id: silverhamu-repository-commit
+    title: 新しいソリューションで検証して変更をコミットする
+    estimateHours: 1
+    remainingHours: 0
+    notes: 新しいソリューションでVS 2026 Debugビルド成功。SQLテスト253件成功をTRXで確認。新ソリューションからデバッグ起動しUI自動化でギンハムちゃんのロゴを確認。今回の269ファイルをステージ済みでdiff --check成功。未追跡の既存2スクリプトは除外し保持。コミット実行が残作業。続いてmainへコミット完了（Unify the database product identity under SilverHamu）。GitHub名・originは未変更、pushは行っていない。

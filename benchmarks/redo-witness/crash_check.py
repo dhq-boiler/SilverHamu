@@ -34,7 +34,7 @@ def main():
     p.add_argument('--expect-format', type=int)
     args=p.parse_args()
     args.out.mkdir(parents=True,exist_ok=False)
-    spec=importlib.util.spec_from_file_location('catdb_client',args.repo/'scripts/catdb-client.py')
+    spec=importlib.util.spec_from_file_location('catdb_client',args.repo/'scripts/silverhamu-client.py')
     clientmod=importlib.util.module_from_spec(spec)
     spec.loader.exec_module(clientmod)
     name='catdb-crash-'+uuid.uuid4().hex[:12]
@@ -87,7 +87,7 @@ def main():
     try:
         init="import os,pathlib; p=pathlib.Path('/data/token'); p.write_text(os.environ['BENCH_TOKEN']); p.chmod(0o400); os.chown(p,10001,10001); os.chown('/data',10001,10001)"
         docker('run','--rm','--network','none','-v',volume+':/data','-e','BENCH_TOKEN',args.image,'python','-c',init,env=dict(os.environ,BENCH_TOKEN=secret))
-        docker('run','--detach','--name',name,'--cpus','2','--memory','4g','--user','10001:10001','-p','127.0.0.1::7400','-v',volume+':/data',*switches,args.image,'catdb-server','--db','/data/catdb.wal','--init','--token-file','/data/token','--bind','0.0.0.0:7400','--allow-remote',env=env)
+        docker('run','--detach','--name',name,'--cpus','2','--memory','4g','--user','10001:10001','-p','127.0.0.1::7400','-v',volume+':/data',*switches,args.image,'silverhamu-server','--db','/data/catdb.wal','--init','--token-file','/data/token','--bind','0.0.0.0:7400','--allow-remote',env=env)
         ready()
         report['initial_format']=actual_format()
         known={}

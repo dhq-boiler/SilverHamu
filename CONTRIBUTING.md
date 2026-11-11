@@ -1,6 +1,6 @@
 # Contributing
 
-catdb is experimental. Keep changes small and document their effect on durability, compatibility, and resource usage. Use synthetic fixtures and never commit personal databases, tokens, crash dumps, or workstation-specific paths.
+silverhamu is experimental. Keep changes small and document their effect on durability, compatibility, and resource usage. Use synthetic fixtures and never commit personal databases, tokens, crash dumps, or workstation-specific paths.
 
 ## Local checks
 
@@ -8,11 +8,11 @@ Use Rust 1.89 or newer and Python 3. Build the service before its process tests:
 
 ```sh
 cargo test --locked --features service -- --test-threads=1
-cargo build --locked --features service --bin catdb-server
+cargo build --locked --features service --bin silverhamu-server
 python tests/service_protocol.py
 cargo build --locked --release --lib
 python -m unittest discover -s tests -p "*ffi_checks.py"
-cargo clippy --locked --features service --lib --bin catdb-server -- -D warnings
+cargo clippy --locked --features service --lib --bin silverhamu-server -- -D warnings
 ```
 
 Set `CATDB_SERVER` or `NEWDBMS_TEST_DLL` to use an alternate executable/library. Defaults select the platform's files in `target/debug` and `target/release`. The FFI test loader supports Windows, Linux and macOS filenames; the current CI runs Windows and Linux.
@@ -24,7 +24,7 @@ Some ignored Rust tests are child-process entry points or larger benchmarks. Par
 Container verification requires Docker:
 
 ```sh
-docker build -t catdb:local .
+docker build -t silverhamu:local .
 python tests/service_container.py
 ```
 
@@ -32,7 +32,7 @@ Tests create their own data under ignored `artifacts/`. Container tests remove o
 
 ## Compatibility and scope
 
-The Cargo package is `catdb`, while the Rust library/native library remain `newdbms` and the C# bindings remain `NewDbms`. This intentionally preserves consumers of the existing ABI. File-format or ABI changes require an explicit compatibility plan.
+The Cargo package is `silverhamu`, while the Rust library/native library remain `newdbms` and the C# bindings remain `NewDbms`. This intentionally preserves consumers of the existing ABI. File-format or ABI changes require an explicit compatibility plan.
 
 The standalone extraction excludes the original application integration and private experiment logs. Benchmark claims need a reproducible workload, hardware description, correctness checks, and both throughput and latency distributions. Avoid claiming universal superiority from a single workload.
 
@@ -44,4 +44,4 @@ and writers; this flag does not disable that internal concurrency.
 
 ## Comparing an optimization with other databases
 
-For each measured performance improvement, update the README with a fresh peer comparison figure for the affected workload alongside the catdb before/after result. Keep the key stream, operation count, client count, durability, CPU and memory limits comparable. Report versions, individual trials, verification and raw data. Group embedded and service products by execution mode. When an experimental path is reachable only through a native test harness, measure that actual path, identify its driver, and label the shipped service separately. Record unavailable products and publication restrictions with the results. Include slower outcomes.
+For each measured performance improvement, update the README with a fresh peer comparison figure for the affected workload alongside the silverhamu before/after result. Keep the key stream, operation count, client count, durability, CPU and memory limits comparable. Report versions, individual trials, verification and raw data. Group embedded and service products by execution mode. When an experimental path is reachable only through a native test harness, measure that actual path, identify its driver, and label the shipped service separately. Record unavailable products and publication restrictions with the results. Include slower outcomes.

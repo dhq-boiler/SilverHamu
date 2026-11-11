@@ -1,4 +1,4 @@
-# Experimental catdb service
+# Experimental silverhamu service
 
 For individual logins and database-scoped permissions, use [TLS service accounts](accounts.md). The shared-token configuration below describes the v1 listener.
 
@@ -7,7 +7,7 @@ The service is opt-in (`--features service`) and uses the same database implemen
 ## Configuration
 
 ```text
-catdb-server --db PATH --token-file PATH [--init]
+silverhamu-server --db PATH --token-file PATH [--init]
   [--bind 127.0.0.1:7400] [--allow-remote]
   [--max-connections 32]
   [--request-timeout-secs 30]
@@ -23,7 +23,7 @@ Parent directories must already exist. Without `--init`, a missing database is a
 The token file must contain 32–256 UTF-8 bytes, with optional trailing CR/LF. All clients sharing the token have full read/write/checkpoint access. Protect this file. The v1 token listener has no role separation or built-in transport encryption.
 
 ```text
-catdb-server --healthcheck --token-file PATH [--bind 127.0.0.1:7400]
+silverhamu-server --healthcheck --token-file PATH [--bind 127.0.0.1:7400]
 ```
 
 Health checks authenticate and query database state. The Docker healthcheck assumes the default token mount and port. Override it if changing those settings.
@@ -108,7 +108,7 @@ Authentication failure, malformed frames/JSON, and expired deadlines close the c
 
 ### Default WAL and upgrades
 
-The standard Rust library, C ABI, server and Docker image create new databases in managed WAL format 4. A normal `cargo build --locked --release --features service --bin catdb-server` or `docker compose up --build` includes the format support. No storage-mode setting is needed. A new managed database starts with a 1 MiB data area plus four 64 KiB recovery slots.
+The standard Rust library, C ABI, server and Docker image create new databases in managed WAL format 4. A normal `cargo build --locked --release --features service --bin silverhamu-server` or `docker compose up --build` includes the format support. No storage-mode setting is needed. A new managed database starts with a 1 MiB data area plus four 64 KiB recovery slots.
 
 As pending updates approach 7/8 of the data area, the commit path starts a checkpoint. The replacement retains the current live records and concurrent commits. If the compacted data and waiting writes would use more than 3/4 of the capacity, the engine grows the replacement geometrically, up to 1 GiB minus the four recovery slots. At the maximum size, it attempts reclamation at the hard boundary. Once that limit or the available disk space is exhausted, writes can fail. Checkpoint publication requires temporary space for both files. The operation triggering maintenance can take longer, especially when a large live dataset must be copied. Explicit checkpoints are also available.
 
@@ -123,7 +123,7 @@ SIGTERM/SIGINT stop new acceptance and close idle clients, discard uncommitted c
 
 ## Container operations
 
-The Docker image uses a multi-stage Rust 1.89/Debian build and runs as UID/GID 10001. Persist the whole `/data` directory; it includes ownership and checkpoint-related files, not just one database file. Mount the token at `/run/secrets/catdb_token` read-only. Do not mount one database directory into multiple active owners.
+The Docker image uses a multi-stage Rust 1.89/Debian build and runs as UID/GID 10001. Persist the whole `/data` directory; it includes ownership and checkpoint-related files, not just one database file. Mount the token at `/run/secrets/silverhamu_token` read-only. Do not mount one database directory into multiple active owners.
 
 Compose adds a 512 MiB memory cap, 128-process limit, dropped capabilities, read-only root filesystem, and no-new-privileges. Those settings are deployment starting points, not benchmark results or production guarantees. Named volumes survive `docker compose down`; deleting volumes destroys the data.
 

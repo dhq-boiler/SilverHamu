@@ -5,7 +5,7 @@ Use Java 17 or later and add this dependency to your application's POM. Maven re
 ```xml
 <dependency>
   <groupId>io.github.dhq-boiler</groupId>
-  <artifactId>catdb-client</artifactId>
+  <artifactId>silverhamu-client</artifactId>
   <version>0.1.0</version>
 </dependency>
 ```
@@ -13,12 +13,12 @@ Use Java 17 or later and add this dependency to your application's POM. Maven re
 For a local token listener, read the same token file used by the service.
 
 ```java
-import io.github.dhqboiler.catdb.CatdbClient;
+import io.github.dhqboiler.silverhamu.SilverHamuClient;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-String token = Files.readString(Path.of(".secrets/catdb-token")).replaceFirst("[\\r\\n]+$", "");
-try (CatdbClient db = CatdbClient.connectWithToken("127.0.0.1", 7400, token)) {
+String token = Files.readString(Path.of(".secrets/silverhamu-token")).replaceFirst("[\\r\\n]+$", "");
+try (SilverHamuClient db = SilverHamuClient.connectWithToken("127.0.0.1", 7400, token)) {
     byte[] key = {0x01, (byte) 0xff};
     String version = db.putCommit(key, new byte[]{0x00, 0x2a});
     byte[] value = db.getLatest(key);
@@ -28,7 +28,7 @@ try (CatdbClient db = CatdbClient.connectWithToken("127.0.0.1", 7400, token)) {
 For a TLS account, supply the username, password, database name and an optional PEM CA file. A null CA file uses the JVM's trust store. The client verifies the certificate chain and hostname before sending credentials.
 
 ```java
-try (CatdbClient db = CatdbClient.connectWithAccount("localhost", 7400,
+try (SilverHamuClient db = SilverHamuClient.connectWithAccount("localhost", 7400,
         "alice", System.getenv("CATDB_PASSWORD"), "main", Path.of("ca.pem"))) {
     db.begin();
     db.put(new byte[]{1}, new byte[0]);
@@ -41,4 +41,4 @@ try (CatdbClient db = CatdbClient.connectWithAccount("localhost", 7400,
 
 Use `request(JsonObject)` for additional protocol operations, including paginated scans. It returns a Gson `JsonObject` with the complete successful response. For a stable scan, begin a read transaction, issue successive `scan` requests with the same range and each returned `next_after` as `after`, and roll back after `next_after` becomes null. An empty page can carry a continuation.
 
-Each request and response is serialized on its connection. Give independent concurrent transactions separate connections. `CatdbClient.ServerException.code()` contains the server's error code. A transport or framing failure closes the connection. A submitted write may already be durable, so inspect the application state before retrying. [Service protocol](https://github.com/dhq-boiler/catdb/blob/main/docs/service.md) · [TLS accounts](https://github.com/dhq-boiler/catdb/blob/main/docs/accounts.md)
+Each request and response is serialized on its connection. Give independent concurrent transactions separate connections. `SilverHamuClient.ServerException.code()` contains the server's error code. A transport or framing failure closes the connection. A submitted write may already be durable, so inspect the application state before retrying. [Service protocol](https://github.com/dhq-boiler/catdb/blob/main/docs/service.md) · [TLS accounts](https://github.com/dhq-boiler/catdb/blob/main/docs/accounts.md)

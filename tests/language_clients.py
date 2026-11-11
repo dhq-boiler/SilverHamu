@@ -1,4 +1,4 @@
-"""Exercise all six SDKs against fresh token and TLS catdb services."""
+"""Exercise all six SDKs against fresh token and TLS silverhamu services."""
 import argparse
 from contextlib import contextmanager
 import importlib.util
@@ -13,7 +13,7 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 SDK = ROOT / "clients"
-spec = importlib.util.spec_from_file_location("catdb_reference", ROOT / "scripts/catdb-client.py")
+spec = importlib.util.spec_from_file_location("silverhamu_reference", ROOT / "scripts/silverhamu-client.py")
 reference = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(reference)
 
@@ -26,7 +26,7 @@ def commands():
         "node": ["node", SDK / "node/smoke.mjs"],
         "go": [os.getenv("CATDB_GO_SMOKE", ROOT / "artifacts" / ("go-smoke.exe" if os.name == "nt" else "go-smoke"))],
         "dotnet": ["dotnet", os.getenv("CATDB_DOTNET_SMOKE", SDK / "dotnet/smoke/bin/Release/net10.0/Smoke.dll")],
-        "java": ["java", "-cp", classpath, "io.github.dhqboiler.catdb.Smoke"],
+        "java": ["java", "-cp", classpath, "io.github.dhqboiler.silverhamu.Smoke"],
         "ruby": ["ruby", SDK / "ruby/smoke.rb"],
     }
 
@@ -43,7 +43,7 @@ def certificates(folder):
                        stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, timeout=30)
 
     openssl("req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "1", "-config", str(conf),
-            "-subj", "/CN=catdb SDK test CA", "-addext", "basicConstraints=critical,CA:TRUE",
+            "-subj", "/CN=silverhamu SDK test CA", "-addext", "basicConstraints=critical,CA:TRUE",
             "-addext", "keyUsage=critical,keyCertSign,cRLSign", "-keyout", "ca.key", "-out", "ca.pem")
     openssl("req", "-new", "-newkey", "rsa:2048", "-nodes", "-config", str(conf), "-subj", "/CN=localhost",
             "-keyout", "server.key", "-out", "server.csr")
@@ -61,7 +61,7 @@ def server(binary, folder, flags):
         if not match:
             proc.terminate()
             _, errors = proc.communicate(timeout=10)
-            raise RuntimeError("catdb failed to start: " + ready + errors)
+            raise RuntimeError("silverhamu failed to start: " + ready + errors)
         yield int(match.group(1))
     finally:
         proc.terminate()
@@ -126,7 +126,7 @@ def exercise(binary, folder, tls, clients):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--server", type=Path, default=ROOT / "target/debug" /
-                        ("catdb-server.exe" if os.name == "nt" else "catdb-server"))
+                        ("silverhamu-server.exe" if os.name == "nt" else "silverhamu-server"))
     parser.add_argument("--clients", nargs="+", choices=list(commands()), default=list(commands()))
     args = parser.parse_args()
     clients = {name: commands()[name] for name in args.clients}

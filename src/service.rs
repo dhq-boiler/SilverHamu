@@ -1624,7 +1624,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "set CATDB_SQL_HOST to the built Catdb.Sql.Host executable"]
+    #[ignore = "set CATDB_SQL_HOST to the built SilverHamu.Sql.Host executable"]
     fn sql_host_frames_use_session_transaction_and_authenticated_view_role() {
         struct Script {
             input: std::io::Cursor<Vec<u8>>,
@@ -1862,7 +1862,7 @@ fn client_thread_name() -> String {
     }
     #[cfg(not(feature = "benchmark-metrics"))]
     {
-        "catdb-client".into()
+        "silverhamu-client".into()
     }
 }
 
@@ -1873,7 +1873,7 @@ fn benchmark_thread_name(requested: Option<&str>) -> String {
             (1..=15).contains(&name.len())
                 && name.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-')
         })
-        .unwrap_or("catdb-client")
+        .unwrap_or("silverhamu-client")
         .into()
 }
 
@@ -1888,7 +1888,7 @@ mod observer_name_tests {
             Some("x\"||"),
             Some("日本語"),
         ] {
-            assert_eq!(super::benchmark_thread_name(value), "catdb-client");
+            assert_eq!(super::benchmark_thread_name(value), "silverhamu-client");
         }
         for value in ["a", "as-123456789abc", "abcdefghijklmno"] {
             assert_eq!(super::benchmark_thread_name(Some(value)), value);

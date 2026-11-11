@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require_relative "lib/catdb"
+require_relative "lib/silverhamu"
 
 def check(condition)
   raise "Ruby SDK smoke assertion failed" unless condition
@@ -10,7 +10,7 @@ auth = if ENV["CATDB_USER"]
        else
          { token: ENV.fetch("CATDB_TOKEN") }
        end
-CatDB::Client.connect(host: ENV.fetch("CATDB_HOST"), port: Integer(ENV.fetch("CATDB_PORT")), **auth) do |client|
+SilverHamu::Client.connect(host: ENV.fetch("CATDB_HOST"), port: Integer(ENV.fetch("CATDB_PORT")), **auth) do |client|
   check(client.ping.match?(/\A\d+\z/))
   next if ENV["CATDB_AUTH_ONLY"] == "1"
   key = ["ff00"].pack("H*")
@@ -31,8 +31,8 @@ CatDB::Client.connect(host: ENV.fetch("CATDB_HOST"), port: Integer(ENV.fetch("CA
   client.rollback
   begin
     client.commit
-    raise "catdb accepted commit without a transaction"
-  rescue CatDB::ServerError => e
+    raise "silverhamu accepted commit without a transaction"
+  rescue SilverHamu::ServerError => e
     check(e.code == "invalid_request")
   end
   client.delete_commit(temporary)

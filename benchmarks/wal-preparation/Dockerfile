@@ -3,7 +3,7 @@ WORKDIR /build
 COPY Cargo.toml Cargo.lock ./
 COPY src ./src
 ARG CATDB_FEATURES=service
-RUN cargo build --locked --release --features "$CATDB_FEATURES" --lib --bin catdb-server
+RUN cargo build --locked --release --features "$CATDB_FEATURES" --lib --bin silverhamu-server
 FROM catdb-comparison:local
 COPY --from=build /build/target/release/libnewdbms.so /usr/local/lib/
-COPY --from=build /build/target/release/catdb-server /usr/local/bin/
+COPY --from=build /build/target/release/silverhamu-server /usr/local/bin/

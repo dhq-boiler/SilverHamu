@@ -94,7 +94,7 @@ request-weighted; group sync means are deduplicated.
 ```sh
 cargo test --locked --features service,lock-timing,single-client-commit
 cargo test --locked --features service,fixed-log,single-client-commit
-cargo build --locked --features service,lock-timing,single-client-commit --bin catdb-server
+cargo build --locked --features service,lock-timing,single-client-commit --bin silverhamu-server
 # Set CATDB_DIAGNOSTICS=1 in the environment for this command:
 python benchmarks/commit-breakdown/test_diagnostics.py
 python benchmarks/commit-breakdown/test_profile.py

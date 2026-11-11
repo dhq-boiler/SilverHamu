@@ -39,7 +39,7 @@ class ClusterFixture(unittest.TestCase):
     member_count = 3
 
     def setUp(self):
-        temp = tempfile.TemporaryDirectory(prefix="catdb-replication-")
+        temp = tempfile.TemporaryDirectory(prefix="silverhamu-replication-")
         self.addCleanup(temp.cleanup)
         self.root = Path(temp.name)
         with ExitStack() as reservations:
@@ -171,7 +171,7 @@ class ReplicationTests(ClusterFixture):
             self.assertEqual(self.ok(restored, "ping")["version"],
                              self.ok(restored, "cluster_status")["applied_index"])
 
-    @unittest.skipUnless(os.getenv("CATDB_SQL_HOST"), "requires Catdb.Sql.Host")
+    @unittest.skipUnless(os.getenv("CATDB_SQL_HOST"), "requires SilverHamu.Sql.Host")
     def test_sql_grants_survive_failover(self):
         viewer_token = secrets.token_hex(32)
         viewer_secret = self.root / "viewer.token"
@@ -311,7 +311,7 @@ class ReplicationTests(ClusterFixture):
             self.ok(leader, "put_commit", key="11", value="ab")
             with self.assertRaisesRegex(RuntimeError, "authentication failed"):
                 Client(*self.endpoints[node], self.peer_token, timeout=2)
-            with self.assertRaisesRegex(ValueError, "different catdb cluster"):
+            with self.assertRaisesRegex(ValueError, "different silverhamu cluster"):
                 Client.connect_leader([self.endpoints[node]], self.token, cluster_id="another-cluster")
             follower = "n1" if node == "n2" else "n2"
             with self.connect(follower) as db:
@@ -430,7 +430,7 @@ class OnlineMembershipTests(ClusterFixture):
             self.assertEqual(first.request(op="cluster_reconfigure", members=self.members)["error"], "forbidden")
             with self.connect(leader) as locker:
                 self.ok(locker, "begin")
-                self.ok(locker, "lock_keys", keys=[b"catdb-raft-noop".hex()])
+                self.ok(locker, "lock_keys", keys=[b"silverhamu-raft-noop".hex()])
                 self.change(first, self.members)
                 self.ok(locker, "rollback")
             self.assertEqual(self.status(leader)["membership_phase"], "catch_up")

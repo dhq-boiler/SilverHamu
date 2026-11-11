@@ -2,7 +2,7 @@ using System.Buffers.Binary;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using Catdb;
+using SilverHamu;
 
 internal static class MalformedReplies
 {
@@ -30,7 +30,7 @@ internal static class MalformedReplies
                 Respond(stream, payload);
                 if (stream.ReadByte() != -1) throw new Exception("Client kept a malformed session open");
             });
-            using var client = CatdbClient.ConnectToken("127.0.0.1", port, "fixture");
+            using var client = SilverHamuClient.ConnectToken("127.0.0.1", port, "fixture");
             try
             {
                 if (write) client.PutCommit([1], [2]); else client.GetLatest([1]);

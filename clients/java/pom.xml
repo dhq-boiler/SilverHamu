@@ -4,10 +4,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.dhq-boiler</groupId>
-  <artifactId>catdb-client</artifactId>
+  <artifactId>silverhamu-client</artifactId>
   <version>0.1.0</version>
-  <name>catdb Java client</name>
-  <description>Java client for the catdb TCP service with binary keys and values, durable writes, transactions and TLS account authentication.</description>
+  <name>silverhamu Java client</name>
+  <description>Java client for the silverhamu TCP service with binary keys and values, durable writes, transactions and TLS account authentication.</description>
   <url>https://github.com/dhq-boiler/catdb/tree/main/clients/java</url>
   <licenses>
     <license>

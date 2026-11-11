@@ -6,10 +6,10 @@ const MAX_REQUEST = 1024 * 1024;
 const MAX_RESPONSE = 2 * 1024 * 1024 + 8192;
 const decoder = new TextDecoder("utf-8", { fatal: true });
 
-export class CatdbError extends Error {
+export class SilverHamuError extends Error {
   constructor(code) {
-    super(`catdb returned ${code}`);
-    this.name = "CatdbError";
+    super(`silverhamu returned ${code}`);
+    this.name = "SilverHamuError";
     this.code = code;
   }
 }
@@ -52,7 +52,7 @@ export class Client {
     // A peer can reset an idle socket between two requests.
     socket.on("error", () => socket.destroy());
     socket.setNoDelay(true);
-    const deadline = setTimeout(() => socket.destroy(new Error("catdb connection timed out")), timeoutMs);
+    const deadline = setTimeout(() => socket.destroy(new Error("silverhamu connection timed out")), timeoutMs);
     try {
       await once(socket, account ? "secureConnect" : "connect");
       clearTimeout(deadline);
@@ -60,7 +60,7 @@ export class Client {
       const reply = await client.request(account
         ? { op: "auth", version: 2, username, password, database }
         : { op: "auth", version: 1, token });
-      if (reply.protocol !== (account ? 2 : 1)) throw new Error("unexpected catdb protocol version");
+      if (reply.protocol !== (account ? 2 : 1)) throw new Error("unexpected silverhamu protocol version");
       return client;
     } catch (error) {
       socket.destroy();
@@ -76,7 +76,7 @@ export class Client {
     while (offset < size) {
       if (!this.#rest.length) {
         const next = await this.#reader.next();
-        if (next.done) throw new Error("catdb connection closed");
+        if (next.done) throw new Error("silverhamu connection closed");
         this.#rest = next.value;
       }
       const count = Math.min(size - offset, this.#rest.length);
@@ -88,30 +88,30 @@ export class Client {
   }
 
   async #exchange(frame) {
-    if (this.#socket.destroyed) throw new Error("catdb connection is closed");
-    const deadline = setTimeout(() => this.#socket.destroy(new Error("catdb request timed out")), this.#timeout);
+    if (this.#socket.destroyed) throw new Error("silverhamu connection is closed");
+    const deadline = setTimeout(() => this.#socket.destroy(new Error("silverhamu request timed out")), this.#timeout);
     let reply;
     try {
       this.#socket.write(frame);
       const size = (await this.#read(4)).readUInt32BE();
-      if (size === 0 || size > MAX_RESPONSE) throw new Error("invalid catdb response size");
+      if (size === 0 || size > MAX_RESPONSE) throw new Error("invalid silverhamu response size");
       reply = JSON.parse(decoder.decode(await this.#read(size)));
       if (typeof reply?.ok !== "boolean" || (!reply.ok && typeof reply.error !== "string")) {
-        throw new Error("invalid catdb response");
+        throw new Error("invalid silverhamu response");
       }
     } catch (cause) {
       this.close();
-      throw new Error("catdb response lost or invalid; a submitted mutation may have committed", { cause });
+      throw new Error("silverhamu response lost or invalid; a submitted mutation may have committed", { cause });
     } finally {
       clearTimeout(deadline);
     }
-    if (!reply.ok) throw new CatdbError(reply.error);
+    if (!reply.ok) throw new SilverHamuError(reply.error);
     return reply;
   }
 
   async request(request) {
     const body = Buffer.from(JSON.stringify(request), "utf8");
-    if (body.length > MAX_REQUEST) throw new RangeError("catdb request exceeds 1 MiB");
+    if (body.length > MAX_REQUEST) throw new RangeError("silverhamu request exceeds 1 MiB");
     const frame = Buffer.allocUnsafe(4 + body.length);
     frame.writeUInt32BE(body.length);
     body.copy(frame, 4);
@@ -125,7 +125,7 @@ export class Client {
     if (value === null) return null;
     if (typeof value !== "string" || value.length % 2 || /[^0-9a-f]/i.test(value)) {
       this.close();
-      throw new Error("invalid catdb value");
+      throw new Error("invalid silverhamu value");
     }
     return Buffer.from(value, "hex");
   }
@@ -134,7 +134,7 @@ export class Client {
     const { version } = await this.request(request);
     if (typeof version !== "string" || !/^(0|[1-9][0-9]*)$/.test(version)) {
       this.close();
-      throw new Error("invalid catdb version");
+      throw new Error("invalid silverhamu version");
     }
     return version;
   }

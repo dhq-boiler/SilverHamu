@@ -10,7 +10,7 @@ on:
 permissions: {}
 
 concurrency:
-  group: publish-catdb-service-client
+  group: publish-silverhamu-service-client
   cancel-in-progress: false
 
 jobs:
@@ -38,7 +38,7 @@ jobs:
         run: |
           python -m venv "$RUNNER_TEMP/consumer"
           "$RUNNER_TEMP/consumer/bin/python" -m pip install --no-deps dist/*.whl
-          "$RUNNER_TEMP/consumer/bin/python" -I -c 'import os; from importlib.metadata import version; assert version("catdb-service-client") == os.environ["RELEASE_VERSION"]'
+          "$RUNNER_TEMP/consumer/bin/python" -I -c 'import os; from importlib.metadata import version; assert version("silverhamu-service-client") == os.environ["RELEASE_VERSION"]'
           "$RUNNER_TEMP/consumer/bin/python" -I clients/python/test_client.py
           sha256sum dist/*
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -53,7 +53,7 @@ jobs:
     timeout-minutes: 10
     environment:
       name: pypi
-      url: https://pypi.org/project/catdb-service-client/
+      url: https://pypi.org/project/silverhamu-service-client/
     permissions:
       id-token: write
     steps:

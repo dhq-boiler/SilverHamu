@@ -26,7 +26,7 @@ impl Fixture {
     fn new() -> Self {
         static N: AtomicU64 = AtomicU64::new(0);
         let dir = std::env::temp_dir().join(format!(
-            "catdb-auto-cutover-{}-{}-{}",
+            "silverhamu-auto-cutover-{}-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)

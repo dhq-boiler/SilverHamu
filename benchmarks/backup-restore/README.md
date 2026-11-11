@@ -27,9 +27,9 @@ Build both versions into separate directories. From the updated checkout:
 
 ```sh
 git worktree add --detach ../catdb-backup-reference 9c11ba0
-cargo build --manifest-path ../catdb-backup-reference/Cargo.toml --locked --release --bin catdb --target-dir ../catdb-backup-reference/target
-cargo build --locked --release --bin catdb --example backup-restore-fixture --target-dir target
-python benchmarks/backup-restore/run.py --catdb target/release/catdb --baseline-catdb ../catdb-backup-reference/target/release/catdb --fixture target/release/examples/backup-restore-fixture --work-dir artifacts/dense-work --out artifacts/dense-times.json --profiles dense near-full spare --reps 18
+cargo build --manifest-path ../catdb-backup-reference/Cargo.toml --locked --release --bin silverhamu --target-dir ../catdb-backup-reference/target
+cargo build --locked --release --bin silverhamu --example backup-restore-fixture --target-dir target
+python benchmarks/backup-restore/run.py --catdb target/release/silverhamu --baseline-catdb ../catdb-backup-reference/target/release/silverhamu --fixture target/release/examples/backup-restore-fixture --work-dir artifacts/dense-work --out artifacts/dense-times.json --profiles dense near-full spare --reps 18
 ```
 
 Add `.exe` to the executable paths on Windows. Each method runs once as a warm-up. The next 18 repetitions cycle through all six orders three times. Each method reads the same closed source and writes a new, synchronized destination on the same filesystem. Windows used NTFS and Rust 1.99.1. Linux used the Docker overlay filesystem on a WSL2 virtual disk with Rust 1.89.0 on the same Ryzen 9 5950X host. The OS measurements ran separately. On Windows, the OS copy and previous-archive trials used the same extended fixture source built against the reference engine (`--baseline-fixture`); Linux used one fixture executable for all three methods. Executable hashes are recorded in each result file.
@@ -67,8 +67,8 @@ Run the benchmark on the filesystem used for backups. It creates independent, cl
 The **spare** database has a 128 MiB WAL data area and 2,048 rows. The **dense** database has a 64 MiB data area and 57,344 rows. Each row initially contains a deterministic 1 KiB binary value. Both fixtures then replace one value, delete one key, commit an empty value and roll back an uncommitted insertion. The two profiles use the same workload in every repetition.
 
 ```sh
-cargo build --release --locked --bin catdb --example backup-restore-fixture
-python benchmarks/backup-restore/run.py --catdb target/release/catdb --fixture target/release/examples/backup-restore-fixture --work-dir artifacts/backup-work --out artifacts/backup-times.json
+cargo build --release --locked --bin silverhamu --example backup-restore-fixture
+python benchmarks/backup-restore/run.py --catdb target/release/silverhamu --fixture target/release/examples/backup-restore-fixture --work-dir artifacts/backup-work --out artifacts/backup-times.json
 ```
 
 On Windows add `.exe` to both executable paths. To compare engine startup changes with a prior version, build the same `fixture.rs` as an example in the prior checkout and pass the resulting executable as `--baseline-fixture`. The reference engine then creates both source databases and opens the ordinary restores. The candidate engine opens the archive restores.

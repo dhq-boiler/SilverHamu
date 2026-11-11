@@ -48,6 +48,6 @@ fig.suptitle('1,000,000 rows / 256 B / explicit 640-MiB retained budget\n1,000 o
 fig.tight_layout();fig.savefig(out/'comparison.svg');fig.savefig(out/'comparison.png',dpi=140);plt.close(fig)
 for f in out.glob('*.svg'):f.write_text('\n'.join(x.rstrip() for x in f.read_text(encoding='utf8').splitlines())+'\n',encoding='utf8')
 (out/'table.md').write_text('\n'.join(table)+'\n',encoding='utf8')
-files=['src/service.rs','src/bin/catdb-server.rs','tests/service_protocol.py','benchmarks/resource-envelope/run.py','benchmarks/resource-envelope/supervisor.py','benchmarks/resource-envelope/client.py','benchmarks/resource-envelope/report.py','benchmarks/resource-envelope/config_report.py']
+files=['src/service.rs','src/bin/silverhamu-server.rs','tests/service_protocol.py','benchmarks/resource-envelope/run.py','benchmarks/resource-envelope/supervisor.py','benchmarks/resource-envelope/client.py','benchmarks/resource-envelope/report.py','benchmarks/resource-envelope/config_report.py']
 (out/'source-sha256.json').write_text(json.dumps({'normalization':'CRLF to LF','files':{n:hashlib.sha256((repo/n).read_bytes().replace(b'\r\n',b'\n')).hexdigest() for n in files}},indent=2),encoding='utf8')
 print(json.dumps(counts,indent=2));print('\n'.join(table))

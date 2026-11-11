@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Version in catdb-client.gemspec
+        description: Version in silverhamu-client.gemspec
         required: true
         type: string
       sha256:
@@ -14,7 +14,7 @@ on:
 permissions: {}
 
 concurrency:
-  group: publish-catdb-ruby-client
+  group: publish-silverhamu-ruby-client
   cancel-in-progress: false
 
 env:
@@ -55,11 +55,11 @@ jobs:
           test "$(gem --version)" = 3.6.9
           umask 022
           mkdir -p "$GITHUB_WORKSPACE/dist"
-          package="$GITHUB_WORKSPACE/dist/catdb-client-$RELEASE_VERSION.gem"
-          gem build --strict catdb-client.gemspec --output "$package"
+          package="$GITHUB_WORKSPACE/dist/silverhamu-client-$RELEASE_VERSION.gem"
+          gem build --strict silverhamu-client.gemspec --output "$package"
           ruby -rrubygems/package -e '
             spec = Gem::Package.new(ARGV.fetch(0)).spec
-            abort "unexpected gem" unless spec.name == "catdb-client" && spec.version.to_s == ENV.fetch("RELEASE_VERSION")
+            abort "unexpected gem" unless spec.name == "silverhamu-client" && spec.version.to_s == ENV.fetch("RELEASE_VERSION")
           ' "$package"
           sha256sum "$package" | tee -a "$GITHUB_STEP_SUMMARY"
           if [[ -n "$EXPECTED_SHA" ]]; then
@@ -68,7 +68,7 @@ jobs:
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ruby-distribution
-          path: dist/catdb-client-${{ inputs.version }}.gem
+          path: dist/silverhamu-client-${{ inputs.version }}.gem
           if-no-files-found: error
 
   publish:
@@ -78,7 +78,7 @@ jobs:
     timeout-minutes: 10
     environment:
       name: rubygems
-      url: https://rubygems.org/gems/catdb-client
+      url: https://rubygems.org/gems/silverhamu-client
     permissions:
       id-token: write
     steps:
@@ -89,8 +89,8 @@ jobs:
       - name: Verify the downloaded gem and check for an existing release
         id: registry
         run: |
-          echo "$EXPECTED_SHA  dist/catdb-client-$RELEASE_VERSION.gem" | sha256sum --check --strict
-          url="https://rubygems.org/api/v2/rubygems/catdb-client/versions/$RELEASE_VERSION.json?platform=ruby"
+          echo "$EXPECTED_SHA  dist/silverhamu-client-$RELEASE_VERSION.gem" | sha256sum --check --strict
+          url="https://rubygems.org/api/v2/rubygems/silverhamu-client/versions/$RELEASE_VERSION.json?platform=ruby"
           status="$(curl --silent --show-error --output version.json --write-out '%{http_code}' "$url")"
           case "$status" in
             200) jq -e --arg sha "$EXPECTED_SHA" '.sha == $sha and .yanked == false' version.json > /dev/null ;;
@@ -125,6 +125,6 @@ jobs:
           with urlopen(exchange, timeout=30) as response:
               key = json.load(response)["rubygems_api_key"]
 
-          gem_file = "dist/catdb-client-" + os.environ["RELEASE_VERSION"] + ".gem"
+          gem_file = "dist/silverhamu-client-" + os.environ["RELEASE_VERSION"] + ".gem"
           subprocess.run(["gem", "push", "--host", registry, gem_file],
                          env={**os.environ, "GEM_HOST_API_KEY": key}, check=True)

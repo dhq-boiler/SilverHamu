@@ -181,7 +181,7 @@ impl Cluster {
     fn storage_result(&self, result: io::Result<()>) -> io::Result<()> {
         result.inspect_err(|err| {
             self.failed.store(true, Ordering::Release);
-            eprintln!("catdb: cluster storage failed: {err}");
+            eprintln!("silverhamu: cluster storage failed: {err}");
         })
     }
 
@@ -419,7 +419,7 @@ impl Cluster {
                         if Instant::now() >= retry
                             && let Err(e) = self.compact()
                         {
-                            eprintln!("catdb: snapshot deferred: {e}");
+                            eprintln!("silverhamu: snapshot deferred: {e}");
                             retry = Instant::now() + Duration::from_secs(10);
                         }
                         thread::sleep(Duration::from_millis(100));

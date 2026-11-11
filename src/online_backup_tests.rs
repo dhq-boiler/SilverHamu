@@ -5,7 +5,7 @@ struct Scratch(PathBuf);
 
 impl Scratch {
     fn new() -> Self {
-        let path = temporary_path(&std::env::temp_dir().join("catdb-online-backup"));
+        let path = temporary_path(&std::env::temp_dir().join("silverhamu-online-backup"));
         fs::create_dir_all(&path).unwrap();
         Self(path)
     }

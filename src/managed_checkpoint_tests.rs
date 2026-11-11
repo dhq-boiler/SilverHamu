@@ -3,7 +3,7 @@ use super::*;
 #[test]
 fn tiny_budget_rollover_releases_the_user_slot_and_preserves_the_last_acknowledged_value() {
     let path = std::env::temp_dir().join(format!(
-        "catdb-managed-tiny-{}-{}.ndb",
+        "silverhamu-managed-tiny-{}-{}.ndb",
         std::process::id(),
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)

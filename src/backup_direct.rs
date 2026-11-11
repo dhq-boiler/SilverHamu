@@ -215,7 +215,7 @@ mod tests {
     use std::fs;
 
     fn verify_output(force_fallback: bool) {
-        let path = temporary_path(&std::env::temp_dir().join("catdb-direct-test"));
+        let path = temporary_path(&std::env::temp_dir().join("silverhamu-direct-test"));
         let mut output = File::options()
             .read(true)
             .write(true)

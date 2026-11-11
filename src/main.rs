@@ -44,7 +44,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
         _ => {
             return Err(
-                "usage: catdb backup <closed-db> <new-archive> | restore <archive> <new-db> | demo <new-file> <count> | read <demo-file> <start> <limit>".into(),
+                "usage: silverhamu backup <closed-db> <new-archive> | restore <archive> <new-db> | demo <new-file> <count> | read <demo-file> <start> <limit>".into(),
             );
         }
     }

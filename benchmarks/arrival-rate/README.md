@@ -92,7 +92,7 @@ python benchmarks/arrival-rate/run.py --variant before=catdb-rate-before:local -
 python benchmarks/arrival-rate/report.py artifacts/arrival-rate-comparison docs/benchmarks/arrival-rate-2026-11-05
 python benchmarks/arrival-rate/test_schedule.py
 python benchmarks/arrival-rate/test_report.py
-cargo build --features service,benchmark-metrics --bin catdb-server
+cargo build --features service,benchmark-metrics --bin silverhamu-server
 # Set CATDB_EXPECT_METRICS=1 for this enabled-feature binary:
 CATDB_EXPECT_METRICS=1 python benchmarks/arrival-rate/test_metrics.py
 ```

@@ -1,7 +1,7 @@
 import importlib.util, os, pathlib, sys, unittest
 ROOT=pathlib.Path(__file__).resolve().parents[2]
 os.environ.update(BENCH_PASSWORD='fixture-only',BENCH_TOKEN='fixture-only',BENCH_KEY_SHAPE='mixed')
-spec=importlib.util.spec_from_file_location('catdb_client',ROOT/'scripts/catdb-client.py')
+spec=importlib.util.spec_from_file_location('catdb_client',ROOT/'scripts/silverhamu-client.py')
 client=importlib.util.module_from_spec(spec);spec.loader.exec_module(client);sys.modules['catdb_client']=client
 spec=importlib.util.spec_from_file_location('fixture',ROOT/'benchmarks/runner.py')
 fixture=importlib.util.module_from_spec(spec);spec.loader.exec_module(fixture)

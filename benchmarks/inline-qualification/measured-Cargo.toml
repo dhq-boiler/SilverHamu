@@ -1,5 +1,5 @@
 [package]
-name = "catdb"
+name = "silverhamu"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.89"
@@ -8,7 +8,7 @@ description = "Experimental embedded transactional key-value database with an op
 repository = "https://github.com/dhq-boiler/catdb"
 readme = "README.md"
 publish = false
-default-run = "catdb"
+default-run = "silverhamu"
 
 [lib]
 name = "newdbms"
@@ -44,12 +44,12 @@ retirement-timing = ["skip-unneeded-history", "lock-timing"]
 allocation-metrics = []
 
 [[bin]]
-name = "catdb"
+name = "silverhamu"
 path = "src/main.rs"
 
 [[bin]]
-name = "catdb-server"
-path = "src/bin/catdb-server.rs"
+name = "silverhamu-server"
+path = "src/bin/silverhamu-server.rs"
 required-features = ["service"]
 
 [[bin]]

@@ -56,7 +56,7 @@ class AccountsTest(unittest.TestCase):
         self.proc = subprocess.Popen([BINARY, "--bind", "127.0.0.1:0", *flags],
                                      stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         line = self.proc.stdout.readline()
-        self.assertIn("catdb-server ready", line, self.proc.stderr.read() if not line else line)
+        self.assertIn("silverhamu-server ready", line, self.proc.stderr.read() if not line else line)
         self.port = int(line.split()[2].rsplit(":", 1)[1])
 
     def stop(self):
@@ -70,7 +70,7 @@ class AccountsTest(unittest.TestCase):
         return Client("localhost", self.port, username=user, password=password or self.secret,
                       database=db, cafile=str(self.cert))
 
-    @unittest.skipUnless(os.getenv("CATDB_SQL_HOST"), "requires the built Catdb.Sql.Host executable")
+    @unittest.skipUnless(os.getenv("CATDB_SQL_HOST"), "requires the built SilverHamu.Sql.Host executable")
     def test_sql_uses_selected_database_admin_grant(self):
         self.stop()
         self.start([*self.flags, "--sql-host", os.environ["CATDB_SQL_HOST"]])
@@ -194,7 +194,7 @@ class AccountsTest(unittest.TestCase):
     def test_cli_password_file_and_revoked_grant(self):
         with self.login() as admin:
             self.assertTrue(admin.request(op="create_user",username="probe",password=self.secret,role="reader")["ok"])
-            cmd=[sys.executable,str(pathlib.Path(__file__).resolve().parents[1]/"scripts/catdb-client.py"),
+            cmd=[sys.executable,str(pathlib.Path(__file__).resolve().parents[1]/"scripts/silverhamu-client.py"),
                  "--host","localhost","--port",str(self.port),"--user","probe","--ca-file",str(self.cert),"--password-file",str(self.file)]
             run=subprocess.run(cmd,input='{"op":"ping"}\n',text=True,capture_output=True,timeout=10)
             self.assertEqual(run.returncode,0,run.stderr)

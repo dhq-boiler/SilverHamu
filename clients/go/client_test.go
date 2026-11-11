@@ -1,4 +1,4 @@
-package catdb
+package silverhamu
 
 import (
 	"encoding/binary"

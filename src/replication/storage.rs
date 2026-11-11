@@ -638,7 +638,7 @@ mod tests {
             let mut id = [0; 16];
             getrandom::getrandom(&mut id).unwrap();
             let dir =
-                std::env::temp_dir().join(format!("catdb-raft-{:x}", u128::from_be_bytes(id)));
+                std::env::temp_dir().join(format!("silverhamu-raft-{:x}", u128::from_be_bytes(id)));
             std::fs::create_dir(&dir).unwrap();
             Self(dir)
         }

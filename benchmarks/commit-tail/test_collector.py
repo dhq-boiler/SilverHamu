@@ -17,7 +17,7 @@ class CollectorTests(unittest.TestCase):
             return module
 
         with mock.patch.dict(os.environ, BENCH_TOKEN='test', BENCH_PASSWORD='test', BENCH_OPS='2'):
-            native_client = load_module('catdb_client', ROOT.parents[1]/'scripts/catdb-client.py')
+            native_client = load_module('catdb_client', ROOT.parents[1]/'scripts/silverhamu-client.py')
             with mock.patch.dict(sys.modules, catdb_client=native_client):
                 runner = load_module('runner', ROOT.parent/'runner.py')
         with mock.patch.dict(sys.modules, runner=runner), mock.patch.object(sys, 'path', sys.path.copy()):

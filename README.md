@@ -1,10 +1,14 @@
-# catdb
+# SilverHamu
+
+<img src="assets/branding/ginhamu_profile.png" alt="SilverHamu — ギンハムちゃんの横顔" width="144">
+
+Formerly **catdb**. SilverHamu combines the silver bullet ambition with Hamu, a coined name derived from hamster. See [migration and compatibility](docs/rebranding.md) for renamed commands and SDKs, unpublished package names, and identifiers retained for existing databases.
 
 ![Status: Experimental](https://img.shields.io/badge/status-Experimental-orange)
 
 ## Feature matrix
 
-| Capability | catdb | Windows Owner | Scope in this checkout |
+| Capability | silverhamu | Windows Owner | Scope in this checkout |
 |---|:---:|:---:|---|
 | Open a local database without a server | Yes | Yes | One owning process per file. Rust, C and C# can embed the storage engine. |
 | Transactions and crash recovery | Yes | Yes | Snapshot reads, conflict detection, commit and rollback use the same native engine. |
@@ -26,7 +30,7 @@
 
 ### SQL syntax matrix
 
-These labels cover common SQL forms in the shared `Catdb.Sql` engine used by catdb and Windows Owner. Each label applies to the form shown. In Owner, a folder opened through `.catlink` supports read-only queries, query plans and session-local table statistics.
+These labels cover common SQL forms in the shared `SilverHamu.Sql` engine used by silverhamu and Windows Owner. Each label applies to the form shown. In Owner, a folder opened through `.catlink` supports read-only queries, query plans and session-local table statistics.
 
 <details>
 <summary>Queries, expressions and joins</summary>
@@ -60,7 +64,7 @@ These labels cover common SQL forms in the shared `Catdb.Sql` engine used by cat
 | `WITH`, `WITH RECURSIVE` | ✓ Supported | Recursive queries use an anchor and a UNION [ALL] recursive term, with at most 4,096 rows. |
 | Window functions (`OVER`) | ✓ Supported | Ranking, navigation and aggregate functions with PARTITION BY, ORDER BY and explicit frames. [Functions and examples](docs/sql.md#window-functions) |
 | `RANGE` or `GROUPS` window frames | ✓ Supported | GROUPS offsets count peer groups in sort order. A RANGE distance is a nonnegative numeric literal and requires one numeric ORDER BY column. |
-| `CASE`, `CAST`, arithmetic such as `SELECT price * qty` | ✓ Supported | Simple and searched CASE, casts to catdb column types, and numeric operators with precedence. |
+| `CASE`, `CAST`, arithmetic such as `SELECT price * qty` | ✓ Supported | Simple and searched CASE, casts to silverhamu column types, and numeric operators with precedence. |
 | `SELECT subtotal + tax FROM invoice_lines` on a named numeric type | ✓ Supported | Enable `+` for the type first. Both columns and the result share that type. |
 | `EXPLAIN SELECT ...`, `EXPLAIN WITH ... SELECT ...` | ✓ Supported | Returns plan steps and estimates for a full SQL connection or Owner folder session. |
 | `ANALYZE table_name` | ✓ Supported | Updates statistics in the current database transaction. In Owner folder mode, statistics stay in memory until the folder is closed. |
@@ -107,13 +111,13 @@ These labels cover common SQL forms in the shared `Catdb.Sql` engine used by cat
 
 </details>
 
-catdb is an embedded transactional key-value database written in Rust. It stores ordered byte keys and byte values, so applications can look up one key or read a range from a consistent snapshot. Multiple threads can update the same database, and successful commits are acknowledged after the log is synchronized.
+silverhamu is an embedded transactional key-value database written in Rust. It stores ordered byte keys and byte values, so applications can look up one key or read a range from a consistent snapshot. Multiple threads can update the same database, and successful commits are acknowledged after the log is synchronized.
 
 New databases use a preallocated write-ahead log that checkpoints and grows automatically. Existing databases keep their storage policy on upgrade. [Capacity management and explicit migration](docs/service.md#default-wal-and-upgrades) · [Sustained writes across checkpoints and growth](docs/benchmarks/managed-wal-2026-11-08/README.md)
 
-Embed catdb in Rust, C or C#, or connect to its authenticated TCP service from Python, JavaScript/TypeScript (Node.js), Go, C#, Java or Ruby. Each service client supports binary keys and values, transactions and TLS account authentication. [Client libraries and examples](docs/clients.md)
+Embed silverhamu in Rust, C or C#, or connect to its authenticated TCP service from Python, JavaScript/TypeScript (Node.js), Go, C#, Java or Ruby. Each service client supports binary keys and values, transactions and TLS account authentication. [Client libraries and examples](docs/clients.md)
 
-**Experimental:** APIs and file formats may change. Use disposable data when evaluating catdb. [MIT license](LICENSE)
+**Experimental:** APIs and file formats may change. Use disposable data when evaluating silverhamu. [MIT license](LICENSE)
 
 ## Quick start
 
@@ -121,23 +125,23 @@ With Rust 1.89 or newer, run the embedded example:
 
 ```sh
 git clone https://github.com/dhq-boiler/catdb.git
-cd catdb
+cd silverhamu
 cargo run --locked --release --example basic
 ```
 
-The example creates `example.ndb` in the current directory, commits `hello → world`, and reads the value back. Creation requires a new file path. To use catdb in your own Rust project, add the dependency below and follow the [example source](examples/basic.rs). The Rust library name is `newdbms`.
+The example creates `example.ndb` in the current directory, commits `hello → world`, and reads the value back. Creation requires a new file path. To use silverhamu in your own Rust project, add the dependency below and follow the [example source](examples/basic.rs). The Rust library name is `newdbms`.
 
 ```toml
 [dependencies]
-newdbms = { package = "catdb", git = "https://github.com/dhq-boiler/catdb.git" }
+newdbms = { package = "silverhamu", git = "https://github.com/dhq-boiler/catdb.git" }
 ```
 
 To try the service instead, run these commands from the cloned repository with Python 3 and Docker Compose installed:
 
 ```sh
-python scripts/create-catdb-token.py
+python scripts/create-silverhamu-token.py
 # On a Linux host, allow the container group to read the token:
-# sudo chgrp 10001 .secrets/catdb-token && chmod 640 .secrets/catdb-token
+# sudo chgrp 10001 .secrets/silverhamu-token && chmod 640 .secrets/silverhamu-token
 docker compose up --build -d
 ```
 
@@ -145,25 +149,25 @@ Connect to `127.0.0.1:7400` with the generated token. For individual logins and 
 
 ## Client libraries
 
-Start a local catdb server with the [quick start](#quick-start). Choose a language below for an example that connects to the server, writes a binary key, and reads its value back.
+Start a local silverhamu server with the [quick start](#quick-start). Choose a language below for an example that connects to the server, writes a binary key, and reads its value back.
 
 | Language and example | Runtime | Install version 0.1.0 | Package |
 | --- | --- | --- | --- |
-| [C#](https://www.nuget.org/packages/Catdb.Client/0.1.0#readme-body-tab) | .NET 10 | `dotnet package add Catdb.Client --version 0.1.0` | [NuGet](https://www.nuget.org/packages/Catdb.Client/0.1.0) |
+| [C#](https://www.nuget.org/packages/SilverHamu.Client/0.1.0#readme-body-tab) | .NET 10 | `dotnet package add SilverHamu.Client --version 0.1.0` | [NuGet](https://www.nuget.org/packages/SilverHamu.Client/0.1.0) |
 | [Go](clients/go/README.md) | Go 1.22+ | `go get github.com/dhq-boiler/catdb/clients/go@v0.1.0` | [Go packages](https://pkg.go.dev/github.com/dhq-boiler/catdb/clients/go@v0.1.0) |
-| [Java](clients/java/README.md) | Java 17+ | Gradle `implementation("io.github.dhq-boiler:catdb-client:0.1.0")` · [Maven POM](clients/java/README.md) | [Maven Central](https://central.sonatype.com/artifact/io.github.dhq-boiler/catdb-client/0.1.0) |
-| [JavaScript / TypeScript](clients/node/README.md) | Node.js 18+ | `npm install catdb-client@0.1.0` | [npm](https://www.npmjs.com/package/catdb-client/v/0.1.0) |
-| [Python](clients/python/README.md) | Python 3.10+ | `python -m pip install catdb-service-client==0.1.0` | [PyPI](https://pypi.org/project/catdb-service-client/0.1.0/) |
-| [Ruby](clients/ruby/README.md) | Ruby 3.1+ | `gem install catdb-client -v 0.1.0` | [RubyGems](https://rubygems.org/gems/catdb-client/versions/0.1.0) |
+| [Java](clients/java/README.md) | Java 17+ | Gradle `implementation("io.github.dhq-boiler:silverhamu-client:0.1.0")` · [Maven POM](clients/java/README.md) | [Maven Central](https://central.sonatype.com/artifact/io.github.dhq-boiler/silverhamu-client/0.1.0) |
+| [JavaScript / TypeScript](clients/node/README.md) | Node.js 18+ | `npm install silverhamu-client@0.1.0` | [npm](https://www.npmjs.com/package/silverhamu-client/v/0.1.0) |
+| [Python](clients/python/README.md) | Python 3.10+ | `python -m pip install silverhamu-service-client==0.1.0` | [PyPI](https://pypi.org/project/silverhamu-service-client/0.1.0/) |
+| [Ruby](clients/ruby/README.md) | Ruby 3.1+ | `gem install silverhamu-client -v 0.1.0` | [RubyGems](https://rubygems.org/gems/silverhamu-client/versions/0.1.0) |
 
 ## Back up and restore a database
 
 Close the standalone database or stop its server. From the repository root, build the CLI and use new filenames for the archive and the restored database.
 
 ```sh
-cargo build --locked --release --bin catdb
-./target/release/catdb backup state.ndb state.catbak
-./target/release/catdb restore state.catbak recovered.ndb
+cargo build --locked --release --bin silverhamu
+./target/release/silverhamu backup state.ndb state.catbak
+./target/release/silverhamu restore state.catbak recovered.ndb
 ```
 
 The archive omits all-zero blocks. In the benchmark with unused WAL capacity, a 128.25 MiB database produced a 2.32 MiB archive. Restore verifies the archive and writes the full database, including its reserved space. Services with TLS accounts require a coordinated copy of the data files and account catalog. [Backup, restore and Docker instructions](docs/backup.md) · [Windows and Linux measurements](benchmarks/backup-restore/README.md)
@@ -172,15 +176,15 @@ The archive omits all-zero blocks. In the benchmark with unused WAL capacity, a 
 
 ### Durable single-key updates
 
-Across 4, 16, 32 and 64 clients, catdb completed more synchronous updates per second and had lower p99 latency than Oracle 26ai Free and PostgreSQL 18.6 in all three trials at each client count. At 32 clients, catdb reached **5,627 updates/s**, 61% more than Oracle, the faster peer. Doubling to 64 clients brought **5,654 updates/s** (+0.5%), while p99 rose from **11.60 to 25.97 ms**.
+Across 4, 16, 32 and 64 clients, silverhamu completed more synchronous updates per second and had lower p99 latency than Oracle 26ai Free and PostgreSQL 18.6 in all three trials at each client count. At 32 clients, silverhamu reached **5,627 updates/s**, 61% more than Oracle, the faster peer. Doubling to 64 clients brought **5,654 updates/s** (+0.5%), while p99 rose from **11.60 to 25.97 ms**.
 
-![Median throughput and p99 latency for three databases. At 4, 16, 32 and 64 clients, catdb completed 1,885, 4,391, 5,627 and 5,654 updates/s, with p99 of 3.25, 5.64, 11.60 and 25.97 ms. The linked results table gives the values for all three databases.](docs/benchmarks/high-clients-2026-11-08/comparison.png)
+![Median throughput and p99 latency for three databases. At 4, 16, 32 and 64 clients, silverhamu completed 1,885, 4,391, 5,627 and 5,654 updates/s, with p99 of 3.25, 5.64, 11.60 and 25.97 ms. The linked results table gives the values for all three databases.](docs/benchmarks/high-clients-2026-11-08/comparison.png)
 
-Each trial timed 8,000 single-key updates against 100,000 keys with 256-byte values, including the request, durable commit and response. Each server and client had 2 CPUs and 4 GiB on the same host. catdb used a 64 MiB preallocated WAL and a connection limit of 64. All timed updates fit before a checkpoint. [Results table, trial ranges and reproduction](docs/benchmarks/high-clients-2026-11-08/README.md)
+Each trial timed 8,000 single-key updates against 100,000 keys with 256-byte values, including the request, durable commit and response. Each server and client had 2 CPUs and 4 GiB on the same host. silverhamu used a 64 MiB preallocated WAL and a connection limit of 64. All timed updates fit before a checkpoint. [Results table, trial ranges and reproduction](docs/benchmarks/high-clients-2026-11-08/README.md)
 
 ### Sustained writes with the product defaults
 
-A separate catdb workload with 2 KiB values included automatic checkpoints and growth. The original 4- and 16-client runs sustained **1,728** and **4,022 updates/s**. With 32 and 64 writers, the v0.1.0 release sustained **4,146** and **4,210 updates/s**, with p99 of **25.46** and **36.96 ms**, respectively. All six high-concurrency runs recovered every key after a forced stop. [4- and 16-client trials](docs/benchmarks/managed-wal-2026-11-08/README.md) · [32- and 64-client trials](docs/benchmarks/high-clients-2026-11-08/README.md#automatic-checkpoints-and-growth)
+A separate silverhamu workload with 2 KiB values included automatic checkpoints and growth. The original 4- and 16-client runs sustained **1,728** and **4,022 updates/s**. With 32 and 64 writers, the v0.1.0 release sustained **4,146** and **4,210 updates/s**, with p99 of **25.46** and **36.96 ms**, respectively. All six high-concurrency runs recovered every key after a forced stop. [4- and 16-client trials](docs/benchmarks/managed-wal-2026-11-08/README.md) · [32- and 64-client trials](docs/benchmarks/high-clients-2026-11-08/README.md#automatic-checkpoints-and-growth)
 
 <details>
 <summary>Earlier comparisons and embedded results</summary>

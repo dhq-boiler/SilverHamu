@@ -1,13 +1,13 @@
 services:
-  catdb:
+  silverhamu:
     build: .
-    image: catdb:local
+    image: silverhamu:local
     ports:
       - "127.0.0.1:7400:7400"
     volumes:
-      - catdb-data:/data
+      - silverhamu-data:/data
     secrets:
-      - catdb_token
+      - silverhamu_token
     read_only: true
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
@@ -16,7 +16,7 @@ services:
     stop_grace_period: 60s
     restart: unless-stopped
 secrets:
-  catdb_token:
-    file: .secrets/catdb-token
+  silverhamu_token:
+    file: .secrets/silverhamu-token
 volumes:
-  catdb-data:
+  silverhamu-data:

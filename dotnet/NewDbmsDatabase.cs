@@ -261,7 +261,7 @@ public sealed class NewDbmsDatabase : IDisposable
             }
             catch (EntryPointNotFoundException error)
             {
-                throw new NotSupportedException("The native catdb library does not support online backup.", error);
+                throw new NotSupportedException("The native silverhamu library does not support online backup.", error);
             }
         }
     }
@@ -278,7 +278,7 @@ public sealed class NewDbmsDatabase : IDisposable
         }
         catch (EntryPointNotFoundException error)
         {
-            throw new NotSupportedException("The native catdb library does not support backup restore.", error);
+            throw new NotSupportedException("The native silverhamu library does not support backup restore.", error);
         }
     }
 
@@ -422,7 +422,7 @@ public sealed class NewDbmsTransaction : IDisposable
             try { TransactionNative.Check(TransactionNative.ndb_tx_savepoint(_handle, operation, bytes, (ulong)bytes.Length)); }
             catch (EntryPointNotFoundException error)
             {
-                throw new NotSupportedException("The loaded catdb native library does not support savepoints.", error);
+                throw new NotSupportedException("The loaded silverhamu native library does not support savepoints.", error);
             }
         }
     }

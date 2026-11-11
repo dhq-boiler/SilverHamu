@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { Client, CatdbError } from "./index.js";
+import { Client, SilverHamuError } from "./index.js";
 
 const env = process.env;
 const auth = env.CATDB_USER ? { username: env.CATDB_USER, password: env.CATDB_PASSWORD,
@@ -25,7 +25,7 @@ try {
     await client.beginRead();
     assert.deepEqual(await client.get(temporary), Buffer.alloc(0));
     await client.rollback();
-    await assert.rejects(client.commit(), err => err instanceof CatdbError && err.code === "invalid_request");
+    await assert.rejects(client.commit(), err => err instanceof SilverHamuError && err.code === "invalid_request");
     await client.deleteCommit(temporary);
     await client.putCommit(key, Buffer.from(env.CATDB_VALUE, "hex"));
   }

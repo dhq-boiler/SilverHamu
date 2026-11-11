@@ -1,7 +1,7 @@
 {
-  "name": "catdb-client",
+  "name": "silverhamu-client",
   "version": "0.1.0",
-  "description": "Node.js client for the catdb TCP service",
+  "description": "Node.js client for the silverhamu TCP service",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dhq-boiler/catdb.git",

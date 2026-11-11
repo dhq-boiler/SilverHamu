@@ -4,19 +4,19 @@ WORKDIR /build
 COPY Cargo.toml Cargo.lock ./
 COPY src ./src
 ARG CATDB_FEATURES=service
-RUN cargo build --locked --release --features "$CATDB_FEATURES" --bin catdb-server --bin catdb
+RUN cargo build --locked --release --features "$CATDB_FEATURES" --bin silverhamu-server --bin silverhamu
 
 FROM debian:bookworm-slim AS runtime
-RUN groupadd --gid 10001 catdb && useradd --uid 10001 --gid catdb --no-create-home catdb \
-    && mkdir /data && chown catdb:catdb /data
-COPY --from=build /build/target/release/catdb-server /usr/local/bin/catdb-server
-COPY --from=build /build/target/release/catdb /usr/local/bin/catdb
+RUN groupadd --gid 10001 silverhamu && useradd --uid 10001 --gid silverhamu --no-create-home silverhamu \
+    && mkdir /data && chown silverhamu:silverhamu /data
+COPY --from=build /build/target/release/silverhamu-server /usr/local/bin/silverhamu-server
+COPY --from=build /build/target/release/silverhamu /usr/local/bin/silverhamu
 USER 10001:10001
 WORKDIR /data
 VOLUME ["/data"]
 EXPOSE 7400
 STOPSIGNAL SIGTERM
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD ["catdb-server", "--healthcheck", "--token-file", "/run/secrets/catdb_token"]
-ENTRYPOINT ["catdb-server"]
-CMD ["--db", "/data/state.ndb", "--init", "--bind", "0.0.0.0:7400", "--allow-remote", "--token-file", "/run/secrets/catdb_token"]
+    CMD ["silverhamu-server", "--healthcheck", "--token-file", "/run/secrets/silverhamu_token"]
+ENTRYPOINT ["silverhamu-server"]
+CMD ["--db", "/data/state.ndb", "--init", "--bind", "0.0.0.0:7400", "--allow-remote", "--token-file", "/run/secrets/silverhamu_token"]

@@ -70,8 +70,8 @@ stage p99 values are not additive. The chart reports complete operation latency
 
 ```sh
 cargo test --locked --features service -- --test-threads=1
-cargo clippy --locked --features service --lib --bin catdb-server -- -D warnings
-cargo build --locked --features service --bin catdb-server
+cargo clippy --locked --features service --lib --bin silverhamu-server -- -D warnings
+cargo build --locked --features service --bin silverhamu-server
 python tests/service_protocol.py
 cargo build --locked --release --lib
 python -m unittest discover -s tests -p "*ffi_checks.py"

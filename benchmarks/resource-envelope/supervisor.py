@@ -24,7 +24,7 @@ def main():
     limits = {x: read(x) for x in ['cpu.max', 'memory.max', 'memory.swap.max']}
     (OUT / f'{tag}-limits.json').write_text(json.dumps(limits))
     with (OUT / f'{tag}-server.log').open('w') as log:
-        command = ['catdb-server','--db','/data/catdb.wal','--bind','0.0.0.0:7400',
+        command = ['silverhamu-server','--db','/data/catdb.wal','--bind','0.0.0.0:7400',
             '--allow-remote','--token-file',str(OUT/'token'),'--transaction-timeout-secs','3600']
         retained=os.environ.get('RETAINED_BYTES')
         if retained: command += ['--max-retained-bytes',retained]
@@ -37,7 +37,7 @@ def main():
         with (OUT / f'{tag}-resources.jsonl').open('w', buffering=1) as f:
             start = time.monotonic(); count = 0; ready = False
             while p.poll() is None:
-                if not ready and 'catdb-server ready' in (OUT/f'{tag}-server.log').read_text():
+                if not ready and 'silverhamu-server ready' in (OUT/f'{tag}-server.log').read_text():
                     (OUT/f'{tag}-ready.json').write_text(json.dumps({'process_ready_ms':(time.monotonic()-start)*1000,'poll_resolution_ms':100 if sampled else 500}))
                     ready = True
                 if sampled or count == 0:

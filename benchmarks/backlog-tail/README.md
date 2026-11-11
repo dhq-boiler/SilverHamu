@@ -109,7 +109,7 @@ docker build -f benchmarks/backlog-tail/Dockerfile --build-arg CATDB_FEATURES=se
 python benchmarks/backlog-tail/run.py --variant candidate-off=catdb-tail-clean:local --variant candidate-profile=catdb-tail-profile:local --ops 8000 --reps 3 --out artifacts/backlog-tail-comparison
 python benchmarks/backlog-tail/analyze.py artifacts/backlog-tail-comparison
 cargo test --features service,backlog-batch,benchmark-metrics,sync-stall,lock-timing -- --test-threads=1
-cargo build --features service,backlog-batch,benchmark-metrics,sync-stall,lock-timing --bin catdb-server
+cargo build --features service,backlog-batch,benchmark-metrics,sync-stall,lock-timing --bin silverhamu-server
 python benchmarks/backlog-tail/test_protocol.py
 python benchmarks/backlog-tail/test_analysis.py
 ```

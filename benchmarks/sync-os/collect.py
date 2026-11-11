@@ -9,9 +9,9 @@ events=['syscalls/sys_enter_fsync','syscalls/sys_exit_fsync','sched/sched_switch
 meta={'clock':'mono','instance':instance.name,'events':events,'started_monotonic_ns':time.monotonic_ns(),'buffer_kb_per_cpu':16384}
 try:
  put('tracing_on',0);put('trace_clock','mono');put('buffer_size_kb',16384)
- put('events/sched/sched_switch/filter','prev_comm == "catdb-server" || next_comm == "catdb-server" || prev_comm == "catdb-client" || next_comm == "catdb-client"')
- put('events/sched/sched_wakeup/filter','comm == "catdb-server" || comm == "catdb-client"')
- put('events/sched/sched_switch/trigger','stacktrace if (prev_comm == "catdb-server" || prev_comm == "catdb-client") && prev_state & 2')
+ put('events/sched/sched_switch/filter','prev_comm == "silverhamu-server" || next_comm == "silverhamu-server" || prev_comm == "catdb-client" || next_comm == "catdb-client"')
+ put('events/sched/sched_wakeup/filter','comm == "silverhamu-server" || comm == "catdb-client"')
+ put('events/sched/sched_switch/trigger','stacktrace if (prev_comm == "silverhamu-server" || prev_comm == "catdb-client") && prev_state & 2')
  for event in events:put('events/'+event+'/enable',1)
  put('tracing_on',1)
  (out/'ready').write_text(instance.name)

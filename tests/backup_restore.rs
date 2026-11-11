@@ -13,7 +13,7 @@ impl Fixture {
     fn new() -> Self {
         static NEXT: AtomicU64 = AtomicU64::new(0);
         let dir = std::env::temp_dir().join(format!(
-            "catdb-backup-{}-{}-{}",
+            "silverhamu-backup-{}-{}-{}",
             std::process::id(),
             SystemTime::now()
                 .duration_since(UNIX_EPOCH)
@@ -37,7 +37,7 @@ impl Drop for Fixture {
 }
 
 fn run_cli(command: &str, source: &Path, destination: &Path) {
-    let result = Command::new(env!("CARGO_BIN_EXE_catdb"))
+    let result = Command::new(env!("CARGO_BIN_EXE_silverhamu"))
         .arg(command)
         .arg(source)
         .arg(destination)

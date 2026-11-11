@@ -1,5 +1,5 @@
-// Package catdb connects to the catdb TCP service.
-package catdb
+// Package silverhamu connects to the silverhamu TCP service.
+package silverhamu
 
 import (
 	"crypto/tls"
@@ -22,10 +22,10 @@ const (
 	maxResponse = 2*1024*1024 + 8192
 )
 
-// ServerError carries the error code returned by catdb.
+// ServerError carries the error code returned by silverhamu.
 type ServerError struct{ Code string }
 
-func (e *ServerError) Error() string { return "catdb: " + e.Code }
+func (e *ServerError) Error() string { return "silverhamu: " + e.Code }
 
 // Client serializes wire requests. Give each concurrent transaction its own Client.
 type Client struct {
@@ -79,7 +79,7 @@ func dial(address string, config *tls.Config, auth map[string]any, protocol int,
 	var version int
 	if json.Unmarshal(reply["protocol"], &version) != nil || version != protocol {
 		c.Close()
-		return nil, errors.New("unexpected catdb protocol version")
+		return nil, errors.New("unexpected silverhamu protocol version")
 	}
 	return c, nil
 }
@@ -111,7 +111,7 @@ func execute[T any](c *Client, request map[string]any, decode func(map[string]js
 		return zero, err
 	}
 	if len(payload) > maxRequest {
-		return zero, errors.New("catdb request exceeds 1 MiB")
+		return zero, errors.New("silverhamu request exceeds 1 MiB")
 	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -132,7 +132,7 @@ func execute[T any](c *Client, request map[string]any, decode func(map[string]js
 	}
 	c.conn.Close()
 	c.conn = nil
-	return zero, fmt.Errorf("catdb exchange failed; a submitted write may have committed: %w", err)
+	return zero, fmt.Errorf("silverhamu exchange failed; a submitted write may have committed: %w", err)
 }
 
 func (c *Client) exchange(payload []byte) (map[string]json.RawMessage, error) {
@@ -155,7 +155,7 @@ func (c *Client) exchange(payload []byte) (map[string]json.RawMessage, error) {
 	}
 	size := binary.BigEndian.Uint32(header[:])
 	if size == 0 || size > maxResponse {
-		return nil, errors.New("invalid catdb response size")
+		return nil, errors.New("invalid silverhamu response size")
 	}
 	body := make([]byte, size)
 	if _, err := io.ReadFull(c.conn, body); err != nil {
@@ -174,11 +174,11 @@ func (c *Client) exchange(payload []byte) (map[string]json.RawMessage, error) {
 	case "false":
 		var code string
 		if json.Unmarshal(reply["error"], &code) != nil || code == "" {
-			return nil, errors.New("invalid catdb error response")
+			return nil, errors.New("invalid silverhamu error response")
 		}
 		return nil, &ServerError{Code: code}
 	default:
-		return nil, errors.New("missing catdb response status")
+		return nil, errors.New("missing silverhamu response status")
 	}
 }
 

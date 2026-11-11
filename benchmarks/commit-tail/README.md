@@ -105,7 +105,7 @@ cause retroactively. No fixed observer-overhead correction is subtracted.
 
 ```sh
 cargo test --locked --features service,lock-timing,single-client-commit -- --test-threads=1
-cargo build --locked --features service,lock-timing,single-client-commit --bin catdb-server
+cargo build --locked --features service,lock-timing,single-client-commit --bin silverhamu-server
 # Set CATDB_DIAGNOSTICS=pull for the next command:
 python benchmarks/commit-tail/test_protocol.py
 # Set CATDB_DIAGNOSTICS=1 for legacy full-response diagnostic checks:

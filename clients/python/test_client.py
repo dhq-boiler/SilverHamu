@@ -6,7 +6,7 @@ import time
 import unittest
 from unittest.mock import patch
 
-from catdb_client import Client
+from silverhamu_client import Client
 
 
 def frame(data):
@@ -16,7 +16,7 @@ def frame(data):
 
 class ResponsesTest(unittest.TestCase):
     def test_leader_discovery_stops_at_deadline_when_all_seeds_are_unavailable(self):
-        with patch("catdb_client._wire.socket.create_connection", side_effect=ConnectionRefusedError):
+        with patch("silverhamu_client._wire.socket.create_connection", side_effect=ConnectionRefusedError):
             started = time.monotonic()
             with self.assertRaises(TimeoutError):
                 Client.connect_leader([("unused", 7400)], "token", cluster_id="books", discovery_timeout=0.1)
@@ -41,7 +41,7 @@ class ResponsesTest(unittest.TestCase):
         worker = threading.Thread(target=trickle)
         worker.start()
         try:
-            with patch("catdb_client._wire.socket.create_connection", return_value=local):
+            with patch("silverhamu_client._wire.socket.create_connection", return_value=local):
                 started = time.monotonic()
                 with self.assertRaises(TimeoutError):
                     Client.connect_leader([("slow.example", 7400)], "token", cluster_id="books", discovery_timeout=0.15)
@@ -65,7 +65,7 @@ class ResponsesTest(unittest.TestCase):
         isolated, _ = member("n3", "leader", {"ok": False, "error": "quorum_unavailable"})
         leader, peer = member("n2", "leader", {"ok": True, "version": "7"})
         seeds = [("first.example", 7401), ("isolated.example", 7403), ("second.example", 7402)]
-        with patch("catdb_client._wire.socket.create_connection", side_effect=[follower, isolated, leader]) as connect:
+        with patch("silverhamu_client._wire.socket.create_connection", side_effect=[follower, isolated, leader]) as connect:
             with Client.connect_leader(seeds, "token", cluster_id="books", timeout=3) as db:
                 self.assertIs(db.socket, leader)
                 self.assertEqual(db.socket.gettimeout(), 3)
@@ -79,7 +79,7 @@ class ResponsesTest(unittest.TestCase):
         local, peer = socket.socketpair()
         self.addCleanup(peer.close)
         peer.sendall(frame({"ok": True, "protocol": 1}))
-        with patch("catdb_client._wire.socket.create_connection", return_value=local):
+        with patch("silverhamu_client._wire.socket.create_connection", return_value=local):
             client = Client("unused", 7400, "test")
         self.addCleanup(client.close)
         return client, peer

@@ -1,4 +1,4 @@
-using Catdb;
+using SilverHamu;
 
 static string Required(string name) => Environment.GetEnvironmentVariable(name) ?? throw new Exception(name);
 static void Require(bool result, string what)
@@ -15,8 +15,8 @@ if (args is ["--check-malformed-replies"])
 var host = Required("CATDB_HOST");
 int port = int.Parse(Required("CATDB_PORT"));
 using var client = Environment.GetEnvironmentVariable("CATDB_TOKEN") is { Length: > 0 } token
-    ? CatdbClient.ConnectToken(host, port, token)
-    : CatdbClient.ConnectAccount(host, port, Required("CATDB_USER"), Required("CATDB_PASSWORD"),
+    ? SilverHamuClient.ConnectToken(host, port, token)
+    : SilverHamuClient.ConnectAccount(host, port, Required("CATDB_USER"), Required("CATDB_PASSWORD"),
         caFile: Environment.GetEnvironmentVariable("CATDB_CA_FILE"));
 client.Ping();
 if (Environment.GetEnvironmentVariable("CATDB_AUTH_ONLY") == "1") return;
@@ -43,7 +43,7 @@ try
     client.Commit();
     throw new Exception("missing server error");
 }
-catch (CatdbServerException error) when (error.Code == "invalid_request") { }
+catch (SilverHamuServerException error) when (error.Code == "invalid_request") { }
 client.DeleteCommit(local);
 client.PutCommit(key, Convert.FromHexString(Required("CATDB_VALUE")));
 Console.WriteLine("C# interoperation passed");

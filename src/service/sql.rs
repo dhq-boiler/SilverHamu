@@ -158,7 +158,7 @@ pub(super) fn execute(
     let exchange = thread::scope(|scope| -> io::Result<Result<Value, Error>> {
         let (done, finished) = mpsc::channel::<()>();
         let _watchdog = thread::Builder::new()
-            .name("catdb-sql-deadline".into())
+            .name("silverhamu-sql-deadline".into())
             .spawn_scoped(scope, move || {
                 let _host = host;
                 while !stop.load(Ordering::Acquire) {

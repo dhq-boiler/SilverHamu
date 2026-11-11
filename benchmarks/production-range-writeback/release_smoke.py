@@ -43,7 +43,7 @@ def smoke(root):
         assert create(b,len(b),bytes([75])*16,C.byref(db))==0
         assert configure(db,1)==27 and configure(db,0)==0 and close(db)==0
         token=root/"token";secret=secrets.token_hex(24);token.write_text(secret)
-        command=["catdb-server","--bind","127.0.0.1:0","--token-file",str(token),"--db"]
+        command=["silverhamu-server","--bind","127.0.0.1:0","--token-file",str(token),"--db"]
         for setting,parent in (("invalid",root),("1",Path(tmp))):
             new=parent/"rejected.db"
             r=subprocess.run(command+[str(new),"--init"],env={**os.environ,"CATDB_EXT4_CHECKPOINT_WRITEBACK":setting},

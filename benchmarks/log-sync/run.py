@@ -47,7 +47,7 @@ def main():
                 if is_catdb:
                     execute('init')
                     run('docker','exec',client,'python','-c',"import os,pathlib;p=pathlib.Path('/data/token');p.write_text(os.environ['BENCH_TOKEN']);p.chmod(0o400);os.chown(p,10001,10001)")
-                    run('docker','run','-d','--name',db,*common,'--network-alias','database','--user','10001:10001','-v',volume+':/data',IMAGES[engine],'catdb-server','--db','/data/catdb.wal','--bind','0.0.0.0:7400','--allow-remote','--token-file','/data/token','--transaction-timeout-secs','3600',env=env);containers.append(db)
+                    run('docker','run','-d','--name',db,*common,'--network-alias','database','--user','10001:10001','-v',volume+':/data',IMAGES[engine],'silverhamu-server','--db','/data/catdb.wal','--bind','0.0.0.0:7400','--allow-remote','--token-file','/data/token','--transaction-timeout-secs','3600',env=env);containers.append(db)
                 elif engine in ['postgres','mysql','oracle']:
                     env.update(POSTGRES_PASSWORD=env['BENCH_PASSWORD'],MYSQL_PASSWORD=env['BENCH_PASSWORD'],MYSQL_ROOT_PASSWORD=env['BENCH_PASSWORD'],ORACLE_PWD=env['BENCH_PASSWORD'])
                     opts={'postgres':['-e','POSTGRES_USER=bench','-e','POSTGRES_DB=bench','-e','POSTGRES_PASSWORD','-v',volume+':/var/lib/postgresql'],

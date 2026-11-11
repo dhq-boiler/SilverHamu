@@ -14,11 +14,11 @@ import time
 import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-spec = importlib.util.spec_from_file_location("catdb_client", ROOT / "scripts/catdb-client.py")
+spec = importlib.util.spec_from_file_location("silverhamu_client", ROOT / "scripts/silverhamu-client.py")
 client_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(client_module)
 Client = client_module.Client
-BINARY = pathlib.Path(os.environ.get("CATDB_SERVER", ROOT / "target/debug" / ("catdb-server.exe" if os.name == "nt" else "catdb-server")))
+BINARY = pathlib.Path(os.environ.get("CATDB_SERVER", ROOT / "target/debug" / ("silverhamu-server.exe" if os.name == "nt" else "silverhamu-server")))
 
 
 class ServiceTests(unittest.TestCase):
@@ -73,7 +73,7 @@ class ServiceTests(unittest.TestCase):
             self.ok(c, op="put", key=key, value=value)
             return self.ok(c, op="commit")
 
-    @unittest.skipUnless(os.getenv("CATDB_SQL_HOST"), "requires the built Catdb.Sql.Host executable")
+    @unittest.skipUnless(os.getenv("CATDB_SQL_HOST"), "requires the built SilverHamu.Sql.Host executable")
     def test_sql_host_and_view_token(self):
         self.stop()
         read_token = secrets.token_hex(32)
@@ -124,7 +124,7 @@ class ServiceTests(unittest.TestCase):
             rows = self.ok(viewer, op="sql", sql="SELECT id FROM visible")["results"][0]["Rows"]
             self.assertEqual([row[0]["Text"] for row in rows], ["1"])
 
-    @unittest.skipUnless(os.getenv("CATDB_SQL_HOST"), "requires the built Catdb.Sql.Host executable")
+    @unittest.skipUnless(os.getenv("CATDB_SQL_HOST"), "requires the built SilverHamu.Sql.Host executable")
     def test_for_update_excludes_another_writer_until_transaction_end(self):
         self.stop()
         self.start("--sql-host", os.environ["CATDB_SQL_HOST"])

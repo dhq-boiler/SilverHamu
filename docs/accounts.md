@@ -4,7 +4,7 @@ One TLS listener hosts the primary database (`main`) and optionally additional n
 
 ## Start the first administrator
 
-Build with `cargo build --release --locked --features service --bin catdb-server`. Prepare a PEM certificate chain and its matching unencrypted PEM private key for the service hostname. The Python client verifies the certificate chain and hostname. For a local trial, generate a temporary certificate:
+Build with `cargo build --release --locked --features service --bin silverhamu-server`. Prepare a PEM certificate chain and its matching unencrypted PEM private key for the service hostname. The Python client verifies the certificate chain and hostname. For a local trial, generate a temporary certificate:
 
 ```sh
 umask 077
@@ -12,21 +12,21 @@ mkdir -p data .secrets
 openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj /CN=localhost \
   -addext subjectAltName=DNS:localhost -keyout .secrets/key.pem -out .secrets/cert.pem
 python -c "from getpass import getpass; from pathlib import Path; p=getpass('Initial administrator password: '); f=Path('.secrets/bootstrap').open('x', encoding='utf-8'); f.write(p); f.close()"
-./target/release/catdb-server --db data/main.ndb --init \
+./target/release/silverhamu-server --db data/main.ndb --init \
   --tls-cert .secrets/cert.pem --tls-key .secrets/key.pem \
   --bootstrap-admin owner --bootstrap-password-file .secrets/bootstrap
 ```
 
-Use at least 15 Unicode characters and at most 1,024 UTF-8 bytes. On Windows use private filesystem ACLs and `catdb-server.exe`. Keep the initial password in a password manager. Once the server reports ready, remove the bootstrap password file and **omit both bootstrap flags on subsequent starts**. Supplying them again fails and cannot replace the original administrator. Remote listening also requires `--allow-remote` and a suitable `--bind`.
+Use at least 15 Unicode characters and at most 1,024 UTF-8 bytes. On Windows use private filesystem ACLs and `silverhamu-server.exe`. Keep the initial password in a password manager. Once the server reports ready, remove the bootstrap password file and **omit both bootstrap flags on subsequent starts**. Supplying them again fails and cannot replace the original administrator. Remote listening also requires `--allow-remote` and a suitable `--bind`.
 
 ## Create users and assign grants
 
 From a second terminal, create a reader on `main`. The client prompts for both passwords without echoing them.
 
 ```sh
-python scripts/catdb-client.py --host localhost --ca-file .secrets/cert.pem \
+python scripts/silverhamu-client.py --host localhost --ca-file .secrets/cert.pem \
   --user owner --create-user alice --role reader
-python scripts/catdb-client.py --host localhost --ca-file .secrets/cert.pem --user alice
+python scripts/silverhamu-client.py --host localhost --ca-file .secrets/cert.pem --user alice
 ```
 
 Enter one JSON request per line, for example `{"op":"ping"}`. The client uses system trust when you omit `--ca-file`. For unattended clients, `--password-file FILE` reads a private UTF-8 file. Passwords never need to appear in command-line arguments.

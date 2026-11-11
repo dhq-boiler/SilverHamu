@@ -8,23 +8,23 @@ Dispose transactions and database handles deterministically. A database file has
 
 ## Embedded SQL and CLI
 
-`Catdb.Sql` adds SQL tables, indexes, constraints and views on top of the transactional engine. It targets .NET 10 and requires the matching native library. Existing databases retain their storage policy, and new databases use the policy of the underlying Rust build.
+`SilverHamu.Sql` adds SQL tables, indexes, constraints and views on top of the transactional engine. It targets .NET 10 and requires the matching native library. Existing databases retain their storage policy, and new databases use the policy of the underlying Rust build.
 
-Build from the repository root. If Cargo output is in a custom target directory, pass `-p:CatdbNativePath=<absolute library path>` to the .NET build.
+Build from the repository root. If Cargo output is in a custom target directory, pass `-p:SilverHamuNativePath=<absolute library path>` to the .NET build.
 
 ```sh
 cargo build --locked --release --lib
-dotnet build dotnet/Catdb.Sql.Host -c Release
-dotnet dotnet/Catdb.Sql.Host/bin/Release/net10.0/Catdb.Sql.Host.dll --create example-sql.ndb "CREATE TABLE items (id INT PRIMARY KEY, label TEXT); INSERT INTO items VALUES (1,'book');"
-dotnet dotnet/Catdb.Sql.Host/bin/Release/net10.0/Catdb.Sql.Host.dll example-sql.ndb "SELECT label FROM items WHERE id=1;"
+dotnet build dotnet/SilverHamu.Sql.Host -c Release
+dotnet dotnet/SilverHamu.Sql.Host/bin/Release/net10.0/SilverHamu.Sql.Host.dll --create example-sql.ndb "CREATE TABLE items (id INT PRIMARY KEY, label TEXT); INSERT INTO items VALUES (1,'book');"
+dotnet dotnet/SilverHamu.Sql.Host/bin/Release/net10.0/SilverHamu.Sql.Host.dll example-sql.ndb "SELECT label FROM items WHERE id=1;"
 ```
 
-The final query returns `book`. To embed SQL, add a project reference to [Catdb.Sql](Catdb.Sql/Catdb.Sql.csproj) and open a dedicated connection:
+The final query returns `book`. To embed SQL, add a project reference to [SilverHamu.Sql](SilverHamu.Sql/SilverHamu.Sql.csproj) and open a dedicated connection:
 
 ```csharp
-using Catdb.Sql;
+using SilverHamu.Sql;
 
-using var db = await CatdbSqlConnection.OpenAsync("example-sql.ndb");
+using var db = await SilverHamuSqlConnection.OpenAsync("example-sql.ndb");
 var results = await db.ExecuteAsync("SELECT label FROM items ORDER BY id;");
 ```
 

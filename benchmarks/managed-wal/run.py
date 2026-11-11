@@ -231,7 +231,7 @@ def main():
     if args.phase:
         assert len(args.clients)==1
         args.clients=args.clients[0]
-        spec=importlib.util.spec_from_file_location("catdb_client","/scripts/catdb-client.py")
+        spec=importlib.util.spec_from_file_location("catdb_client","/scripts/silverhamu-client.py")
         mod=importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
         def connect():

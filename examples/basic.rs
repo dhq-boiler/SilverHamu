@@ -1,4 +1,4 @@
-use newdbms::transactions::{Database, ResourceLimits};
+use silverhamu::transactions::{Database, ResourceLimits};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This ID identifies this example database; it is not a credential.

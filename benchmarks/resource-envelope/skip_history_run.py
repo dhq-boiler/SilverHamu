@@ -9,7 +9,7 @@ for kind,dockerfile in [('','benchmarks/resource-envelope/history-capacity.Docke
   if variant!='before':args+=['--build-arg','EXTRA_FEATURES=,'+('inline-latest' if variant=='after' else 'skip-unneeded-history')]
   run(args+['.'])
 run(['docker','run','--rm','-e','CATDB_SERVER=/usr/local/bin/silverhamu-server','-v',str(r)+':/source:ro','--tmpfs','/source/artifacts:rw,mode=1777','catdb-skip-service-skip:local','python','/source/tests/service_protocol.py'])
-run(['docker','run','--rm','-e','NEWDBMS_TEST_DLL=/usr/local/lib/libnewdbms.so','-v',str(r)+':/source:ro','--tmpfs','/source/artifacts:rw,mode=1777','-w','/source','catdb-skip-service-skip:local','python','-m','unittest','discover','-s','tests','-p','*ffi_checks.py'])
+run(['docker','run','--rm','-e','NEWDBMS_TEST_DLL=/usr/local/lib/libsilverhamu.so','-v',str(r)+':/source:ro','--tmpfs','/source/artifacts:rw,mode=1777','-w','/source','catdb-skip-service-skip:local','python','-m','unittest','discover','-s','tests','-p','*ffi_checks.py'])
 schedule=[]
 run([sys.executable,'-X','utf8','benchmarks/resource-envelope/history_capacity_run.py','--out',str(out/'smoke'),'--rows','100000','--observer','counted','--image','catdb-skip-skip:local'])
 for kind in ['memory','service','service-unpinned']:

@@ -23,7 +23,7 @@ class Native:
     @classmethod
     def connect(cls, create=False):
         if cls.lib is None:
-            cls.lib = c.CDLL('/usr/local/lib/libnewdbms.so')
+            cls.lib = c.CDLL('/usr/local/lib/libsilverhamu.so')
             p,u=c.c_void_p,c.c_uint64
             signatures={'db_create':[p,u,p,p], 'db_open':[p,u,p], 'db_close':[u],
                 'begin':[u,p,p], 'get':[u,p,u,p,u,p,p], 'put':[u,p,u,p,u],

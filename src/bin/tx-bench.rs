@@ -1,5 +1,5 @@
-use newdbms::Snapshot;
-use newdbms::transactions::Database;
+use silverhamu::Snapshot;
+use silverhamu::transactions::Database;
 use std::error::Error;
 use std::sync::{Arc, Barrier};
 use std::time::Instant;
@@ -49,7 +49,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             let db = db.clone();
             let staged = staged.clone();
             let publish = publish.clone();
-            std::thread::spawn(move || -> newdbms::transactions::Result<Vec<f64>> {
+            std::thread::spawn(move || -> silverhamu::transactions::Result<Vec<f64>> {
                 let mut timings = Vec::new();
                 for item in 0..commits {
                     let mut tx = db.begin()?;

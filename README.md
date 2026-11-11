@@ -131,11 +131,11 @@ cd SilverHamu
 cargo run --locked --release --example basic
 ```
 
-The example creates `example.ndb` in the current directory, commits `hello → world`, and reads the value back. Creation requires a new file path. To use silverhamu in your own Rust project, add the dependency below and follow the [example source](examples/basic.rs). The Rust library name is `newdbms`.
+The example creates `example.ndb` in the current directory, commits `hello → world`, and reads the value back. Creation requires a new file path. To use silverhamu in your own Rust project, add the dependency below and follow the [example source](examples/basic.rs). The Rust library name is `silverhamu`.
 
 ```toml
 [dependencies]
-newdbms = { package = "silverhamu", git = "https://github.com/dhq-boiler/SilverHamu.git" }
+silverhamu = { git = "https://github.com/dhq-boiler/SilverHamu.git" }
 ```
 
 To try the service instead, run these commands from the cloned repository with Python 3 and Docker Compose installed:

@@ -32,7 +32,7 @@ Tests create their own data under ignored `artifacts/`. Container tests remove o
 
 ## Compatibility and scope
 
-The Cargo package is `silverhamu`, while the Rust library/native library remain `newdbms` and the C# bindings remain `NewDbms`. This intentionally preserves consumers of the existing ABI. File-format or ABI changes require an explicit compatibility plan.
+The Cargo package, Rust library and native library are named `silverhamu`. The C# bindings retain the `NewDbms` namespace, and C ABI symbols and calling conventions are unchanged. Rust consumers must update imports from `newdbms` to `silverhamu`; native consumers must load the renamed library. File-format or ABI changes require an explicit compatibility plan.
 
 The standalone extraction excludes the original application integration and private experiment logs. Benchmark claims need a reproducible workload, hardware description, correctness checks, and both throughput and latency distributions. Avoid claiming universal superiority from a single workload.
 

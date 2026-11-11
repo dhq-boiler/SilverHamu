@@ -1,4 +1,4 @@
-use newdbms::transactions::{Database, ResourceLimits, ScanLimits, Transaction};
+use silverhamu::transactions::{Database, ResourceLimits, ScanLimits, Transaction};
 use serde_json::json;
 use std::alloc::{GlobalAlloc, Layout, System};
 use std::sync::{

@@ -633,64 +633,64 @@ internal static class TransactionNative
         throw new NewDbmsException(code, $"NewDBMS transaction operation failed (status {code}).");
     }
 
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern uint ndb_tx_abi_version();
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern uint ndb_tx_resource_api_version();
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_set_group_commit(DatabaseHandle handle, uint enabled);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_set_checkpoint_retirement(DatabaseHandle handle, uint enabled, ulong maxBytes);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_checkpoint_retirement_status(DatabaseHandle handle, [Out] ulong[] values);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_commit_sync_attempts(DatabaseHandle handle, out ulong attempts);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_db_create_limited(byte[] path, ulong length, byte[] identity, ulong[] limits, out ulong handle);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_db_open_limited(byte[] path, ulong length, ulong[] limits, out ulong handle);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_db_resources(DatabaseHandle handle, [Out] ulong[] values);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_scan_page(TransactionHandle handle, byte[] start, ulong startLength,
         byte[] end, ulong endLength, uint hasEnd, byte[] after, ulong afterLength, uint hasAfter,
         ulong maxRows, ulong maxBytes, ulong maxVisits, [Out] byte[] buffer, ulong capacity, out ulong required);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_db_create(byte[] path, ulong length, byte[] identity, out ulong handle);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_db_open(byte[] path, ulong length, out ulong handle);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_db_close(ulong handle);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_db_info(DatabaseHandle handle, [Out] byte[] identity, [Out] ulong[] stats);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_begin(DatabaseHandle handle, out ulong transaction, out ulong version);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_get(TransactionHandle handle, byte[] key, ulong keyLength, [Out] byte[] buffer, ulong capacity, out ulong required, out ulong found);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_put(TransactionHandle handle, byte[] key, ulong keyLength, byte[] value, ulong valueLength);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_delete(TransactionHandle handle, byte[] key, ulong keyLength);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_lock_keys(TransactionHandle handle, byte[] frame, ulong length);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_savepoint(TransactionHandle handle, uint operation, byte[] name, ulong nameLength);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_scan(TransactionHandle handle, byte[] start, ulong startLength, byte[] end, ulong endLength, uint hasEnd, [Out] byte[] buffer, ulong capacity, out ulong required, out ulong count);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_commit(TransactionHandle handle, out ulong version);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_rollback(ulong handle);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_checkpoint(DatabaseHandle handle, out ulong version, out ulong records, out ulong before, out ulong after);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_backup(DatabaseHandle handle, byte[] destination, ulong destinationLength, out ulong version, out ulong records);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_restore(byte[] source, ulong sourceLength, byte[] destination, ulong destinationLength, out ulong version, out ulong records);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_checkpoint_deferred(DatabaseHandle handle, out ulong version, out ulong records, out ulong before, out ulong after);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_reclaim_checkpoint(ulong handle);
-    [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int ndb_tx_export(DatabaseHandle handle, byte[] path, ulong length, byte[] generation, byte[] start, ulong startLength, byte[] end, ulong endLength, uint hasEnd, out ulong version, out ulong count);
 }

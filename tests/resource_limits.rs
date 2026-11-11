@@ -1,4 +1,4 @@
-use newdbms::transactions::{Database, Error, ResourceLimits, ScanLimits};
+use silverhamu::transactions::{Database, Error, ResourceLimits, ScanLimits};
 use std::path::PathBuf;
 use std::sync::{Arc, Barrier};
 

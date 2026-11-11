@@ -1,4 +1,4 @@
-use newdbms::{MAX_PAGE_BYTES, MAX_PAGE_RECORDS, MAX_RECORD_BYTES, Snapshot, create};
+use silverhamu::{MAX_PAGE_BYTES, MAX_PAGE_RECORDS, MAX_RECORD_BYTES, Snapshot, create};
 use std::fs;
 use std::io::ErrorKind;
 use std::path::PathBuf;

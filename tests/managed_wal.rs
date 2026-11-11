@@ -1,6 +1,6 @@
 #![cfg(feature = "redo-witness")]
 
-use newdbms::transactions::{Database, Error};
+use silverhamu::transactions::{Database, Error};
 use std::fs;
 use std::path::PathBuf;
 use std::sync::Barrier;

@@ -103,12 +103,12 @@ jobs:
         run: cargo build --locked --release --no-default-features --lib --target-dir target/compat-deque
       - if: matrix.features == 'service' && runner.os == 'Linux'
         run: |
-          python tests/storage_transition.py target/compat-deque/release/libnewdbms.so target/release/libnewdbms.so
-          python tests/key_storage_transition.py target/compat-deque/release/libnewdbms.so target/release/libnewdbms.so
+          python tests/storage_transition.py target/compat-deque/release/libsilverhamu.so target/release/libsilverhamu.so
+          python tests/key_storage_transition.py target/compat-deque/release/libsilverhamu.so target/release/libsilverhamu.so
       - if: matrix.features == 'service' && runner.os == 'Windows'
         run: |
-          python tests/storage_transition.py target/compat-deque/release/newdbms.dll target/release/newdbms.dll
-          python tests/key_storage_transition.py target/compat-deque/release/newdbms.dll target/release/newdbms.dll
+          python tests/storage_transition.py target/compat-deque/release/silverhamu.dll target/release/silverhamu.dll
+          python tests/key_storage_transition.py target/compat-deque/release/silverhamu.dll target/release/silverhamu.dll
 
       - run: cargo clippy --locked ${{ matrix.cargo_args }} --features "${{ matrix.features }}" --lib --bin silverhamu-server -- -D warnings
       - if: contains(matrix.features, 'history-metrics')

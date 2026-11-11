@@ -1,4 +1,4 @@
-use newdbms::transactions::Database;
+use silverhamu::transactions::Database;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let path = std::env::args_os().nth(1).ok_or("database path required")?;
     let began = std::time::Instant::now();

@@ -1,4 +1,4 @@
-use newdbms::transactions::{Database, backup, restore};
+use silverhamu::transactions::{Database, backup, restore};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;

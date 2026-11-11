@@ -1,6 +1,6 @@
-use newdbms::replication::ClusterConfig;
-use newdbms::service::{AccountOptions, Config, ReadRole, Server, SqlOptions, healthcheck};
-use newdbms::transactions::ResourceLimits;
+use silverhamu::replication::ClusterConfig;
+use silverhamu::service::{AccountOptions, Config, ReadRole, Server, SqlOptions, healthcheck};
+use silverhamu::transactions::ResourceLimits;
 use std::io::Read;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 use std::sync::Arc;

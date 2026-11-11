@@ -1,6 +1,6 @@
 #[cfg(feature = "lock-timing")]
 mod probe {
-    use newdbms::transactions::{
+    use silverhamu::transactions::{
         Database, ScanLimits, take_state_hold_timing, take_thread_lock_wait_ns,
     };
     use serde_json::{Value, json};

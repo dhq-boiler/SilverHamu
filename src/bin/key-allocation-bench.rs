@@ -1,4 +1,4 @@
-use newdbms::transactions::{Database, ResourceLimits};
+use silverhamu::transactions::{Database, ResourceLimits};
 use std::alloc::{GlobalAlloc, Layout, System};
 use std::sync::atomic::{AtomicUsize, Ordering};
 struct Alloc;

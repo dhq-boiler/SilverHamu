@@ -1,4 +1,4 @@
-use newdbms::transactions::{Database, Rows, ScanLimits};
+use silverhamu::transactions::{Database, Rows, ScanLimits};
 use std::alloc::{GlobalAlloc, Layout, System};
 use std::error::Error;
 use std::path::PathBuf;

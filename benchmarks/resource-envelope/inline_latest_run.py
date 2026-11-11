@@ -9,7 +9,7 @@ for kind,dockerfile in [('','benchmarks/resource-envelope/history-capacity.Docke
   if variant=='after':args+=['--build-arg','EXTRA_FEATURES=,inline-latest']
   run(args+['.'])
 run(['docker','run','--rm','-e','CATDB_SERVER=/usr/local/bin/silverhamu-server','-v',str(r)+':/source:ro','--tmpfs','/source/artifacts:rw,mode=1777','catdb-inline-service-after:local','python','/source/tests/service_protocol.py'])
-run(['docker','run','--rm','-e','NEWDBMS_TEST_DLL=/usr/local/lib/libnewdbms.so','-v',str(r)+':/source:ro','--tmpfs','/source/artifacts:rw,mode=1777','-w','/source','catdb-inline-service-after:local','python','-m','unittest','discover','-s','tests','-p','*ffi_checks.py'])
+run(['docker','run','--rm','-e','NEWDBMS_TEST_DLL=/usr/local/lib/libsilverhamu.so','-v',str(r)+':/source:ro','--tmpfs','/source/artifacts:rw,mode=1777','-w','/source','catdb-inline-service-after:local','python','-m','unittest','discover','-s','tests','-p','*ffi_checks.py'])
 schedule=[]
 for kind in ['memory','service']:
  for rep in range(1,4):

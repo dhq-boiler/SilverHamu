@@ -1,4 +1,4 @@
-use newdbms::transactions::{Database, Error, ResourceLimits, ScanLimits};
+use silverhamu::transactions::{Database, Error, ResourceLimits, ScanLimits};
 use std::path::PathBuf;
 struct Fixture(PathBuf);
 impl Fixture {

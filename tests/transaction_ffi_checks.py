@@ -3,7 +3,7 @@ import sys
 import ctypes as c
 import pathlib, tempfile, unittest, struct
 ROOT=pathlib.Path(__file__).resolve().parents[1]
-N=c.CDLL(os.environ.get("NEWDBMS_TEST_DLL", str(ROOT / "target/release" / ("newdbms.dll" if os.name == "nt" else "libnewdbms.dylib" if sys.platform == "darwin" else "libnewdbms.so"))))
+N=c.CDLL(os.environ.get("NEWDBMS_TEST_DLL", str(ROOT / "target/release" / ("silverhamu.dll" if os.name == "nt" else "libsilverhamu.dylib" if sys.platform == "darwin" else "libsilverhamu.so"))))
 U8=c.POINTER(c.c_uint8); U64=c.c_uint64; OUT=c.POINTER(U64)
 for name,args in {
  'db_create':[U8,U64,U8,OUT], 'db_open':[U8,U64,OUT], 'db_close':[U64],

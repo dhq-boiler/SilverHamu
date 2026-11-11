@@ -7,7 +7,7 @@ import tempfile
 import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-DLL = c.CDLL(os.environ.get("NEWDBMS_TEST_DLL", str(ROOT / "target/release" / ("newdbms.dll" if os.name == "nt" else "libnewdbms.dylib" if sys.platform == "darwin" else "libnewdbms.so"))))
+DLL = c.CDLL(os.environ.get("NEWDBMS_TEST_DLL", str(ROOT / "target/release" / ("silverhamu.dll" if os.name == "nt" else "libsilverhamu.dylib" if sys.platform == "darwin" else "libsilverhamu.so"))))
 U64 = c.c_uint64
 PTR = c.c_void_p
 for name, args in {

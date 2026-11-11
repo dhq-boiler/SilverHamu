@@ -1,5 +1,5 @@
 #![cfg(feature = "history-metrics")]
-use newdbms::transactions::{Database, Error, ResourceLimits};
+use silverhamu::transactions::{Database, Error, ResourceLimits};
 use std::path::PathBuf;
 struct Fixture(PathBuf);
 impl Fixture {

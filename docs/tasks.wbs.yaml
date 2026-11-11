@@ -3,6 +3,24 @@ title: SilverHamu
 createdAt: 2026-11-09T15:31:25.7166025Z
 modifiedAt: 2026-11-11T10:04:37.930708Z
 tasks:
+- id: silverhamu-readme-benchmark-legend
+  title: READMEのベンチマーク画像の凡例をsilverhamuに更新する
+  estimateHours: 0.25
+  remainingHours: 0
+  notes: >-
+    READMEから参照するhigh-clients比較画像の生成元とPNGを更新し、測定値・原データを保持したまま凡例の表示を確認する。
+
+
+    chart.pyの凡例と下部注記の表示名をsilverhamuに変更しcomparison.pngを再生成。READMEと比較レポートは同じPNGを参照するため両方へ反映。元のcatdb-service測定キーと結果JSONは変更なし。生成処理で36ケースの条件・完了件数・指標・重複と欠落を検証し成功。生成画像を目視確認し凡例・注記に重なりや欠けなし、数値・色・レイアウトを維持。対象差分はchart.pyの2行とPNGのみ、git diff --check成功。
+- id: silverhamu-rust-library-name
+  title: Rustライブラリ名をsilverhamuへ統一する
+  estimateHours: 1
+  remainingHours: 0.25
+  notes: >-
+    Cargoのライブラリ名・Rust参照・READMEの依存例を更新する。cdylibの出力名変更に合わせてネイティブ参照・CI・Dockerも更新し、C ABIと保存形式と既存のC#名前空間は維持する。過去の計測原データは保持。既存テストと外部Rust利用例・FFIで検証する。
+
+
+    Cargoのlib名と計測用manifest、全Rust参照、README依存例、バックアップ文書、ネイティブDLLのC#ロード先・コピー先、Python FFIテスト、CI、Dockerとベンチスクリプトをsilverhamuに統一。C ABI・保存形式・C# NewDbms名前空間・過去の計測記録を保持。Cargo TOML解析、旧Rust参照なし、Python構文解析、MSBuild XML解析、DllImport先、READMEの整合チェックとgit diff --check成功。実行環境でcargo/rustcが見つからず、Docker daemonも未起動のため実ビルド・既存Rustテスト・新DLLでのFFI検証は未実行。残り0.25hはツールチェーン利用可能後の検証見積り（環境準備時間は不明）。
 - id: sql-semantic-types
   title: SQLで日時・金額・識別子の意味を保証する
   notes: 基本型と名前付き独自型を使い分ける。異なるIDの比較・代入を拒否し、制約・型情報がSQLの読み書きと保存を通じて保たれることを終了条件とする。

@@ -1,4 +1,4 @@
-use newdbms::transactions::Database;
+use silverhamu::transactions::Database;
 use std::error::Error;
 use std::fs::{self, File};
 use std::io::Write;

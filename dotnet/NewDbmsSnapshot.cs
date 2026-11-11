@@ -70,15 +70,15 @@ public sealed class NewDbmsSnapshot : IDisposable
 
     private static class Native
     {
-        [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
         internal static extern uint ndb_abi_version();
-        [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
         internal static extern int ndb_open(byte[] path, ulong length, byte[] generation, out ulong handle, out ulong count);
-        [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
         internal static extern int ndb_read_page(ulong handle, ulong start, uint limit, [Out] byte[] output, ulong capacity, out ulong bytes, out ulong count);
-        [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
         internal static extern int ndb_close(ulong handle);
-        [DllImport("newdbms", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("silverhamu", CallingConvention = CallingConvention.Cdecl)]
         internal static extern int ndb_create(byte[] path, ulong length, byte[] generation, byte[] framed, ulong framedLength, ulong count);
     }
 }

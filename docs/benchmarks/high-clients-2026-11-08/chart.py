@@ -17,7 +17,7 @@ from matplotlib.ticker import MaxNLocator, StrMethodFormatter
 HERE = Path(__file__).resolve().parent
 CLIENTS = (4, 16, 32, 64)
 SERIES = {
-    "catdb-service": ("catdb", "#166A68", ""),
+    "catdb-service": ("silverhamu", "#166A68", ""),
     "oracle": ("Oracle 26ai Free", "#A35136", "///"),
     "postgres": ("PostgreSQL 18.6", "#496786", ".."),
 }
@@ -102,7 +102,7 @@ def plot(cases, output):
     draw_panel(axes[0], cases, "ops_s", "Throughput (updates/s)", "Higher is better", ",.0f")
     draw_panel(axes[1], cases, "p99_ms", "p99 latency (ms)", "Lower is better", ".2f")
     fig.text(0.047, 0.035,
-             "2 CPUs and 4 GiB each for client and server  ·  catdb format 4, 64 MiB preallocated WAL",
+             "2 CPUs and 4 GiB each for client and server  ·  silverhamu format 4, 64 MiB preallocated WAL",
              fontsize=10, color=MUTED, va="center")
     fig.savefig(output, dpi=160, facecolor="white")
     plt.close(fig)

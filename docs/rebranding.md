@@ -27,13 +27,15 @@ Ownerでは、提供された回し車GIFを処理中だけ画面中央に表示
 
 Ownerは `apps/SilverHamu.Owner.sln` から開く。ソリューション内のプロジェクトと出力は `SilverHamu.*`。ネイティブDLLの場所を指定するMSBuildプロパティは `SilverHamuNativePath`。旧名のソリューション・プロジェクト・SDKソースは新名へ移行し、旧名のビルドキャッシュは削除した。
 
+Rustライブラリ名も `newdbms` から `silverhamu` へ移行する。Rustのimportと依存名を `silverhamu` に更新する。ネイティブ出力は `silverhamu.dll` / `libsilverhamu.so` / `libsilverhamu.dylib` となるため、配置ファイルとロード先も更新する。旧名のバイナリ別名は提供しない。
+
 ## 既存データとの互換性
 
 次の識別子は既存データ・接続設定を維持するため変更しない。
 
 - `.ndb`、`.catlink`、旧参照ファイル名 `catdb-current.txt` と既存バックアップの形式。
 - バックアップ識別子 `CATDBBAK`、SQLカタログの `_catdb_owner/sql/v1/`、Raft内部キー。
-- Rustライブラリ名 `newdbms`、ネイティブDLL名とC ABI。
+- C ABIのシンボルと呼出規約、C#バインディングの `NewDbms` 名前空間。
 - 設定・テスト・運用スクリプトの `CATDB_*` 環境変数。
 - WindowsのアプリケーションID `dev.catdb.owner`。
 - 過去の計測データと、比較用の `catdb` 計測キー、実験用のイメージ名・実行オプション。資料の本文・表では製品の表示名をSilverHamuに統一し、数値や原データは変更しない。

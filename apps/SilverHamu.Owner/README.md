@@ -12,7 +12,7 @@ Visual Studio 2026 Communityで `../SilverHamu.Owner.sln` を開き、`SilverHam
 ./scripts/build-owner-native.ps1
 ```
 
-生成先は `target/release/newdbms.dll`。アプリとテストのビルド時に各出力フォルダーへコピーされる。`SilverHamuNativePath` で互換DLLの場所を明示することもできる。組み込み接続はWindows x64版。
+生成先は `target/release/silverhamu.dll`。アプリとテストのビルド時に各出力フォルダーへコピーされる。`SilverHamuNativePath` で互換DLLの場所を明示することもできる。組み込み接続はWindows x64版。
 
 ビルド済みの開発用アプリは `bin/Debug/net10.0-windows10.0.19041.0/win-x64/SilverHamu.Owner.exe`。出力フォルダーの依存ファイルと一緒に利用する。自己完結パッケージ・インストーラーは未作成。
 

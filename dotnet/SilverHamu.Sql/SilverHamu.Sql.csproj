@@ -3,9 +3,9 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <SilverHamuNativeName Condition="$([MSBuild]::IsOSPlatform('Windows'))">newdbms.dll</SilverHamuNativeName>
-    <SilverHamuNativeName Condition="$([MSBuild]::IsOSPlatform('Linux'))">libnewdbms.so</SilverHamuNativeName>
-    <SilverHamuNativeName Condition="$([MSBuild]::IsOSPlatform('OSX'))">libnewdbms.dylib</SilverHamuNativeName>
+    <SilverHamuNativeName Condition="$([MSBuild]::IsOSPlatform('Windows'))">silverhamu.dll</SilverHamuNativeName>
+    <SilverHamuNativeName Condition="$([MSBuild]::IsOSPlatform('Linux'))">libsilverhamu.so</SilverHamuNativeName>
+    <SilverHamuNativeName Condition="$([MSBuild]::IsOSPlatform('OSX'))">libsilverhamu.dylib</SilverHamuNativeName>
     <SilverHamuNativePath Condition="'$(SilverHamuNativePath)' == ''">$(MSBuildThisFileDirectory)../../target/release/$(SilverHamuNativeName)</SilverHamuNativePath>
   </PropertyGroup>
   <ItemGroup>

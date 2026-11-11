@@ -7,7 +7,7 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-NATIVE = c.CDLL(os.environ.get("NEWDBMS_TEST_DLL", str(ROOT / "target/release" / ("newdbms.dll" if os.name == "nt" else "libnewdbms.dylib" if sys.platform == "darwin" else "libnewdbms.so"))))
+NATIVE = c.CDLL(os.environ.get("NEWDBMS_TEST_DLL", str(ROOT / "target/release" / ("silverhamu.dll" if os.name == "nt" else "libsilverhamu.dylib" if sys.platform == "darwin" else "libsilverhamu.so"))))
 U8 = c.POINTER(c.c_uint8)
 U64 = c.c_uint64
 NATIVE.ndb_open.argtypes = [U8, U64, U8, c.POINTER(U64), c.POINTER(U64)]

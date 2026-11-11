@@ -1,5 +1,5 @@
-use newdbms::Snapshot;
-use newdbms::transactions::{
+use silverhamu::Snapshot;
+use silverhamu::transactions::{
     ConflictKind, Database, Error, MAX_KEY_BYTES, MAX_TRANSACTION_WRITES, MAX_VALUE_BYTES,
 };
 use std::fs;
@@ -12,7 +12,7 @@ struct Fixture(PathBuf);
 #[cfg(feature = "lock-timing")]
 #[test]
 fn checkpoint_replace_trace_is_bounded_by_the_call_and_consumed_once() {
-    use newdbms::transactions::{
+    use silverhamu::transactions::{
         diagnostic_now_ns, take_checkpoint_replace_trace, take_checkpoint_timing,
     };
     let fixture = Fixture::new();
@@ -571,7 +571,7 @@ fn st_concurrent_readers_never_observe_half_of_a_committed_pair() {
 
 #[test]
 fn bv_transaction_body_limit_allows_exact_maximum_and_rejects_next_byte() {
-    use newdbms::transactions::MAX_TRANSACTION_BYTES;
+    use silverhamu::transactions::MAX_TRANSACTION_BYTES;
     let f = Fixture::new();
     let db = f.create();
     let mut tx = db.begin().unwrap();

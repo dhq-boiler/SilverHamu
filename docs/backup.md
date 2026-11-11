@@ -8,7 +8,7 @@ Use this procedure for one standalone transaction database, including a service 
 
 For replicated services, export application data through the leader. A single-file backup omits the node's durable votes and log. [Cluster recovery](replication.md#restart-and-capacity)
 
-1. Build the CLI with `cargo build --locked --release --bin silverhamu`. The executable is `./target/release/silverhamu` on Linux and `.\target\release\silverhamu.exe` on Windows. Rust applications can call `newdbms::transactions::backup` and `newdbms::transactions::restore` directly.
+1. Build the CLI with `cargo build --locked --release --bin silverhamu`. The executable is `./target/release/silverhamu` on Linux and `.\target\release\silverhamu.exe` on Windows. Rust applications can call `silverhamu::transactions::backup` and `silverhamu::transactions::restore` directly.
 2. Close all embedded database handles or stop the service. Use its configured database path. Choose an existing private backup directory on a separate device and a new archive filename. The command holds the ownership lock and a file lock during the copy and reports an error if the database is busy.
 3. Restore to a new database filename in an existing directory with space for the **full original file**, including its reserved WAL capacity.
 

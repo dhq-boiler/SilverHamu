@@ -1,4 +1,4 @@
-use newdbms::{Snapshot, create};
+use silverhamu::{Snapshot, create};
 use std::error::Error;
 use std::path::Path;
 use std::time::Instant;
@@ -8,8 +8,8 @@ const DEMO_GENERATION: [u8; 16] = *b"synthetic-demo01";
 fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<_> = std::env::args_os().collect();
     match args.get(1).and_then(|s| s.to_str()) {
-        Some("backup") if args.len() == 4 => newdbms::transactions::backup(&args[2], &args[3])?,
-        Some("restore") if args.len() == 4 => newdbms::transactions::restore(&args[2], &args[3])?,
+        Some("backup") if args.len() == 4 => silverhamu::transactions::backup(&args[2], &args[3])?,
+        Some("restore") if args.len() == 4 => silverhamu::transactions::restore(&args[2], &args[3])?,
         Some("demo") if args.len() == 4 => {
             let count: usize = args[3].to_str().ok_or("invalid count")?.parse()?;
             if count > 1_000_000 {

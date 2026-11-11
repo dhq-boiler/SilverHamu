@@ -29,7 +29,7 @@ unsafe impl GlobalAlloc for Alloc {
 static ALLOC: Alloc = Alloc;
 fn main() {
     let n = 10000;
-    let (reads, writes) = newdbms::service::wire_probe(
+    let (reads, writes) = silverhamu::service::wire_probe(
         n,
         || ENABLED.store(true, Ordering::Relaxed),
         || ENABLED.store(false, Ordering::Relaxed),

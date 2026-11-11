@@ -1,8 +1,8 @@
 #[cfg(feature = "service")]
 mod probe {
-    use newdbms::transactions::{Database, ScanLimits};
+    use silverhamu::transactions::{Database, ScanLimits};
     #[cfg(feature = "lock-timing")]
-    use newdbms::transactions::{take_state_hold_timing, take_thread_lock_wait_ns};
+    use silverhamu::transactions::{take_state_hold_timing, take_thread_lock_wait_ns};
     #[cfg(not(feature = "lock-timing"))]
     fn take_state_hold_timing() -> [u64; 3] {
         [0; 3]

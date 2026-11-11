@@ -1,12 +1,12 @@
 <Project>
   <PropertyGroup>
-    <SilverHamuNativePath Condition="'$(SilverHamuNativePath)' == ''">$(MSBuildThisFileDirectory)..\target\release\newdbms.dll</SilverHamuNativePath>
+    <SilverHamuNativePath Condition="'$(SilverHamuNativePath)' == ''">$(MSBuildThisFileDirectory)..\target\release\silverhamu.dll</SilverHamuNativePath>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)..\dotnet\NewDbmsDatabase.cs" Link="Native\NewDbmsDatabase.cs" />
-    <Content Include="$(SilverHamuNativePath)" Link="newdbms.dll" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="$(SilverHamuNativePath)" Link="silverhamu.dll" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <Target Name="RequireSilverHamuNative" BeforeTargets="PrepareForBuild" Condition="!Exists('$(SilverHamuNativePath)')">
-    <Error Text="silverhamu native DLL is missing. Run scripts/build-owner-native.ps1 first, or set SilverHamuNativePath to a compatible x64 newdbms.dll." />
+    <Error Text="silverhamu native DLL is missing. Run scripts/build-owner-native.ps1 first, or set SilverHamuNativePath to a compatible x64 silverhamu.dll." />
   </Target>
 </Project>

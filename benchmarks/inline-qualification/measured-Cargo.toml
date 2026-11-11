@@ -11,7 +11,7 @@ publish = false
 default-run = "silverhamu"
 
 [lib]
-name = "newdbms"
+name = "silverhamu"
 crate-type = ["rlib", "cdylib"]
 
 [dependencies]

@@ -1,4 +1,4 @@
-use newdbms::transactions::{
+use silverhamu::transactions::{
     ConflictKind, Database, Error, MAX_SCAN_PAGE_BYTES, MAX_SCAN_PAGE_ROWS, MAX_SCAN_PAGE_VISITS,
     Rows, ScanLimits, Transaction,
 };
@@ -220,7 +220,7 @@ fn er_invalid_ranges_and_continuations_are_rejected_without_panics() {
             Err(Error::Invalid(_))
         ));
     }
-    let long = vec![0; newdbms::transactions::MAX_KEY_BYTES + 1];
+    let long = vec![0; silverhamu::transactions::MAX_KEY_BYTES + 1];
     assert!(matches!(
         tx.scan_page(b"", None, Some(&long), ScanLimits::default()),
         Err(Error::Limit(_))

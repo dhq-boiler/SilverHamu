@@ -2,7 +2,7 @@
 
 `NewDbmsDatabase.cs` wraps the transactional C ABI and `NewDbmsSnapshot.cs` wraps immutable snapshots. Include the source files in a modern .NET application with implicit usings enabled, and build the native library with `cargo build --locked --release --lib`.
 
-Deploy the matching native library beside your executable or configure the application's native library resolver. The native library is named `newdbms.dll` on Windows, `libnewdbms.so` on Linux, and `libnewdbms.dylib` on macOS. These bindings and the `NewDbms` namespace retain their legacy names for compatibility.
+Deploy the matching native library beside your executable or configure the application's native library resolver. The native library is named `silverhamu.dll` on Windows, `libsilverhamu.so` on Linux, and `libsilverhamu.dylib` on macOS. The C# bindings and the `NewDbms` namespace retain their legacy names for compatibility. Update native library deployments from the former `newdbms` filenames to the names above; C ABI symbols and calling conventions are unchanged.
 
 Dispose transactions and database handles deterministically. A database file has one owning process at a time.
 

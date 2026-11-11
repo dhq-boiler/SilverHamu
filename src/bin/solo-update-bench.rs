@@ -1,4 +1,4 @@
-use newdbms::transactions::{Database, Transaction};
+use silverhamu::transactions::{Database, Transaction};
 use serde_json::{Value, json};
 use std::{collections::BTreeMap, time::Instant};
 
@@ -52,17 +52,17 @@ fn main() {
     for &(k, stamp) in &operations {
         let start = Instant::now();
         #[cfg(feature = "lock-timing")]
-        let entered = newdbms::transactions::diagnostic_now_ns();
+        let entered = silverhamu::transactions::diagnostic_now_ns();
         let mut tx = db.begin().unwrap();
         tx.put(&k.to_be_bytes(), &value(k, stamp)).unwrap();
         #[cfg(feature = "lock-timing")]
-        let commit = newdbms::transactions::diagnostic_now_ns();
+        let commit = silverhamu::transactions::diagnostic_now_ns();
         tx.commit().unwrap();
         #[cfg(feature = "lock-timing")]
-        let ended = newdbms::transactions::diagnostic_now_ns();
+        let ended = silverhamu::transactions::diagnostic_now_ns();
         samples.push(start.elapsed().as_nanos() as u64);
         #[cfg(feature="lock-timing")]
-        diagnostics.push(json!({"entered":entered,"commit":commit,"ended":ended,"trace":newdbms::transactions::take_commit_trace(),"detail":newdbms::transactions::take_commit_detail(),"sync_start":newdbms::transactions::take_commit_sync_start()}));
+        diagnostics.push(json!({"entered":entered,"commit":commit,"ended":ended,"trace":silverhamu::transactions::take_commit_trace(),"detail":silverhamu::transactions::take_commit_detail(),"sync_start":silverhamu::transactions::take_commit_sync_start()}));
     }
     let elapsed = wall.elapsed().as_secs_f64();
     let syncs = db.commit_sync_attempts() - sync_before;

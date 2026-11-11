@@ -16,7 +16,7 @@ def signature(lib,name,*args):
     return f
 
 def smoke(root):
-    lib=C.CDLL("/usr/local/lib/libnewdbms.so"); u=C.c_uint64; ptr=C.POINTER(u)
+    lib=C.CDLL("/usr/local/lib/libsilverhamu.so"); u=C.c_uint64; ptr=C.POINTER(u)
     create=signature(lib,"db_create",C.c_char_p,u,C.c_char_p,ptr)
     close=signature(lib,"db_close",u)
     configure=signature(lib,"set_checkpoint_range_writeback",u,C.c_uint32)

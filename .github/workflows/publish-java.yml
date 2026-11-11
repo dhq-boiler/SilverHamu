@@ -1,0 +1,123 @@
+name: Publish Java client to Maven Central
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Client version in the verified GitHub release
+        required: true
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: publish-silverhamu-java-client
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: maven-central
+      url: https://central.sonatype.com/artifact/io.github.dhq-boiler/silverhamu-client
+    env:
+      RELEASE_VERSION: ${{ inputs.version }}
+    steps:
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.11'
+      - name: Verify the tested artifacts
+        shell: python
+        run: |
+          import hashlib, json, os, pathlib, re, urllib.request
+          import xml.etree.ElementTree as ET
+          version = os.environ['RELEASE_VERSION']
+          assert re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+', version), 'invalid version'
+          base = f'https://github.com/dhq-boiler/SilverHamu/releases/download/clients/v{version}/'
+          with urllib.request.urlopen(base + 'release-manifest.json', timeout=60) as response:
+              manifest = json.load(response)
+          assert manifest['version'] == version
+          target = pathlib.Path('bundle/io/github/dhq-boiler/silverhamu-client', version)
+          target.mkdir(parents=True)
+          for suffix in ('.pom', '.jar', '-sources.jar', '-javadoc.jar'):
+              name = f'silverhamu-client-{version}{suffix}'
+              with urllib.request.urlopen(base + name, timeout=60) as response:
+                  data = response.read()
+              assert hashlib.sha256(data).hexdigest() == manifest['files'][name]['sha256'], name
+              (target / name).write_bytes(data)
+          pom = ET.parse(target / f'silverhamu-client-{version}.pom').getroot()
+          ns = {'m': 'http://maven.apache.org/POM/4.0.0'}
+          assert pom.find('m:groupId', ns).text == 'io.github.dhq-boiler'
+          assert pom.find('m:artifactId', ns).text == 'silverhamu-client'
+          assert pom.find('m:version', ns).text == version
+          print(f'Verified four Maven artifacts for {version}')
+      - name: Sign and verify the Maven bundle
+        shell: python
+        env:
+          MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+        run: |
+          import hashlib, os, pathlib, shutil, subprocess, tempfile
+          key = os.environ.get('MAVEN_GPG_PRIVATE_KEY')
+          if not key:
+              raise SystemExit('Configure MAVEN_GPG_PRIVATE_KEY in the maven-central environment')
+          with tempfile.TemporaryDirectory() as home:
+              os.chmod(home, 0o700)
+              command = ['gpg', '--homedir', home, '--batch']
+              subprocess.run(command + ['--import'], input=key.encode(), check=True)
+              listing = subprocess.check_output(command + ['--with-colons', '--list-secret-keys'], text=True)
+              assert sum(line.startswith('sec:') for line in listing.splitlines()) == 1, 'import exactly one signing key'
+              fingerprint = next(line.split(':')[9] for line in listing.splitlines() if line.startswith('fpr:'))
+              files = sorted(pathlib.Path('bundle').rglob('*'))
+              for path in files:
+                  if not path.is_file():
+                      continue
+                  subprocess.run(command + ['--yes', '--pinentry-mode', 'loopback', '--passphrase-fd', '0', '--local-user', fingerprint, '--armor', '--detach-sign', str(path)],
+                                 input=(os.environ.get('MAVEN_GPG_PASSPHRASE', '') + '\n').encode(), check=True)
+                  subprocess.run(command + ['--verify', str(path) + '.asc', str(path)], check=True)
+                  data = path.read_bytes()
+                  for algorithm in ('md5', 'sha1', 'sha256', 'sha512'):
+                      pathlib.Path(str(path) + '.' + algorithm).write_text(hashlib.new(algorithm, data).hexdigest(), encoding='ascii')
+          shutil.make_archive('central-bundle', 'zip', 'bundle')
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: silverhamu-maven-central-${{ inputs.version }}
+          path: central-bundle.zip
+          if-no-files-found: error
+      - name: Upload and follow the deployment to publication
+        shell: python
+        env:
+          CENTRAL_TOKEN_USERNAME: ${{ secrets.CENTRAL_TOKEN_USERNAME }}
+          CENTRAL_TOKEN_PASSWORD: ${{ secrets.CENTRAL_TOKEN_PASSWORD }}
+        run: |
+          import base64, json, os, pathlib, time, urllib.parse, urllib.request, uuid
+          user, password = os.environ.get('CENTRAL_TOKEN_USERNAME'), os.environ.get('CENTRAL_TOKEN_PASSWORD')
+          if not user or not password:
+              raise SystemExit('Configure CENTRAL_TOKEN_USERNAME and CENTRAL_TOKEN_PASSWORD in the maven-central environment')
+          authorization = 'Bearer ' + base64.b64encode(f'{user}:{password}'.encode()).decode()
+          base = 'https://central.sonatype.com/api/v1/publisher/'
+          boundary = uuid.uuid4().hex
+          data = (f'--{boundary}\r\nContent-Disposition: form-data; name="bundle"; filename="central-bundle.zip"\r\nContent-Type: application/octet-stream\r\n\r\n'.encode()
+                  + pathlib.Path('central-bundle.zip').read_bytes() + f'\r\n--{boundary}--\r\n'.encode())
+          query = urllib.parse.urlencode({'name': 'SilverHamu Java client ' + os.environ['RELEASE_VERSION'], 'publishingType': 'AUTOMATIC'})
+          request = urllib.request.Request(base + 'upload?' + query, data=data, headers={'Authorization': authorization, 'Content-Type': 'multipart/form-data; boundary=' + boundary}, method='POST')
+          with urllib.request.urlopen(request, timeout=120) as response:
+              deployment = str(uuid.UUID(response.read().decode().strip()))
+          pathlib.Path('deployment-id.txt').write_text(deployment + '\n')
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write(f'Maven Central deployment: `{deployment}`\n')
+          print('Deployment ID:', deployment, flush=True)
+          for attempt in range(90):
+              request = urllib.request.Request(base + 'status?' + urllib.parse.urlencode({'id': deployment}), data=b'', headers={'Authorization': authorization}, method='POST')
+              with urllib.request.urlopen(request, timeout=60) as response:
+                  status = json.load(response)
+              state = status['deploymentState']
+              print('Deployment state:', state, flush=True)
+              if state == 'PUBLISHED':
+                  break
+              if state == 'FAILED':
+                  raise SystemExit(json.dumps(status.get('errors', {})))
+              time.sleep(10)
+          else:
+              raise SystemExit('Publication is still pending; follow the existing deployment ID before uploading again')

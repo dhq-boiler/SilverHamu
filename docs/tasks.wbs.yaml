@@ -10,7 +10,8 @@ tasks:
   - id: silverhamu-release-020-prepare
     title: バージョン・配布手順・リリースノートを整え全変更をコミットする
     estimateHours: 1
-    remainingHours: 1
+    remainingHours: 0
+    notes: 全83ファイルを04d69c1にコミットしてmainへpush済み。本体・Owner・SQLを0.2.0に更新し、検証・配布用workflowとリリースノートを追加。Releaseビルド・SQL618テスト・C ABI35テスト成功。Docker配布用ビルド成功。既存CIのmanaged-walベンチマークで旧トークン配置が残る問題を検出し修正中。
   - id: silverhamu-release-020-publish
     title: 配布物を検証してタグとGitHub Releaseを公開する
     estimateHours: 1

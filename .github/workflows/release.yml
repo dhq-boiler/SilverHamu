@@ -103,6 +103,7 @@ jobs:
           version="${RELEASE_TAG#v}"
           docker build -t "silverhamu:$version" .
           docker run --rm --entrypoint /bin/sh "silverhamu:$version" -c 'test -x /usr/local/bin/silverhamu-server && test -x /usr/local/bin/silverhamu && test "$(id -u)" = 10001'
+          python tests/service_container.py --image "silverhamu:$version"
           mkdir -p artifacts/release/downloads
           docker save "silverhamu:$version" | gzip > "artifacts/release/downloads/silverhamu-$version-linux-amd64-docker.tar.gz"
       - uses: actions/upload-artifact@v4

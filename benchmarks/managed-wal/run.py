@@ -189,7 +189,7 @@ def fixture(args, count, image_id, folder):
         limits=["--network",network,"--cpus","2","--memory","4g"]
         docker("run","-d","--name",server,*limits,"--network-alias","database","--read-only","--cap-drop","ALL",
                "--security-opt","no-new-privileges:true","-v",volume+":/data",
-               "-v",str(secret)+":/run/secrets/catdb_token:ro",args.image)
+               "-v",str(secret)+":/run/secrets/silverhamu_token:ro",args.image)
         clean.callback(docker,"rm","-f",server,allow_failure=True)
         docker("run","-d","--name",client,*limits,"--read-only","-v",volume+":/data:ro",
                "-v",str(repo/"scripts")+":/scripts:ro","-v",str(Path(__file__).resolve().parent)+":/study:ro",

@@ -1,6 +1,8 @@
 # SilverHamu
 
-<img src="assets/branding/ginhamu_profile.png" alt="SilverHamu — ギンハムちゃんの横顔" width="144">
+<p align="center">
+  <img src="assets/branding/ginhamu_profile.png" alt="SilverHamu — ギンハムちゃんの横顔" width="144">
+</p>
 
 SilverHamu combines the silver bullet ambition with Hamu, a coined name derived from hamster. See [migration and compatibility](docs/rebranding.md) for renamed commands and SDKs, unpublished package names, and identifiers retained for existing databases.
 

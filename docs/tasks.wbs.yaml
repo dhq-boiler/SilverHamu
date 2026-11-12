@@ -1,7 +1,7 @@
 version: 3
 title: SilverHamu
 createdAt: 2026-11-09T15:31:25.7166025Z
-modifiedAt: 2026-11-12T10:13:16.6498165Z
+modifiedAt: 2026-11-12T10:34:42.8459102Z
 tasks:
 - id: silverhamu-release-020
   title: 全変更をコミットしSilverHamu v0.2.0の検証済み配布物を公開する
@@ -538,3 +538,8 @@ tasks:
   estimateHours: 2
   remainingHours: 0
   notes: 先生の依頼。既存の手動main起点の公開方式へ揃え、Linux上でバージョン一致・fmt・全テスト・Clippy・実サービス相互運用・publish dry-run・配布物を検証する。公開は分離したcrates-io環境ジョブでOIDCの短期トークンを使い、検証済み配布物と再生成結果のSHA256を照合。既存版は同一SHAかつnon-yankedなら再公開せず、別内容・HTTPエラー・バージョン不一致は失敗させる観点をテスト。共通クライアント配布物へRustを追加し、Trusted Publisherの対象repo/workflow/environmentを限定して設定する。先行作業の未コミット文書・WBS変更は保持。隔離済みWindowsツールは使わない。 実装・Linux検証完了：publish-rust.ymlはmain限定の手動入力version/publish（既定false）、検証と公開を分離、crates-io環境・OIDC v1.0.6をSHA固定。共通配布物と通常CIへRust/公開チェックを統合。actionlint 1.7.12で3ワークフロー成功、公開判定10テスト・Rust11テスト・README3例・fmt/Clippy・実サービスtoken/TLS相互運用・cargo packageとpublish --dry-run成功。再生成SHA87659465c37f3c471ac15b72271e05688d8f65069033b359f7ffbb9fc02c441b一致。ログartifacts/rust-actions-check/validation.logとdry-run.log。残作業はmainへのコミット/pushとGitHub crates-io環境のmain制限、crates.ioへowner dhq-boiler/repo SilverHamu/workflow publish-rust.yml/environment crates-ioの限定Trusted Publisher登録、GitHub上の検証のみ実行。権限登録の最終確認待ち。 先生が限定Trusted Publisherを登録済みと連絡し、mainへのコミット・通常pushとGitHub Actions検証を明示承認。origin/mainとの差分は既存Rustクライアントコミット66b0121のみで分岐なし。GitHubのcrates-io Environmentを作成しmainブランチだけのdeployment branch policyを設定して進める。 完了：先生がTrusted Publisher登録を済ませ、実装fc30175と既存Rust追加66b0121をmainへ通常push。GitHub crates-io Environmentはmainブランチ限定。publish-rust.ymlをversion=0.2.0/publish=falseで実行した43197899221がsuccess、build成功・publishは意図どおりskipped。https://github.com/dhq-boiler/SilverHamu/actions/runs/43197899221 。同じコミットのLanguage clients 43197858157もsuccessでRustのubuntu/windows両ジョブと全言語相互運用成功。https://github.com/dhq-boiler/SilverHamu/actions/runs/43197858157 。GitHubログはartifacts/rust-actions-check/github-release-validation.log。新しい版の公開・OIDCトークン交換は今回実行していない。再公開なし・Defender隔離維持。
+- id: rust-client-release-021
+  title: Rustクライアント0.2.1をGitHub Actionsから公開して実運用を確認する
+  estimateHours: 0.5
+  remainingHours: 0.5
+  notes: 先生の明示依頼。RustクライアントのCargo.toml/Cargo.lockと導入例だけを0.2.1へ更新しmainにコミット・通常push。publish-rust.ymlをversion=0.2.1/publish=trueで実行し、Linux検証、短期OIDC認証、検証済みパッケージの実公開とレジストリSHA256照合を確認。公開後は認証情報なしの新規Linux利用側から=0.2.1を取得してビルドする。他言語と本体のバージョンは変更しない。Defender隔離は維持。

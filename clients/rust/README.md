@@ -6,14 +6,14 @@ of the embedded storage engine. The API and protocol are experimental.
 Install from crates.io:
 
 ```sh
-cargo add silverhamu-client@0.2.0
+cargo add silverhamu-client@0.2.1
 ```
 
 Or add the dependency to `Cargo.toml`:
 
 ```toml
 [dependencies]
-silverhamu-client = "0.2.0"
+silverhamu-client = "0.2.1"
 ```
 
 ```rust,no_run

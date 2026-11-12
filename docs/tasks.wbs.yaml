@@ -1,7 +1,7 @@
 version: 3
 title: SilverHamu
 createdAt: 2026-11-09T15:31:25.7166025Z
-modifiedAt: 2026-11-12T10:44:25.0829253Z
+modifiedAt: 2026-11-12T11:02:03.1505243Z
 tasks:
 - id: silverhamu-release-020
   title: 全変更をコミットしSilverHamu v0.2.0の検証済み配布物を公開する
@@ -542,4 +542,4 @@ tasks:
   title: Rustクライアント0.2.1をGitHub Actionsから公開して実運用を確認する
   estimateHours: 0.5
   remainingHours: 0
-  notes: 先生の明示依頼。RustクライアントのCargo.toml/Cargo.lockと導入例だけを0.2.1へ更新しmainにコミット・通常push。publish-rust.ymlをversion=0.2.1/publish=trueで実行し、Linux検証、短期OIDC認証、検証済みパッケージの実公開とレジストリSHA256照合を確認。公開後は認証情報なしの新規Linux利用側から=0.2.1を取得してビルドする。他言語と本体のバージョンは変更しない。Defender隔離は維持。 完了：2a41fcaでRustのmanifest/lockと導入例を0.2.1へ更新しmainへ通常push。GitHub Actions 43201699145をversion=0.2.1/publish=trueで実行しbuild・publishともsuccess。https://github.com/dhq-boiler/SilverHamu/actions/runs/43201699145 。短期OIDCトークン取得、再生成パッケージ照合、実公開、レジストリchecksum照合、短期トークンの後処理まで全成功。Language clients 43201699053もsuccess。公開URL https://crates.io/crates/silverhamu-client/0.2.1 。認証情報なし・空Cargoキャッシュの別Linuxコンテナで=0.2.1を取得しcargo check --all-targets成功。公開配布物13985bytes・non-yanked・SHA256 2199b53c40cb5c16437194a13245a44dd1c0cc09dac732f74ed69305f08c99acがActions配布物と完全一致。配布物のgit.sha1も2a41fca81cf26835c287aab8086aca226ff9d22d・dirty=falseを確認。ログはartifacts/rust-client-021/github-publish.logとconsumer-check.log。Defender隔離を維持。
+  notes: 先生の明示依頼。RustクライアントのCargo.toml/Cargo.lockと導入例だけを0.2.1へ更新しmainにコミット・通常push。publish-rust.ymlをversion=0.2.1/publish=trueで実行し、Linux検証、短期OIDC認証、検証済みパッケージの実公開とレジストリSHA256照合を確認。公開後は認証情報なしの新規Linux利用側から=0.2.1を取得してビルドする。他言語と本体のバージョンは変更しない。Defender隔離は維持。 完了：2a41fcaでRustのmanifest/lockと導入例を0.2.1へ更新しmainへ通常push。GitHub Actions 43201699145をversion=0.2.1/publish=trueで実行しbuild・publishともsuccess。https://github.com/dhq-boiler/SilverHamu/actions/runs/43201699145 。短期OIDCトークン取得、再生成パッケージ照合、実公開、レジストリchecksum照合、短期トークンの後処理まで全成功。Language clients 43201699053もsuccess。公開URL https://crates.io/crates/silverhamu-client/0.2.1 。認証情報なし・空Cargoキャッシュの別Linuxコンテナで=0.2.1を取得しcargo check --all-targets成功。公開配布物13985bytes・non-yanked・SHA256 2199b53c40cb5c16437194a13245a44dd1c0cc09dac732f74ed69305f08c99acがActions配布物と完全一致。配布物のgit.sha1も2a41fca81cf26835c287aab8086aca226ff9d22d・dirty=falseを確認。ログはartifacts/rust-client-021/github-publish.logとconsumer-check.log。Defender隔離を維持。 先生からREADME本体のClient libraries表にRust行がないことを指摘。既存の0.2.1導入例更新の範囲として、Rust 1.89+・cargo add silverhamu-client@0.2.1・crates.io公開版リンクを追記し、全クライアントを0.2.0と見せる列見出しも修正する。 README表の文字順を保ちRubyの次にRustを追加。利用例へのローカルリンク、Rust 1.89+、0.2.1導入コマンドと公開済みcrates.ioリンクを記載し、列見出しをInstall commandへ変更。ローカルリンクの存在とgit diff --check成功を確認。文書変更のみのためビルドは行わず、今回の変更は未コミット。

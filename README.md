@@ -153,7 +153,7 @@ Connect to `127.0.0.1:7400` with the generated token. For individual logins and 
 
 Start a local silverhamu server with the [quick start](#quick-start). Choose a language below for an example that connects to the server, writes a binary key, and reads its value back.
 
-| Language and example | Runtime | Install version 0.2.0 | Package |
+| Language and example | Runtime | Install command | Package |
 | --- | --- | --- | --- |
 | [C#](https://www.nuget.org/packages/SilverHamu.Client/0.2.0#readme-body-tab) | .NET 10 | `dotnet package add SilverHamu.Client --version 0.2.0` | [NuGet](https://www.nuget.org/packages/SilverHamu.Client/0.2.0) |
 | [Go](clients/go/README.md) | Go 1.22+ | `go get github.com/dhq-boiler/SilverHamu/clients/go@v0.2.0` | [Go packages](https://pkg.go.dev/github.com/dhq-boiler/SilverHamu/clients/go@v0.2.0) |
@@ -161,6 +161,7 @@ Start a local silverhamu server with the [quick start](#quick-start). Choose a l
 | [JavaScript / TypeScript](clients/node/README.md) | Node.js 18+ | `npm install silverhamu-client@0.2.0` | [npm](https://www.npmjs.com/package/silverhamu-client/v/0.2.0) |
 | [Python](clients/python/README.md) | Python 3.10+ | `python -m pip install silverhamu-service-client==0.2.0` | [PyPI](https://pypi.org/project/silverhamu-service-client/0.2.0/) |
 | [Ruby](clients/ruby/README.md) | Ruby 3.1+ | `gem install silverhamu-client -v 0.2.0` | [RubyGems](https://rubygems.org/gems/silverhamu-client/versions/0.2.0) |
+| [Rust](clients/rust/README.md) | Rust 1.89+ | `cargo add silverhamu-client@0.2.1` | [crates.io](https://crates.io/crates/silverhamu-client/0.2.1) |
 
 ## Back up and restore a database
 

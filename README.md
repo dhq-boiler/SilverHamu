@@ -117,7 +117,7 @@ silverhamu is an embedded transactional key-value database written in Rust. It s
 
 New databases use a preallocated write-ahead log that checkpoints and grows automatically. Existing databases keep their storage policy on upgrade. [Capacity management and explicit migration](docs/service.md#default-wal-and-upgrades) · [Sustained writes across checkpoints and growth](docs/benchmarks/managed-wal-2026-11-08/README.md)
 
-Embed silverhamu in Rust, C or C#, or connect to its authenticated TCP service from Python, JavaScript/TypeScript (Node.js), Go, C#, Java or Ruby. Each service client supports binary keys and values, transactions and TLS account authentication. [Client libraries and examples](docs/clients.md)
+Embed silverhamu in Rust, C or C#, or connect to its authenticated TCP service from Rust, Python, JavaScript/TypeScript (Node.js), Go, C#, Java or Ruby. Each service client supports binary keys and values, transactions and TLS account authentication. [Client libraries and examples](docs/clients.md)
 
 **Experimental:** APIs and file formats may change. Use disposable data when evaluating silverhamu. [MIT license](LICENSE)
 

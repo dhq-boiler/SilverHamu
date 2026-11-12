@@ -1,0 +1,19 @@
+[package]
+name = "silverhamu-client"
+version = "0.2.0"
+edition = "2024"
+rust-version = "1.89"
+license = "MIT"
+description = "Synchronous TCP and TLS client for the SilverHamu service"
+repository = "https://github.com/dhq-boiler/SilverHamu"
+readme = "README.md"
+
+[dependencies]
+rustls = { version = "0.23", default-features = false, features = ["std", "ring"] }
+rustls-native-certs = "0.8"
+rustls-pemfile = "2"
+serde_json = "1"
+
+[[example]]
+name = "smoke"
+path = "examples/smoke.rs"

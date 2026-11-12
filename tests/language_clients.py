@@ -1,4 +1,4 @@
-"""Exercise all six SDKs against fresh token and TLS silverhamu services."""
+"""Exercise all seven SDKs against fresh token and TLS silverhamu services."""
 import argparse
 from contextlib import contextmanager
 import importlib.util
@@ -28,6 +28,8 @@ def commands():
         "dotnet": ["dotnet", os.getenv("CATDB_DOTNET_SMOKE", SDK / "dotnet/smoke/bin/Release/net10.0/Smoke.dll")],
         "java": ["java", "-cp", classpath, "io.github.dhqboiler.silverhamu.Smoke"],
         "ruby": ["ruby", SDK / "ruby/smoke.rb"],
+        "rust": [os.getenv("CATDB_RUST_SMOKE", SDK / "rust/target/debug/examples" /
+                            ("smoke.exe" if os.name == "nt" else "smoke"))],
     }
 
 

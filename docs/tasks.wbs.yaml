@@ -1,7 +1,7 @@
 version: 3
 title: SilverHamu
 createdAt: 2026-11-09T15:31:25.7166025Z
-modifiedAt: 2026-11-11T18:04:17.211611Z
+modifiedAt: 2026-11-12T08:28:16.9647762Z
 tasks:
 - id: silverhamu-release-020
   title: 全変更をコミットしSilverHamu v0.2.0の検証済み配布物を公開する
@@ -523,3 +523,8 @@ tasks:
   estimateHours: 4
   remainingHours: 0
   notes: 最初のGIFの絵と大きく走る動きが理想とのユーザー指定に従い元絵へ復帰。元12コマのうち最初の8コマを7・8・1・2・3・4・5・6の順に循環させ、途中から先頭へ飛ぶ構成を修正。各110ms・1周0.88秒・約9.1fps・4段階各2コマ。元の全不透明RGB値と透過の完全保持、8コマ・表示時間・無限ループを検証。輪郭の崩れる動画補間案と、脚が小さく不自然に流れる部品化方式は不採用としartifactsへ退避。最初のGIFと再構成スクリプトはapps/SilverHamu.Owner/Resources/Animationに保存。4列プレビューはartifacts/owner-animation-review/original-restored-preview.png。VS 2026ビルド成功、ソースと配置済みGIFのSHA256一致、Image_3全件SELECTの4秒超14連続画像で再生継続とエラーなしを確認。ユーザーから「すばらしい！」と採用確認済み。Kudaki MCP未公開・停止中のfallback記録で次回起動時に再反映する。
+- id: rust-sync-client
+  title: Rust同期クライアントを既存SDKと同じ機能範囲で提供する
+  estimateHours: 3
+  remainingHours: 0
+  notes: clients/rustに独立したsilverhamu-client crateを追加。トークン認証、検証付きTLS 1.3アカウント認証、バイナリ読み書き、トランザクション、raw request、タイムアウト、サーバーエラーと通信失敗を提供。検証観点 EQ=欠落と空値・読み書き、BV=フレームサイズ境界とu64、ST=確定・取消・不正遷移、ER=不正応答・途中切断・再送禁止、AUTH=資格情報・CA・ホスト名。単体試験・既存実サービス相互運用試験・CI・利用例を整備する。公開とコミットは依頼範囲外。 2026-11-12追記：同期API・README・CIと相互運用smokeを実装。Rust 1.89で最初の単体9テスト成功、実サービスのtoken/TLS読み書き・トランザクション・資格情報/CA/ホスト名拒否成功。検証ツール導入中にDefenderがrustfmt 1.89 Windows配布物のキャッシュ名7cab256ad2279e65ddfbb79ce454d5160fbcd58bb672742d59dd8883c55ff912をTrojan:Win32/Suschil!rfnとして検知。公式manifestのxz_hashとキャッシュ名は一致するが本体の実ハッシュは未確認。DefenderはIsActive=False・DidThreatExecute=False・対処成功を報告。除外・復元は行わず、追加取得/実行を停止。直接取得・展開は自動承認レビューで拒否され未実行。残作業は追加2テスト・READMEの3例を含む最終再検証とrustfmt/Clippy。安全性の確認時期は不明で完了とはしない。 先生の指示で隔離維持のまま検証を再開。Windows検知対象の復元・再取得・実行はせず、Linuxコンテナにクライアントのソースとlockfileだけを渡し、全11テスト・README例・rustfmt・Clippyを確認する。 2026-11-12完了：Ubuntuのrootless Podmanと公式rust:1.89.0-slimのLinuxツールを使用し、Windows検知対象と独立した環境で検証。実行時はnetwork=none、cap-drop=all、no-new-privileges、ホストマウントなし。cargo fmtとfmt --check成功、全11プロトコルテストとREADMEの3例のコンパイル成功、cargo clippy --locked --offline --all-targets -- -D warnings成功（終了コード0）。整形済みRustソース3ファイルを本流へ反映し検証コンテナからの出力とSHA256一致、git diff --check成功。CIの整形とClippyはLinuxに限定し、Windowsでは単体試験を維持して検知対象の補助ツールを要求しない。ログはartifacts/rust-client-linux/validation.log、分離設定はcontainer-isolation.json。Defenderの隔離・保護設定は変更していない。未コミット。

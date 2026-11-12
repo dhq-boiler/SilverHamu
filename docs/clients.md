@@ -4,6 +4,7 @@ Start a silverhamu service with the [quick start](../README.md#quick-start), the
 
 | Language | Runtime | Install or reference |
 |---|---|---|
+| [Rust](../clients/rust/README.md) | Rust 1.89+ | Use a path dependency on `clients/rust` (`silverhamu-client`); not yet published to crates.io. |
 | [Python](../clients/python/README.md) | Python 3.10+ | Install `silverhamu-service-client` and import `silverhamu_client`. |
 | [JavaScript and TypeScript](../clients/node/README.md) | Node.js 18+ | Run `npm install silverhamu-client@0.2.0`. The package includes TypeScript declarations. |
 | [Go](../clients/go/README.md) | Go 1.22+ | Run `go get github.com/dhq-boiler/SilverHamu/clients/go@v0.2.0`. |
@@ -19,4 +20,4 @@ For in-process use, the Rust crate, C ABI and existing C# native bindings open t
 
 ## Running the interoperability checks
 
-The [language clients workflow](../.github/workflows/language-clients.yml) builds the server and smoke programs from the checkout. After those build steps, run `python tests/language_clients.py`. It starts two disposable servers, passes a binary value from one language to the next, and checks each client against rejected credentials, an untrusted certificate and a hostname mismatch. Use `--clients` with one or more of `python node go dotnet java ruby` to run a subset.
+The [language clients workflow](../.github/workflows/language-clients.yml) builds the server and smoke programs from the checkout. After those build steps, run `python tests/language_clients.py`. It starts two disposable servers, passes a binary value from one language to the next, and checks each client against rejected credentials, an untrusted certificate and a hostname mismatch. Use `--clients` with one or more of `python node go dotnet java ruby rust` to run a subset. Rust protocol tests also run on Windows and Linux.

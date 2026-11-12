@@ -4,7 +4,7 @@ Start a silverhamu service with the [quick start](../README.md#quick-start), the
 
 | Language | Runtime | Install or reference |
 |---|---|---|
-| [Rust](../clients/rust/README.md) | Rust 1.89+ | Use a path dependency on `clients/rust` (`silverhamu-client`); not yet published to crates.io. |
+| [Rust](../clients/rust/README.md) | Rust 1.89+ | Run `cargo add silverhamu-client@0.2.0` from [crates.io](https://crates.io/crates/silverhamu-client). |
 | [Python](../clients/python/README.md) | Python 3.10+ | Install `silverhamu-service-client` and import `silverhamu_client`. |
 | [JavaScript and TypeScript](../clients/node/README.md) | Node.js 18+ | Run `npm install silverhamu-client@0.2.0`. The package includes TypeScript declarations. |
 | [Go](../clients/go/README.md) | Go 1.22+ | Run `go get github.com/dhq-boiler/SilverHamu/clients/go@v0.2.0`. |

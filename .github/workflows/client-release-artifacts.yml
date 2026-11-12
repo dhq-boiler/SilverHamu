@@ -24,6 +24,10 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
         with:
           python-version: '3.11'
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+        with:
+          toolchain: '1.89.0'
+          components: rustfmt, clippy
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -53,7 +57,19 @@ jobs:
           assert ET.parse('clients/java/pom.xml').getroot().find('{http://maven.apache.org/POM/4.0.0}version').text == version
           assert ET.parse('clients/dotnet/SilverHamu.Client/SilverHamu.Client.csproj').find('.//Version').text == version
           assert pathlib.Path('clients/go/go.mod').read_text().splitlines()[0] == 'module github.com/dhq-boiler/SilverHamu/clients/go'
+      - run: python scripts/rust-client-release.py metadata --version "$RELEASE_VERSION"
       - run: cargo build --locked --features service --bin silverhamu-server
+      - name: Build and verify the Rust distribution
+        run: |
+          cargo fmt --manifest-path clients/rust/Cargo.toml -- --check
+          cargo test --locked --manifest-path clients/rust/Cargo.toml
+          cargo clippy --locked --manifest-path clients/rust/Cargo.toml --all-targets -- -D warnings
+          cargo build --locked --manifest-path clients/rust/Cargo.toml --example smoke
+          cargo publish --dry-run --locked --manifest-path clients/rust/Cargo.toml
+          mkdir -p dist
+          package="clients/rust/target/package/silverhamu-client-$RELEASE_VERSION.crate"
+          python scripts/rust-client-release.py package --version "$RELEASE_VERSION" --package "$package"
+          cp "$package" dist/
       - name: Build and test Python distributions
         run: |
           python -m pip install build twine

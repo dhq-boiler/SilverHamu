@@ -3,11 +3,17 @@
 A synchronous Rust 1.89+ client for the SilverHamu TCP service. It is independent
 of the embedded storage engine. The API and protocol are experimental.
 
-This crate is not yet published to crates.io. In an application next to this checkout:
+Install from crates.io:
+
+```sh
+cargo add silverhamu-client@0.2.0
+```
+
+Or add the dependency to `Cargo.toml`:
 
 ```toml
 [dependencies]
-silverhamu-client = { path = "../SilverHamu/clients/rust" }
+silverhamu-client = "0.2.0"
 ```
 
 ```rust,no_run
@@ -106,3 +112,30 @@ python tests/language_clients.py --clients rust
 
 The interoperability check verifies binary values, transactions, token/TLS
 authentication and rejected credentials, untrusted CAs and hostname mismatches.
+
+## Releasing from GitHub Actions
+
+Update the version in `clients/rust/Cargo.toml` and refresh `clients/rust/Cargo.lock`,
+then merge the release changes into `main`. Run **Publish Rust client to crates.io**
+(`publish-rust.yml`) from `main` with that version. Leave `publish` unchecked for a
+validation-only run, or enable it to publish after all checks pass.
+
+The Linux build job checks metadata, formatting, tests, Clippy, token/TLS
+interoperability and `cargo publish --dry-run`. It uploads the tested `.crate` and
+records its SHA-256 in the run summary. The separate publish job checks the artifact,
+reproduces it from the same commit and checks its SHA-256 before requesting a
+short-lived crates.io token. The downloaded registry version must match that checksum.
+An already published, identical, non-yanked version succeeds without another upload;
+a different package at the same version fails. Bump the version for any release change.
+
+One-time configuration for this repository:
+
+- GitHub environment: `crates-io`, with deployments restricted to the `main` branch.
+- [crates.io Trusted Publishing](https://crates.io/crates/silverhamu-client/settings):
+  repository owner `dhq-boiler`, repository `SilverHamu`, workflow `publish-rust.yml`,
+  environment `crates-io`.
+
+The workflow uses OIDC, so it does not need a long-lived `CARGO_REGISTRY_TOKEN` secret.
+The **Build client release artifacts** workflow also includes the Rust `.crate` in
+the shared client downloads and checksums. Rust releases run on Linux; the quarantined
+Windows Rust tooling is not used.

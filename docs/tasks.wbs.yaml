@@ -1,7 +1,7 @@
 version: 3
 title: SilverHamu
 createdAt: 2026-11-09T15:31:25.7166025Z
-modifiedAt: 2026-11-12T08:28:16.9647762Z
+modifiedAt: 2026-11-12T10:09:08.0875548Z
 tasks:
 - id: silverhamu-release-020
   title: 全変更をコミットしSilverHamu v0.2.0の検証済み配布物を公開する
@@ -528,3 +528,13 @@ tasks:
   estimateHours: 3
   remainingHours: 0
   notes: clients/rustに独立したsilverhamu-client crateを追加。トークン認証、検証付きTLS 1.3アカウント認証、バイナリ読み書き、トランザクション、raw request、タイムアウト、サーバーエラーと通信失敗を提供。検証観点 EQ=欠落と空値・読み書き、BV=フレームサイズ境界とu64、ST=確定・取消・不正遷移、ER=不正応答・途中切断・再送禁止、AUTH=資格情報・CA・ホスト名。単体試験・既存実サービス相互運用試験・CI・利用例を整備する。公開とコミットは依頼範囲外。 2026-11-12追記：同期API・README・CIと相互運用smokeを実装。Rust 1.89で最初の単体9テスト成功、実サービスのtoken/TLS読み書き・トランザクション・資格情報/CA/ホスト名拒否成功。検証ツール導入中にDefenderがrustfmt 1.89 Windows配布物のキャッシュ名7cab256ad2279e65ddfbb79ce454d5160fbcd58bb672742d59dd8883c55ff912をTrojan:Win32/Suschil!rfnとして検知。公式manifestのxz_hashとキャッシュ名は一致するが本体の実ハッシュは未確認。DefenderはIsActive=False・DidThreatExecute=False・対処成功を報告。除外・復元は行わず、追加取得/実行を停止。直接取得・展開は自動承認レビューで拒否され未実行。残作業は追加2テスト・READMEの3例を含む最終再検証とrustfmt/Clippy。安全性の確認時期は不明で完了とはしない。 先生の指示で隔離維持のまま検証を再開。Windows検知対象の復元・再取得・実行はせず、Linuxコンテナにクライアントのソースとlockfileだけを渡し、全11テスト・README例・rustfmt・Clippyを確認する。 2026-11-12完了：Ubuntuのrootless Podmanと公式rust:1.89.0-slimのLinuxツールを使用し、Windows検知対象と独立した環境で検証。実行時はnetwork=none、cap-drop=all、no-new-privileges、ホストマウントなし。cargo fmtとfmt --check成功、全11プロトコルテストとREADMEの3例のコンパイル成功、cargo clippy --locked --offline --all-targets -- -D warnings成功（終了コード0）。整形済みRustソース3ファイルを本流へ反映し検証コンテナからの出力とSHA256一致、git diff --check成功。CIの整形とClippyはLinuxに限定し、Windowsでは単体試験を維持して検知対象の補助ツールを要求しない。ログはartifacts/rust-client-linux/validation.log、分離設定はcontainer-isolation.json。Defenderの隔離・保護設定は変更していない。未コミット。
+- id: rust-client-crates-publish
+  title: Rustクライアント0.2.0をcrates.ioへ公開する
+  estimateHours: 1
+  remainingHours: 0
+  notes: 先生の明示依頼。Defender隔離を維持しLinuxコンテナでsilverhamu-clientの名前の空き確認、配布内容点検、cargo publish --dry-runを実行してから公開する。公開用認証情報をログやリポジトリへ出さず、公開後はAPIと新規利用側から0.2.0の取得を検証しREADMEとクライアント一覧を更新する。現時点で既定のWindows/Ubuntu Cargo認証情報は見つかっていない。 Linuxの公式APIで404を確認し名前は未登録。配布物8ファイル・約12.8KiB、cargo publish --dry-run成功、全11テスト・README3例成功。先生の追加指示により今後の更新にも使えるsilverhamu-client限定のpublish-new/publish-update・90日（2027-02-10まで）トークンを発行承認され、Ubuntuの~/.cargo/credentials.tomlへmode600で保存。値はログ・Git・イメージへ含めず、Windows一時コピーは削除。UI集約ラベルの混入を修正後、crates.ioの認証は成功したがverified email不足の400で公開未完了。先生へプロフィールのメール認証を依頼して待機。隔離状態は維持。 2026-11-12完了：先生がメール認証を完了後、Linuxコンテナからsilverhamu-client 0.2.0をcrates.ioへ公開しCargoのPublished応答を確認。https://crates.io/crates/silverhamu-client/0.2.0 。認証情報なし・空のCargoキャッシュを使う別Linuxコンテナで公式APIの0.2.0/non-yanked状態と配布物13142bytesを確認し、SHA256がdry-run配布物c77afff181b31b9b6a6446402a1509f977fa741a9689b5c7e486bf870a6df2c9と完全一致。新規利用側の厳密バージョン=0.2.0依存でcargo check --all-targets成功しcargo treeでレジストリ版利用を確認。READMEとクライアント一覧をcrates.ioの導入手順へ更新。publish.logとconsumer-check.logをartifacts/rust-client-publishへ保存。Windowsの隔離・保護設定は変更せず、限定トークンはLinux mode600で今後の更新用に保持。公開関連の文書とWBS変更は未コミット。
+- id: rust-client-actions-release
+  title: Rustクライアントの検証とcrates.io公開をGitHub Actionsへ組み込む
+  estimateHours: 2
+  remainingHours: 0.5
+  notes: 先生の依頼。既存の手動main起点の公開方式へ揃え、Linux上でバージョン一致・fmt・全テスト・Clippy・実サービス相互運用・publish dry-run・配布物を検証する。公開は分離したcrates-io環境ジョブでOIDCの短期トークンを使い、検証済み配布物と再生成結果のSHA256を照合。既存版は同一SHAかつnon-yankedなら再公開せず、別内容・HTTPエラー・バージョン不一致は失敗させる観点をテスト。共通クライアント配布物へRustを追加し、Trusted Publisherの対象repo/workflow/environmentを限定して設定する。先行作業の未コミット文書・WBS変更は保持。隔離済みWindowsツールは使わない。 実装・Linux検証完了：publish-rust.ymlはmain限定の手動入力version/publish（既定false）、検証と公開を分離、crates-io環境・OIDC v1.0.6をSHA固定。共通配布物と通常CIへRust/公開チェックを統合。actionlint 1.7.12で3ワークフロー成功、公開判定10テスト・Rust11テスト・README3例・fmt/Clippy・実サービスtoken/TLS相互運用・cargo packageとpublish --dry-run成功。再生成SHA87659465c37f3c471ac15b72271e05688d8f65069033b359f7ffbb9fc02c441b一致。ログartifacts/rust-actions-check/validation.logとdry-run.log。残作業はmainへのコミット/pushとGitHub crates-io環境のmain制限、crates.ioへowner dhq-boiler/repo SilverHamu/workflow publish-rust.yml/environment crates-ioの限定Trusted Publisher登録、GitHub上の検証のみ実行。権限登録の最終確認待ち。 先生が限定Trusted Publisherを登録済みと連絡し、mainへのコミット・通常pushとGitHub Actions検証を明示承認。origin/mainとの差分は既存Rustクライアントコミット66b0121のみで分岐なし。GitHubのcrates-io Environmentを作成しmainブランチだけのdeployment branch policyを設定して進める。

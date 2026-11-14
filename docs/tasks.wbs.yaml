@@ -1,11 +1,11 @@
 version: 3
 title: SilverHamu
 createdAt: 2026-11-09T15:31:25.7166025Z
-modifiedAt: 2026-11-14T11:11:45.9297571Z
+modifiedAt: 2026-11-14T11:31:08.1233833Z
 tasks:
 - id: silverhamu-sbom
   title: SBOMを配布物と結び付け脆弱性の検出と影響調査を迅速化する
-  notes: 実装とローカル検証は完了。PR・main・日次の依存検査、配布物のSyft/CycloneDX SBOM、High以上の公開ゲート、既存SBOMの日次再検査と対応手順を追加。GitHubでの初回実行と新リリースへのSBOM公開は未実施であり、下記の運用開始タスクに分離した。Rustはロックファイルによる保守的な一覧で未使用依存を含み得る。Dockerエンジン未起動のため実イメージ検査はCIで確認が必要。
+  notes: 実装・ローカル検証・mainへのpushとGitHub初回確認は完了。59f4ac4のDependency securityはRust・Java・.NET全三ジョブ成功、計138件の依存一覧と検出ゼロを成果物でも確認。既存CI全三十五ジョブとSQL統合も初回実行で成功し、再実行・修正なし。新リリースでの配布SBOM公開と公開後再検査は未実施で別タスクに分離。Rustはロックファイルによる保守的な一覧で未使用依存を含み得る。
   children:
   - id: silverhamu-sbom-ci
     title: ソース依存のSBOM生成とPR・定期脆弱性検査を追加する
@@ -23,14 +23,25 @@ tasks:
     remainingHours: 0
     notes: actionlint v1.7.12で三workflowを検証しPython構文も成功。公式checksum照合済みSyft/GrypeでRust108件・NuGet28件・Java2件を生成し、2026-11-14の有効DBでは全て検出ゼロ。既知脆弱パッケージでは閾値失敗exit2とJSON保存を確認。欠落・余分・改変・空一覧・重複checksum・不正tag・要約の文字エスケープ・失敗の誤表示防止を含む十一検証成功。Windows/Linuxの梱包でlockfile同梱とWBS/benchmark除外を確認。docs/security-sbom.mdとREADMEに対象・限界・運用を記載。実アプリの再ビルドやGitHub上の実行は未実施。
   - id: silverhamu-sbom-activate
-    title: GitHubで検査を初回実行し新リリースのSBOM公開と定期再検査を確認する
-    estimateHours: 0.5
-    remainingHours: 0.5
+    title: mainへ反映しGitHubの初回依存検査と既存CIの成功を確認する
+    estimateHours: 0.25
+    remainingHours: 0
     notes: >-
       コミット・pushと新リリース公開後にGitHub上で三依存検査、Windows/Linux/Docker配布検査、十二ファイルのchecksumと再検査を確認する。既存v0.2.0の資産は改変していない。ブランチ保護の必須検査指定はリポジトリ管理者の運用設定として必要に応じ実施。待ち時間・指摘対応時間は未確定。
 
 
       先生から今回のSBOM関連差分のコミット・mainへの通常push・GitHub Actions初回実行成功までの監視と失敗修正を明示承認された。まず依存検査とpushで起動する既存CIを確認する。新バージョンの公開は今回の依頼に含めず、配布SBOMの公開と公開後再検査は別の残作業として区別する。
+
+
+      59f4ac438806f30503746909fc0a7472b1ece72dをmainへ通常push済み。Dependency security初回43588898427はRust・Java・.NET全三ジョブ成功。GitHub成果物のSyft/CycloneDX/Grype JSONを取得しRust108件・Java2件・NuGet28件、検出ゼロ、有効DBを確認。SQL統合43588898361も成功。既存CI43588898479の全三十五ジョブ完了を監視中。
+
+
+      初回実行の最終結果：Dependency security https://github.com/dhq-boiler/SilverHamu/actions/runs/43588898427 は三ジョブ成功、CI https://github.com/dhq-boiler/SilverHamu/actions/runs/43588898479 は三十五ジョブ全成功、SQL integration https://github.com/dhq-boiler/SilverHamu/actions/runs/43588898361 は成功。全て59f4ac438806f30503746909fc0a7472b1ece72dのpush実行であり再実行・コード修正なし。前回失敗していたWindowsのレプリケーション試験も今回成功。三つのSBOM成果物をダウンロードしSyft/CycloneDX/Grype JSONの整合・有効DB・High/Criticalを含め検出ゼロを確認。今回依頼されたコミット・main反映と初回Actions成功までの確認は完了。
+  - id: silverhamu-sbom-release-activate
+    title: 新リリースの配布SBOM公開と公開後の再検査を確認する
+    estimateHours: 0.25
+    remainingHours: 0.25
+    notes: 今回のコミット・pushと初回依存検査確認とは分離した残作業。新しい検証済みバージョンの配布物四件とSBOM八件の公開、SHA256SUMS、Docker実イメージ検査、公開済みSBOM再検査を確認する。既存v0.2.0の公開資産は変更しない。新リリース公開は今回の依頼には含めず、公開タイミングと不具合対応に要する時間は未確定。
 - id: silverhamu-release-020
   title: 全変更をコミットしSilverHamu v0.2.0の検証済み配布物を公開する
   notes: クライアント0.2.0は既に公開済み。本体・Ownerのバージョンを更新し、Windows Owner／サービス・Linuxサービス・DockerイメージとSHA256SUMSをGitHub Releaseへ公開する。Kudaki MCP未公開・停止中のfallback記録。

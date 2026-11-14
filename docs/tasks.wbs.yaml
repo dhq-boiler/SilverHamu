@@ -1,7 +1,7 @@
 version: 3
 title: SilverHamu
 createdAt: 2026-11-09T15:31:25.7166025Z
-modifiedAt: 2026-11-14T11:31:08.1233833Z
+modifiedAt: 2026-11-14T12:03:36.0870587Z
 tasks:
 - id: silverhamu-sbom
   title: SBOMを配布物と結び付け脆弱性の検出と影響調査を迅速化する
@@ -38,10 +38,14 @@ tasks:
 
       初回実行の最終結果：Dependency security https://github.com/dhq-boiler/SilverHamu/actions/runs/43588898427 は三ジョブ成功、CI https://github.com/dhq-boiler/SilverHamu/actions/runs/43588898479 は三十五ジョブ全成功、SQL integration https://github.com/dhq-boiler/SilverHamu/actions/runs/43588898361 は成功。全て59f4ac438806f30503746909fc0a7472b1ece72dのpush実行であり再実行・コード修正なし。前回失敗していたWindowsのレプリケーション試験も今回成功。三つのSBOM成果物をダウンロードしSyft/CycloneDX/Grype JSONの整合・有効DB・High/Criticalを含め検出ゼロを確認。今回依頼されたコミット・main反映と初回Actions成功までの確認は完了。
   - id: silverhamu-sbom-release-activate
-    title: 新リリースの配布SBOM公開と公開後の再検査を確認する
-    estimateHours: 0.25
-    remainingHours: 0.25
-    notes: 今回のコミット・pushと初回依存検査確認とは分離した残作業。新しい検証済みバージョンの配布物四件とSBOM八件の公開、SHA256SUMS、Docker実イメージ検査、公開済みSBOM再検査を確認する。既存v0.2.0の公開資産は変更しない。新リリース公開は今回の依頼には含めず、公開タイミングと不具合対応に要する時間は未確定。
+    title: v0.2.1を公開し配布SBOMと公開後の再検査を確認する
+    estimateHours: 1
+    remainingHours: 1
+    notes: >-
+      今回のコミット・pushと初回依存検査確認とは分離した残作業。新しい検証済みバージョンの配布物四件とSBOM八件の公開、SHA256SUMS、Docker実イメージ検査、公開済みSBOM再検査を確認する。既存v0.2.0の公開資産は変更しない。新リリース公開は今回の依頼には含めず、公開タイミングと不具合対応に要する時間は未確定。
+
+
+      先生から新リリース公開と配布SBOM公開・公開後再検査の成功までを明示承認された。未使用の次パッチv0.2.1で本体/Owner/SQLのメタデータとリリースノートを更新し、mainへコミット・pushする。publish=falseの配布検証でWindows/Linux/DockerとSBOMを確認し、検証済みソースにタグ付けしてpublish=trueで新規公開する。既存クライアントは再公開しない。公開後は全十二資産とchecksumを照合しrescan-sbom.ymlの手動実行を成功まで確認する。失敗原因と対処は同タスクへ追記し、High/Criticalを検査除外で隠さない。検証ビルドの待ち時間や脆弱性対応が必要な場合の延長見通しは現時点では不明。
 - id: silverhamu-release-020
   title: 全変更をコミットしSilverHamu v0.2.0の検証済み配布物を公開する
   notes: クライアント0.2.0は既に公開済み。本体・Ownerのバージョンを更新し、Windows Owner／サービス・Linuxサービス・DockerイメージとSHA256SUMSをGitHub Releaseへ公開する。Kudaki MCP未公開・停止中のfallback記録。

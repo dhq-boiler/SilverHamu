@@ -9,9 +9,9 @@
     <Nullable>enable</Nullable>
     <ApplicationTitle>SilverHamu Owner</ApplicationTitle>
     <ApplicationId>dev.catdb.owner</ApplicationId>
-    <ApplicationDisplayVersion>0.2.0</ApplicationDisplayVersion>
-    <Version>0.2.0</Version>
-    <ApplicationVersion>2</ApplicationVersion>
+    <ApplicationDisplayVersion>0.2.1</ApplicationDisplayVersion>
+    <Version>0.2.1</Version>
+    <ApplicationVersion>3</ApplicationVersion>
     <WindowsPackageType>None</WindowsPackageType>
     <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>

@@ -1,0 +1,69 @@
+name: Generate and scan SBOM
+description: Preserve an inventory and vulnerability evidence, including on policy failure
+inputs:
+  name:
+    description: Unique artifact name
+    required: true
+  target:
+    description: Syft source, such as dir:path or docker:image
+    required: false
+  sbom:
+    description: Existing Syft JSON SBOM to rescan without rebuilding
+    required: false
+runs:
+  using: composite
+  steps:
+    - name: Prepare report directory
+      shell: bash
+      run: mkdir -p artifacts/security
+    - uses: anchore/sbom-action/download-syft@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+      id: syft
+      if: inputs.sbom == ''
+      with:
+        syft-version: v1.57.1
+    - name: Generate inventory
+      if: inputs.sbom == ''
+      shell: bash
+      env:
+        SCAN_TARGET: ${{ inputs.target }}
+        SCAN_NAME: ${{ inputs.name }}
+        SYFT_CMD: ${{ steps.syft.outputs.cmd }}
+      run: |
+        "$SYFT_CMD" "$SCAN_TARGET" --source-name "$SCAN_NAME" --select-catalogers +rust-cargo-lock-cataloger \
+          -o "syft-json=artifacts/security/$SCAN_NAME.syft.json" \
+          -o "cyclonedx-json=artifacts/security/$SCAN_NAME.cdx.json"
+    - name: Reject empty inventories
+      shell: python
+      env:
+        SBOM_PATH: ${{ inputs.sbom || format('artifacts/security/{0}.syft.json', inputs.name) }}
+      run: |
+        import json, os
+        from pathlib import Path
+        document = json.loads(Path(os.environ['SBOM_PATH']).read_text(encoding='utf-8'))
+        if not document.get('artifacts') or not document.get('schema', {}).get('version'):
+            raise SystemExit('No package inventory or Syft schema found; refusing a false clean scan')
+    - name: Scan inventory with current vulnerability data
+      uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
+      with:
+        sbom: ${{ inputs.sbom || format('artifacts/security/{0}.syft.json', inputs.name) }}
+        grype-version: v0.121.3
+        output-format: json
+        output-file: artifacts/security/${{ inputs.name }}.grype.json
+        severity-cutoff: high
+        fail-build: true
+        only-fixed: false
+    - name: Summarize findings
+      if: always()
+      shell: bash
+      env:
+        SCAN_NAME: ${{ inputs.name }}
+      run: python scripts/security-summary.py "artifacts/security/$SCAN_NAME.grype.json"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: security-${{ inputs.name }}
+        path: |
+          artifacts/security/${{ inputs.name }}.*.json
+          ${{ inputs.sbom }}
+        if-no-files-found: error
+        retention-days: 90

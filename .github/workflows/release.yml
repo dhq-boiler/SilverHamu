@@ -30,7 +30,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, windows-latest]
+        include:
+          - os: ubuntu-24.04
+            platform: linux-x64
+            extension: .tar.gz
+          - os: windows-latest
+            platform: windows-x64
+            extension: .zip
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     steps:
@@ -80,12 +86,32 @@ jobs:
           if ($process.HasExited) { throw "Owner exited during startup with $($process.ExitCode)" }
           Stop-Process -Id $process.Id
       - name: Package binaries
+        id: package
         env:
           RELEASE_TAG: ${{ inputs.tag }}
         run: python scripts/package-release.py package
+      - name: Inventory and scan service and SQL host
+        uses: ./.github/actions/scan-sbom
+        with:
+          name: silverhamu-${{ inputs.tag }}-${{ matrix.platform }}${{ matrix.extension }}
+          target: dir:artifacts/release/core-${{ matrix.platform }}
+      - name: Inventory and scan Windows Owner
+        if: ${{ !cancelled() && runner.os == 'Windows' && steps.package.outcome == 'success' }}
+        uses: ./.github/actions/scan-sbom
+        with:
+          name: silverhamu-owner-${{ inputs.tag }}-windows-x64.zip
+          target: dir:artifacts/release/owner
+      - name: Include inventories in release downloads
+        shell: python
+        run: |
+          from pathlib import Path
+          import shutil
+          for pattern in ['*.syft.json', '*.cdx.json']:
+              for inventory in Path('artifacts/security').glob(pattern):
+                  shutil.copy2(inventory, Path('artifacts/release/downloads') / inventory.name)
       - uses: actions/upload-artifact@v4
         with:
-          name: binaries-${{ runner.os }}
+          name: release-binaries-${{ runner.os }}
           path: artifacts/release/downloads/*
           if-no-files-found: error
 
@@ -100,19 +126,34 @@ jobs:
         with:
           python-version: '3.12'
       - name: Build and verify image
+        id: image
         env:
           RELEASE_TAG: ${{ inputs.tag }}
         run: |
           python scripts/package-release.py check
           version="${RELEASE_TAG#v}"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
           docker build -t "silverhamu:$version" .
           docker run --rm --entrypoint /bin/sh "silverhamu:$version" -c 'test -x /usr/local/bin/silverhamu-server && test -x /usr/local/bin/silverhamu && test "$(id -u)" = 10001'
           python tests/service_container.py --image "silverhamu:$version"
+      - name: Inventory and scan the runtime image
+        uses: ./.github/actions/scan-sbom
+        with:
+          name: silverhamu-${{ inputs.tag }}-linux-amd64-docker.tar.gz
+          target: docker:silverhamu:${{ steps.image.outputs.version }}
+      - name: Export image and inventories
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          version="${RELEASE_TAG#v}"
           mkdir -p artifacts/release/downloads
           docker save "silverhamu:$version" | gzip > "artifacts/release/downloads/silverhamu-$version-linux-amd64-docker.tar.gz"
+          for format in syft cdx; do
+            cp "artifacts/security/silverhamu-$RELEASE_TAG-linux-amd64-docker.tar.gz.$format.json" "artifacts/release/downloads/silverhamu-$version-linux-amd64-docker.tar.gz.$format.json"
+          done
       - uses: actions/upload-artifact@v4
         with:
-          name: docker
+          name: release-docker
           path: artifacts/release/downloads/*
           if-no-files-found: error
 
@@ -128,6 +169,7 @@ jobs:
           ref: ${{ inputs.ref }}
       - uses: actions/download-artifact@v4
         with:
+          pattern: release-*
           path: artifacts/release/downloads
           merge-multiple: true
       - name: Verify complete downloads and publish

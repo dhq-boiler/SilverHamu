@@ -11,6 +11,7 @@ RUN groupadd --gid 10001 silverhamu && useradd --uid 10001 --gid silverhamu --no
     && mkdir /data && chown silverhamu:silverhamu /data
 COPY --from=build /build/target/release/silverhamu-server /usr/local/bin/silverhamu-server
 COPY --from=build /build/target/release/silverhamu /usr/local/bin/silverhamu
+COPY Cargo.lock /usr/share/silverhamu/Cargo.lock
 USER 10001:10001
 WORKDIR /data
 VOLUME ["/data"]

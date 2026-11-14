@@ -1,8 +1,36 @@
 version: 3
 title: SilverHamu
 createdAt: 2026-11-09T15:31:25.7166025Z
-modifiedAt: 2026-11-12T11:02:03.1505243Z
+modifiedAt: 2026-11-14T11:11:45.9297571Z
 tasks:
+- id: silverhamu-sbom
+  title: SBOMを配布物と結び付け脆弱性の検出と影響調査を迅速化する
+  notes: 実装とローカル検証は完了。PR・main・日次の依存検査、配布物のSyft/CycloneDX SBOM、High以上の公開ゲート、既存SBOMの日次再検査と対応手順を追加。GitHubでの初回実行と新リリースへのSBOM公開は未実施であり、下記の運用開始タスクに分離した。Rustはロックファイルによる保守的な一覧で未使用依存を含み得る。Dockerエンジン未起動のため実イメージ検査はCIで確認が必要。
+  children:
+  - id: silverhamu-sbom-ci
+    title: ソース依存のSBOM生成とPR・定期脆弱性検査を追加する
+    estimateHours: 1
+    remainingHours: 0
+    notes: security.ymlと共通scan-sbom Actionを追加。Rust両lockfile、Mavenの推移的ランタイムJAR、Ownerの復元済みNuGet lockfileを隔離採取。Syft v1.57.1とGrype v0.121.3およびAnchore ActionsのSHAを固定。空の一覧を拒否し、High/Criticalは修正有無によらず失敗。検出一覧とJSONを失敗時も保存する。
+  - id: silverhamu-sbom-release
+    title: 配布物のSBOMとチェックサムを公開手順へ組み込み再検査を可能にする
+    estimateHours: 1.5
+    remainingHours: 0
+    notes: 四配布物ごとのSyft JSONとCycloneDX JSONを計八件公開し、既存四アーカイブと合わせた十二件をSHA256SUMSで照合。Rust lockfileを配布物とDockerへ同梱。release-*の成果物だけを公開へ渡し検査証跡の混入を防止。rescan-sbom.ymlは既存配布SBOMを取得・照合し再ビルドなしで再検査する。SBOMのない旧リリースは明示的な失敗として扱い新しい検証済みリリースが必要。
+  - id: silverhamu-sbom-verify
+    title: 検査結果・失敗時の証跡と運用手順を検証する
+    estimateHours: 1
+    remainingHours: 0
+    notes: actionlint v1.7.12で三workflowを検証しPython構文も成功。公式checksum照合済みSyft/GrypeでRust108件・NuGet28件・Java2件を生成し、2026-11-14の有効DBでは全て検出ゼロ。既知脆弱パッケージでは閾値失敗exit2とJSON保存を確認。欠落・余分・改変・空一覧・重複checksum・不正tag・要約の文字エスケープ・失敗の誤表示防止を含む十一検証成功。Windows/Linuxの梱包でlockfile同梱とWBS/benchmark除外を確認。docs/security-sbom.mdとREADMEに対象・限界・運用を記載。実アプリの再ビルドやGitHub上の実行は未実施。
+  - id: silverhamu-sbom-activate
+    title: GitHubで検査を初回実行し新リリースのSBOM公開と定期再検査を確認する
+    estimateHours: 0.5
+    remainingHours: 0.5
+    notes: >-
+      コミット・pushと新リリース公開後にGitHub上で三依存検査、Windows/Linux/Docker配布検査、十二ファイルのchecksumと再検査を確認する。既存v0.2.0の資産は改変していない。ブランチ保護の必須検査指定はリポジトリ管理者の運用設定として必要に応じ実施。待ち時間・指摘対応時間は未確定。
+
+
+      先生から今回のSBOM関連差分のコミット・mainへの通常push・GitHub Actions初回実行成功までの監視と失敗修正を明示承認された。まず依存検査とpushで起動する既存CIを確認する。新バージョンの公開は今回の依頼に含めず、配布SBOMの公開と公開後再検査は別の残作業として区別する。
 - id: silverhamu-release-020
   title: 全変更をコミットしSilverHamu v0.2.0の検証済み配布物を公開する
   notes: クライアント0.2.0は既に公開済み。本体・Ownerのバージョンを更新し、Windows Owner／サービス・Linuxサービス・DockerイメージとSHA256SUMSをGitHub Releaseへ公開する。Kudaki MCP未公開・停止中のfallback記録。

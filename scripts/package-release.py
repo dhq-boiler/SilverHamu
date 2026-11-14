@@ -71,7 +71,7 @@ def package(version, tag):
     require(host / ("SilverHamu.Sql.Host" + suffix))
     require(host / library)
     shutil.copytree(host, staging / "sql-host")
-    for name in ("LICENSE", "README.md"):
+    for name in ("LICENSE", "README.md", "Cargo.lock"):
         shutil.copy2(require(ROOT / name), staging / name)
     shutil.copytree(ROOT / "docs", staging / "docs", ignore=shutil.ignore_patterns("benchmarks", "*.wbs.yaml"))
     (staging / "scripts").mkdir()
@@ -96,6 +96,7 @@ def package(version, tag):
         for name in ("SilverHamu.Owner.exe", "SilverHamu.Owner.dll", library, "coreclr.dll", "Microsoft.UI.Xaml.dll"):
             require(owner / name)
         shutil.copy2(ROOT / "LICENSE", owner / "LICENSE")
+        shutil.copy2(ROOT / "Cargo.lock", owner / "Cargo.lock")
         shutil.copy2(ROOT / "apps/SilverHamu.Owner/README.md", owner / "README.md")
         shutil.copy2(ROOT / f"docs/releases/{tag}.md", owner / "RELEASE-NOTES.md")
         archive(owner, DOWNLOADS / f"silverhamu-owner-{tag}-windows-x64.zip")
@@ -109,6 +110,7 @@ def checksums(version, tag):
         f"silverhamu-{tag}-linux-x64.tar.gz",
         f"silverhamu-{version}-linux-amd64-docker.tar.gz",
     }
+    expected |= {name + suffix for name in expected for suffix in (".syft.json", ".cdx.json")}
     actual = {p.name for p in DOWNLOADS.iterdir()}
     if actual != expected:
         raise ValueError(f"Download set mismatch: missing={expected - actual}, extra={actual - expected}")

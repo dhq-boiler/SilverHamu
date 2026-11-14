@@ -1,0 +1,92 @@
+name: Dependency security
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 20 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dependencies:
+    name: Dependencies (${{ matrix.ecosystem }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - ecosystem: rust
+            os: ubuntu-24.04
+          - ecosystem: java
+            os: ubuntu-24.04
+          - ecosystem: dotnet
+            os: windows-latest
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-java@v4
+        if: matrix.ecosystem == 'java'
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-dotnet@v4
+        if: matrix.ecosystem == 'dotnet'
+        with:
+          dotnet-version: '10.0.x'
+      - name: Prepare isolated inventory directory
+        shell: python
+        run: |
+          from pathlib import Path
+          Path('artifacts/security/input').mkdir(parents=True)
+      - name: Collect Rust service and client lockfiles
+        if: matrix.ecosystem == 'rust'
+        shell: python
+        run: |
+          from pathlib import Path
+          import shutil
+          for source, name in [(Path('.'), 'service'), (Path('clients/rust'), 'client')]:
+              target = Path('artifacts/security/input') / name
+              target.mkdir()
+              for filename in ['Cargo.toml', 'Cargo.lock']:
+                  shutil.copy2(source / filename, target / filename)
+      - name: Resolve Java runtime dependencies including transitives
+        if: matrix.ecosystem == 'java'
+        run: mvn --batch-mode --no-transfer-progress -f clients/java/pom.xml org.apache.maven.plugins:maven-dependency-plugin:3.8.1:copy-dependencies -DincludeScope=runtime -DoutputDirectory="${{ github.workspace }}/artifacts/security/input"
+      - name: Resolve Owner dependencies including transitives
+        if: matrix.ecosystem == 'dotnet'
+        shell: pwsh
+        run: |
+          dotnet workload install maui-windows
+          if ($LASTEXITCODE -ne 0) { throw 'MAUI installation failed' }
+          dotnet restore apps/SilverHamu.Owner/SilverHamu.Owner.csproj --use-lock-file --force-evaluate -r win-x64
+          if ($LASTEXITCODE -ne 0) { throw 'Owner restore failed' }
+      - name: Collect resolved NuGet lockfiles
+        if: matrix.ecosystem == 'dotnet'
+        shell: python
+        run: |
+          from pathlib import Path
+          import shutil
+          locks = [*Path('apps/SilverHamu.Owner').glob('packages.lock.json'),
+                   *Path('dotnet').glob('*/packages.lock.json')]
+          if not locks:
+              raise SystemExit('No resolved NuGet lockfiles found')
+          for lock in locks:
+              target = Path('artifacts/security/input') / lock.parent.name
+              target.mkdir()
+              shutil.copy2(lock, target / lock.name)
+      - uses: ./.github/actions/scan-sbom
+        with:
+          name: source-${{ matrix.ecosystem }}-${{ github.sha }}
+          target: dir:artifacts/security/input

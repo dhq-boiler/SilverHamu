@@ -1,0 +1,75 @@
+name: Rescan released SBOMs
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to rescan (empty selects the latest release)
+        required: false
+        type: string
+  schedule:
+    - cron: '47 20 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  inventories:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      matrix: ${{ steps.verify.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download released inventories and checksum manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          if [[ -z "$RELEASE_TAG" ]]; then
+            RELEASE_TAG="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)"
+          fi
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo 'Expected a release tag such as v0.2.0' >&2
+            exit 1
+          fi
+          echo "RELEASE_TAG=$RELEASE_TAG" >> "$GITHUB_ENV"
+          mkdir -p artifacts/released-sboms
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+            --pattern '*.syft.json' --pattern SHA256SUMS --dir artifacts/released-sboms
+      - name: Verify inventories against release checksums
+        id: verify
+        run: python scripts/verify-release-sboms.py artifacts/released-sboms "$RELEASE_TAG"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: released-sboms
+          path: artifacts/released-sboms/*
+          if-no-files-found: error
+          retention-days: 90
+
+  vulnerabilities:
+    needs: inventories
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.inventories.outputs.matrix) }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: released-sboms
+          path: artifacts/released-sboms
+      - uses: ./.github/actions/scan-sbom
+        with:
+          name: rescan-${{ matrix.name }}
+          sbom: artifacts/released-sboms/${{ matrix.name }}.syft.json

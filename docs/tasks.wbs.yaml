@@ -1,11 +1,11 @@
 version: 3
 title: SilverHamu
 createdAt: 2026-11-09T15:31:25.7166025Z
-modifiedAt: 2026-11-14T12:20:27.7471205Z
+modifiedAt: 2026-11-14T13:11:30.6686364Z
 tasks:
 - id: silverhamu-sbom
   title: SBOMを配布物と結び付け脆弱性の検出と影響調査を迅速化する
-  notes: 実装・ローカル検証・mainへのpushとGitHub初回確認は完了。59f4ac4のDependency securityはRust・Java・.NET全三ジョブ成功、計138件の依存一覧と検出ゼロを成果物でも確認。既存CI全三十五ジョブとSQL統合も初回実行で成功し、再実行・修正なし。新リリースでの配布SBOM公開と公開後再検査は未実施で別タスクに分離。Rustはロックファイルによる保守的な一覧で未使用依存を含み得る。
+  notes: SBOM導入・main反映・v0.2.1正式公開と公開後再検査まで完了。検証済みc941c84から四配布物と八SBOMおよびSHA256SUMSを公開しGitHub digest・公開SBOM・タグを照合。公開前検査と公開後再検査の四配布物すべてで検出ゼロ。mainと公開タグのCI各三十五ジョブ、依存検査・SQL統合・タグの言語クライアント検査、公開後SBOM再検査全五ジョブが成功。DockerはDebian12でCritical2/High49を検出したため、検査基準を維持してdigest固定Wolfiへ更新し解消。公開済み最新SBOMの日次再検査を運用開始。Rust一覧は保守的なlockfile由来で未使用依存を含み得る。
   children:
   - id: silverhamu-sbom-ci
     title: ソース依存のSBOM生成とPR・定期脆弱性検査を追加する
@@ -40,7 +40,7 @@ tasks:
   - id: silverhamu-sbom-release-activate
     title: v0.2.1を公開し配布SBOMと公開後の再検査を確認する
     estimateHours: 1
-    remainingHours: 1
+    remainingHours: 0
     notes: >-
       今回のコミット・pushと初回依存検査確認とは分離した残作業。新しい検証済みバージョンの配布物四件とSBOM八件の公開、SHA256SUMS、Docker実イメージ検査、公開済みSBOM再検査を確認する。既存v0.2.0の公開資産は変更しない。新リリース公開は今回の依頼には含めず、公開タイミングと不具合対応に要する時間は未確定。
 
@@ -49,6 +49,15 @@ tasks:
 
 
       ec40d42の公開前検証43593046721でDocker SBOMゲートが正しく失敗。Debian12のOS層にCritical2/High49を検出し、51件は未修正版（wont-fix22/not-fixed29）。公開・タグ付けはまだ行っていない。Debian13候補もCritical0/High67で基準を満たさず。公式Wolfi候補は19 OSパッケージ、glibc2.44・libgcc16を含み、Grypeの有効なWolfi providerで全重大度の検出ゼロ。index digest sha256:1f6b749929164c3d9e7cad0289254f39b2ba51e1dddaeb0fa57532ea03f2db31 を確認。ランタイムのみこのdigestへ固定し、BusyBoxのアカウント作成へ切替、既存コンテナ動作検証を維持して再ビルドする。検査基準や除外規則は変更しない。非Dockerの初回検証は継続中。記録はartifacts/sbom-work/docker-first-evidence、debian-trixie.*、wolfi-base.*。
+
+
+      修正c941c84cedd246f827f57245a5f28a73a5a89b28の公開前検証43594451823はWindows/Linux/Docker全三ジョブ成功。先行Windowsでは大きな書込やリーダー移譲中にnot_leader/commit_uncertainが出たが、同じRustソースの今回のReleaseサービス試験は全件成功し、Owner自己完結ビルド・起動と両Windows配布SBOMも成功。修正Dockerの実SBOMはWolfi APK19件とRust60件で全検出ゼロ、有効なWolfi providerで照合済み。修正後Dependency security三ジョブとSQL統合も成功。既存CIは三十五中三十四成功で残り一件を追跡中。成功runのrelease-*成果物を取得し、最終公開は検証済みの同一成果物を再ビルドせずgh release createで添付する。公開前に固定ソース・完全な十二ファイル・checksumを確認し、タグを検証済みコミットへ付ける。公開後にGitHub資産digestと手元checksumを照合してから、公開済みSBOMの再検査を実行する。
+
+
+      v0.2.1を正式公開済み：https://github.com/dhq-boiler/SilverHamu/releases/tag/v0.2.1 。成功した公開前検証43594451823のrelease-*成果物をそのまま取得して、検証済みc941c84を--targetに指定したgh release createで公開（再ビルドなし）。タグがc941c84cedd246f827f57245a5f28a73a5a89b28に一致し、Latest・正式版・draft=falseを確認。四アーカイブと八SBOMおよびSHA256SUMSの全十三資産を確認し、十二ファイルのGitHub asset digestとローカル検証済みSHA256、公開manifestの同一性を照合済み。Syft一覧はDocker79件、Owner151件、Linux62件、Windows81件でRust/.NET/Wolfi OSの内容を確認。公開後のLatest自動選択による再検査43596637051（https://github.com/dhq-boiler/SilverHamu/actions/runs/43596637051）は取得照合と四検査の全五ジョブ成功。全四レポートで検出ゼロ、有効DB、入力SBOMの公開資産とのバイト同一性を確認した。c941c84のmain CI43594452179全三十五ジョブ、依存検査三ジョブ、SQL統合も成功。残りは公開タグの自動起動CI43596520715の完了追跡と最終WBS記録のコミット。
+
+
+      完了：v0.2.1は検証済みc941c84cedd246f827f57245a5f28a73a5a89b28から正式版・Latestとして公開し、四配布物・八SBOM・SHA256SUMSの全十三資産とタグを確認。検証run43594451823の同一成果物をgh release createで公開しており再ビルドしていない。十二ファイルのGitHub digestと検証済みSHA256が一致し、公開manifestも一致。Windows ZIPのCRC・本体/SQL/Ownerバージョン・x64 DLL、Linux TARの本体/SQLバージョン・x64 ELF、Docker TARのタグ/imageIDと公開SBOM・UID10001・volume・healthcheckも確認。四配布検査と公開後再検査43596637051の全四Grypeレポートは全重大度で検出ゼロ、公開SBOM入力とのバイト同一性と有効DBを確認した。公開後再検査は準備を含む全五ジョブ成功（https://github.com/dhq-boiler/SilverHamu/actions/runs/43596637051）。main CI43594452179の三十五ジョブ、依存検査43594452245の三ジョブ、SQL統合43594452090が成功し、公開タグのCI43596520715も三十五ジョブ全成功、タグのSQL統合43596520713とLanguage clients43596520758も成功。先行Windows失敗の根因は未特定だがRust実装は変更せず現ソースのRelease/CI試験は通過。検査基準・除外は変更せずDebian12のCritical2/High49を実ランタイムの更新で解消した。既存v0.2.0資産とクライアントの公開版は維持。今回の公開と再検査の終了条件は達成し残作業なし。証跡：artifacts/sbom-work/v0.2.1-public、v0.2.1-rescan、release-validated-security。
 - id: silverhamu-release-020
   title: 全変更をコミットしSilverHamu v0.2.0の検証済み配布物を公開する
   notes: クライアント0.2.0は既に公開済み。本体・Ownerのバージョンを更新し、Windows Owner／サービス・Linuxサービス・DockerイメージとSHA256SUMSをGitHub Releaseへ公開する。Kudaki MCP未公開・停止中のfallback記録。

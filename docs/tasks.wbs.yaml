@@ -1,7 +1,7 @@
 version: 3
 title: SilverHamu
 createdAt: 2026-11-09T15:31:25.7166025Z
-modifiedAt: 2026-11-14T12:03:36.0870587Z
+modifiedAt: 2026-11-14T12:20:27.7471205Z
 tasks:
 - id: silverhamu-sbom
   title: SBOMを配布物と結び付け脆弱性の検出と影響調査を迅速化する
@@ -46,6 +46,9 @@ tasks:
 
 
       先生から新リリース公開と配布SBOM公開・公開後再検査の成功までを明示承認された。未使用の次パッチv0.2.1で本体/Owner/SQLのメタデータとリリースノートを更新し、mainへコミット・pushする。publish=falseの配布検証でWindows/Linux/DockerとSBOMを確認し、検証済みソースにタグ付けしてpublish=trueで新規公開する。既存クライアントは再公開しない。公開後は全十二資産とchecksumを照合しrescan-sbom.ymlの手動実行を成功まで確認する。失敗原因と対処は同タスクへ追記し、High/Criticalを検査除外で隠さない。検証ビルドの待ち時間や脆弱性対応が必要な場合の延長見通しは現時点では不明。
+
+
+      ec40d42の公開前検証43593046721でDocker SBOMゲートが正しく失敗。Debian12のOS層にCritical2/High49を検出し、51件は未修正版（wont-fix22/not-fixed29）。公開・タグ付けはまだ行っていない。Debian13候補もCritical0/High67で基準を満たさず。公式Wolfi候補は19 OSパッケージ、glibc2.44・libgcc16を含み、Grypeの有効なWolfi providerで全重大度の検出ゼロ。index digest sha256:1f6b749929164c3d9e7cad0289254f39b2ba51e1dddaeb0fa57532ea03f2db31 を確認。ランタイムのみこのdigestへ固定し、BusyBoxのアカウント作成へ切替、既存コンテナ動作検証を維持して再ビルドする。検査基準や除外規則は変更しない。非Dockerの初回検証は継続中。記録はartifacts/sbom-work/docker-first-evidence、debian-trixie.*、wolfi-base.*。
 - id: silverhamu-release-020
   title: 全変更をコミットしSilverHamu v0.2.0の検証済み配布物を公開する
   notes: クライアント0.2.0は既に公開済み。本体・Ownerのバージョンを更新し、Windows Owner／サービス・Linuxサービス・DockerイメージとSHA256SUMSをGitHub Releaseへ公開する。Kudaki MCP未公開・停止中のfallback記録。

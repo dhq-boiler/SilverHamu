@@ -6,8 +6,9 @@ COPY src ./src
 ARG CATDB_FEATURES=service
 RUN cargo build --locked --release --features "$CATDB_FEATURES" --bin silverhamu-server --bin silverhamu
 
-FROM debian:bookworm-slim AS runtime
-RUN groupadd --gid 10001 silverhamu && useradd --uid 10001 --gid silverhamu --no-create-home silverhamu \
+FROM cgr.dev/chainguard/wolfi-base@sha256:1f6b749929164c3d9e7cad0289254f39b2ba51e1dddaeb0fa57532ea03f2db31 AS runtime
+USER root
+RUN addgroup -g 10001 silverhamu && adduser -D -H -u 10001 -G silverhamu silverhamu \
     && mkdir /data && chown silverhamu:silverhamu /data
 COPY --from=build /build/target/release/silverhamu-server /usr/local/bin/silverhamu-server
 COPY --from=build /build/target/release/silverhamu /usr/local/bin/silverhamu

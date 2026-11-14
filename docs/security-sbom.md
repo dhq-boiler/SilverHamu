@@ -50,7 +50,7 @@ are kept separate from the `release-*` artifacts used for publication.
 | .NET source | Owner's restored NuGet lockfiles, including referenced SQL project | Windows x64; generated after MAUI installation; SDK/workload tooling is not a runtime inventory |
 | Native service/SQL distribution | Packaged binaries, self-contained SQL host DLLs and deps.json, root Cargo.lock | Lockfile covers the native Rust dependency candidates; .NET inventory is taken from published files |
 | Windows Owner | Published DLLs/deps.json, bundled runtime, root Cargo.lock | Includes native dependency candidates, NuGet and discoverable bundled runtime components |
-| Docker runtime | Final image's Debian packages and root Cargo.lock at `/usr/share/silverhamu/Cargo.lock` | Rust lockfile cataloger is explicitly enabled for image scans; build-stage tooling is excluded |
+| Docker runtime | Final image's Wolfi APK packages and root Cargo.lock at `/usr/share/silverhamu/Cargo.lock` | Rust lockfile cataloger is explicitly enabled for image scans; build-stage tooling is excluded |
 
 Rust binaries currently do not embed cargo-auditable dependency metadata. A
 lockfile finding is evidence of a dependency candidate, not proof that the
@@ -70,11 +70,15 @@ lockfiles, local artifacts or unrelated files.
    repeat scans do not create duplicate tasks.
 2. Read the advisory and `.grype.json` matching evidence. For Rust lockfile
    findings, confirm the release feature/target dependency path. For .NET and
-   Debian, confirm the bundled runtime or OS package version. Distinguish
+   Wolfi, confirm the bundled runtime or OS package version. Distinguish
    presence from exploitability; retain the evidence for either conclusion.
 3. Upgrade the responsible direct dependency or runtime/base image and refresh
    its resolved dependencies. Rebuild, regenerate SBOMs and rerun the scan.
    Rescanning an existing SBOM updates findings but does not fix the software.
+   The Docker runtime image is pinned by digest. To update it, resolve a new
+   official `cgr.dev/chainguard/wolfi-base` digest, inspect its inventory, then
+   verify both vulnerability checks and the container behavior tests before
+   changing the pin. Preserve the APK package database for accurate matching.
 4. If a finding is inapplicable or a fix must be deferred, record the rationale,
    owner, compensating measures and review deadline. This pipeline has no
    automatic exception mechanism; any future VEX/exception policy needs an
